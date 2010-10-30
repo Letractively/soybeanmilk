@@ -91,8 +91,8 @@ public class ConfigurationParser
 	public static final String TAG_REF="ref";
 	public static final String TAG_REF_ATTR_NAME="name";
 	
-	protected Element root;
-	protected Configuration configuration;
+	private Document document;
+	private Configuration configuration;
 	
 	/**
 	 * 从默认配置文件解析
@@ -100,6 +100,15 @@ public class ConfigurationParser
 	public ConfigurationParser()
 	{
 		this(Constants.DEFAULT_CONFIG_FILE);
+	}
+	
+	/**
+	 * 从文档对象解析
+	 * @param document
+	 */
+	public ConfigurationParser(Document document)
+	{
+		this.document=document;
 	}
 	
 	/**
@@ -130,21 +139,24 @@ public class ConfigurationParser
 		if(_logDebugEnabled)
 			log.debug("start parsing from config file '"+configFile+"'");
 		
-		initDocumentRoot(in);
+		this.document=parseDocument(in);
 	}
 	
 	/**
 	 * 从输入流解析
-	 * @param configFileStream
+	 * @param inputStream
 	 */
-	public ConfigurationParser(InputStream configFileStream)
+	public ConfigurationParser(InputStream inputStream)
 	{
-		initDocumentRoot(configFileStream);
+		this.document=parseDocument(inputStream);
 	}
 	
-	protected void initDocumentRoot(InputStream configFileStream)
-	{
-		root=getRootElement(configFileStream);
+	/**
+	 * 取得解析结果
+	 * @return
+	 */
+	public Configuration getConfiguration() {
+		return configuration;
 	}
 	
 	/**
@@ -153,8 +165,7 @@ public class ConfigurationParser
 	 */
 	public Configuration parse()
 	{
-		this.configuration=createConfigurationInstance();
-		parseConfiguration();
+		parse(createConfigurationInstance());
 		
 		return configuration;
 	}
@@ -168,90 +179,30 @@ public class ConfigurationParser
 		assertNotEmpty(configuration,"[configuration] must not be null");
 		
 		this.configuration=configuration;
-		parseConfiguration();
-	}
-	
-	/**
-	 * 解析配置信息，解析解决对象、全局配置、可执行对象
-	 */
-	protected void parseConfiguration()
-	{
-		parseResolvers();
+		
 		parseGlobalConfigs();
+		parseResolvers();
 		parseExecutables();
 		
 		processExecutableRefProxys();
 	}
 	
 	/**
-	 * 解析根元素下的全局配置
+	 * 解析全局配置
 	 */
-	protected void parseGlobalConfigs()
+	public void parseGlobalConfigs()
 	{
-		Element parent=getSingleElementByTagName(root, TAG_GLOBAL_CONFIG);
+		Element parent=getSingleElementByTagName(getRootElement(), TAG_GLOBAL_CONFIG);
 		
 		parseGenericConverter(parent);
 	}
 	
 	/**
-	 * 解析通用转换器
-	 * @param parent
+	 * 解析并构建根解决对象，写入配置对象中。
 	 */
-	protected void parseGenericConverter(Element parent)
+	public void parseResolvers()
 	{
-		Element cvtEl = getSingleElementByTagName(parent, TAG_GENERIC_CONVERTER);
-		
-		String clazz = cvtEl==null ? null : getAttribute(cvtEl, TAG_GENERIC_CONVERTER_ATTR_CLASS);
-		
-		GenericConverter genericConverter = configuration.getGenericConverter();
-		if(genericConverter == null)
-		{
-			if(clazz==null || clazz.length()==0)
-				genericConverter = createGenericConverterInstance();
-			else
-				genericConverter = (GenericConverter)createClassInstance(clazz);
-			
-			configuration.setGenericConverter(genericConverter);
-			
-			if(_logDebugEnabled)
-				log.debug("set "+GenericConverter.class.getSimpleName()+" instance '"+genericConverter+"'");
-		}
-		
-		parseSupportConverters(genericConverter, cvtEl);
-	}
-	
-	/**
-	 * 解析父元素下的支持转换器
-	 * @param genericConverter
-	 * @param parent
-	 */
-	protected void parseSupportConverters(GenericConverter genericConverter, Element parent)
-	{
-		List<Element> children=getChildrenByTagName(parent, TAG_CONVERTER);
-		if(children==null || children.size()==0)
-			return;
-		
-		for(Element e : children)
-		{
-			String src = getAttribute(e, TAG_CONVERTER_ATTR_SRC);
-			String target = getAttribute(e, TAG_CONVERTER_ATTR_TARGET);
-			String clazz = getAttribute(e, TAG_CONVERTER_ATTR_CLASS);
-			
-			assertNotEmpty(src, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_SRC+"] must not be empty");
-			assertNotEmpty(target, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_TARGET+"] must not be empty");
-			assertNotEmpty(clazz, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_CLASS+"] must not be empty");
-			
-			genericConverter.addConverter(toClass(src), toClass(target), (Converter)createClassInstance(clazz));
-		}
-	}
-	
-
-	/**
-	 * 解析并构建根元素下的解决对象对象，写入配置对象中。
-	 */
-	protected void parseResolvers()
-	{
-		List<Element> children=getChildrenByTagName(getSingleElementByTagName(root, TAG_RESOLVERS), TAG_RESOLVER);
+		List<Element> children=getChildrenByTagName(getSingleElementByTagName(getRootElement(), TAG_RESOLVERS), TAG_RESOLVER);
 		
 		if(children!=null && children.size()>0)
 		{
@@ -285,11 +236,11 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 解析并构建根元素下的可执行对象，写入配置对象
+	 * 解析并构建可执行对象，写入配置对象
 	 */
-	protected void parseExecutables()
+	public void parseExecutables()
 	{
-		Element executables=getSingleElementByTagName(root,TAG_EXECUTABLES);
+		Element executables=getSingleElementByTagName(getRootElement(),TAG_EXECUTABLES);
 		if(executables != null)
 		{
 			List<Element> children=getChildrenByTagName(executables, null);
@@ -308,6 +259,58 @@ public class ConfigurationParser
 					configuration.addExecutable(executable);
 				}
 			}
+		}
+	}
+	
+	/**
+	 * 解析通用转换器
+	 * @param parent
+	 */
+	protected void parseGenericConverter(Element parent)
+	{
+		Element cvtEl = getSingleElementByTagName(parent, TAG_GENERIC_CONVERTER);
+		
+		String clazz = cvtEl==null ? null : getAttribute(cvtEl, TAG_GENERIC_CONVERTER_ATTR_CLASS);
+		
+		GenericConverter genericConverter = configuration.getGenericConverter();
+		if(genericConverter == null)
+		{
+			if(clazz==null || clazz.length()==0)
+				genericConverter = createGenericConverterInstance();
+			else
+				genericConverter = (GenericConverter)createClassInstance(clazz);
+			
+			configuration.setGenericConverter(genericConverter);
+			
+			if(_logDebugEnabled)
+				log.debug("set "+GenericConverter.class.getSimpleName()+" instance '"+genericConverter+"'");
+		}
+		
+		parseSupportConverters(genericConverter, cvtEl);
+	}
+	
+	/**
+	 * 解析父元素下的支持转换器并加入给定的通用转换器中
+	 * @param genericConverter
+	 * @param parent
+	 */
+	protected void parseSupportConverters(GenericConverter genericConverter, Element parent)
+	{
+		List<Element> children=getChildrenByTagName(parent, TAG_CONVERTER);
+		if(children==null || children.size()==0)
+			return;
+		
+		for(Element e : children)
+		{
+			String src = getAttribute(e, TAG_CONVERTER_ATTR_SRC);
+			String target = getAttribute(e, TAG_CONVERTER_ATTR_TARGET);
+			String clazz = getAttribute(e, TAG_CONVERTER_ATTR_CLASS);
+			
+			assertNotEmpty(src, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_SRC+"] must not be empty");
+			assertNotEmpty(target, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_TARGET+"] must not be empty");
+			assertNotEmpty(clazz, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_CLASS+"] must not be empty");
+			
+			genericConverter.addConverter(toClass(src), toClass(target), (Converter)createClassInstance(clazz));
 		}
 	}
 	
@@ -505,12 +508,12 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 取得XML根元素
+	 * 从输入流解析xml文档对象
 	 * @param in
 	 * @return
-	 * @throws Exception
+	 * @throws ParseException
 	 */
-	protected Element getRootElement(InputStream in)
+	protected Document parseDocument(InputStream in)
 	{
 		try
 		{
@@ -518,18 +521,32 @@ public class ConfigurationParser
 			dbf.setValidating(false);
 			dbf.setNamespaceAware(false);
 			
-			DocumentBuilder db=null;
-	
-			db=dbf.newDocumentBuilder();
+			DocumentBuilder db=dbf.newDocumentBuilder();
 			
-			Document doc=db.parse(in);
-			
-			return doc.getDocumentElement();
+			return db.parse(in);
 		}
 		catch(Exception e)
 		{
 			throw new ParseException("",e);
 		}
+	}
+	
+	/**
+	 * 取得解析的文档对象
+	 * @return
+	 */
+	protected Document getDocument()
+	{
+		return this.document;
+	}
+	
+	/**
+	 * 取得解析的文档根元素
+	 * @return
+	 */
+	protected Element getRootElement()
+	{
+		return document.getDocumentElement();
 	}
 	
 	/**
@@ -650,7 +667,7 @@ public class ConfigurationParser
 	{
 		return new DefaultResolverFactory();
 	}
-
+	
 	/**
 	 * 创建空的通用转换器对象，用于设置其属性
 	 * @return
@@ -731,7 +748,7 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 可以行对象代理，用于可执行对象引用的延迟初始化
+	 * 可执行对象代理，用于可执行对象引用的延迟初始化
 	 * @author earthAngry@gmail.com
 	 * @date 2010-10-28
 	 *

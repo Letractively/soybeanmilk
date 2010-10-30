@@ -28,6 +28,7 @@ import org.soybeanMilk.web.config.ExceptionHandlerInfo;
 import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
@@ -56,27 +57,47 @@ public class WebConfigurationParser extends ConfigurationParser
 	 */
 	private String executableNameSuffix;
 	
+	/**
+	 * @see ConfigurationParser#ConfigurationParser()
+	 */
 	public WebConfigurationParser()
 	{
 		super();
 	}
-	
+
+	/**
+	 * @param document
+	 * @see ConfigurationParser#ConfigurationParser(Document)
+	 */
+	public WebConfigurationParser(Document document)
+	{
+		super(document);
+	}
+
+	/**
+	 * @param inputStream
+	 * @see ConfigurationParser#ConfigurationParser(InputStream)
+	 */
+	public WebConfigurationParser(InputStream inputStream)
+	{
+		super(inputStream);
+	}
+
+	/**
+	 * @param configFile
+	 * @see ConfigurationParser#ConfigurationParser(String)
+	 */
 	public WebConfigurationParser(String configFile)
 	{
 		super(configFile);
 	}
 	
-	public WebConfigurationParser(InputStream configFileStream)
-	{
-		super(configFileStream);
-	}
-	
 	@Override
-	protected void parseGlobalConfigs()
+	public void parseGlobalConfigs()
 	{
 		super.parseGlobalConfigs();
 		
-		Element parent=getSingleElementByTagName(root, TAG_GLOBAL_CONFIG);
+		Element parent=getSingleElementByTagName(getRootElement(), TAG_GLOBAL_CONFIG);
 		
 		parseExecutableNameSuffix(parent);
 		parseExceptionHandlerInfo(parent);
@@ -213,7 +234,7 @@ public class WebConfigurationParser extends ConfigurationParser
 	
 	protected WebConfiguration getWebConfiguration()
 	{
-		return (WebConfiguration)configuration;
+		return (WebConfiguration)getConfiguration();
 	}
 	
 	protected ExceptionHandlerInfo createExceptionHandlerInfoInstane()

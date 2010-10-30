@@ -1,0 +1,775 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
+ */
+
+package org.soybeanMilk.core.config.parser;
+
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.core.Constants;
+import org.soybeanMilk.core.Executable;
+import org.soybeanMilk.core.ExecuteException;
+import org.soybeanMilk.core.ObjectSource;
+import org.soybeanMilk.core.bean.Converter;
+import org.soybeanMilk.core.bean.DefaultGenericConverter;
+import org.soybeanMilk.core.bean.GenericConverter;
+import org.soybeanMilk.core.config.Configuration;
+import org.soybeanMilk.core.exe.Action;
+import org.soybeanMilk.core.exe.Invoke;
+import org.soybeanMilk.core.exe.Invoke.Arg;
+import org.soybeanMilk.core.resolver.DefaultResolverFactory;
+import org.soybeanMilk.core.resolver.FactoryResolverProvider;
+import org.soybeanMilk.core.resolver.ResolverFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+
+/**
+ * 配置解析器
+ * @author earthAngry@gmail.com
+ * @date 2010-10-1
+ */
+public class ConfigurationParser
+{
+	private static Log log=LogFactory.getLog(ConfigurationParser.class);
+	private static boolean _logDebugEnabled=log.isDebugEnabled();
+	
+	public static final String TAG_ROOT="soybean-milk";
+	
+	public static final String TAG_RESOLVERS="resolvers";
+	public static final String TAG_RESOLVER="resolver";
+	public static final String TAG_RESOLVER_ATTR_ID="id";
+	public static final String TAG_RESOLVER_ATTR_CLASS="class";
+	
+	public static final String TAG_GLOBAL_CONFIG="global-config";
+	public static final String TAG_GENERIC_CONVERTER="generic-converter";
+	public static final String TAG_GENERIC_CONVERTER_ATTR_CLASS="class";
+	public static final String TAG_CONVERTER="converter";
+	public static final String TAG_CONVERTER_ATTR_SRC="src";
+	public static final String TAG_CONVERTER_ATTR_TARGET="target";
+	public static final String TAG_CONVERTER_ATTR_CLASS=TAG_GENERIC_CONVERTER_ATTR_CLASS;
+	
+	public static final String TAG_EXECUTABLES="executables";
+	
+	public static final String TAG_ACTION="action";
+	public static final String TAG_ACTION_ATTR_NAME="name";
+	
+	public static final String TAG_INVOKE="invoke";
+	public static final String TAG_INVOKE_ATTR_NAME=TAG_ACTION_ATTR_NAME;
+	public static final String TAG_INVOKE_ATTR_METHOD="method";
+	public static final String TAG_INVOKE_ATTR_RESOLVER_OBJECT="resolver";
+	public static final String TAG_INVOKE_ATTR_RESOLVER_CLASS="resolver-class";
+	public static final String TAG_INVOKE_ATTR_RESULT_KEY="result-key";
+	
+	public static final String TAG_ARG="arg";
+	public static final String TAG_ARG_ATTR_KEY="key";
+	public static final String TAG_ARG_ATTR_VALUE="value";
+	
+	public static final String TAG_REF="ref";
+	public static final String TAG_REF_ATTR_NAME="name";
+	
+	protected Element root;
+	protected Configuration configuration;
+	
+	/**
+	 * 从默认配置文件解析
+	 */
+	public ConfigurationParser()
+	{
+		this(Constants.DEFAULT_CONFIG_FILE);
+	}
+	
+	/**
+	 * 从给定文件解析，可以是资源文件，也可以是文件系统文件
+	 * @param configFile
+	 */
+	public ConfigurationParser(String configFile)
+	{
+		InputStream in = null;
+		try
+		{
+			in = ConfigurationParser.class.getClassLoader().getResourceAsStream(configFile);
+		}
+		catch(Exception e){}
+		
+		if(in == null)
+		{
+			try
+			{
+				in=new FileInputStream(configFile);
+			}
+			catch(Exception e1){}
+		}
+		
+		if(in == null)
+			throw new IllegalArgumentException("can not find config file named '"+configFile+"'");
+		
+		if(_logDebugEnabled)
+			log.debug("start parsing from config file '"+configFile+"'");
+		
+		initDocumentRoot(in);
+	}
+	
+	/**
+	 * 从输入流解析
+	 * @param configFileStream
+	 */
+	public ConfigurationParser(InputStream configFileStream)
+	{
+		initDocumentRoot(configFileStream);
+	}
+	
+	protected void initDocumentRoot(InputStream configFileStream)
+	{
+		root=getRootElement(configFileStream);
+	}
+	
+	/**
+	 * 解析一个新的配置对象
+	 * @return
+	 */
+	public Configuration parse()
+	{
+		this.configuration=createConfigurationInstance();
+		parseConfiguration();
+		
+		return configuration;
+	}
+	
+	/**
+	 * 在一个已有的配置对象基础上解析，将所有配置信息加入这个已有的对象
+	 * @param configuration
+	 */
+	public void parse(Configuration configuration)
+	{
+		assertNotEmpty(configuration,"[configuration] must not be null");
+		
+		this.configuration=configuration;
+		parseConfiguration();
+	}
+	
+	/**
+	 * 解析配置信息，解析解决对象、全局配置、可执行对象
+	 */
+	protected void parseConfiguration()
+	{
+		parseResolvers();
+		parseGlobalConfigs();
+		parseExecutables();
+		
+		processExecutableRefProxys();
+	}
+	
+	/**
+	 * 解析根元素下的全局配置
+	 */
+	protected void parseGlobalConfigs()
+	{
+		Element parent=getSingleElementByTagName(root, TAG_GLOBAL_CONFIG);
+		
+		parseGenericConverter(parent);
+	}
+	
+	/**
+	 * 解析通用转换器
+	 * @param parent
+	 */
+	protected void parseGenericConverter(Element parent)
+	{
+		Element cvtEl = getSingleElementByTagName(parent, TAG_GENERIC_CONVERTER);
+		
+		String clazz = cvtEl==null ? null : getAttribute(cvtEl, TAG_GENERIC_CONVERTER_ATTR_CLASS);
+		
+		GenericConverter genericConverter = configuration.getGenericConverter();
+		if(genericConverter == null)
+		{
+			if(clazz==null || clazz.length()==0)
+				genericConverter = createGenericConverterInstance();
+			else
+				genericConverter = (GenericConverter)createClassInstance(clazz);
+			
+			configuration.setGenericConverter(genericConverter);
+			
+			if(_logDebugEnabled)
+				log.debug("set "+GenericConverter.class.getSimpleName()+" instance '"+genericConverter+"'");
+		}
+		
+		parseSupportConverters(genericConverter, cvtEl);
+	}
+	
+	/**
+	 * 解析父元素下的支持转换器
+	 * @param genericConverter
+	 * @param parent
+	 */
+	protected void parseSupportConverters(GenericConverter genericConverter, Element parent)
+	{
+		List<Element> children=getChildrenByTagName(parent, TAG_CONVERTER);
+		if(children==null || children.size()==0)
+			return;
+		
+		for(Element e : children)
+		{
+			String src = getAttribute(e, TAG_CONVERTER_ATTR_SRC);
+			String target = getAttribute(e, TAG_CONVERTER_ATTR_TARGET);
+			String clazz = getAttribute(e, TAG_CONVERTER_ATTR_CLASS);
+			
+			assertNotEmpty(src, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_SRC+"] must not be empty");
+			assertNotEmpty(target, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_TARGET+"] must not be empty");
+			assertNotEmpty(clazz, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_CLASS+"] must not be empty");
+			
+			genericConverter.addConverter(toClass(src), toClass(target), (Converter)createClassInstance(clazz));
+		}
+	}
+	
+
+	/**
+	 * 解析并构建根元素下的解决对象对象，写入配置对象中。
+	 */
+	protected void parseResolvers()
+	{
+		List<Element> children=getChildrenByTagName(getSingleElementByTagName(root, TAG_RESOLVERS), TAG_RESOLVER);
+		
+		if(children!=null && children.size()>0)
+		{
+			ResolverFactory rf = configuration.getResolverFactory();
+			if(rf == null)
+			{
+				rf= createResolverFactoryInstance();
+				configuration.setResolverFactory(rf);
+			}
+			
+			if(!(rf instanceof DefaultResolverFactory))
+				throw new ParseException("the resolver factory you set must be instance of '"+DefaultResolverFactory.class.getName()+"'");
+			
+			DefaultResolverFactory drf=(DefaultResolverFactory)rf;
+			
+			for(Element e : children)
+			{
+				String id=getAttribute(e,TAG_RESOLVER_ATTR_ID);
+				assertNotEmpty(id,"<"+TAG_RESOLVER+"> attribute ["+TAG_RESOLVER_ATTR_ID+"] must not be null");
+				String clazz=getAttribute(e,TAG_RESOLVER_ATTR_CLASS);
+				assertNotEmpty(clazz,"<"+TAG_RESOLVER+"> of id '"+id+"' attribute ["+TAG_RESOLVER_ATTR_CLASS+"] must not be null");
+				
+				Object resolver=createClassInstance(clazz);
+				
+				if(_logDebugEnabled)
+					log.debug("parsed resolver instance of Class '"+resolver.getClass().getName()+"' with id '"+id+"'");
+				
+				drf.addResolver(id,resolver);
+			}
+		}
+	}
+	
+	/**
+	 * 解析并构建根元素下的可执行对象，写入配置对象
+	 */
+	protected void parseExecutables()
+	{
+		Element executables=getSingleElementByTagName(root,TAG_EXECUTABLES);
+		if(executables != null)
+		{
+			List<Element> children=getChildrenByTagName(executables, null);
+			
+			if(children != null)
+			{
+				for(Element e : children)
+				{
+					Executable executable=createExecutableInstance(e.getTagName());
+					
+					setExecutableProperties(executable,e);
+					
+					if(_logDebugEnabled)
+						log.debug("parsed '"+executable+"'");
+					
+					configuration.addExecutable(executable);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 从可执行对象对应的元素中解析并设置对象的属性。
+	 * @param executable 可执行对象，可能是Action也可能是Invoke
+	 * @param element
+	 */
+	protected void setExecutableProperties(Executable executable,Element element)
+	{
+		if(executable instanceof Action)
+			setActionProperties((Action)executable,element);
+		else
+			setInvokeProperties((Invoke)executable,element);
+	}
+	
+	/**
+	 * 从元素中解析并设置动作的属性。
+	 * @param action
+	 * @param element
+	 */
+	protected void setActionProperties(Action action,Element element)
+	{
+		String name=getAttribute(element,TAG_ACTION_ATTR_NAME);
+		assertNotEmpty(name, "<"+TAG_ACTION+"> attribute ["+TAG_ACTION_ATTR_NAME+"] must not be null");
+		
+		action.setName(customizeExecutableName(name));
+		
+		List<Element> children=getChildrenByTagName(element, null);
+		for(Element e : children)
+		{
+			String tagName=e.getTagName();
+			if(TAG_REF.equals(tagName))
+			{
+				String refExecutableName=getAttribute(e,TAG_REF_ATTR_NAME);
+				assertNotEmpty(refExecutableName, "<"+TAG_REF+"> attribute ["+TAG_REF_ATTR_NAME+"] in <"+TAG_ACTION+"> named '"+action.getName()+"' must not be null");
+				
+				action.addExecutable(new ExecutableRefProxy(customizeExecutableName(refExecutableName)));
+			}
+			else if(TAG_INVOKE.equals(tagName))
+			{
+				Invoke invoke=createInvokeIntance();
+				setInvokeProperties(invoke,e);
+				
+				action.addExecutable(invoke);
+			}
+		}
+	}
+	
+	/**
+	 * 从元素中解析并设置调用的属性
+	 * @param invoke
+	 * @param element
+	 */
+	protected void setInvokeProperties(Invoke invoke,Element element)
+	{
+		String name=getAttribute(element,TAG_INVOKE_ATTR_NAME);
+		String methodName=getAttribute(element, TAG_INVOKE_ATTR_METHOD);
+		String resolverId=getAttribute(element,TAG_INVOKE_ATTR_RESOLVER_OBJECT);
+		String resolverClazz=getAttribute(element, TAG_INVOKE_ATTR_RESOLVER_CLASS);
+		String resultKey=getAttribute(element,TAG_INVOKE_ATTR_RESULT_KEY);
+		
+		if(name==null && methodName==null)
+			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_NAME+"] or ["+TAG_INVOKE_ATTR_METHOD+"] must not be null");
+		
+		if(methodName == null)
+			methodName=name;
+		
+		assertNotEmpty(methodName, "<"+TAG_INVOKE+"> named '"+name+"' attribute ["+TAG_INVOKE_ATTR_METHOD+"] must not be null");
+		
+		if(resolverClazz==null && resolverId==null)
+			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_RESOLVER_OBJECT+"] or ["+TAG_INVOKE_ATTR_RESOLVER_CLASS+"] must not be null");
+		
+		Class<?> resolverClass=null;
+		List<Element> argInfos=getChildrenByTagName(element, TAG_ARG);
+		int argNums= argInfos == null ? 0 : argInfos.size();
+		
+		if(resolverClazz != null)
+		{
+			resolverClass=toClass(resolverClazz);
+		}
+		else if(resolverId != null)
+		{
+			Object resolverBean=configuration.getResolverFactory().getResolver(resolverId);
+			assertNotEmpty(resolverBean, "can not find resolver with id '"+resolverId+"' referenced in <"+TAG_INVOKE+"> named '"+name+"'");
+			
+			resolverClass=resolverBean.getClass();
+			
+			invoke.setResolverProvider(new FactoryResolverProvider(configuration.getResolverFactory(), resolverId));
+		}
+		
+		Method method=Invoke.findMethodThrow(resolverClass, methodName, argNums);
+		
+		invoke.setName(customizeExecutableName(name));
+		invoke.setMethod(method);
+		invoke.setResultKey(resultKey);
+		
+		parseArgs(element,invoke);
+	}
+	
+	/**
+	 * 解析并构建parent元素下的所有参数信息对象，写入调用对象中
+	 * @param parent
+	 * @param invoke
+	 */
+	protected void parseArgs(Element parent,Invoke invoke)
+	{
+		Class<?>[] paramTypes=invoke.getMethod().getParameterTypes();
+		//如果调用对应的方法没有参数，则没有必要再解析
+		if(paramTypes==null || paramTypes.length==0)
+			return;
+		
+		Arg[] args = new Arg[paramTypes.length];
+		
+		List<Element> elements=getChildrenByTagName(parent, TAG_ARG);
+		if(elements==null || elements.size()!=paramTypes.length)
+			throw new ParseException("the number of <"+TAG_ARG+"> does not match the number of the actual method parameters named '"+invoke.getMethod()+"'");
+		
+		for(int i=0;i<elements.size();i++)
+		{
+			Element e=elements.get(i);
+			
+			Arg a=createArgInfoInstance();
+			a.setType(paramTypes[i]);
+			setArgProperties(a,e);
+			
+			if(_logDebugEnabled)
+				log.debug("parsed '"+a+"'");
+			
+			args[i]=a;
+		}
+		
+		invoke.setArgs(args);
+	}
+	
+	/**
+	 * 从元素中解析并设置参数对象的属性
+	 * @param arg
+	 * @param element
+	 */
+	protected void setArgProperties(Arg arg,Element element)
+	{
+		String key=getAttribute(element,TAG_ARG_ATTR_KEY);
+		String valueStr=getAttribute(element, TAG_ARG_ATTR_VALUE);
+		
+		if(key==null && valueStr==null)
+			throw new ParseException("<"+TAG_ARG+"> must have either ["+TAG_ARG_ATTR_KEY+"] or ["+TAG_ARG_ATTR_VALUE+"] attribute");
+		
+		arg.setKey(key);
+		
+		if(valueStr != null)
+			arg.setValue(configuration.getGenericConverter().convert(valueStr, arg.getType()));
+	}
+	
+	/**
+	 * 处理可执行对象引用代理，将它们替换为真正的引用可执行对象，
+	 * 比如动作中的可执行对象引用代理。
+	 */
+	protected void processExecutableRefProxys()
+	{
+		Map<String, Executable> executables=configuration.getExecutables();
+		if(executables == null)
+			return;
+		
+		Set<String> exeNames=executables.keySet();
+		
+		for(String nameKey : exeNames)
+		{
+			Executable exe=executables.get(nameKey);
+			
+			if(exe instanceof Action)
+			{
+				Action action=(Action)exe;
+				List<Executable> actionExes=action.getExecutables();
+				if(actionExes==null)
+					continue;
+				
+				for(int i=0,len=actionExes.size();i<len;i++)
+				{
+					Executable e=actionExes.get(i);
+					
+					if(e instanceof ExecutableRefProxy)
+					{
+						String refName=((ExecutableRefProxy)e).getRefName();
+						Executable refExe=configuration.getExecutable(refName);
+						
+						if(refExe == null)
+							throw new ParseException("can not find Executable named '"+refName+"' referenced in Action '"+action.getName()+"'");
+						
+						actionExes.set(i, refExe);
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 取得XML根元素
+	 * @param in
+	 * @return
+	 * @throws Exception
+	 */
+	protected Element getRootElement(InputStream in)
+	{
+		try
+		{
+			DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
+			dbf.setValidating(false);
+			dbf.setNamespaceAware(false);
+			
+			DocumentBuilder db=null;
+	
+			db=dbf.newDocumentBuilder();
+			
+			Document doc=db.parse(in);
+			
+			return doc.getDocumentElement();
+		}
+		catch(Exception e)
+		{
+			throw new ParseException("",e);
+		}
+	}
+	
+	/**
+	 * 取得父元素的直接子元素列表。如果没有，则返回null。
+	 * 只有子元素的标签名与给定名称匹配的才会返回，如果名称为null，则返回所有。
+	 * @param parent
+	 * @param name
+	 * @return
+	 * @throws Exception
+	 */
+	protected List<Element> getChildrenByTagName(Element parent,String name)
+	{
+		if(parent == null)
+			return null;
+		
+		boolean filter= name != null;
+		
+		NodeList nl=parent.getChildNodes();
+		
+		List<Element> elements=new ArrayList<Element>();
+		for(int i=0;i<nl.getLength();i++)
+		{
+			Node n=nl.item(i);
+			if(!(n instanceof Element))
+				continue;
+			
+			Element e=(Element)nl.item(i);
+			
+			if(!filter)
+				elements.add(e);
+			else
+			{
+				if(name.equals(e.getTagName()))
+					elements.add(e);
+			}
+		}
+		
+		return elements;
+	}
+	
+	/**
+	 * 取得父元素的单一子元素
+	 * @param parent
+	 * @param name
+	 * @return
+	 */
+	protected Element getSingleElementByTagName(Element parent,String name)
+	{
+		if(parent == null)
+			return null;
+		
+		NodeList nodes=parent.getElementsByTagName(name);
+		
+		if(nodes==null || nodes.getLength()==0)
+			return null;
+		
+		return (Element)nodes.item(0);
+	}
+	
+	/**
+	 * 确保给定的对象不为null，如果是字符串，同时确保它不为空字符串。
+	 * @param o 对象
+	 * @param msg 失败时的异常消息
+	 */
+	protected void assertNotEmpty(Object o,String msg)
+	{
+		boolean toThrow=false;
+		
+		if(o == null)
+			toThrow=true;
+		else if(o instanceof String)
+		{
+			String s=(String)o;
+			if(s.length() == 0)
+				toThrow=true;
+		}
+		
+		if(toThrow)
+			throw new ParseException(msg);
+	}
+	
+	/**
+	 * 获取元素的属性值
+	 * @param element
+	 * @param attrName
+	 * @return
+	 */
+	protected String getAttribute(Element element,String attrName)
+	{
+		//没定义的属性居然会返回""
+		String v=element.getAttribute(attrName);
+		if(v==null || v.length()==0)
+			return null;
+		
+		return v;
+	}
+	
+	/**
+	 * 自定义可执行对象的名称，所有可执行对象的名称都将使用该自定义规则
+	 * @param rawName
+	 * @return
+	 */
+	protected String customizeExecutableName(String rawName)
+	{
+		return rawName;
+	}
+	
+	/**
+	 * 创建空的配置对象，用于从配置文件解析并设置其属性
+	 * @return
+	 */
+	protected Configuration createConfigurationInstance()
+	{
+		return new Configuration();
+	}
+	
+	protected ResolverFactory createResolverFactoryInstance()
+	{
+		return new DefaultResolverFactory();
+	}
+
+	/**
+	 * 创建空的通用转换器对象，用于设置其属性
+	 * @return
+	 */
+	protected GenericConverter createGenericConverterInstance()
+	{
+		return new DefaultGenericConverter();
+	}
+	
+	/**
+	 * 创建空的可执行对象，用于从配置文件解析并设置其属性
+	 * @return
+	 */
+	protected Executable createExecutableInstance(String type)
+	{
+		if(TAG_ACTION.equals(type))
+			return createActionIntance();
+		else if(TAG_INVOKE.equals(type))
+			return createInvokeIntance();
+		else
+			throw new ParseException("invalid Executable type <"+type+">");
+	}
+	
+	/**
+	 * 创建空的动作对象，用于从配置文件解析并设置其属性
+	 * @return
+	 */
+	protected Action createActionIntance()
+	{
+		return new Action();
+	}
+	
+	/**
+	 * 创建空的调用对象，用于从配置文件解析并设置其属性
+	 * @return
+	 */
+	protected Invoke createInvokeIntance()
+	{
+		return new Invoke();
+	}
+	
+	/**
+	 * 创建参数信息对象，用于设置其属性
+	 * @return
+	 */
+	protected Arg createArgInfoInstance()
+	{
+		return new Arg();
+	}
+	
+	/**
+	 * 创建对象
+	 * @param clazz
+	 * @return
+	 */
+	protected static Object createClassInstance(String clazz)
+	{
+		try
+		{
+			return Class.forName(clazz).newInstance();
+		}
+		catch(Exception e)
+		{
+			throw new ParseException(e);
+		}
+	}
+	
+	protected static Class<?> toClass(String clazz)
+	{
+		try
+		{
+			return Class.forName(clazz);
+		}
+		catch(Exception e)
+		{
+			throw new ParseException(e);
+		}
+	}
+	
+	/**
+	 * 可以行对象代理，用于可执行对象引用的延迟初始化
+	 * @author earthAngry@gmail.com
+	 * @date 2010-10-28
+	 *
+	 */
+	protected static class ExecutableRefProxy implements Executable
+	{
+		private String refName;
+
+		public ExecutableRefProxy(String refName)
+		{
+			super();
+			this.refName = refName;
+		}
+
+		public String getRefName() {
+			return refName;
+		}
+
+		public void setRefName(String refName) {
+			this.refName = refName;
+		}
+
+		@Override
+		public void execute(ObjectSource objectSource) throws ExecuteException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String getName()
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String toString()
+		{
+			return "Executable [name=" + refName + "]";
+		}
+	}
+}

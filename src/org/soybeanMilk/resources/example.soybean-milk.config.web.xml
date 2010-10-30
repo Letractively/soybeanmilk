@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE soybean-milk PUBLIC "-//soybeanMilk//DTD soybeanMilk 1.0//ZH"
+	"http://www.soybean-milk.org/dtd/soubean-milk.web.dtd">
+<soybean-milk>
+
+	<global-config>
+		<!--
+		添加自定义的日期转换器，比如日期字符串使用与框架默认不同的格式
+		-->
+		<generic-converter>
+			<converter src="java.lang.String" target="java.util.Date" class="my.converter.DateConverter" />
+		</generic-converter>
+		
+		<!--
+		定义统一后缀
+		-->
+		<exe-name-suffix>.do</exe-name-suffix>
+		
+		<!--
+		定义异常处理器，并告诉框架将执行异常对象以“session.executeExceptoin”保存到对象源中
+		-->
+		<exception-handler executable-name="/handleException" exception-arg-key="session.executeExceptoin" />
+	</global-config>
+	
+	<resolvers>
+		<resolver id="userResolver" class="my.user.UserResolver" />
+		<resolver id="roleResolver" class="my.user.RoleResolver" />
+		<resolver id="exceptionResolver" class="my.util.ExceptionResolver" />
+	</resolvers>
+	
+	<executables>
+		<action name="/handleException">
+			<invoke method="handleException" resolver="exceptionResolver">
+				<arg key="session.loginUserId" />
+				
+				<!-- 以上面异常处理器配置中定义的关键字取得执行异常对象 -->
+				<arg key="session.executeExceptoin" />
+			</invoke>
+			
+			<target url="/error.jsp" />
+		</action>
+		
+		<!-- 注册 -->
+		<action name="/user/register">
+			<invoke method="processRegister" resolver="userResolver" result-key="registerUserInfo">
+				<!-- 该方法的第一个参数是用户信息Bean，这里告诉框架将整个参数转换为用户信息Bean对象 -->
+				<arg key="param" />
+				
+				<!-- 该方法的第二个参数是确认密码，这里告诉框架从参数中的“confirmPassword”取值 -->
+				<arg key="confirmPassword" />
+			</invoke>
+			
+			<target url="/register_result.jsp" />
+		</action>
+		
+		<!-- 登录 -->
+		<action name="/user/login">
+			<invoke method="processLogin" resolver="userResolver" result-key="session.loginUserInfo">
+				<arg key="param" />
+			</invoke>
+			
+			<target url="/index.jsp" type="redirect" />
+		</action>
+		
+		<!-- 显示登录用户的好友列表 -->
+		<action name="/user/friendList">
+			<invoke method="friendList" resolver="userResolver" result-key="friendList">
+				<arg key="session.loginUserInfo" />
+			</invoke>
+			<target url="/user/friend_list.jsp" />
+		</action>
+	</executables>
+</soybean-milk>
+

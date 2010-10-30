@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE soybean-milk PUBLIC "-//soybeanMilk//DTD soybeanMilk 1.0//ZH"
+	"http://www.soybean-milk.org/dtd/soybean-milk.core.dtd">
+<soybean-milk>
+	
+	<resolvers>
+		<resolver id="resolver_0" class="my.test.TestBean1" />
+		<resolver id="resolver_1" class="my.test.TestBean2" />
+	</resolvers>
+	
+	<executables>
+		<invoke name="invoke_0" method="method0" resolver="resolver_0" result-key="invoke_0_Result">
+			<arg key="param_0" />
+			<arg key="param_1" />
+			<arg value="true" />
+		</invoke>
+		
+		<action name="action_0">
+			<ref name="invoke_0" />
+		</action>
+		
+		<action name="action_1">
+			<ref name="action_0" />
+			<invoke method="invoke_0" resolver="resolver_0">
+				<arg key="param_0" />
+			</invoke>
+			<ref name="invoke_0" />
+		</action>
+		
+		<action name="empty_exe" />
+	</executables>
+</soybean-milk>

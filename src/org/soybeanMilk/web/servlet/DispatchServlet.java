@@ -167,7 +167,9 @@ public class DispatchServlet extends HttpServlet
 				log.debug("add '"+external+"' in 'application' scope to '"+configuration+"' as external resolver factory");
 		}
 		
-		new WebConfigurationParser(configFileName).parse(configuration);
+		WebConfigurationParser parser=new WebConfigurationParser(configFileName);
+		parser.setConfiguration(configuration);
+		parser.parse();
 		
 		this.webExecutor=new WebExecutor(configuration);
 	}

@@ -103,8 +103,15 @@ public class WebConfigurationParser extends ConfigurationParser
 		parseExceptionHandlerInfo(parent);
 	}
 	
+	@Override
+	public void parseRefs()
+	{
+		processExceptionHanderInfoRefs();
+		super.parseRefs();
+	}
+	
 	/**
-	 * 解析并保存父元素下的可执行对象后缀配置。
+	 * 解析并保存父元素下的可执行对象后缀配置
 	 * @param parent
 	 */
 	protected void parseExecutableNameSuffix(Element parent)
@@ -181,17 +188,10 @@ public class WebConfigurationParser extends ConfigurationParser
 		targetInfo.setType(type);
 	}
 	
-	@Override
-	protected void processExecutableRefProxys()
-	{
-		processExecutableRefProxysExceptionHanderInfo();
-		super.processExecutableRefProxys();
-	}
-	
 	/**
 	 * 替换异常处理器的代理为真实的可执行对象
 	 */
-	protected void processExecutableRefProxysExceptionHanderInfo()
+	protected void processExceptionHanderInfoRefs()
 	{
 		ExceptionHandlerInfo hi=getWebConfiguration().getExceptionHandlerInfo();
 		if(hi == null)

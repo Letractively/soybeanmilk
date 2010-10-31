@@ -160,31 +160,28 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 解析一个新的配置对象
-	 * @return
+	 * 设置解析配置对象，所有的解析结果将写入该配置中，它应该在解析前调用
+	 * @param configuration
 	 */
-	public Configuration parse()
-	{
-		parse(createConfigurationInstance());
-		
-		return configuration;
+	public void setConfiguration(Configuration configuration) {
+		this.configuration = configuration;
 	}
 	
 	/**
-	 * 在一个已有的配置对象基础上解析，将所有配置信息加入这个已有的对象
-	 * @param configuration
+	 * 解析，如果你没有在之前设置配置对象（通过{@link #setConfiguration(Configuration)}），它将新创建
+	 * @return 解析结果
 	 */
-	public void parse(Configuration configuration)
+	public Configuration parse()
 	{
-		assertNotEmpty(configuration,"[configuration] must not be null");
-		
-		this.configuration=configuration;
+		if(getConfiguration() == null)
+			setConfiguration(createConfigurationInstance());
 		
 		parseGlobalConfigs();
 		parseResolvers();
 		parseExecutables();
+		parseRefs();
 		
-		processExecutableRefProxys();
+		return getConfiguration();
 	}
 	
 	/**
@@ -198,7 +195,7 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 解析并构建根解决对象，写入配置对象中。
+	 * 解析并构建解决对象
 	 */
 	public void parseResolvers()
 	{
@@ -236,7 +233,7 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 解析并构建可执行对象，写入配置对象
+	 * 解析并构建可执行对象
 	 */
 	public void parseExecutables()
 	{
@@ -260,6 +257,14 @@ public class ConfigurationParser
 				}
 			}
 		}
+	}
+	
+	/**
+	 * 处理引用
+	 */
+	public void parseRefs()
+	{
+		processExecutableRefs();
 	}
 	
 	/**
@@ -469,7 +474,7 @@ public class ConfigurationParser
 	 * 处理可执行对象引用代理，将它们替换为真正的引用可执行对象，
 	 * 比如动作中的可执行对象引用代理。
 	 */
-	protected void processExecutableRefProxys()
+	protected void processExecutableRefs()
 	{
 		Map<String, Executable> executables=configuration.getExecutables();
 		if(executables == null)

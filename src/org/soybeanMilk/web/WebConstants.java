@@ -33,6 +33,11 @@ public class WebConstants extends Constants
 	public static final String DEFAULT_ENCODING="UTF-8";
 	
 	/**
+	 * WEB执行器在应用中的保存关键字
+	 */
+	public static final String APPLICATION_EXECUTOR_KEY=WebExecutor.class.getName();
+	
+	/**
 	 * servlet允许的初始化配置参数
 	 * @author earthAngry@gmail.com
 	 * @date 2010-10-6

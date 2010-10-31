@@ -86,6 +86,7 @@ public class DispatchServlet extends HttpServlet
 	@Override
 	public void destroy()
 	{
+		getServletContext().removeAttribute(WebConstants.APPLICATION_EXECUTOR_KEY);
 		this.webExecutor = null;
 		super.destroy();
 	}
@@ -97,6 +98,8 @@ public class DispatchServlet extends HttpServlet
 		
 		initEncoding();
 		initWebExecutor();
+		
+		getServletContext().setAttribute(WebConstants.APPLICATION_EXECUTOR_KEY, webExecutor);
 	}
 	
 	/**
@@ -151,26 +154,37 @@ public class DispatchServlet extends HttpServlet
 		else if(configFileName.startsWith("WEB-INF/"))
 			configFileName = getServletContext().getRealPath("/").replace(File.separatorChar, '/')+configFileName;
 		
-		WebConfiguration configuration=new WebConfiguration(new DefaultResolverFactory());
+		DefaultResolverFactory rf=new DefaultResolverFactory();
+		rf.setExternalResolverFactory(findExternalResolverFactory(getInitParameter(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY)));
 		
-		String efKey=getInitParameter(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY);
-		if(efKey != null)
-		{
-			ResolverFactory external=(ResolverFactory)getServletContext().getAttribute(efKey);
-			if(external == null)
-				throw new NullPointerException("can not find external ResolverFactory in application with key '"+efKey+"'");
-			
-			DefaultResolverFactory drf=(DefaultResolverFactory)configuration.getResolverFactory();
-			drf.setExternalResolverFactory(external);
-			
-			if(_logDebugEnabled)
-				log.debug("add '"+external+"' in 'application' scope to '"+configuration+"' as external resolver factory");
-		}
+		WebConfiguration configuration=new WebConfiguration(rf);
 		
 		WebConfigurationParser parser=new WebConfigurationParser(configFileName);
 		parser.setConfiguration(configuration);
 		parser.parse();
 		
 		this.webExecutor=new WebExecutor(configuration);
+	}
+	
+	/**
+	 * 查找应用的外部解决对象工厂
+	 * @param factoryKey
+	 * @return
+	 */
+	protected ResolverFactory findExternalResolverFactory(String factoryKey)
+	{
+		ResolverFactory erf=null;
+		
+		if(factoryKey != null)
+		{
+			erf=(ResolverFactory)getServletContext().getAttribute(factoryKey);
+			if(erf == null)
+				throw new NullPointerException("can not find external ResolverFactory in application with key '"+factoryKey+"'");
+			
+			if(_logDebugEnabled)
+				log.debug("find external resolver factory '"+erf.getClass().getName()+"' in 'application' scope");
+		}
+		
+		return erf;
 	}
 }

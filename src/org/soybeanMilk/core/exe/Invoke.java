@@ -158,15 +158,15 @@ public class Invoke implements Executable,Serializable
 		}
 		catch(InvocationTargetException e)
 		{
-			throw new ExecuteException(e,ExecuteException.ExceptionType.INVOCATION,this);
+			throw new ExecuteException(e,ExecuteException.ExceptionType.INVOCATION);
 		}
 		catch(IllegalArgumentException e)
 		{
-			throw new ExecuteException(e,ExecuteException.ExceptionType.ARGUMENT,this);
+			throw new ExecuteException(e,ExecuteException.ExceptionType.ARGUMENT);
 		}
 		catch(IllegalAccessException e)
 		{
-			throw new ExecuteException(e,ExecuteException.ExceptionType.ACCESS,this);
+			throw new ExecuteException(e,ExecuteException.ExceptionType.ACCESS);
 		}
 		
 		if(_logDebugEnabled)

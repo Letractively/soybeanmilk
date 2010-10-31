@@ -65,14 +65,13 @@ public class WebExecutor implements Executor
 		this.webConfiguration = webConfiguration;
 	}
 	
-	
 	@Override
 	public void execute(String exeName, ObjectSource objSource)
 			throws ExecuteException, ExecutableNotFoundException
 	{
 		throw new UnsupportedOperationException("this method is not support here");
 	}
-
+	
 	/**
 	 * 执行，它根据请求查找可执行对象并执行对应的动作；如果配置了异常处理器，它还会处理可能出现的异常
 	 * @param objSource WEB对象源，你不需要要设置它的{@linkplain GenericConverter 通用转换器}属性，这个方法会自动设置它

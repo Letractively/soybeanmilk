@@ -40,10 +40,6 @@ public class WebConfigurationParser extends ConfigurationParser
 	private static Log log=LogFactory.getLog(WebConfigurationParser.class);
 	private static boolean _logDebugEnabled=log.isDebugEnabled();
 	
-	public static final String TAG_GLOBAL_CONFIG_TAG_EXECUTABLE_NAME_SUFFIX="exe-name-suffix";
-	
-	public static final String TAG_GLOBAL_CONFIG_TAG_INVOKE_ACCESSABLE="invoke-accessable";
-	
 	public static final String TAG_EXCEPTION_HANDLER="exception-handler";
 	public static final String TAG_EXCEPTION_HANDLER_ATTR_EXECUTABLE="executable-name";
 	public static final String TAG_EXCEPTION_HANDLER_ATTR_ARG_KEY="exception-arg-key";

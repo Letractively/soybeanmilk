@@ -2,24 +2,16 @@
 <!--该定义是由soybean-milk.core.dtd继承而来，大部分的说明可以参考它-->
 
 <!ELEMENT soybean-milk (global-config?,resolvers?,executables)>
-<!ELEMENT global-config (generic-converter?,exe-name-suffix?,exception-handler?)>
+<!ELEMENT global-config (generic-converter?,exception-handler?)>
 <!ELEMENT generic-converter (converter*)>
-
-<!--
-可执行对象的后缀配置，配置解析器会为所有可执行对象加此后缀，比如配置：
-<exe-name-suffix>.do</exe-name-suffix>
-那么，无论是全局还是局部可执行对象，只要定义了名称属性，都将被加上这个后缀
--->
-<!ELEMENT exe-name-suffix (#PCDATA)>
 
 <!--
 异常处理器，执行器在遇到执行异常时，会将异常转交给它所定义的可执行对象来处理，比如配置：
 <global-config>
-		<exe-name-suffix>.do</exe-name-suffix>
-		<exception-handler executable-name="/handleException" exception-arg-key="session.executeExceptoin" />
+		<exception-handler executable-name="/handleException.do" exception-arg-key="session.executeExceptoin" />
 </global-config>
 <executables>
-	<action name="/handleException">
+	<action name="/handleException.do">
 		<invoke method="handleException" resolver-class="my.utils.ExceptionHandler">
 			<arg key="session.userId" />
 			<arg key="session.executeExceptoin" />

@@ -12,14 +12,9 @@
 		</generic-converter>
 		
 		<!--
-		定义统一后缀
-		-->
-		<exe-name-suffix>.do</exe-name-suffix>
-		
-		<!--
 		定义异常处理器，并告诉框架将执行异常对象以“session.executeExceptoin”保存到对象源中
 		-->
-		<exception-handler executable-name="/handleException" exception-arg-key="session.executeExceptoin" />
+		<exception-handler executable-name="/handleException.do" exception-arg-key="session.executeExceptoin" />
 	</global-config>
 	
 	<resolvers>
@@ -29,7 +24,7 @@
 	</resolvers>
 	
 	<executables>
-		<action name="/handleException">
+		<action name="/handleException.do">
 			<invoke method="handleException" resolver="exceptionResolver">
 				<arg key="session.loginUserId" />
 				
@@ -41,7 +36,7 @@
 		</action>
 		
 		<!-- 注册 -->
-		<action name="/user/register">
+		<action name="/user/register.do">
 			<invoke method="processRegister" resolver="userResolver" result-key="registerUserInfo">
 				<!-- 该方法的第一个参数是用户信息Bean，这里告诉框架将整个参数转换为用户信息Bean对象 -->
 				<arg key="param" />
@@ -54,7 +49,7 @@
 		</action>
 		
 		<!-- 登录 -->
-		<action name="/user/login">
+		<action name="/user/login.do">
 			<invoke method="processLogin" resolver="userResolver" result-key="session.loginUserInfo">
 				<arg key="param" />
 			</invoke>
@@ -63,7 +58,7 @@
 		</action>
 		
 		<!-- 显示登录用户的好友列表 -->
-		<action name="/user/friendList">
+		<action name="/user/friendList.do">
 			<invoke method="friendList" resolver="userResolver" result-key="friendList">
 				<arg key="session.loginUserInfo" />
 			</invoke>

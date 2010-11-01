@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="build_version" default="jar_src" basedir=".">
+
+	<!--类文件夹-->
+	<property name="classDir" value="../bin" />
+	
+	<!--目标jar目录-->
+	<property name="destDir" value="dist" />
+	
+	<!-- 版本 -->
+	<property name="appVersion" value="0.9" />
+	
+	<!-- 名称 -->
+	<property name="appName" value="soybeanMilk-${appVersion}" />
+	
+	<target name="jar_src">
+		<delete file="${destDir}/${appName}.jar" />  
+		<jar destfile="${destDir}/${appName}.jar" basedir="${classDir}"
+			includes="org/**/*.class, org/**/*.dtd, org/**/*.xml" />
+	</target>
+</project>

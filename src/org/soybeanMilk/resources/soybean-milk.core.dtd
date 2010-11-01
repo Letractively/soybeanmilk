@@ -62,6 +62,11 @@
 如果你执行“calculate”动作，则是先计算，然后打印结果。
 -->
 <!ELEMENT executables (invoke | action)*>
+
+<!--
+动作
+它可以包含多个局部调用或者全局引用
+-->
 <!ELEMENT action (invoke | ref)*>
 <!--
 执行引用，将已定义的可执行对象添加到本次执行中。

@@ -86,7 +86,9 @@ public class DispatchServlet extends HttpServlet
 	@Override
 	public void destroy()
 	{
-		getServletContext().removeAttribute(appExecutorKey);
+		if(appExecutorKey != null)
+			getServletContext().removeAttribute(appExecutorKey);
+		
 		this.webExecutor = null;
 		super.destroy();
 	}
@@ -99,7 +101,8 @@ public class DispatchServlet extends HttpServlet
 		initEncoding();
 		initWebExecutor();
 		
-		getServletContext().setAttribute(appExecutorKey, webExecutor);
+		if(appExecutorKey != null)
+			getServletContext().setAttribute(appExecutorKey, webExecutor);
 	}
 	
 	/**
@@ -133,7 +136,7 @@ public class DispatchServlet extends HttpServlet
 	protected void initEncoding()
 	{
 		encoding=getInitParameter(WebConstants.ServletInitParams.ENCODING);
-		if(encoding == null)
+		if(encoding==null || encoding.length()==0)
 			encoding=WebConstants.DEFAULT_ENCODING;
 	}
 	
@@ -143,8 +146,6 @@ public class DispatchServlet extends HttpServlet
 	protected void initAppExecutorKey()
 	{
 		appExecutorKey=getInitParameter(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY);
-		if(appExecutorKey == null)
-			appExecutorKey=WebConstants.DEFAULT_APPLICATION_EXECUTOR_KEY;
 	}
 	
 	/**

@@ -33,9 +33,9 @@ public class WebConstants extends Constants
 	public static final String DEFAULT_ENCODING="UTF-8";
 	
 	/**
-	 * WEB执行器在应用中的保存关键字
+	 * WEB执行器对象在应用中的默认存储关键字
 	 */
-	public static final String APPLICATION_EXECUTOR_KEY=WebExecutor.class.getName();
+	public static final String DEFAULT_APPLICATION_EXECUTOR_KEY=WebExecutor.class.getName();
 	
 	/**
 	 * servlet允许的初始化配置参数
@@ -50,8 +50,11 @@ public class WebConstants extends Constants
 		/**配置文件位置*/
 		public static final String SOYBEAN_MILK_CONFIG="soybean-milk.config";
 		
-		/**外部解决对象工厂在application内的关键字*/
+		/**外部解决对象工厂在应用中的关键字*/
 		public static final String EXTERNAL_RESOLVER_FACTORY="external-resolver-factory";
+		
+		/**WEB执行器对象在应用中的存储关键字*/
+		public static final String APPLICATION_EXECUTOR_KEY="application-executor-key";
 	}
 	
 	/**

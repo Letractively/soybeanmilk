@@ -51,6 +51,9 @@ public class DispatchServlet extends HttpServlet
 	/**编码*/
 	private String encoding;
 	
+	/**WEB执行器存储关键字*/
+	private String appExecutorKey;
+	
 	public DispatchServlet()
 	{
 		super();
@@ -59,16 +62,13 @@ public class DispatchServlet extends HttpServlet
 	public WebExecutor getWebExecutor() {
 		return webExecutor;
 	}
-	public void setWebExecutor(WebExecutor webExecutor) {
-		this.webExecutor = webExecutor;
-	}
 	public String getEncoding() {
 		return encoding;
 	}
-	public void setEncoding(String encoding) {
-		this.encoding = encoding;
+	public String getAppExecutorKey() {
+		return appExecutorKey;
 	}
-
+	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException
@@ -86,7 +86,7 @@ public class DispatchServlet extends HttpServlet
 	@Override
 	public void destroy()
 	{
-		getServletContext().removeAttribute(WebConstants.APPLICATION_EXECUTOR_KEY);
+		getServletContext().removeAttribute(appExecutorKey);
 		this.webExecutor = null;
 		super.destroy();
 	}
@@ -99,7 +99,7 @@ public class DispatchServlet extends HttpServlet
 		initEncoding();
 		initWebExecutor();
 		
-		getServletContext().setAttribute(WebConstants.APPLICATION_EXECUTOR_KEY, webExecutor);
+		getServletContext().setAttribute(appExecutorKey, webExecutor);
 	}
 	
 	/**
@@ -126,7 +126,7 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 初始化框架编码。
+	 * 初始化框架编码
 	 * 如果你配置了{@link WebConstants.ServletInitParams#ENCODING}参数，框架将使用这个编码，
 	 * 否则，将使用{@link WebConstants#DEFAULT_ENCODING}定义的编码
 	 */
@@ -138,6 +138,16 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
+	 * 初始化执行器在应用中的存储关键字
+	 */
+	protected void initAppExecutorKey()
+	{
+		appExecutorKey=getInitParameter(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY);
+		if(appExecutorKey == null)
+			appExecutorKey=WebConstants.DEFAULT_APPLICATION_EXECUTOR_KEY;
+	}
+	
+	/**
 	 * 初始化{@link WebExecutor WEB执行器}对象。
 	 * 如果你配置了{@link WebConstants.ServletInitParams#SOYBEAN_MILK_CONFIG}参数，框架将使用它初始化，
 	 * 否则，将使用{@link WebConstants#DEFAULT_CONFIG_FILE}。
@@ -146,7 +156,7 @@ public class DispatchServlet extends HttpServlet
 	protected void initWebExecutor()
 	{
 		DefaultResolverFactory rf=new DefaultResolverFactory();
-		rf.setExternalResolverFactory(findExternalResolverFactory(getInitParameter(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY)));
+		rf.setExternalResolverFactory(findExternalResolverFactory());
 		
 		WebConfiguration configuration=new WebConfiguration(rf);
 		
@@ -177,18 +187,19 @@ public class DispatchServlet extends HttpServlet
 	
 	/**
 	 * 查找应用的外部解决对象工厂
-	 * @param factoryKey
 	 * @return
 	 */
-	protected ResolverFactory findExternalResolverFactory(String factoryKey)
+	protected ResolverFactory findExternalResolverFactory()
 	{
+		String erfKey=getInitParameter(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY);
+		
 		ResolverFactory erf=null;
 		
-		if(factoryKey != null)
+		if(erfKey != null)
 		{
-			erf=(ResolverFactory)getServletContext().getAttribute(factoryKey);
+			erf=(ResolverFactory)getServletContext().getAttribute(erfKey);
 			if(erf == null)
-				throw new NullPointerException("can not find external ResolverFactory in application with key '"+factoryKey+"'");
+				throw new NullPointerException("can not find external ResolverFactory in application with key '"+erfKey+"'");
 			
 			if(_logDebugEnabled)
 				log.debug("find external resolver factory '"+erf.getClass().getName()+"' in 'application' scope");

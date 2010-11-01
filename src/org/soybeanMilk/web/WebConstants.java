@@ -47,7 +47,7 @@ public class WebConstants extends Constants
 		/**
 		 * 配置文件位置。如果不指定，则框架会使用{@link WebConstants#DEFAULT_CONFIG_FILE}配置
 		 */
-		public static final String SOYBEAN_MILK_CONFIG="soybean-milk.config";
+		public static final String SOYBEAN_MILK_CONFIG="soybean-milk-config";
 		
 		/**
 		 * 外部解决对象工厂在应用中的关键字。如果指定，框架会搜索并整合它

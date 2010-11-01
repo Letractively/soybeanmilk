@@ -145,6 +145,24 @@ public class DispatchServlet extends HttpServlet
 	 */
 	protected void initWebExecutor()
 	{
+		DefaultResolverFactory rf=new DefaultResolverFactory();
+		rf.setExternalResolverFactory(findExternalResolverFactory(getInitParameter(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY)));
+		
+		WebConfiguration configuration=new WebConfiguration(rf);
+		
+		WebConfigurationParser parser=new WebConfigurationParser(getInitConfigFile());
+		parser.setConfiguration(configuration);
+		parser.parse();
+		
+		this.webExecutor=new WebExecutor(configuration);
+	}
+	
+	/**
+	 * 取得初始化参数的配置文件名，如果不是java包里的资源文件，该方法会将它转换为绝对路径
+	 * @return
+	 */
+	protected String getInitConfigFile()
+	{
 		String configFileName=getInitParameter(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG);
 		if(configFileName == null)
 			configFileName=WebConstants.DEFAULT_CONFIG_FILE;
@@ -154,16 +172,7 @@ public class DispatchServlet extends HttpServlet
 		else if(configFileName.startsWith("WEB-INF/"))
 			configFileName = getServletContext().getRealPath("/").replace(File.separatorChar, '/')+configFileName;
 		
-		DefaultResolverFactory rf=new DefaultResolverFactory();
-		rf.setExternalResolverFactory(findExternalResolverFactory(getInitParameter(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY)));
-		
-		WebConfiguration configuration=new WebConfiguration(rf);
-		
-		WebConfigurationParser parser=new WebConfigurationParser(configFileName);
-		parser.setConfiguration(configuration);
-		parser.parse();
-		
-		this.webExecutor=new WebExecutor(configuration);
+		return configFileName;
 	}
 	
 	/**

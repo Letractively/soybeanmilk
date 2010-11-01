@@ -53,11 +53,6 @@ public class WebConfigurationParser extends ConfigurationParser
 	public static final String TAG_TARGET_ATTR_TYPE="type";
 	
 	/**
-	 * 可执行对象名的后缀
-	 */
-	private String executableNameSuffix;
-	
-	/**
 	 * @see ConfigurationParser#ConfigurationParser()
 	 */
 	public WebConfigurationParser()
@@ -99,7 +94,6 @@ public class WebConfigurationParser extends ConfigurationParser
 		
 		Element parent=getSingleElementByTagName(getRootElement(), TAG_GLOBAL_CONFIG);
 		
-		parseExecutableNameSuffix(parent);
 		parseExceptionHandlerInfo(parent);
 	}
 	
@@ -108,17 +102,6 @@ public class WebConfigurationParser extends ConfigurationParser
 	{
 		processExceptionHanderInfoRefs();
 		super.parseRefs();
-	}
-	
-	/**
-	 * 解析并保存父元素下的可执行对象后缀配置
-	 * @param parent
-	 */
-	protected void parseExecutableNameSuffix(Element parent)
-	{
-		Element element=getSingleElementByTagName(parent,TAG_GLOBAL_CONFIG_TAG_EXECUTABLE_NAME_SUFFIX);
-		if(element != null)
-			this.executableNameSuffix = element.getTextContent();
 	}
 	
 	/**
@@ -204,14 +187,6 @@ public class WebConfigurationParser extends ConfigurationParser
 			Executable handler = getWebConfiguration().getExecutable(((ExecutableRefProxy)he).getRefName());
 			hi.setExceptionHandler(handler);
 		}
-	}
-	
-	@Override
-	protected String customizeExecutableName(String rawName)
-	{
-		if(executableNameSuffix==null || executableNameSuffix.length()==0)
-			return rawName;
-		return rawName+executableNameSuffix;
 	}
 	
 	@Override

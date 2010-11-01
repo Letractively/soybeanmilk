@@ -105,7 +105,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		
 		Class<?> sourceClass=sourceObj.getClass();
-		if(targetClass.isAssignableFrom(sourceClass))
+		if(toWrapperClass(targetClass).isAssignableFrom(sourceClass))
 			return sourceObj;
 		
 		Converter c = getConverter(sourceClass, targetClass);

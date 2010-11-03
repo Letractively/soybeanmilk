@@ -85,53 +85,30 @@ public class WebExecutor implements Executor
 		if(objSource.getGenericConverter() == null)
 			objSource.setGenericConverter(webConfiguration.getGenericConverter());
 		
-		HttpServletRequest request = objSource.getRequest();
-		HttpServletResponse response = objSource.getResponse();
-		
-		if(_logDebugEnabled)
-			log.debug("processing request '"+request.getServletPath()+"'");
-		
-		Executable exe = findRequestExecutable(request, response);
+		Executable exe = findRequestExecutable(objSource);
 		
 		try
 		{
 			exe.execute(objSource);
+			processTarget(exe, objSource);
 		}
 		catch(ExecuteException e)
 		{
-			//处理异常
-			ExceptionHandlerInfo hi = webConfiguration.getExceptionHandlerInfo();
-			if(hi==null || hi.getExceptionHandler()==null)
-				throw new ServletException(e);
-			
-			//存入异常对象到对象源
-			objSource.set(hi.getExceptionArgKey(), e);
-			
-			exe = hi.getExceptionHandler();
-			
-			try
-			{
-				exe.execute(objSource);
-			}
-			catch(ExecuteException e1)
-			{
-				throw new ServletException(e1);
-			}
+			handleException(exe, objSource, e);
 		}
-		
-		processTarget(exe, request, response);
 	}
 	
 	/**
 	 * 查找处理请求的{@linkplain Executable 可执行对象}，{@link #execute(WebObjectSource)}使用这个方法来确定哪个可执行对象来处理该请求
-	 * @param request
-	 * @param response
+	 * @param objSource
 	 * @return
 	 * @throws ExecutableNotFoundException
 	 */
-	protected Executable findRequestExecutable(HttpServletRequest request, HttpServletResponse response)
+	protected Executable findRequestExecutable(WebObjectSource objSource)
 			throws ExecutableNotFoundException
 	{
+		HttpServletRequest request = objSource.getRequest();
+		
 		String servletPath=request.getServletPath();
 		
 		Executable exe = webConfiguration.getExecutable(servletPath);
@@ -142,15 +119,45 @@ public class WebExecutor implements Executor
 	}
 	
 	/**
-	 * 处理可执行对象的目标
-	 * @param executable
-	 * @param request
-	 * @param response
+	 * 处理执行异常
+	 * @param causeExe 导致异常的可执行对象
+	 * @param objSource 执行对象源
+	 * @param exception 执行异常
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	protected void processTarget(Executable executable,HttpServletRequest request, 
-			HttpServletResponse response) throws ServletException, IOException
+	protected void handleException(Executable causeExe, WebObjectSource objSource, ExecuteException exception)
+			throws ServletException, IOException
+	{
+		//处理异常
+		ExceptionHandlerInfo hi = webConfiguration.getExceptionHandlerInfo();
+		if(hi==null || hi.getExceptionHandler()==null)
+			throw new ServletException(exception);
+		
+		//存入异常对象到对象源
+		objSource.set(hi.getExceptionArgKey(), exception);
+		
+		Executable exe = hi.getExceptionHandler();
+		
+		try
+		{
+			exe.execute(objSource);
+			processTarget(exe, objSource);
+		}
+		catch(ExecuteException e)
+		{
+			throw new ServletException(e);
+		}
+	}
+	
+	/**
+	 * 处理可执行对象的目标
+	 * @param executable
+	 * @param objSource
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	protected void processTarget(Executable executable, WebObjectSource objSource) throws ServletException, IOException
 	{
 		Target target = getTarget(executable);
 		
@@ -161,6 +168,9 @@ public class WebExecutor implements Executor
 			
 			return;
 		}
+		
+		HttpServletRequest request = objSource.getRequest();
+		HttpServletResponse response=objSource.getResponse();
 		
 		if(Target.REDIRECT.equalsIgnoreCase(target.getType()))
 		{

@@ -94,12 +94,14 @@ public class ConfigurationParser
 	private Document document;
 	private Configuration configuration;
 	
+	private ConfigFileNameProcessor fileNameProcessor;
+	
 	/**
 	 * 从默认配置文件解析
 	 */
 	public ConfigurationParser()
 	{
-		this(Constants.DEFAULT_CONFIG_FILE);
+		this(null, null);
 	}
 	
 	/**
@@ -112,11 +114,29 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 从给定文件解析，可以是资源文件，也可以是文件系统文件
+	 * 从给定文件解析
 	 * @param configFile
 	 */
 	public ConfigurationParser(String configFile)
 	{
+		this(configFile, null);
+	}
+	
+	/**
+	 * 从给定文件解析，可以是资源文件，也可以是文件系统文件
+	 * @param configFile 如果为null，则从默认文件解析
+	 * @param fileNameProcessor
+	 */
+	public ConfigurationParser(String configFile, ConfigFileNameProcessor fileNameProcessor)
+	{
+		this.fileNameProcessor = fileNameProcessor;
+		
+		if(configFile==null)
+			configFile=getDefaultConfigFile();
+		
+		if(this.fileNameProcessor != null)
+			configFile=this.fileNameProcessor.doProcess(configFile);
+		
 		InputStream in = null;
 		try
 		{
@@ -165,6 +185,10 @@ public class ConfigurationParser
 	 */
 	public void setConfiguration(Configuration configuration) {
 		this.configuration = configuration;
+	}
+	
+	public ConfigFileNameProcessor getFileNameProcessor() {
+		return fileNameProcessor;
 	}
 	
 	/**
@@ -536,6 +560,11 @@ public class ConfigurationParser
 		}
 	}
 	
+	protected String getDefaultConfigFile()
+	{
+		return Constants.DEFAULT_CONFIG_FILE;
+	}
+	
 	/**
 	 * 取得解析的文档对象
 	 * @return
@@ -793,5 +822,10 @@ public class ConfigurationParser
 		{
 			return "Executable [name=" + refName + "]";
 		}
+	}
+	
+	public static interface ConfigFileNameProcessor
+	{
+		String doProcess(String rawConfigFileName);
 	}
 }

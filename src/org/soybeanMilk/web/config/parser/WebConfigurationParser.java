@@ -22,7 +22,9 @@ import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
+import org.soybeanMilk.core.config.parser.ConfigurationParser.ConfigFileNameProcessor;
 import org.soybeanMilk.core.exe.Action;
+import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 import org.soybeanMilk.web.config.ExceptionHandlerInfo;
 import org.soybeanMilk.web.config.WebConfiguration;
@@ -83,6 +85,16 @@ public class WebConfigurationParser extends ConfigurationParser
 		super(configFile);
 	}
 	
+	/**
+	 * @param configFile
+	 * @param fileNameProcessor
+	 * @see ConfigurationParser#ConfigurationParser(String, ConfigFileNameProcessor)
+	 */
+	public WebConfigurationParser(String configFile, ConfigFileNameProcessor fileNameProcessor)
+	{
+		super(configFile, fileNameProcessor);
+	}
+
 	@Override
 	public void parseGlobalConfigs()
 	{
@@ -183,6 +195,12 @@ public class WebConfigurationParser extends ConfigurationParser
 			Executable handler = getWebConfiguration().getExecutable(((ExecutableRefProxy)he).getRefName());
 			hi.setExceptionHandler(handler);
 		}
+	}
+	
+	@Override
+	protected String getDefaultConfigFile()
+	{
+		return WebConstants.DEFAULT_CONFIG_FILE;
 	}
 	
 	@Override

@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.core.ExecutableNotFoundException;
+import org.soybeanMilk.core.config.parser.ConfigurationParser.ConfigFileNameProcessor;
 import org.soybeanMilk.core.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.resolver.ResolverFactory;
 import org.soybeanMilk.web.WebConstants;
@@ -161,7 +162,25 @@ public class DispatchServlet extends HttpServlet
 		
 		WebConfiguration configuration=new WebConfiguration(rf);
 		
-		WebConfigurationParser parser=new WebConfigurationParser(getInitConfigFile());
+		String configFileName=getInitParameter(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG);
+		
+		WebConfigurationParser parser=new WebConfigurationParser(configFileName,
+				new ConfigFileNameProcessor()
+				{
+					@Override
+					public String doProcess(String rawConfigFileName)
+					{
+						String realPath=getServletContext().getRealPath("").replace(File.separatorChar, '/');
+						
+						if(rawConfigFileName.startsWith("/WEB-INF/"))
+							rawConfigFileName = realPath+rawConfigFileName;
+						else if(rawConfigFileName.startsWith("WEB-INF/"))
+							rawConfigFileName = realPath+"/"+rawConfigFileName;
+						
+						return rawConfigFileName;
+					}
+				});
+		
 		parser.setConfiguration(configuration);
 		parser.parse();
 		

@@ -35,7 +35,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * WEB解析器，它可以解析应用“/WEB-INF”下的配置文件
+ * WEB解析器，它可以解析类路径资源文件和应用“/WEB-INF”下的配置文件
  * @author earthAngry@gmail.com
  *
  */
@@ -93,7 +93,7 @@ public class WebConfigurationParser extends ConfigurationParser
 	}
 	
 	@Override
-	public void parseRefs()
+	protected void parseRefs()
 	{
 		processExceptionHanderInfoRefs();
 		super.parseRefs();

@@ -10,8 +10,6 @@ import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.core.os.HashMapObjectSource;
-import org.soybeanMilk.web.config.parser.WebConfigurationParser;
-
 
 public class ExampleConfigFile
 {
@@ -19,7 +17,7 @@ public class ExampleConfigFile
 	
 	public static void main(String[] args)
 	{
-		WebConfigurationParser parser=new WebConfigurationParser("test/example/"+Constants.DEFAULT_CONFIG_FILE, null);
+		ConfigurationParser parser=new ConfigurationParser("test/example/"+Constants.DEFAULT_CONFIG_FILE);
 		Configuration cfg=parser.parse();
 		Executor executor=new DefaultExecutor(cfg);
 		

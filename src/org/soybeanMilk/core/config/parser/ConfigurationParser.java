@@ -173,7 +173,9 @@ public class ConfigurationParser
 	 */
 	public Configuration parse()
 	{
-		setDocument(parseDocument(getDefaultConfigFile()));
+		if(getDocument() == null)
+			setDocument(parseDocument(getDefaultConfigFile()));
+		
 		parseAll();
 		return getConfiguration();
 	}
@@ -186,6 +188,7 @@ public class ConfigurationParser
 	public Configuration parse(String configFile)
 	{
 		setDocument(parseDocument(configFile));
+		
 		parseAll();
 		return getConfiguration();
 	}
@@ -198,6 +201,7 @@ public class ConfigurationParser
 	public Configuration parse(InputStream in)
 	{
 		setDocument(parseDocument(in));
+		
 		parseAll();
 		return getConfiguration();
 	}
@@ -210,6 +214,7 @@ public class ConfigurationParser
 	public Configuration parse(Document document)
 	{
 		setDocument(document);
+		
 		parseAll();
 		return getConfiguration();
 	} 

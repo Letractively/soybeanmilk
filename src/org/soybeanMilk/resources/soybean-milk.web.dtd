@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--该定义是由soybean-milk.core.dtd继承而来，大部分的说明可以参考它-->
 
-<!ELEMENT soybean-milk (global-config?,resolvers?,executables)>
+<!ELEMENT soybean-milk (global-config?,includes?,resolvers?,executables)>
 <!ELEMENT global-config (generic-converter?,exception-handler?)>
 <!ELEMENT generic-converter (converter*)>
 
@@ -27,6 +27,8 @@
 -->
 <!ELEMENT exception-handler EMPTY>
 <!ELEMENT converter EMPTY>
+<!ELEMENT includes (file*)>
+<!ELEMENT file #PCDTATA>
 <!ELEMENT resolvers (resolver*)>
 <!ELEMENT resolver EMPTY>
 <!ELEMENT executables (invoke | action)*>

@@ -76,5 +76,39 @@ public class ExampleConfigFile
 		}
 		
 		log.info("----------------------------------------------");
+		
+		{
+			ConvertableObjectSource os = new HashMapObjectSource();
+			try
+			{
+				executor.execute("m0.testAction", os);
+				
+				String re=(String)os.get("formatResult", null);
+				
+				log.info(re);
+			}
+			catch(ExecuteException e)
+			{
+				log.error("",e);
+			}
+		}
+		
+		log.info("----------------------------------------------");
+		
+		{
+			ConvertableObjectSource os = new HashMapObjectSource();
+			try
+			{
+				executor.execute("m1.testAction", os);
+				
+				String re=(String)os.get("formatResult", null);
+				
+				log.info(re);
+			}
+			catch(ExecuteException e)
+			{
+				log.error("",e);
+			}
+		}
 	}
 }

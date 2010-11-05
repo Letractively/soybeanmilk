@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soybean-milk>
+
+	<resolvers>
+		<resolver id="testResolver_1" class="test.example.resolver.TestResolver" />
+	</resolvers>
+	
+	<executables>
+		<action name="m1.testAction">
+			<ref name="m0.testAction" />
+		</action>
+		
+	</executables>
+	
+</soybean-milk>

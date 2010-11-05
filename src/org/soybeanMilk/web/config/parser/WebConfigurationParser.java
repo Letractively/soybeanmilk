@@ -93,16 +93,7 @@ public class WebConfigurationParser extends ConfigurationParser
 		if(configFile == null)
 			return;
 		
-		if(configFile.startsWith("/WEB-INF/"))
-			configFile = getServletContext().getRealPath("").replace(File.separatorChar, '/')+configFile;
-		else if(configFile.startsWith("WEB-INF/"))
-			configFile = getServletContext().getRealPath("").replace(File.separatorChar, '/')+"/"+configFile;
-		
-		InputStream in=getInputStreamByName(configFile);
-		setDocument(parseDocument(in));
-		
-		if(_logDebugEnabled)
-			log.debug("Parsing will start from '"+configFile+"'");
+		setDocument(parseDocument(configFile));
 	}
 	
 	public ServletContext getServletContext() {
@@ -114,7 +105,7 @@ public class WebConfigurationParser extends ConfigurationParser
 	{
 		super.parseGlobalConfigs();
 		
-		Element parent=getSingleElementByTagName(getRootElement(), TAG_GLOBAL_CONFIG);
+		Element parent=getSingleElementByTagName(getCurrentDocumentRoot(), TAG_GLOBAL_CONFIG);
 		
 		parseExceptionHandlerInfo(parent);
 	}
@@ -211,6 +202,17 @@ public class WebConfigurationParser extends ConfigurationParser
 		}
 	}
 	
+	@Override
+	protected Document parseDocument(String fileName)
+	{
+		if(fileName.startsWith("/WEB-INF/"))
+			fileName = getServletContext().getRealPath("").replace(File.separatorChar, '/')+fileName;
+		else if(fileName.startsWith("WEB-INF/"))
+			fileName = getServletContext().getRealPath("").replace(File.separatorChar, '/')+"/"+fileName;
+		
+		return super.parseDocument(fileName);
+	}
+
 	@Override
 	protected Configuration createConfigurationInstance()
 	{

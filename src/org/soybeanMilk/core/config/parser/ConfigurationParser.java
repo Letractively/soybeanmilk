@@ -59,11 +59,6 @@ public class ConfigurationParser
 	
 	public static final String TAG_ROOT="soybean-milk";
 	
-	public static final String TAG_RESOLVERS="resolvers";
-	public static final String TAG_RESOLVER="resolver";
-	public static final String TAG_RESOLVER_ATTR_ID="id";
-	public static final String TAG_RESOLVER_ATTR_CLASS="class";
-	
 	public static final String TAG_GLOBAL_CONFIG="global-config";
 	public static final String TAG_GENERIC_CONVERTER="generic-converter";
 	public static final String TAG_GENERIC_CONVERTER_ATTR_CLASS="class";
@@ -71,6 +66,14 @@ public class ConfigurationParser
 	public static final String TAG_CONVERTER_ATTR_SRC="src";
 	public static final String TAG_CONVERTER_ATTR_TARGET="target";
 	public static final String TAG_CONVERTER_ATTR_CLASS=TAG_GENERIC_CONVERTER_ATTR_CLASS;
+	
+	public static final String TAG_INCLUDES="includes";
+	public static final String TAG_FILE="file";
+	
+	public static final String TAG_RESOLVERS="resolvers";
+	public static final String TAG_RESOLVER="resolver";
+	public static final String TAG_RESOLVER_ATTR_ID="id";
+	public static final String TAG_RESOLVER_ATTR_CLASS="class";
 	
 	public static final String TAG_EXECUTABLES="executables";
 	
@@ -91,8 +94,12 @@ public class ConfigurationParser
 	public static final String TAG_REF="ref";
 	public static final String TAG_REF_ATTR_NAME="name";
 	
+	
 	private Document document;
 	private Configuration configuration;
+	
+	private Document currentDocument;
+	private List<Document> modules;
 	
 	/**
 	 * 从默认配置文件解析
@@ -120,11 +127,7 @@ public class ConfigurationParser
 		if(configFile==null)
 			return;
 		
-		InputStream in=getInputStreamByName(configFile);
-		this.document=parseDocument(in);
-		
-		if(_logDebugEnabled)
-			log.debug("Parsing will start from config file '"+configFile+"'");
+		this.document=parseDocument(configFile);
 	}
 	
 	/**
@@ -161,8 +164,20 @@ public class ConfigurationParser
 		return this.document;
 	}
 	
+	/**
+	 * 设置解析文档对象
+	 * @param document
+	 */
 	public void setDocument(Document document) {
 		this.document = document;
+	}
+	
+	public List<Document> getModules() {
+		return modules;
+	}
+	
+	public void setModules(List<Document> modules) {
+		this.modules = modules;
 	}
 	
 	/**
@@ -174,9 +189,33 @@ public class ConfigurationParser
 		if(getConfiguration() == null)
 			setConfiguration(createConfigurationInstance());
 		
+		setCurrentDocument(document);
+		
 		parseGlobalConfigs();
+		
+		parseIncludes();
+		
 		parseResolvers();
+		if(modules !=null)
+		{
+			for(Document doc : modules)
+			{
+				setCurrentDocument(doc);
+				parseResolvers();
+			}
+		}
+		
+		setCurrentDocument(document);
 		parseExecutables();
+		if(modules !=null)
+		{
+			for(Document doc : modules)
+			{
+				setCurrentDocument(doc);
+				parseExecutables();
+			}
+		}
+		
 		parseRefs();
 		
 		return getConfiguration();
@@ -187,9 +226,31 @@ public class ConfigurationParser
 	 */
 	public void parseGlobalConfigs()
 	{
-		Element parent=getSingleElementByTagName(getRootElement(), TAG_GLOBAL_CONFIG);
+		Element parent=getSingleElementByTagName(getCurrentDocumentRoot(), TAG_GLOBAL_CONFIG);
 		
 		parseGenericConverter(parent);
+	}
+	
+	/**
+	 * 解析包含的模块配置
+	 */
+	public void parseIncludes()
+	{
+		List<Element> files=getChildrenByTagName(getSingleElementByTagName(getCurrentDocumentRoot(), TAG_INCLUDES), TAG_FILE);
+		
+		if(files == null || files.size()==0)
+			return;
+		
+		this.modules = new ArrayList<Document>();
+		
+		for(Element el : files)
+		{
+			String fileName=el.getTextContent();
+			assertNotEmpty(fileName, "<"+TAG_FILE+">'s content must not be null");
+			
+			Document doc=parseDocument(fileName);
+			this.modules.add(doc);
+		}
 	}
 	
 	/**
@@ -197,7 +258,7 @@ public class ConfigurationParser
 	 */
 	public void parseResolvers()
 	{
-		List<Element> children=getChildrenByTagName(getSingleElementByTagName(getRootElement(), TAG_RESOLVERS), TAG_RESOLVER);
+		List<Element> children=getChildrenByTagName(getSingleElementByTagName(getCurrentDocumentRoot(), TAG_RESOLVERS), TAG_RESOLVER);
 		
 		if(children!=null && children.size()>0)
 		{
@@ -235,7 +296,7 @@ public class ConfigurationParser
 	 */
 	public void parseExecutables()
 	{
-		Element executables=getSingleElementByTagName(getRootElement(),TAG_EXECUTABLES);
+		Element executables=getSingleElementByTagName(getCurrentDocumentRoot(),TAG_EXECUTABLES);
 		if(executables != null)
 		{
 			List<Element> children=getChildrenByTagName(executables, null);
@@ -535,12 +596,15 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 根据名称取得输入流
+	 * 根据名称取得文档对象
 	 * @param fileName
 	 * @return
 	 */
-	protected InputStream getInputStreamByName(String fileName)
+	protected Document parseDocument(String fileName)
 	{
+		if(_logDebugEnabled)
+			log.debug("parsing Document object from '"+fileName+"'");
+		
 		InputStream in = null;
 		try
 		{
@@ -560,16 +624,27 @@ public class ConfigurationParser
 		if(in == null)
 			throw new IllegalArgumentException("can not find config file named '"+fileName+"'");
 		
-		return in;
+		Document doc=parseDocument(in);
+		
+		return doc;
 	}
 	
 	/**
-	 * 取得解析的文档根元素
+	 * 设置当前解析文档
+	 * @param doc
+	 */
+	protected void setCurrentDocument(Document doc)
+	{
+		this.currentDocument=doc;
+	}
+	
+	/**
+	 * 取得当前解析的文档根元素
 	 * @return
 	 */
-	protected Element getRootElement()
+	protected Element getCurrentDocumentRoot()
 	{
-		return document.getDocumentElement();
+		return this.currentDocument.getDocumentElement();
 	}
 	
 	/**

@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <soybean-milk>
+
+	<includes>
+		<file>test/example/soybean-milk.config.m0.xml</file>
+		<file>test/example/soybean-milk.config.m1.xml</file>
+	</includes>
+	
 	<resolvers>
 		<resolver id="testResolver" class="test.example.resolver.TestResolver" />
 	</resolvers>

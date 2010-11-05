@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--根元素-->
-<!ELEMENT soybean-milk (global-config?,resolvers?,executables)>
+<!ELEMENT soybean-milk (global-config?,includes?,resolvers?,executables)>
 
 <!--全局配置-->
 <!ELEMENT global-config (generic-converter)>
@@ -27,6 +27,18 @@
 自定义的辅助转换器，它将被添加到通用转换器中以提供转换支持，后添加的将会替换掉先添加的
 -->
 <!ELEMENT converter EMPTY>
+
+<!--
+包含的模块配置文件，模块配置中应该仅包含resolvers和executables，其他配置都是无效的
+-->
+<!ELEMENT includes (file*)>
+<!--
+模块配置文件名，它可以是模糊的也可以是明确的
+比如：
+“my/cfg/*”			表示目录“my/cfg/”下面的所有XML文件（包括子目录）
+“my/cfg/my.xml”		表示单一的配置文件
+-->
+<!ELEMENT file #PCDTATA>
 
 <!--
 解决对象配置

@@ -14,7 +14,6 @@
 
 package org.soybeanMilk.web.servlet;
 
-import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -163,10 +162,9 @@ public class DispatchServlet extends HttpServlet
 		
 		String configFileName=getInitParameter(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG);
 		
-		WebConfigurationParser parser=new WebConfigurationParser(configFileName,getServletContext());
+		WebConfigurationParser parser=new WebConfigurationParser(configuration,getServletContext());
 		
-		parser.setConfiguration(configuration);
-		parser.parse();
+		parser.parse(configFileName);
 		
 		this.webExecutor=new WebExecutor(configuration);
 	}

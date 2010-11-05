@@ -102,41 +102,20 @@ public class ConfigurationParser
 	private List<Document> modules;
 	
 	/**
-	 * 从默认配置文件解析
+	 * 创建解析器，不预设存储配置对象
 	 */
 	public ConfigurationParser()
 	{
-		this(Constants.DEFAULT_CONFIG_FILE);
+		this(null);
 	}
 	
 	/**
-	 * 从文档对象解析
-	 * @param document
+	 * 创建解析器，并预设存储配置对象，所有的解析结果都将保存到这个配置中
+	 * @param configuration 预设配置对象
 	 */
-	public ConfigurationParser(Document document)
+	public ConfigurationParser(Configuration configuration)
 	{
-		this.document=document;
-	}
-	
-	/**
-	 * 从给定文件解析，可以是资源文件，也可以是文件系统文件
-	 * @param configFile 如果为null，则什么也不做
-	 */
-	public ConfigurationParser(String configFile)
-	{
-		if(configFile==null)
-			return;
-		
-		this.document=parseDocument(configFile);
-	}
-	
-	/**
-	 * 从输入流解析
-	 * @param inputStream
-	 */
-	public ConfigurationParser(InputStream inputStream)
-	{
-		this.document=parseDocument(inputStream);
+		setConfiguration(configuration);
 	}
 	
 	/**
@@ -148,7 +127,7 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 设置解析配置对象，所有的解析结果将写入该配置中，它应该在解析前调用
+	 * 设置解析配置对象，所有的解析结果将保存到该配置中，它应该在解析前调用
 	 * @param configuration
 	 */
 	public void setConfiguration(Configuration configuration) {
@@ -156,7 +135,7 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 取得解析的文档对象
+	 * 取得解析文档对象
 	 * @return
 	 */
 	public Document getDocument()
@@ -172,19 +151,74 @@ public class ConfigurationParser
 		this.document = document;
 	}
 	
+	/**
+	 * 取得模块文档
+	 * @return
+	 */
 	public List<Document> getModules() {
 		return modules;
 	}
 	
+	/**
+	 * 设置模块文档
+	 * @param modules
+	 */
 	public void setModules(List<Document> modules) {
 		this.modules = modules;
 	}
 	
 	/**
-	 * 解析，如果你没有在之前设置配置对象（通过{@link #setConfiguration(Configuration)}），它将新创建
-	 * @return 解析结果
+	 * 从默认配置文件解析
+	 * @return
 	 */
 	public Configuration parse()
+	{
+		setDocument(parseDocument(getDefaultConfigFile()));
+		parseAll();
+		return getConfiguration();
+	}
+	
+	/**
+	 * 从给定配置文件解析
+	 * @param configFile 配置文件，可以类路径资源文件，也可以是文件系统文件
+	 * @return
+	 */
+	public Configuration parse(String configFile)
+	{
+		setDocument(parseDocument(configFile));
+		parseAll();
+		return getConfiguration();
+	}
+	
+	/**
+	 * 从输入流解析
+	 * @param in
+	 * @return
+	 */
+	public Configuration parse(InputStream in)
+	{
+		setDocument(parseDocument(in));
+		parseAll();
+		return getConfiguration();
+	}
+	
+	/**
+	 * 从文档对象解析
+	 * @param document
+	 * @return
+	 */
+	public Configuration parse(Document document)
+	{
+		setDocument(document);
+		parseAll();
+		return getConfiguration();
+	} 
+	
+	/**
+	 * 解析，如果你没有预设配置对象，这个方法将自动创建
+	 * @return 解析结果
+	 */
+	protected void parseAll()
 	{
 		if(getConfiguration() == null)
 			setConfiguration(createConfigurationInstance());
@@ -217,14 +251,12 @@ public class ConfigurationParser
 		}
 		
 		parseRefs();
-		
-		return getConfiguration();
 	}
 	
 	/**
 	 * 解析全局配置
 	 */
-	public void parseGlobalConfigs()
+	protected void parseGlobalConfigs()
 	{
 		Element parent=getSingleElementByTagName(getCurrentDocumentRoot(), TAG_GLOBAL_CONFIG);
 		
@@ -234,7 +266,7 @@ public class ConfigurationParser
 	/**
 	 * 解析包含的模块配置
 	 */
-	public void parseIncludes()
+	protected void parseIncludes()
 	{
 		List<Element> files=getChildrenByTagName(getSingleElementByTagName(getCurrentDocumentRoot(), TAG_INCLUDES), TAG_FILE);
 		
@@ -256,7 +288,7 @@ public class ConfigurationParser
 	/**
 	 * 解析并构建解决对象
 	 */
-	public void parseResolvers()
+	protected void parseResolvers()
 	{
 		List<Element> children=getChildrenByTagName(getSingleElementByTagName(getCurrentDocumentRoot(), TAG_RESOLVERS), TAG_RESOLVER);
 		
@@ -294,7 +326,7 @@ public class ConfigurationParser
 	/**
 	 * 解析并构建可执行对象
 	 */
-	public void parseExecutables()
+	protected void parseExecutables()
 	{
 		Element executables=getSingleElementByTagName(getCurrentDocumentRoot(),TAG_EXECUTABLES);
 		if(executables != null)
@@ -321,7 +353,7 @@ public class ConfigurationParser
 	/**
 	 * 处理引用
 	 */
-	public void parseRefs()
+	protected void parseRefs()
 	{
 		processExecutableRefs();
 	}
@@ -645,6 +677,15 @@ public class ConfigurationParser
 	protected Element getCurrentDocumentRoot()
 	{
 		return this.currentDocument.getDocumentElement();
+	}
+	
+	/**
+	 * 取得默认配置文件
+	 * @return
+	 */
+	protected String getDefaultConfigFile()
+	{
+		return Constants.DEFAULT_CONFIG_FILE;
 	}
 	
 	/**

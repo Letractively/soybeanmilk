@@ -17,8 +17,8 @@ public class ExampleConfigFile
 	
 	public static void main(String[] args)
 	{
-		ConfigurationParser parser=new ConfigurationParser("test/example/"+Constants.DEFAULT_CONFIG_FILE);
-		Configuration cfg=parser.parse();
+		Configuration cfg=new ConfigurationParser(null).parse("test/example/"+Constants.DEFAULT_CONFIG_FILE);
+		
 		Executor executor=new DefaultExecutor(cfg);
 		
 		{

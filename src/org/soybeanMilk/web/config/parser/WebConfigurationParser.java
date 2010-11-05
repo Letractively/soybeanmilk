@@ -15,7 +15,6 @@
 package org.soybeanMilk.web.config.parser;
 
 import java.io.File;
-import java.io.InputStream;
 
 import javax.servlet.ServletContext;
 
@@ -36,6 +35,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
+ * WEB解析器，它可以解析应用“/WEB-INF”下的配置文件
  * @author earthAngry@gmail.com
  *
  */
@@ -55,53 +55,35 @@ public class WebConfigurationParser extends ConfigurationParser
 	private ServletContext servletContext;
 	
 	/**
-	 * @param document
-	 * @see ConfigurationParser#ConfigurationParser(Document)
-	 */
-	public WebConfigurationParser(Document document)
-	{
-		super(document);
-	}
-
-	/**
-	 * @param inputStream
-	 * @see ConfigurationParser#ConfigurationParser(InputStream)
-	 */
-	public WebConfigurationParser(InputStream inputStream)
-	{
-		super(inputStream);
-	}
-	
-	/**
-	 * WEB下从默认配置文件解析，配置文件{@link WebConstants#DEFAULT_CONFIG_FILE}应该存在
+	 * 创建WEB解析器
 	 * @param servletContext
 	 */
 	public WebConfigurationParser(ServletContext servletContext)
 	{
-		this(WebConstants.DEFAULT_CONFIG_FILE, servletContext);
+		this(null, servletContext);
 	}
 	
 	/**
-	 * WEB下的配置文件解析
-	 * @param configFile 配置文件名，可以是类路径资源文件，也可以是“/WEB-INF/”下的文件
-	 * @param servletContext 应用语境，用以确定文件的绝对路径
+	 * 创建WEB解析器并预设存储配置对象
+	 * @param configuration
+	 * @param servletContext
 	 */
-	public WebConfigurationParser(String configFile, ServletContext servletContext)
+	public WebConfigurationParser(Configuration configuration, ServletContext servletContext)
 	{
-		super((String)null);
-		
-		if(configFile == null)
-			return;
-		
-		setDocument(parseDocument(configFile));
+		super(configuration);
+		this.servletContext=servletContext;
 	}
 	
 	public ServletContext getServletContext() {
 		return servletContext;
 	}
 	
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
+	
 	@Override
-	public void parseGlobalConfigs()
+	protected void parseGlobalConfigs()
 	{
 		super.parseGlobalConfigs();
 		
@@ -212,7 +194,13 @@ public class WebConfigurationParser extends ConfigurationParser
 		
 		return super.parseDocument(fileName);
 	}
-
+	
+	@Override
+	protected String getDefaultConfigFile()
+	{
+		return WebConstants.DEFAULT_CONFIG_FILE;
+	}
+	
 	@Override
 	protected Configuration createConfigurationInstance()
 	{

@@ -245,6 +245,7 @@ public class ConfigurationParser
 		}
 		
 		setCurrentDocument(document);
+		
 		parseExecutables();
 		if(modules !=null)
 		{
@@ -254,6 +255,8 @@ public class ConfigurationParser
 				parseExecutables();
 			}
 		}
+		
+		setCurrentDocument(document);
 		
 		parseRefs();
 	}

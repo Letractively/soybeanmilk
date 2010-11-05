@@ -14,7 +14,10 @@
 
 package org.soybeanMilk.web.config.parser;
 
+import java.io.File;
 import java.io.InputStream;
+
+import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,7 +25,6 @@ import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
-import org.soybeanMilk.core.config.parser.ConfigurationParser.ConfigFileNameProcessor;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.bean.WebGenericConverter;
@@ -50,14 +52,8 @@ public class WebConfigurationParser extends ConfigurationParser
 	public static final String TAG_TARGET_ATTR_URL="url";
 	public static final String TAG_TARGET_ATTR_TYPE="type";
 	
-	/**
-	 * @see ConfigurationParser#ConfigurationParser()
-	 */
-	public WebConfigurationParser()
-	{
-		super();
-	}
-
+	private ServletContext servletContext;
+	
 	/**
 	 * @param document
 	 * @see ConfigurationParser#ConfigurationParser(Document)
@@ -75,26 +71,44 @@ public class WebConfigurationParser extends ConfigurationParser
 	{
 		super(inputStream);
 	}
-
+	
 	/**
-	 * @param configFile
-	 * @see ConfigurationParser#ConfigurationParser(String)
+	 * WEB下从默认配置文件解析，配置文件{@link WebConstants#DEFAULT_CONFIG_FILE}应该存在
+	 * @param servletContext
 	 */
-	public WebConfigurationParser(String configFile)
+	public WebConfigurationParser(ServletContext servletContext)
 	{
-		super(configFile);
+		this(WebConstants.DEFAULT_CONFIG_FILE, servletContext);
 	}
 	
 	/**
-	 * @param configFile
-	 * @param fileNameProcessor
-	 * @see ConfigurationParser#ConfigurationParser(String, ConfigFileNameProcessor)
+	 * WEB下的配置文件解析
+	 * @param configFile 配置文件名，可以是类路径资源文件，也可以是“/WEB-INF/”下的文件
+	 * @param servletContext 应用语境，用以确定文件的绝对路径
 	 */
-	public WebConfigurationParser(String configFile, ConfigFileNameProcessor fileNameProcessor)
+	public WebConfigurationParser(String configFile, ServletContext servletContext)
 	{
-		super(configFile, fileNameProcessor);
+		super((String)null);
+		
+		if(configFile == null)
+			return;
+		
+		if(configFile.startsWith("/WEB-INF/"))
+			configFile = getServletContext().getRealPath("").replace(File.separatorChar, '/')+configFile;
+		else if(configFile.startsWith("WEB-INF/"))
+			configFile = getServletContext().getRealPath("").replace(File.separatorChar, '/')+"/"+configFile;
+		
+		InputStream in=getInputStreamByName(configFile);
+		setDocument(parseDocument(in));
+		
+		if(_logDebugEnabled)
+			log.debug("Parsing will start from '"+configFile+"'");
 	}
-
+	
+	public ServletContext getServletContext() {
+		return servletContext;
+	}
+	
 	@Override
 	public void parseGlobalConfigs()
 	{
@@ -195,12 +209,6 @@ public class WebConfigurationParser extends ConfigurationParser
 			Executable handler = getWebConfiguration().getExecutable(((ExecutableRefProxy)he).getRefName());
 			hi.setExceptionHandler(handler);
 		}
-	}
-	
-	@Override
-	protected String getDefaultConfigFile()
-	{
-		return WebConstants.DEFAULT_CONFIG_FILE;
 	}
 	
 	@Override

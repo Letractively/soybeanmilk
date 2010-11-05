@@ -94,14 +94,12 @@ public class ConfigurationParser
 	private Document document;
 	private Configuration configuration;
 	
-	private ConfigFileNameProcessor fileNameProcessor;
-	
 	/**
 	 * 从默认配置文件解析
 	 */
 	public ConfigurationParser()
 	{
-		this(null, null);
+		this(Constants.DEFAULT_CONFIG_FILE);
 	}
 	
 	/**
@@ -114,52 +112,19 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 从给定文件解析
-	 * @param configFile
+	 * 从给定文件解析，可以是资源文件，也可以是文件系统文件
+	 * @param configFile 如果为null，则什么也不做
 	 */
 	public ConfigurationParser(String configFile)
 	{
-		this(configFile, null);
-	}
-	
-	/**
-	 * 从给定文件解析，可以是资源文件，也可以是文件系统文件
-	 * @param configFile 如果为null，则从默认文件解析
-	 * @param fileNameProcessor
-	 */
-	public ConfigurationParser(String configFile, ConfigFileNameProcessor fileNameProcessor)
-	{
-		this.fileNameProcessor = fileNameProcessor;
-		
 		if(configFile==null)
-			configFile=getDefaultConfigFile();
+			return;
 		
-		if(this.fileNameProcessor != null)
-			configFile=this.fileNameProcessor.doProcess(configFile);
-		
-		InputStream in = null;
-		try
-		{
-			in = ConfigurationParser.class.getClassLoader().getResourceAsStream(configFile);
-		}
-		catch(Exception e){}
-		
-		if(in == null)
-		{
-			try
-			{
-				in=new FileInputStream(configFile);
-			}
-			catch(Exception e1){}
-		}
-		
-		if(in == null)
-			throw new IllegalArgumentException("can not find config file named '"+configFile+"'");
+		InputStream in=getInputStreamByName(configFile);
+		this.document=parseDocument(in);
 		
 		if(_logDebugEnabled)
-			log.debug("start parsing from config file '"+configFile+"'");
-		
-		this.document=parseDocument(in);
+			log.debug("Parsing will start from config file '"+configFile+"'");
 	}
 	
 	/**
@@ -187,8 +152,17 @@ public class ConfigurationParser
 		this.configuration = configuration;
 	}
 	
-	public ConfigFileNameProcessor getFileNameProcessor() {
-		return fileNameProcessor;
+	/**
+	 * 取得解析的文档对象
+	 * @return
+	 */
+	public Document getDocument()
+	{
+		return this.document;
+	}
+	
+	public void setDocument(Document document) {
+		this.document = document;
 	}
 	
 	/**
@@ -560,18 +534,33 @@ public class ConfigurationParser
 		}
 	}
 	
-	protected String getDefaultConfigFile()
-	{
-		return Constants.DEFAULT_CONFIG_FILE;
-	}
-	
 	/**
-	 * 取得解析的文档对象
+	 * 根据名称取得输入流
+	 * @param fileName
 	 * @return
 	 */
-	protected Document getDocument()
+	protected InputStream getInputStreamByName(String fileName)
 	{
-		return this.document;
+		InputStream in = null;
+		try
+		{
+			in = getClass().getClassLoader().getResourceAsStream(fileName);
+		}
+		catch(Exception e){}
+		
+		if(in == null)
+		{
+			try
+			{
+				in=new FileInputStream(fileName);
+			}
+			catch(Exception e1){}
+		}
+		
+		if(in == null)
+			throw new IllegalArgumentException("can not find config file named '"+fileName+"'");
+		
+		return in;
 	}
 	
 	/**
@@ -822,10 +811,5 @@ public class ConfigurationParser
 		{
 			return "Executable [name=" + refName + "]";
 		}
-	}
-	
-	public static interface ConfigFileNameProcessor
-	{
-		String doProcess(String rawConfigFileName);
 	}
 }

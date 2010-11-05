@@ -19,7 +19,8 @@ public class ExampleConfigFile
 	
 	public static void main(String[] args)
 	{
-		Configuration cfg=new WebConfigurationParser("test/example/"+Constants.DEFAULT_CONFIG_FILE).parse();
+		WebConfigurationParser parser=new WebConfigurationParser("test/example/"+Constants.DEFAULT_CONFIG_FILE, null);
+		Configuration cfg=parser.parse();
 		Executor executor=new DefaultExecutor(cfg);
 		
 		{

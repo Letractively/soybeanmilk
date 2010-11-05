@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.core.ExecutableNotFoundException;
-import org.soybeanMilk.core.config.parser.ConfigurationParser.ConfigFileNameProcessor;
 import org.soybeanMilk.core.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.resolver.ResolverFactory;
 import org.soybeanMilk.web.WebConstants;
@@ -164,45 +163,12 @@ public class DispatchServlet extends HttpServlet
 		
 		String configFileName=getInitParameter(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG);
 		
-		WebConfigurationParser parser=new WebConfigurationParser(configFileName,
-				new ConfigFileNameProcessor()
-				{
-					@Override
-					public String doProcess(String rawConfigFileName)
-					{
-						String realPath=getServletContext().getRealPath("").replace(File.separatorChar, '/');
-						
-						if(rawConfigFileName.startsWith("/WEB-INF/"))
-							rawConfigFileName = realPath+rawConfigFileName;
-						else if(rawConfigFileName.startsWith("WEB-INF/"))
-							rawConfigFileName = realPath+"/"+rawConfigFileName;
-						
-						return rawConfigFileName;
-					}
-				});
+		WebConfigurationParser parser=new WebConfigurationParser(configFileName,getServletContext());
 		
 		parser.setConfiguration(configuration);
 		parser.parse();
 		
 		this.webExecutor=new WebExecutor(configuration);
-	}
-	
-	/**
-	 * 取得初始化参数的配置文件名，如果不是java包里的资源文件，该方法会将它转换为绝对路径
-	 * @return
-	 */
-	protected String getInitConfigFile()
-	{
-		String configFileName=getInitParameter(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG);
-		if(configFileName == null)
-			configFileName=WebConstants.DEFAULT_CONFIG_FILE;
-		
-		if(configFileName.startsWith("/WEB-INF/"))
-			configFileName = getServletContext().getRealPath("").replace(File.separatorChar, '/')+configFileName;
-		else if(configFileName.startsWith("WEB-INF/"))
-			configFileName = getServletContext().getRealPath("/").replace(File.separatorChar, '/')+configFileName;
-		
-		return configFileName;
 	}
 	
 	/**

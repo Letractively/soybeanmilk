@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soybean-milk>
+
+	<!-- 定义解决对象 -->
+	<resolvers>
+		<resolver id="helloResolver" class="example.resolver.HelloResolver" />
+	</resolvers>
+	
+	<executables>
+		<invoke name="hello" resolver-class="example.resolver.HelloResolver" result-key="helloResult">
+			<arg key="helloFrom" />
+			<arg key="helloTo" />
+		</invoke>
+		
+		<action name="helloAction">
+			<invoke method="setMe" resolver="helloResolver">
+				<arg value="earth" />
+			</invoke>
+			<invoke method="getMe" resolver="helloResolver" result-key="helloFrom" />
+			
+			<ref name="hello" />
+		</action>
+		
+	</executables>
+	
+</soybean-milk>

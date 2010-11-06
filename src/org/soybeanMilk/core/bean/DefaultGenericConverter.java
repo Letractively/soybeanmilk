@@ -137,7 +137,7 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		Converter c = getConverter(sourceObj.getClass(), targetClass);
 		if(c == null)
-			throw new NullPointerException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
+			throw new ConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
 		
 		try
 		{

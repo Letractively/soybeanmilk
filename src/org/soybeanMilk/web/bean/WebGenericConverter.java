@@ -115,18 +115,21 @@ public class WebGenericConverter extends DefaultGenericConverter
 			//如果源对象是数组而目标类型不是，则使用数组的第一个元素转换
 			if(sourceClass.isArray() && !targetClass.isArray())
 			{
-				Object firstElement = Array.getLength(sourceObj) ==0 ? null : Array.get(sourceObj, 0);
-				c = getConverter(sourceClass.getComponentType(), targetClass);
-				
 				if(_logDebugEnabled)
-					log.debug("the source '"+getStringDesc(sourceObj)+"' is an array while the target Class is not, so it's first element '"+firstElement+"' will be used for converting");
+					log.debug("the source '"+getStringDesc(sourceObj)+"' is an array while the target Class is not, so it's first element will be used for converting");
 				
-				sourceObj = firstElement;
+				sourceClass=sourceClass.getComponentType();
+				sourceObj=Array.getLength(sourceObj) ==0 ? null : Array.get(sourceObj, 0);
+				
+				if(toWrapperClass(targetClass).isAssignableFrom(sourceClass))
+					return sourceObj;
+				
+				c = getConverter(sourceClass, targetClass);
 			}
 		}
 		
 		if(c == null)
-			throw new NullPointerException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
+			throw new ConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
 		
 		if(_logDebugEnabled)
 				log.debug("find Converter '"+c.getClass().getName()+"' for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
@@ -470,7 +473,8 @@ public class WebGenericConverter extends DefaultGenericConverter
 			this.beanClass = beanClass;
 			this.beanName = beanName;
 			
-			parent.addPropertyBeanInfo(this);
+			if(parent != null)
+				parent.addPropertyBeanInfo(this);
 			
 			this.beanReadMethod=beanReadMethod;
 			this.beanWriteMethod=beanWriteMethod;

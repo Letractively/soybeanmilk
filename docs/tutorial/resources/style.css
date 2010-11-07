@@ -2,15 +2,31 @@
 body{
 	margin:0;
 }
-a{
-	text-decoration:none;
+a,a:visited{
+	/*text-decoration:none;*/
+	color:blue;
 }
-p{
-	line-height:normal;
+.required{
+	color:red;
+}
+p,li{
+	line-height:23px;
 }
 .var{
 	font-style:italic;
 	color:green;
+}
+.tag{
+	color:#0000FF;
+}
+.tagAttr{
+	color:green;
+}
+.tagValue{
+	color:#7B007B;
+}
+.glossary{
+	font-weight:bold;
 }
 .code-java{
 	color:#666666;

@@ -1,0 +1,603 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>主页 - soybeanMilk</title>
+<link href="resources/style.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div class="pageHeader">
+	<span class="mainTitle">SoybeanMilk</span>
+</div>
+<hr>
+<div class="pageBody">
+	<div class="bodyMenu">
+		<ul class="menu">
+			<li><a href="index.html">介&nbsp;绍</a></li>
+			<li><a href="quickStart.html">入&nbsp;门</a></li>
+			<li class="current"><a href="userGuide.html">指&nbsp;南</a></li>
+			<li><a href="faq.html">问&nbsp;答</a></li>
+			<li><a href="../api/index.html">API</a></li>
+		</ul>
+	</div>
+	<div class="bodyContent">
+		<div class="content">
+			<p>
+				如果你对java反射机制很熟悉，那么你会很容易理解这个框架，它实际上只是做如下四件事：<br>
+				<ul>
+					<li>依据参数配置来构造反射方法的参数值数组</li>
+					<li>在配置的对象上调用方法</li>
+					<li>保存方法的结果</li>
+					<li>处理URL转发</li>
+				</ul>
+			</p>
+			<p>
+				<a href="../api/org/soybeanMilk/core/ObjectSource.html" class="glossary">对象源</a>是框架的核心接口，用于获取和保存对象。
+				你使用此框架要做的大部分工作就是告诉框架如何从<span class="glossary">对象源</span>中取得参数值，以及如何保存方法的结果。
+			</p>
+			<p>
+				<a href="../api/org/soybeanMilk/core/Executable.html" class="glossary">可执行对象</a>是框架的另一核心接口，
+				它仅依赖<span class="glossary">对象源</span>就可以自我执行。它在框架中有两个实现，一是<a href="../api/org/soybeanMilk/core/exe/Invoke.html" class="glossary">调用</a>、一是<a href="../api/org/soybeanMilk/core/exe/Action.html" class="glossary">动作</a>，
+				它们都是对java反射方法的高级封装，一个<span class="glossary">动作</span>可以包含多个<span class="glossary">调用</span>，一个<span class="glossary">调用</span>对应一个java反射方法。
+			</p>
+			<p>
+				<a href="javascript:void(0);" class="glossary">解决对象</a>是框架的一个重要概念，反射方法的调用目标即是它。
+				它在框架中并没有明确的接口体现，因为它完全是由框架使用者定义的，你可以把它理解为你应用中的业务对象。
+			</p>
+			<p>
+				下面从可配置项开始，来详细介绍框架。<br>
+				<ul>
+					<li>
+						<a href="#tag_global-config"><span class="tag">&lt;global-config&gt;</span></a>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						全局配置块
+						<ul>
+							<li>
+								<a href="#tag_generic-converter"><span class="tag">&lt;generic-converter&gt;</span></a>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								通用转换器
+								<ul>
+									<li>
+										<a href="#tag_converter"><span class="tag">&lt;converter&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;
+										 辅助转换器
+									</li>
+								</ul>
+							</li>
+							<li>
+								<a href="#tag_exception-handler"><span class="tag">&lt;exception-handler&gt;</span></a>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								 异常处理器
+							</li>
+						</ul>
+					</li>
+					<li>
+						<a href="#tag_includes"><span class="tag">&lt;includes&gt;</span></a>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						&nbsp;&nbsp;&nbsp;&nbsp;
+						 包含模块
+						<ul>
+							<li>
+								<a href="#tag_file"><span class="tag">&lt;file&gt;</span></a>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;&nbsp;&nbsp;
+								 模块配置文件 
+							</li>
+						</ul>
+					</li>
+					<li>
+						<a href="#tag_resolvers"><span class="tag">&lt;resolvers&gt;</span></a>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						&nbsp;&nbsp;&nbsp;
+						 解决对象配置块
+						<ul>
+							<li>
+								<a href="#tag_resolver"><span class="tag">&lt;resolver&gt;</span></a>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								 解决对象
+							</li>
+						</ul>
+					</li>
+					<li>
+						<a href="#tag_executables"><span class="tag">&lt;executables&gt;</span></a>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						&nbsp;
+						 可执行对象配置块
+						<ul>
+							<li>
+								<a href="#tag_invoke"><span class="tag">&lt;invoke&gt;</span></a>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;
+								 全局调用
+								<ul>
+									<li>
+										<a href="#tag_arg"><span class="tag">&lt;arg&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										调用的方法参数配置
+									</li>
+								</ul>
+							</li>
+							<li>
+								<a href="#tag_action"><span class="tag">&lt;action&gt;</span></a>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;
+								 全局动作
+								<ul>
+									<li>
+										<a href="#tag_invoke"><span class="tag">&lt;invoke&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										 局部调用
+										<ul>
+											<li>
+												<a href="#tag_arg"><span class="tag">&lt;arg&gt;</span></a>
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												&nbsp;&nbsp;&nbsp;
+												调用的方法参数配置
+											</li>
+										</ul>
+									</li>
+									<li>
+										<a href="#tag_ref"><span class="tag">&lt;ref&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										 可执行对象引用
+									</li>
+									<li>
+										<a href="#tag_target"><span class="tag">&lt;target&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										 目标
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_global-config"></a>
+				<span class="tag bold">&lt;global-config&gt;</span>（可选） <br/>
+			</p>
+			<p>
+				全局配置块。它只是作为一个父标签，包含框架的一些全局配置项，本身没有任何属性。
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_generic-converter"></a>
+				<span class="tag bold">&lt;generic-converter&gt;</span>（可选） <br/>
+			</p>
+			<p>
+				通用转换器配置。框架的一个内置功能是支持类型转换，当<span class="glossary">对象源</span>中保存的对象与要取得对象的类型不匹配时，
+				框架会尝试进行类型转换（参考<a href="../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">通用转换器</a>接口）。
+				比如，如果在配置文件中直接定义了调用方法参数的值，那么解析器会在解析时将这个字符串值转换为实际参数类型的对象。
+			</p>
+			<p>
+				特别是在WEB环境下，请求参数值都是字符串，而<span class="glossary">调用</span>的方法参数可能是任何类型的，类型转换尤为重要。
+				实际上，也只有是从参数中取得对象时，框架才会执行类型转换。
+			</p>
+			<p>
+				它包含如下属性：
+				<ul>
+					<li>
+						<span class="tagAttr">class</span>（可选） <br />
+						自定义通用转换器实现类，你可以配置它来完全替换框架的实现。
+						要注意的是，这个类必须实现<a href="../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">通用转换器</a>接口并提供默认无参构造方法。<br />
+						如果你不配置这个属性，框架将使用默认的<a href="../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>。
+					</li>
+				</ul>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_converter"></a>
+				<span class="tag bold">&lt;converter&gt;</span>（可选） <br/>
+			</p>
+			<p>
+				辅助转换器配置。你可以配置多个辅助转换器，来为通用转换器添加更多的类型转换支持，或者替换旧的辅助转换器（后添加的将替换掉先前添加的）。<br />
+				默认的<a href="../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>已经添加了大部分常用的辅助转换器（参考<a href="../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a>类说明），
+				它还支持将“java.util.Map”转换为JavaBean对象。
+			</p>
+			<p>
+				它包含如下属性：
+				<ul>
+					<li>
+						<span class="tagAttr">src</span>（<span class="required">必须</span>） <br />
+						转换器支持转换的源类型
+					</li>
+					<li>
+						<span class="tagAttr">dest</span>（<span class="required">必须</span>） <br />
+						转换器支持转换的目标类型
+					</li>
+					<li>
+						<span class="tagAttr">class</span>（<span class="required">必须</span>） <br />
+						转换器类
+					</li>
+				</ul>
+			</p>
+			<p>
+				下面是一个自定义辅助日期转换器配置，框架内置的将被替换：
+<pre class="code-xml">
+&lt;generic-converter&gt;
+	&lt;converter src="java.lang.String" dest="java.util.Date" class="my.converter.DateConverter" /&gt;
+&lt;/generic-converter&gt;
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_exception-handler"></a>
+				<span class="tag bold">&lt;exception-handler&gt;</span>（可选） <br/>
+			</p>
+			<p>
+				异常处理器配置。当框架出现执行异常时，会将异常转交给这个异常处理器。
+				可能的源异常都定义在<a href="../api/org/soybeanMilk/core/ExecuteException.ExceptionType.html">ExceptionType</a>类中，
+				一般你只需要处理<a href="../api/org/soybeanMilk/core/ExecuteException.ExceptionType.html#INVOCATION">INVOCATION</a>异常。<br />
+			</p>
+			<p>
+				如果你不配置异常处理器，执行异常将会一直向上抛出。
+			</p>
+			<p>
+				它包含如下属性：
+				<ul>
+					<li>
+						<span class="tagAttr">executable-name</span>（<span class="required">必须</span>） <br />
+						处理异常的<span class="glossary">可执行对象</span>名称，你应该在之后定义该名称的<span class="glossary">可执行对象</span>
+					</li>
+					<li>
+						<span class="tagAttr">exception-arg-key</span>（<span class="required">必须</span>） <br />
+						执行异常对象的存储关键字。它告诉框架应该如何存储执行异常，以便之后的异常处理<span class="glossary">可执行对象</span>能根据这个关键字取得它。
+					</li>
+				</ul>
+			</p>
+			<p>
+				下面是一个异常处理器配置示例，当出现执行异常时，框架将执行<span class="glossary">动作</span>“/handleException.do”：
+<pre class="code-xml">
+&lt;global-config&gt;		
+		&lt;exception-handler executable-name="/handleException.do"
+			exception-arg-key="session.executeExceptoin" /&gt;
+&lt;/global-config&gt;
+
+&lt;executables&gt;
+		&lt;action name="/handleException.do"&gt;
+			&lt;invoke method="handleException" resolver="exceptionResolver"&gt;
+				&lt;arg key="session.executeExceptoin" /&gt;
+			&lt;/invoke&gt;
+			
+			&lt;target url="/error.jsp" /&gt;
+		&lt;/action&gt;
+		...
+		...
+&lt;/executables&gt;
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_includes"></a>
+				<span class="tag bold">&lt;includes&gt;</span>（可选） <br/>
+			</p>
+			<p>
+				包含模块。它只是作为一个父标签，本身没有任何属性。
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_file"></a>
+				<span class="tag bold">&lt;file&gt;</span>（可选） <br/>
+			</p>
+			<p>
+				模块配置文件。这个配置文件可以是类路径的资源文件，也可以是应用“/WEB-INF/”下的文件。
+			</p>
+			<p>
+				注意，模块配置文件中只有<span class="tag">&lt;resolvers&gt;</span>和<span class="tag">&lt;executables&gt;</span>才是有效的。
+			</p>
+			<p>
+				下面是一个示例：
+<pre class="code-xml">
+&lt;includes&gt;
+	&lt;file&gt;my/config/module.1.xml&lt;/file&gt;
+	&lt;file&gt;my/config/module.2.xml&lt;/file&gt;
+	&lt;file&gt;/WEB-INF/config/module.3.xml&lt;/file&gt;
+	&lt;file&gt;/WEB-INF/config/module.4.xml&lt;/file&gt;
+	&lt;file&gt;/home/myapp/config/module.5.xml&lt;/file&gt;
+&lt;/includes&gt;
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_resolvers"></a>
+				<span class="tag bold">&lt;resolvers&gt;</span>（可选） <br/>
+			</p>
+			<p>
+				<span class="glossary">解决对象</span>配置块。它只是作为一个父标签，没有任何属性。
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_resolver"></a>
+				<span class="tag bold">&lt;resolver&gt;</span>（可选） <br/>
+			</p>
+			<p>
+				<span class="glossary">解决对象</span>配置。你可以配置多个解决对象，以供后面的<span class="glossary">可执行对象</span>使用。
+			</p>
+			<p>
+				它包含如下属性：
+				<ul>
+					<li>
+						<span class="tagAttr">id</span>（<span class="required">必须</span>） <br />
+						<span class="glossary">解决对象</span>ID，后面的<span class="glossary">可执行对象</span>通过这个ID来引用它
+					</li>
+					<li>
+						<span class="tagAttr">class</span>（<span class="required">必须</span>） <br />
+						<span class="glossary">解决对象</span>类名，配置解析器会在解析时创建它的单一实例，供所有与之相关的<span class="glossary">可执行对象</span>使用
+					</li>
+				</ul>
+			</p>
+			<p>
+				下面是一个示例：
+<pre class="code-xml">
+&lt;resolvers&gt;
+	&lt;resolver id="myResolver0" class="my.resolver.MyResolver0" /&gt;
+	&lt;resolver id="myResolver1" class="my.resolver.MyResolver0" /&gt;
+	&lt;resolver id="myResolver2" class="my.resolver.MyResolver1" /&gt;
+&lt;/resolvers&gt;
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_executables"></a>
+				<span class="tag bold">&lt;executables&gt;</span>（可选） <br/>
+			</p>
+			<p>
+				可执行对象配置块。它只是作为一个父标签，没有任何属性。
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_invoke"></a>
+				<span class="tag bold">&lt;invoke&gt;</span>（可选） <br/>
+			</p>
+			<p>
+				调用配置。它可以直接添加在<span class="tag">&lt;executables&gt;</span>标签下（全局的），也可以添加到<span class="tag">&lt;action&gt;</span>标签下（局部的）。
+			</p>
+			<p>
+				它包含如下属性：
+				<ul>
+					<li>
+						<span class="tagAttr">name</span>（可选） <br />
+						定义调用的名称，只有当它是全局调用时，该属性才需要被配置 。
+					</li>
+					<li>
+						<span class="tagAttr">method</span>（<span class="required">必须</span>） <br />
+						定义调用的方法名称，这个方法必须在<span class="tagAttr">resolver-class</span>或者<span class="tagAttr">resolver</span>类中存在。
+						配置解析器会在解析时根据这个名称查找对应的java反射方法对象，如果你定义了<span class="tagAttr">resolver-class</span>属性，解析器会优先使用它来查找；
+						否则，使用<span class="tagAttr">resolver</span>定义的<span class="glossary">解决对象</span>来查找。
+					</li>
+					<li>
+						<span class="tagAttr">resolver-class</span>（<span class="required">不定</span>） <br />
+						定义<span class="glossary">解决对象</span>类名，如果方法是类方法，你仅需要定义这个属性即可，而不需定义下面的<span class="tagAttr">resolver</span>属性，
+						因为类方法的调用不需要<span class="glossary">解决对象</span>实例。
+					</li>
+					<li>
+						<span class="tagAttr">resolver</span>（<span class="required">不定</span>） <br />
+						定义<span class="glossary">解决对象</span>引用ID，这个ID可以是该文件域内的<span class="glossary">解决对象</span>ID，也可以是任何包含模块文件中的<span class="glossary">解决对象</span>ID。
+						如果该调用的Java反射方法不是类方法，这个属性必须被定义。
+					</li>
+					<li>
+						<span class="tagAttr">result-key</span>（可选） <br />
+						调用的Java反射方法结果在对象源中中的保存关键字。无论方法是否有返回结果，只要你定义了“result-key”，
+						框架总会执行保存操作，只不过无返回结果的话是以null值保存的；反之，则不会保存。
+						如果这个结果关键字里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。<br />
+						下面是合法的结果关键字：
+						<ul>
+							<li>
+								<span class="tagValue">myResultKey</span> <br/>
+								结果将以“myResultKey”关键字被保存到“request”作用域中
+							</li>
+							<li>
+								<span class="tagValue">request.myResultKey</span> <br/>
+								同上
+							</li>
+							<li>
+								<span class="tagValue">session.myResultKey</span> <br/>
+								结果将以“myResultKey”关键字被保存到“session”作用域中
+							</li>
+							<li>
+								<span class="tagValue">application.myResultKey</span> <br/>
+								结果将以“myResultKey”关键字被保存到“application”作用域中
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_arg"></a>
+				<span class="tag bold">&lt;arg&gt;</span>（<span class="required">不定</span>） <br/>
+			</p>
+			<p>
+				调用的参数配置。<span class="tag">&lt;arg&gt;</span>的个数是由调用的Java反射方法决定的，
+				方法有几个参数，你就需要配置几个<span class="tag">&lt;arg&gt;</span>，
+				如果方法没有参数，你就不必要配置它。
+			</p>
+			<p>
+				它包含如下属性：
+				<ul>
+					<li>
+						<span class="tagAttr">key</span>（<span class="required">不定</span>） <br />
+						定义调用方法的参数关键字，框架将根据该关键字从<span class="glossary">对象源</span>取得参数值。
+						如果这个关键字里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。<br/>
+						下面是合法的参数关键字：
+						<ul>
+							<li>
+								<span class="tagValue">param</span> <br/>
+								整个请求参数映射表
+							</li>
+							<li>
+								<span class="tagValue">myArgKey</span> <br/>
+								请求参数映射表中的以“myArgKey.”开头的请求参数
+							</li>
+							<li>
+								<span class="tagValue">param.myArgKey</span> <br/>
+								同上
+							</li>
+							<li>
+								<span class="tagValue">request</span> <br/>
+								请求HttpServletRequest对象
+							</li>
+							<li>
+								<span class="tagValue">request.myArgKey</span> <br/>
+								请求属性中的“myArgKey”关键字对应的对象
+							</li>
+							<li>
+								<span class="tagValue">session</span> <br/>
+								会话HttpSession对象
+							</li>
+							<li>
+								<span class="tagValue">session.myArgKey</span> <br/>
+								会话属性中的“myArgKey”关键字对应的对象
+							</li>
+							<li>
+								<span class="tagValue">application</span> <br/>
+								应用ServletContext对象
+							</li>
+							<li>
+								<span class="tagValue">application.myArgKey</span> <br/>
+								应用属性中的“myArgKey”关键字对应的对象
+							</li>
+							<li>
+								<span class="tagValue">response</span> <br/>
+								回应HttpServletResponse对象
+							</li>
+						</ul>
+					</li>
+					<li>
+						<span class="tagAttr">value</span>（<span class="required">不定</span>） <br />
+						直接定义参数的值，解析器会在解析时将这个字符串值转换为实际的参数类型对象。
+					</li>
+				</ul>
+			</p>
+			<p>
+				下面是一些配置示例：
+			</p>
+			<p>
+				假设<span class="glossary">解决对象</span><span class="tagValue">calculator</span>的方法定义为：
+<pre class="code-java">
+public int multiply(int a, int b);
+</pre>
+			</p>
+			<p>
+				那么这个配置：
+<pre class="code-xml">
+&lt;invoke name="/multiply.do" method="multiply" resolver="calculator" result-key="multiplyResult"&gt;
+	&lt;arg key="a" /&gt;
+	&lt;arg key="param.b" /&gt;
+&lt;/invoke&gt;
+</pre>
+				即是，从请求参数中取得<span class="tagValue">a</span>参数的值作为方法的第一个参数，取得<span class="tagValue">b</span>参数的值作为方法的第二个参数，
+				并将方法的执行结果以<span class="tagValue">multiplyResult</span>关键字保存到请求对象的属性中。
+			</p>
+			<p>
+				而对于方法：
+<pre class="code-java">
+public void doMultiply(HttpServletRequest request, HttpServletResponse response);
+</pre>
+				应该这样配置：
+			</p>
+			<p>
+<pre class="code-xml">
+&lt;invoke name="/doMultiply.do" method="doMultiply" resolver="calculator"&gt;
+	&lt;arg key="request" /&gt;
+	&lt;arg key="response" /&gt;
+&lt;/invoke&gt;
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_action"></a>
+				<span class="tag bold">&lt;action&gt;</span>（可选） <br/>
+			</p>
+			<p>
+				动作配置。你可以为其配置多个<span class="tag">&lt;invoke&gt;</span>和<span class="tag">&lt;ref&gt;</span>子元素，
+				它们将被顺序地执行。
+			</p>
+			<p>
+				它包含如下属性：
+				<ul>
+					<li>
+						<span class="tagAttr">name</span>（<span class="required">必须</span>） <br />
+						定义动作的名称。
+					</li>
+				</ul>
+			</p>
+			<p>
+				下面是一个动作示例：
+<pre class="code-xml">
+&lt;action name="/myAction.do"&gt;
+	&lt;invoke method="method0" resolver="myResolver" result-key="result0" /&gt;
+	&lt;invoke method="method1" resolver="myResolver"&gt;
+		&lt;arg key="param.a" /&gt;
+		&lt;arg key="request.result0" /&gt;
+		&lt;arg value="true" /&gt;
+	&lt;/invoke&gt;
+	&lt;ref name="gloablInvoke0" /&gt;
+	&lt;ref name="gloablInvoke1" /&gt;
+	
+	&lt;target url="/action_result.jsp" /&gt;
+&lt;/action&gt;
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_ref"></a>
+				<span class="tag bold">&lt;ref&gt;</span>（可选） <br/>
+			</p>
+			<p>
+				引用配置。你可以将多个全局<span class="glossary">可执行对象</span>添加到这个动作中。
+			</p>
+			<p>
+				它包含如下属性：
+				<ul>
+					<li>
+						<span class="tagAttr">name</span>（<span class="required">必须</span>） <br />
+						要引用的全局<span class="glossary">可执行对象</span>名。
+					</li>
+				</ul>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_target"></a>
+				<span class="tag bold">&lt;target&gt;</span>（可选） <br/>
+			</p>
+			<p>
+				动作的目标配置。你可以使用它定义动作的转发URL。
+			</p>
+			<p>
+				它包含如下属性：
+				<ul>
+					<li>
+						<span class="tagAttr">url</span>（<span class="required">必须</span>） <br />
+						目标URL，如果是应用内的URL，则必须以“/”开头。
+					</li>
+					<li>
+						<span class="tagAttr">type</span>（可选） <br />
+						类型，它仅有两个可用的值：<span class="tagValue">forward</span>和<span class="tagValue">redirect</span>。
+						如果你没有定义，框架将默认按照<span class="tagValue">forward</span>来处理目标。
+					</li>
+				</ul>
+			</p>
+		</div>
+	</div>
+</div>
+<hr size="1">
+<div class="pageFooter">
+	email
+</div>
+</body>
+</html>

@@ -3,11 +3,17 @@ body{
 	margin:0;
 }
 a,a:visited{
-	/*text-decoration:none;*/
-	color:blue;
+	color:#3169C6;
 }
 .required{
 	color:red;
+}
+.bold{
+	font-weight:bold;
+}
+.seprator{
+	height:3px;
+	background-color:#999999;
 }
 p,li{
 	line-height:23px;
@@ -17,7 +23,7 @@ p,li{
 	color:green;
 }
 .tag{
-	color:#0000FF;
+	color:#3169C6;
 }
 .tagAttr{
 	color:green;
@@ -34,7 +40,7 @@ p,li{
 	padding:11px 0px 11px 11px;
 }
 .code-xml{
-	color:#0000FF;
+	color:#3169C6;
 	border:1px dashed #cccccc;
 	padding:11px 0px 11px 11px;
 }
@@ -44,7 +50,7 @@ p,li{
 	padding:3px 0px 5px 5px;
 }
 .mainTitle{
-	color:blue;
+	color:#3169C6;
 }
 .pageBody{
 	margin-top:17px;
@@ -52,19 +58,31 @@ p,li{
 .bodyMenu{
 	display:inline-block;
 	width:17%;
-	margin-left:13px;
-	border:1px solid #CCCCCC;
+	padding:0px 0px 0px 13px;
+	min-height:550px;
 }
 .menu{
+	border:1px solid #EEEEEE;
+	list-style:none;
+	padding:2px 2px 2px 2px;
 }
 .menu li{
 	list-style:none;
-	margin:3px 0px 5px 0px;
+	padding:2px 0px 2px 0px;
+	margin:0px 0px 5px 0px;
 	font-weight:bold;
+}
+.menu li a{
+	margin-left:13px;
 }
 .menu .current{
 	font-weight:bolder;
+	background-color:#3169C6;
 }
+.menu .current a{
+	color:#FFFFFF;
+}
+
 .bodyContent{
 	display:inline-block;
 	width:77%;
@@ -74,8 +92,8 @@ p,li{
 .bodyContent .title{
 	font-weight:bolder;
 	font-size:large;
-	background-color:#EEEEEE;
-	color:#000000;
+	background-color:#3169C6;
+	color:#FFFFFF;
 	padding:3px 0px 3px 7px;
 }
 .bodyContent .content{

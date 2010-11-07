@@ -67,10 +67,29 @@ public class WebConstants extends Constants
 	 */
 	public static class Scope
 	{
+		/**
+		 * 请求参数映射表，它是一个Map对象
+		 */
 		public static final String PARAM="param";
+		
+		/**
+		 * 请求，它是一个HttpServletRequest对象
+		 */
 		public static final String REQUEST="request";
+		
+		/**
+		 * 会话，它是一个HttpSession对象
+		 */
 		public static final String SESSION="session";
+		
+		/**
+		 * 应用，它是一个ServletContext对象
+		 */
 		public static final String APPLICATION="application";
+		
+		/**
+		 * 回应，它是一个HttpServletResponse对象
+		 */
 		public static final String RESPONSE="response";
 	}
 }

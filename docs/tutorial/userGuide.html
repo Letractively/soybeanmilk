@@ -207,7 +207,7 @@
 			<p>
 				辅助转换器配置。你可以配置多个辅助转换器，来为通用转换器添加更多的类型转换支持，或者替换旧的辅助转换器（后添加的将替换掉先前添加的）。<br />
 				默认的<a href="../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>已经添加了大部分常用的辅助转换器（参考<a href="../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a>类说明），
-				它还支持将“java.util.Map”转换为JavaBean对象。
+				它还支持将“<span class="var">java.util.Map</span>”转换为JavaBean对象。
 			</p>
 			<p>
 				它包含如下属性：
@@ -261,7 +261,7 @@
 				</ul>
 			</p>
 			<p>
-				下面是一个异常处理器配置示例，当出现执行异常时，框架将执行<span class="glossary">动作</span>“/handleException.do”：
+				下面是一个异常处理器配置示例，当出现执行异常时，框架将执行<span class="glossary">动作</span>“<span class="var">/handleException.do</span>”：
 <pre class="code-xml">
 &lt;global-config&gt;		
 		&lt;exception-handler executable-name="/handleException.do"
@@ -295,7 +295,7 @@
 				<span class="tag bold">&lt;file&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				模块配置文件。这个配置文件可以是类路径的资源文件，也可以是应用“/WEB-INF/”下的文件。
+				模块配置文件。这个配置文件可以是类路径的资源文件，也可以是应用“<span class="var">/WEB-INF</span>”下的文件。
 			</p>
 			<p>
 				注意，模块配置文件中只有<span class="tag">&lt;resolvers&gt;</span>和<span class="tag">&lt;executables&gt;</span>才是有效的。
@@ -392,14 +392,14 @@
 					</li>
 					<li>
 						<span class="tagAttr">result-key</span>（可选） <br />
-						调用的Java反射方法结果在对象源中中的保存关键字。无论方法是否有返回结果，只要你定义了“result-key”，
+						调用的Java反射方法结果在对象源中中的保存关键字。无论方法是否有返回结果，只要你定义了<span class="tagAttr">result-key</span>，
 						框架总会执行保存操作，只不过无返回结果的话是以null值保存的；反之，则不会保存。
 						如果这个结果关键字里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。<br />
 						下面是合法的结果关键字：
 						<ul>
 							<li>
 								<span class="tagValue">myResultKey</span> <br/>
-								结果将以“myResultKey”关键字被保存到“request”作用域中
+								结果将以“<span class="var">myResultKey</span>”关键字被保存到“<span class="var">request</span>”作用域中
 							</li>
 							<li>
 								<span class="tagValue">request.myResultKey</span> <br/>
@@ -407,11 +407,11 @@
 							</li>
 							<li>
 								<span class="tagValue">session.myResultKey</span> <br/>
-								结果将以“myResultKey”关键字被保存到“session”作用域中
+								结果将以“<span class="var">myResultKey</span>”关键字被保存到“<span class="var">session</span>”作用域中
 							</li>
 							<li>
 								<span class="tagValue">application.myResultKey</span> <br/>
-								结果将以“myResultKey”关键字被保存到“application”作用域中
+								结果将以“<span class="var">myResultKey</span>”关键字被保存到“<span class="var">application</span>”作用域中
 							</li>
 						</ul>
 					</li>
@@ -442,7 +442,7 @@
 							</li>
 							<li>
 								<span class="tagValue">myArgKey</span> <br/>
-								请求参数映射表中的以“myArgKey.”开头的请求参数
+								请求参数映射表中的以“<span class="var">myArgKey.</span>”开头的请求参数
 							</li>
 							<li>
 								<span class="tagValue">param.myArgKey</span> <br/>
@@ -454,7 +454,7 @@
 							</li>
 							<li>
 								<span class="tagValue">request.myArgKey</span> <br/>
-								请求属性中的“myArgKey”关键字对应的对象
+								请求属性中的“<span class="var">myArgKey</span>”关键字对应的对象
 							</li>
 							<li>
 								<span class="tagValue">session</span> <br/>
@@ -462,7 +462,7 @@
 							</li>
 							<li>
 								<span class="tagValue">session.myArgKey</span> <br/>
-								会话属性中的“myArgKey”关键字对应的对象
+								会话属性中的“<span class="var">myArgKey</span>”关键字对应的对象
 							</li>
 							<li>
 								<span class="tagValue">application</span> <br/>
@@ -470,7 +470,7 @@
 							</li>
 							<li>
 								<span class="tagValue">application.myArgKey</span> <br/>
-								应用属性中的“myArgKey”关键字对应的对象
+								应用属性中的“<span class="var">myArgKey</span>”关键字对应的对象
 							</li>
 							<li>
 								<span class="tagValue">response</span> <br/>
@@ -584,7 +584,7 @@ public void doMultiply(HttpServletRequest request, HttpServletResponse response)
 				<ul>
 					<li>
 						<span class="tagAttr">url</span>（<span class="required">必须</span>） <br />
-						目标URL，如果是应用内的URL，则必须以“/”开头。
+						目标URL，如果是应用内的URL，则必须以“<span class="var">/</span>”开头。
 					</li>
 					<li>
 						<span class="tagAttr">type</span>（可选） <br />

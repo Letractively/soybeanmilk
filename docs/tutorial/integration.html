@@ -111,7 +111,7 @@
 			</p>
 			<p>
 				指定外部<a href="../api/org/soybeanMilk/core/resolver/ResolverFactory.html" class="glossary">解决对象工厂</a>在应用（ServletContext）属性中的关键字。
-				如果你设置了这个初始化参数，这个servlet将会从应用中查找外部<span class="glossary">解决对象工厂</span>并将它整合到框架中。
+				如果你设置了这个初始化参数，<span class="glossary">DispatchServlet</span>将会从应用中查找外部<span class="glossary">解决对象工厂</span>并将它整合到框架中。
 			</p>
 			<p>
 				你可以使用这个初始化参数来整合其他框架，比如IOC容器Spring和Guice。
@@ -174,7 +174,10 @@ public class MySpringResolverFactoryInitListener implements ServletContextListen
 </pre>
 			</p>
 			<p>
-				然后，将你的<span class="glossary">DispatchServlet</span>初始化参数<span class="tag">external-resolver-factory</span>的值设置为“<span class="var">mySpringAppContextResolverFactory</span>”即可。
+				然后，将你的<span class="glossary">DispatchServlet</span>初始化参数<span class="tag">external-resolver-factory</span>的值设置为“<span class="var">mySpringAppContextResolverFactory</span>”。
+			</p>
+			<p>
+				这样，你就可以在框架配置文件<span class="tag">&lt;invoke&gt;</span>标签的<span class="tagAttr">resolver</span>属性中使用在Spring中定义的那些<span class="tag">&lt;bean&gt;</span>的<span class="tagAttr">id</span>了。
 			</p>
 			<div class="seprator"></div>
 			<p>
@@ -182,7 +185,7 @@ public class MySpringResolverFactoryInitListener implements ServletContextListen
 				<span class="tag bold">application-executor-key</span>（可选）
 			</p>
 			<p>
-				设置<span class="glossary">DispatchServlet</span>创建的<span class="glossary">WEB执行器</span>在应用中（ServletContext）的保存关键字，这样你便可以在需要时访问到框架内容。
+				设置<span class="glossary">DispatchServlet</span>创建的<span class="glossary">WEB执行器</span>在应用中（ServletContext）的保存关键字，这样你便可以在需要时访问到此框架的所有内容。
 			</p>
 			<p>
 				如果你没有定义这个初始化参数，<span class="glossary">DispatchServlet</span>将不会在应用中保存它创建的<span class="glossary">WEB执行器</span>。

@@ -39,7 +39,7 @@
 			<p>
 				<a href="../api/org/soybeanMilk/core/Executable.html" class="glossary">可执行对象</a>是框架的另一核心接口，
 				它仅依赖<span class="glossary">对象源</span>就可以自我执行。它在框架中有两个实现，一是<a href="../api/org/soybeanMilk/core/exe/Invoke.html" class="glossary">调用</a>、一是<a href="../api/org/soybeanMilk/core/exe/Action.html" class="glossary">动作</a>，
-				它们都是对java反射方法的高级封装，一个<span class="glossary">动作</span>可以包含多个<span class="glossary">调用</span>，一个<span class="glossary">调用</span>对应一个java反射方法。
+				它们都是对方法（java.lang.reflect.Method）的高级封装，一个<span class="glossary">动作</span>可以包含多个<span class="glossary">调用</span>，一个<span class="glossary">调用</span>对应一个方法。
 			</p>
 			<p>
 				<a href="javascript:void(0);" class="glossary">解决对象</a>是框架的一个重要概念，反射方法的调用目标即是它。
@@ -357,7 +357,7 @@
 				<span class="tag bold">&lt;executables&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				可执行对象配置块。它只是作为一个父标签，没有任何属性。
+				<span class="glossary">可执行对象</span>配置块。它只是作为一个父标签，没有任何属性。
 			</p>
 			<div class="seprator"></div>
 			<p>
@@ -365,25 +365,25 @@
 				<span class="tag bold">&lt;invoke&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				调用配置。它可以直接添加在<span class="tag">&lt;executables&gt;</span>标签下（全局的），也可以添加到<span class="tag">&lt;action&gt;</span>标签下（局部的）。
+				<span class="glossary">调用</span>配置。它可以直接添加在<span class="tag">&lt;executables&gt;</span>标签下（全局的），也可以添加到<span class="tag">&lt;action&gt;</span>标签下（局部的）。
 			</p>
 			<p>
 				它包含如下属性：
 				<ul>
 					<li>
 						<span class="tagAttr">name</span>（可选） <br />
-						定义调用的名称，只有当它是全局调用时，该属性才需要被配置 。
+						定义<span class="glossary">调用</span>的名称，只有当它是全局调用时，该属性才需要被配置 。
 					</li>
 					<li>
 						<span class="tagAttr">method</span>（<span class="required">必须</span>） <br />
-						定义调用的方法名称，这个方法必须在<span class="tagAttr">resolver-class</span>或者<span class="tagAttr">resolver</span>类中存在。
-						配置解析器会在解析时根据这个名称查找对应的java反射方法对象，如果你定义了<span class="tagAttr">resolver-class</span>属性，解析器会优先使用它来查找；
+						定义<span class="glossary">调用</span>的方法名称，这个方法必须在<span class="tagAttr">resolver-class</span>或者<span class="tagAttr">resolver</span>类中存在。
+						配置解析器会在解析时根据这个名称查找对应的方法对象，如果你定义了<span class="tagAttr">resolver-class</span>属性，解析器会优先使用它来查找；
 						否则，使用<span class="tagAttr">resolver</span>定义的<span class="glossary">解决对象</span>来查找。
 					</li>
 					<li>
 						<span class="tagAttr">resolver-class</span>（<span class="required">不定</span>） <br />
 						定义<span class="glossary">解决对象</span>类名，如果方法是类方法，你仅需要定义这个属性即可，而不需定义下面的<span class="tagAttr">resolver</span>属性，
-						因为类方法的调用不需要<span class="glossary">解决对象</span>实例。
+						因为类方法执行时不需要<span class="glossary">解决对象</span>实例。
 					</li>
 					<li>
 						<span class="tagAttr">resolver</span>（<span class="required">不定</span>） <br />
@@ -392,7 +392,7 @@
 					</li>
 					<li>
 						<span class="tagAttr">result-key</span>（可选） <br />
-						调用的Java反射方法结果在对象源中中的保存关键字。无论方法是否有返回结果，只要你定义了<span class="tagAttr">result-key</span>，
+						<span class="glossary">调用</span>方法结果在对象源中中的保存关键字。无论方法是否有返回结果，只要你定义了<span class="tagAttr">result-key</span>，
 						框架总会执行保存操作，只不过无返回结果的话是以null值保存的；反之，则不会保存。
 						如果这个结果关键字里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。<br />
 						下面是合法的结果关键字：
@@ -423,7 +423,7 @@
 				<span class="tag bold">&lt;arg&gt;</span>（<span class="required">不定</span>） <br/>
 			</p>
 			<p>
-				调用的参数配置。<span class="tag">&lt;arg&gt;</span>的个数是由调用的Java反射方法决定的，
+				<span class="glossary">调用</span>方法的参数配置。<span class="tag">&lt;arg&gt;</span>的个数是由<span class="glossary">调用</span>方法决定的，
 				方法有几个参数，你就需要配置几个<span class="tag">&lt;arg&gt;</span>，
 				如果方法没有参数，你就不必要配置它。
 			</p>
@@ -432,17 +432,21 @@
 				<ul>
 					<li>
 						<span class="tagAttr">key</span>（<span class="required">不定</span>） <br />
-						定义调用方法的参数关键字，框架将根据该关键字从<span class="glossary">对象源</span>取得参数值。
+						定义<span class="glossary">调用</span>方法的参数关键字，框架将根据该关键字从<span class="glossary">对象源</span>取得参数值。
 						如果这个关键字里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。<br/>
 						下面是合法的参数关键字：
 						<ul>
 							<li>
 								<span class="tagValue">param</span> <br/>
-								整个请求参数映射表
+								整个请求参数映射表。如果<span class="glossary">调用</span>方法参数是<span class="var">java.util.Map</span>类型，
+								那么这个请求参数映射表会原封不动地传递给方法；如果是其他类型，框架会首先将此映射表转换为这个类型的对象，然后传递给方法。
 							</li>
 							<li>
 								<span class="tagValue">myArgKey</span> <br/>
-								请求参数映射表中的以“<span class="var">myArgKey.</span>”开头的请求参数
+								请求参数映射表中以“<span class="var">myArgKey</span>”开头的请求参数。
+								如果这个参数有明确的值，框架会将这个值进行类型转换（需要的话）后传递给方法；否则，就根据“<span class="var">myArgKey</span>”来对参数映射表进行过滤，
+								产生一个新的映射表（它的关键字是原始关键字“<span class="var">myArgKey.</span>”之后的部分，比如由“<span class="var">beanName.propertyName</span>”变为“<span class="var">propertyName</span>”），
+								然后，与上面提到的一样，根据<span class="glossary">调用</span>方法参数的类型直接传递这个新映射表或者传递转换后的对象。
 							</li>
 							<li>
 								<span class="tagValue">param.myArgKey</span> <br/>
@@ -450,31 +454,31 @@
 							</li>
 							<li>
 								<span class="tagValue">request</span> <br/>
-								请求HttpServletRequest对象
+								请求HttpServletRequest对象。<span class="glossary">调用</span>方法的参数类型应该为“<span class="var">javax.servlet.http.HttpServletRequest</span>”
 							</li>
 							<li>
 								<span class="tagValue">request.myArgKey</span> <br/>
-								请求属性中的“<span class="var">myArgKey</span>”关键字对应的对象
+								请求属性中的“<span class="var">myArgKey</span>”关键字对应的对象。框架不会对此对象执行类型转换，<span class="glossary">调用</span>方法的参数类型应该与这个关键字对应的对象一致。
 							</li>
 							<li>
 								<span class="tagValue">session</span> <br/>
-								会话HttpSession对象
+								会话HttpSession对象。<span class="glossary">调用</span>方法的参数类型应该为“<span class="var">javax.servlet.http.HttpSession</span>”
 							</li>
 							<li>
 								<span class="tagValue">session.myArgKey</span> <br/>
-								会话属性中的“<span class="var">myArgKey</span>”关键字对应的对象
+								会话属性中的“<span class="var">myArgKey</span>”关键字对应的对象。框架不会对此对象执行类型转换。
 							</li>
 							<li>
 								<span class="tagValue">application</span> <br/>
-								应用ServletContext对象
+								应用ServletContext对象。<span class="glossary">调用</span>方法的参数类型应该为“<span class="var">javax.servlet.ServletContext</span>”
 							</li>
 							<li>
 								<span class="tagValue">application.myArgKey</span> <br/>
-								应用属性中的“<span class="var">myArgKey</span>”关键字对应的对象
+								应用属性中的“<span class="var">myArgKey</span>”关键字对应的对象。框架不会对此对象执行类型转换。
 							</li>
 							<li>
 								<span class="tagValue">response</span> <br/>
-								回应HttpServletResponse对象
+								回应HttpServletResponse对象。<span class="glossary">调用</span>方法的参数类型应该为“<span class="var">javax.servlet.http.HttpServletResponse</span>”
 							</li>
 						</ul>
 					</li>

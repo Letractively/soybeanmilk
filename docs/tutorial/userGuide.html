@@ -529,7 +529,7 @@ public void doMultiply(HttpServletRequest request, HttpServletResponse response)
 				<span class="tag bold">&lt;action&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				动作配置。你可以为其配置多个<span class="tag">&lt;invoke&gt;</span>和<span class="tag">&lt;ref&gt;</span>子元素，
+				<span class="glossary">动作</span>配置。你可以为其配置多个<span class="tag">&lt;invoke&gt;</span>和<span class="tag">&lt;ref&gt;</span>子元素，
 				它们将被顺序地执行。
 			</p>
 			<p>
@@ -537,12 +537,12 @@ public void doMultiply(HttpServletRequest request, HttpServletResponse response)
 				<ul>
 					<li>
 						<span class="tagAttr">name</span>（<span class="required">必须</span>） <br />
-						定义动作的名称。
+						定义<span class="glossary">动作</span>的名称。
 					</li>
 				</ul>
 			</p>
 			<p>
-				下面是一个动作示例：
+				下面是一个<span class="glossary">动作</span>示例：
 <pre class="code-xml">
 &lt;action name="/myAction.do"&gt;
 	&lt;invoke method="method0" resolver="myResolver" result-key="result0" /&gt;
@@ -581,7 +581,7 @@ public void doMultiply(HttpServletRequest request, HttpServletResponse response)
 				<span class="tag bold">&lt;target&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				动作的目标配置。你可以使用它定义动作的转发URL。
+				<span class="glossary">动作</span>的目标配置。你可以使用它定义<span class="glossary">动作</span>的转发URL。
 			</p>
 			<p>
 				它包含如下属性：

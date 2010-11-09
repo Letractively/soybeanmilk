@@ -8,7 +8,7 @@
 	<property name="destDir" value="dist" />
 	
 	<!-- 版本 -->
-	<property name="appVersion" value="0.9-beta" />
+	<property name="appVersion" value="1.0-beta" />
 	
 	<!-- 名称 -->
 	<property name="appName" value="soybeanMilk-${appVersion}" />

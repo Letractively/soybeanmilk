@@ -14,6 +14,8 @@
 
 package org.soybeanMilk.core.config.parser;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -173,11 +175,7 @@ public class ConfigurationParser
 	 */
 	public Configuration parse()
 	{
-		if(getDocument() == null)
-			setDocument(parseDocument(getDefaultConfigFile()));
-		
-		parseAll();
-		return getConfiguration();
+		return parse((String)null);
 	}
 	
 	/**
@@ -187,6 +185,9 @@ public class ConfigurationParser
 	 */
 	public Configuration parse(String configFile)
 	{
+		if(configFile==null || configFile.length()==0)
+			configFile=getDefaultConfigFile();
+		
 		setDocument(parseDocument(configFile));
 		
 		parseAll();
@@ -288,8 +289,12 @@ public class ConfigurationParser
 			String fileName=el.getTextContent();
 			assertNotEmpty(fileName, "<"+TAG_FILE+">'s content must not be null");
 			
-			Document doc=parseDocument(fileName);
-			this.modules.add(doc);
+			Document[] docs=parseDocuments(fileName);
+			if(docs != null)
+			{
+				for(Document d : docs)
+					this.modules.add(d);
+			}
 		}
 	}
 	
@@ -636,14 +641,81 @@ public class ConfigurationParser
 	}
 	
 	/**
+	 * 解析名称中带有匹配符的文档
+	 * @param fileName
+	 * @return
+	 */
+	protected Document[] parseDocuments(String fileName)
+	{
+		Document[] docs=null;
+		
+		if(! fileName.endsWith("/*"))
+		{
+			docs=new Document[1];
+			docs[0]=parseDocument(fileName);
+		}
+		else
+		{
+			fileName=formatIncludeFileName(fileName);
+			fileName=fileName.substring(0, fileName.length()-2);
+			
+			File folder=new File(fileName);
+			if(!folder.exists() || !folder.isDirectory())
+				throw new ParseException("can not find directory '"+fileName+"'");
+			
+			File[] files=folder.listFiles(new FileFilter()
+			{
+				@Override
+				public boolean accept(File pathname)
+				{
+					String name=pathname.getName().toLowerCase();
+					if(name.endsWith(".xml"))
+						return true;
+					else
+						return false;
+				}
+			});
+			
+			if(files!=null && files.length>0)
+			{
+				docs=new Document[files.length];
+				
+				for(int i=0;i<files.length;i++)
+				{
+					InputStream in=null;
+					try
+					{
+						in=new FileInputStream(files[i]);
+					}
+					catch(Exception e)
+					{
+						throw new ParseException("", e);
+					}
+					
+					docs[i]=parseDocument(in);
+					
+					if(_logDebugEnabled)
+						log.debug("parsed Document object from '"+files[i].getAbsolutePath()+"'");
+				}
+			}
+			else
+			{
+				if(_logDebugEnabled)
+					log.debug("no xml file found in directory '"+fileName+"'");
+			}
+		}
+		
+		return docs;
+	}
+	
+	/**
 	 * 根据名称取得文档对象
 	 * @param fileName
 	 * @return
 	 */
 	protected Document parseDocument(String fileName)
 	{
-		if(_logDebugEnabled)
-			log.debug("parsing Document object from '"+fileName+"'");
+		fileName=formatIncludeFileName(fileName);
 		
 		InputStream in = null;
 		try
@@ -662,11 +734,19 @@ public class ConfigurationParser
 		}
 		
 		if(in == null)
-			throw new IllegalArgumentException("can not find config file named '"+fileName+"'");
+			throw new ParseException("can not find config file named '"+fileName+"'");
 		
 		Document doc=parseDocument(in);
 		
+		if(_logDebugEnabled)
+			log.debug("parsing Document object from '"+fileName+"'");
+		
 		return doc;
+	}
+	
+	protected String formatIncludeFileName(String rawFileName)
+	{
+		return rawFileName;
 	}
 	
 	/**

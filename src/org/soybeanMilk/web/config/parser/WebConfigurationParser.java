@@ -185,14 +185,14 @@ public class WebConfigurationParser extends ConfigurationParser
 	}
 	
 	@Override
-	protected Document parseDocument(String fileName)
+	protected String formatIncludeFileName(String rawFileName)
 	{
-		if(fileName.startsWith("/WEB-INF/"))
-			fileName = getServletContext().getRealPath("").replace(File.separatorChar, '/')+fileName;
-		else if(fileName.startsWith("WEB-INF/"))
-			fileName = getServletContext().getRealPath("").replace(File.separatorChar, '/')+"/"+fileName;
-		
-		return super.parseDocument(fileName);
+		if(rawFileName.startsWith("/WEB-INF/"))
+			return getServletContext().getRealPath("").replace(File.separatorChar, '/')+rawFileName;
+		else if(rawFileName.startsWith("WEB-INF/"))
+			return getServletContext().getRealPath("").replace(File.separatorChar, '/')+"/"+rawFileName;
+		else
+			return rawFileName;
 	}
 	
 	@Override

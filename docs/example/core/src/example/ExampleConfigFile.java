@@ -17,12 +17,10 @@ public class ExampleConfigFile
 		Executor executor=new DefaultExecutor(cfg);
 		
 		ConvertableObjectSource os = new HashMapObjectSource();
+		
 		os.set("helloTo", "mars");
+		os.set("helloRepeat", 3);
 		
 		executor.execute("helloAction", os);
-		
-		Object helloResult=os.get("helloResult", null);
-		
-		System.out.println("helloAction :"+helloResult);
 	}
 }

@@ -55,6 +55,15 @@ public class DefaultExecutor implements Executor
 		if(objSource instanceof ConvertableObjectSource)
 			((ConvertableObjectSource)objSource).setGenericConverter(cfg.getGenericConverter());
 		
-		exe.execute(objSource);
+		try
+		{
+			exe.execute(objSource);
+		}
+		catch(ExecuteException e)
+		{
+			e.setSource(exe);
+			
+			throw e;
+		}
 	}
 }

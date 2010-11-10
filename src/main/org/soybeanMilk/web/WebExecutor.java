@@ -129,6 +129,8 @@ public class WebExecutor implements Executor
 	protected void handleException(Executable causeExe, WebObjectSource objSource, ExecuteException exception)
 			throws ServletException, IOException
 	{
+		exception.setSource(causeExe);
+		
 		//处理异常
 		ExceptionHandlerInfo hi = webConfiguration.getExceptionHandlerInfo();
 		if(hi==null || hi.getExceptionHandler()==null)

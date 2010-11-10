@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>整合 - soybeanMilk</title>
+<link href="resources/style.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div class="pageHeader">
+	<span class="mainTitle">SoybeanMilk</span>
+</div>
+<hr>
+<div class="pageBody">
+	<div class="bodyMenu">
+		<ul class="menu">
+			<li><a href="index.html">主&nbsp;页</a></li>
+			<li><a href="quickStart.html">入&nbsp;门</a></li>
+			<li><a href="userGuide.html">指&nbsp;南</a></li>
+			<li class="current"><a href="integration.html">整&nbsp;合</a></li>
+			<li><a href="faq.html">问&nbsp;答</a></li>
+			<li><a href="../api/index.html">API</a></li>
+		</ul>
+	</div>
+	<div class="bodyContent">
+		<div class="content">
+			<p>
+				框架本身已提供了一个整合servlet <a href="../api/org/soybeanMilk/web/servlet/DispatchServlet.html">DispatchServlet</a>，
+				它会依据初始化参数构造一个<a href="../api/org/soybeanMilk/web/WebExecutor.html">WEB执行器</a>。
+				在运行时，所有到这个servlet的请求都会被交给这个<span class="glossary">WEB执行器</span>来处理。
+			</p>
+			<p>
+				你只需要将这个servlet添加到应用的web.xml中， 配置一些初始化参数，然后设置它可以处理URL即可。
+			</p>
+			<p>
+				下面是一个配置示例：
+<pre class="code-xml">
+&lt;servlet&gt;
+	&lt;servlet-name&gt;dispatchServlet&lt;/servlet-name&gt;
+	&lt;servlet-class&gt;org.soybeanMilk.web.servlet.DispatchServlet&lt;/servlet-class&gt;
+	&lt;init-param&gt;
+		&lt;param-name&gt;encoding&lt;/param-name&gt;
+		&lt;param-value&gt;UTF-8&lt;/param-value&gt;
+	&lt;/init-param&gt;
+	&lt;init-param&gt;
+		&lt;param-name&gt;soybean-milk-config&lt;/param-name&gt;
+		&lt;param-value&gt;/WEB-INF/soybean-milk-config.xml&lt;/param-value&gt;
+	&lt;/init-param&gt;
+	&lt;init-param&gt;
+		&lt;param-name&gt;external-resolver-factory&lt;/param-name&gt;
+		&lt;param-value&gt;mySpringAppContextResolverFactory&lt;/param-value&gt;
+	&lt;/init-param&gt;
+	&lt;init-param&gt;
+		&lt;param-name&gt;application-executor-key&lt;/param-name&gt;
+		&lt;param-value&gt;myWebExecutor&lt;/param-value&gt;
+	&lt;/init-param&gt;
+	&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+&lt;/servlet&gt;
+&lt;servlet-mapping&gt;
+	&lt;servlet-name&gt;dispatchServlet&lt;/servlet-name&gt;
+	&lt;url-pattern&gt;*.do&lt;/url-pattern&gt;
+&lt;/servlet-mapping&gt;
+</pre>
+			</p>
+			<p>
+				上面这个示例包含了<a href="../api/org/soybeanMilk/web/servlet/DispatchServlet.html">DispatchServlet</a>允许的所有初始化参数：
+				<ul>
+					<li>
+						<a href="#init_encoding">encoding</a>
+					</li>
+					<li>
+						<a href="#init_soybean-milk-config">soybean-milk-config</a>
+					</li>
+					<li>
+						<a href="#init_external-resolver-factory">external-resolver-factory</a>
+					</li>
+					<li>
+						<a href="#init_application-executor-key">application-executor-key</a>
+					</li>
+				</ul>
+			</p>
+			<p>
+				下面将详细介绍这几个初始化参数的作用：
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="init_encoding"></a>
+				<span class="tag bold">encoding</span>（可选）
+			</p>
+			<p>
+				设置servlet编码。
+			</p>
+			<p>
+				如果你没有定义这个初始化参数，框架将使用默认的“<span class="var">UTF-8</span>”编码。
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="init_soybean-milk-config"></a>
+				<span class="tag bold">soybean-milk-config</span>（可选）
+			</p>
+			<p>
+				指定框架配置文件的位置。它可以是类路径的资源文件，比如“<span class="var">my/config/soybean-milk.cfg.xml</span>”；
+				也可以是应用的“<span class="var">/WEB-INF</span>”目录下的文件，比如“<span class="var">/WEB-INF/cfg/soybean-milk.cfg.xml</span>”。
+			</p>
+			<p>
+				如果你没有定义这个初始化参数，框架将会从从默认的“<span class="var">/WEB-INF/soybean-milk.config.xml</span>”配置文件初始化。
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="init_external-resolver-factory"></a>
+				<span class="tag bold">external-resolver-factory</span>（可选）
+			</p>
+			<p>
+				指定外部<a href="../api/org/soybeanMilk/core/resolver/ResolverFactory.html" class="glossary">解决对象工厂</a>在应用（ServletContext）属性中的关键字。
+				如果你设置了这个初始化参数，<span class="glossary">DispatchServlet</span>将会从应用中查找外部<span class="glossary">解决对象工厂</span>并将它整合到框架中。
+			</p>
+			<p>
+				你可以使用这个初始化参数来整合其他框架，比如IOC容器Spring和Guice。
+			</p>
+			<p>
+				下面是一个整合Spring的过程示例：
+			</p>
+			<p>
+				首先，定义一个<span class="glossary">解决对象工厂</span>类：
+<pre class="code-java">
+public class MySpringResolverFactory implements ResolverFactory
+{
+	private BeanFactory webApplicationContext;
+	
+	public MySpringResolverFactory(){}
+	
+	public void setWebApplicationContext(WebApplicationContext webAppContext)
+	{
+		this.webApplicationContext=webAppContext;
+	}
+	
+	@Override
+	public Object Object(Serializable resolverId)
+	{
+		return webApplicationContext.getBean(resolverId);
+	}
+}
+</pre>
+			</p>
+			<p>
+				定义一个应用监听器，并把它配置在web.xml中Spring初始化监听器之后：
+<pre class="code-java">
+public class MySpringResolverFactoryInitListener implements ServletContextListener
+{
+	public void contextDestroyed(ServletContextEvent sce)
+	{
+		
+	}
+	
+	public void contextInitialized(ServletContextEvent sce)
+	{
+		BeanFactory springContext=ContextLoader.getCurrentWebApplicationContext(sce.getServletContext());
+		
+		MySpringResolverFactory rf=new MySpringResolverFactory();
+		rf.setWebApplicationContext(springContext);
+		
+		sce.getServletContext().setAttribute("mySpringAppContextResolverFactory",rf);
+	}
+}
+</pre>
+			</p>
+			<p>
+<pre class="code-xml">
+&lt;listener&gt;
+    &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
+&lt;/listener&gt;
+&lt;listener&gt;
+    &lt;listener-class&gt;my.MySpringResolverFactoryInitListener&lt;/listener-class&gt;
+&lt;/listener&gt;
+</pre>
+			</p>
+			<p>
+				然后，将你的<span class="glossary">DispatchServlet</span>初始化参数<span class="tag">external-resolver-factory</span>的值设置为“<span class="var">mySpringAppContextResolverFactory</span>”。
+			</p>
+			<p>
+				这样，你就可以在框架配置文件<span class="tag">&lt;invoke&gt;</span>标签的<span class="tagAttr">resolver</span>属性中使用在Spring中定义的那些<span class="tag">&lt;bean&gt;</span>的<span class="tagAttr">id</span>了。
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="init_application-executor-key"></a>
+				<span class="tag bold">application-executor-key</span>（可选）
+			</p>
+			<p>
+				设置<span class="glossary">DispatchServlet</span>创建的<span class="glossary">WEB执行器</span>在应用（ServletContext）中的保存关键字，这样你便可以在需要时访问到此框架的所有内容。
+			</p>
+			<p>
+				如果你没有定义这个初始化参数，<span class="glossary">DispatchServlet</span>将不会在应用中保存它创建的<span class="glossary">WEB执行器</span>。
+			</p>
+		</div>
+	</div>
+</div>
+<hr size="1">
+<div class="pageFooter">
+</div>
+</body>
+</html>

@@ -38,8 +38,8 @@
 	
 	<!--将整个docs打成zip文件-->
 	<target name="zipDocsToDist" depends="copyApiToDocs">
-		<delete file="${distDir}/${appName}_docs.zip" />
-		<zip destfile="${distDir}/${appName}_docs.zip" basedir="docs" />
+		<delete file="${distDir}/${appName}.docs.zip" />
+		<zip destfile="${distDir}/${appName}.docs.zip" basedir="docs" />
 	</target>
 	
 	<target name="cleanAfterDist" depends="zipDocsToDist">

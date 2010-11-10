@@ -25,8 +25,13 @@
 			includes="org/**/*.class, org/**/*.dtd, org/**/*.xml" />
 	</target>
 	
+	<target name="copyJarToExampleProject" depends="jarFramework">
+		<delete file="../../${exampleProjectName}/WebContent/WEB-INF/lib/${appName}.jar" />
+		<copy file="${distDir}/${appName}.jar" todir="../../${exampleProjectName}/WebContent/WEB-INF/lib" />
+	</target>
+	
 	<!--压缩示例工程-->
-	<target name="zipExampleProject" depends="jarFramework">
+	<target name="zipExampleProject" depends="copyJarToExampleProject">
 		<delete file="${distDir}/docs/example/web/${exampleProjectName}.zip" />
 		<zip destfile="${distDir}/docs/example/web/${exampleProjectName}.zip" basedir="../../${exampleProjectName}" />
 	</target>

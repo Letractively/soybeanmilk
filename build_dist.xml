@@ -7,6 +7,8 @@
 	<!--发布目录-->
 	<property name="distDir" value="dist" />
 	
+	<property name="tmpDir" value="../tmp" />
+	
 	<!-- 版本 -->
 	<property name="appVersion" value="1.0-beta" />
 	
@@ -25,24 +27,24 @@
 	
 	<!--压缩示例工程-->
 	<target name="zipExampleProject" depends="jarFramework">
-		<delete file="docs/example/web/${exampleProjectName}.zip" />
-		<zip destfile="docs/example/web/${exampleProjectName}.zip" basedir="../../${exampleProjectName}" />
+		<delete file="${distDir}/docs/example/web/${exampleProjectName}.zip" />
+		<zip destfile="${distDir}/docs/example/web/${exampleProjectName}.zip" basedir="../../${exampleProjectName}" />
 	</target>
 	
 	<!--拷贝API到docs下-->
 	<target name="copyApiToDocs" depends="zipExampleProject">
-		<delete dir="docs/api" />
-		<mkdir dir="docs/api"/>
-		<copydir dest="docs/api" src="../api" />
+		<delete dir="${distDir}/docs/api" />
+		<mkdir dir="${distDir}/docs/api"/>
+		<copydir dest="${distDir}/docs/api" src="${tmpDir}/api" />
 	</target>
 	
-	<!--将整个docs打成zip文件-->
-	<target name="zipDocsToDist" depends="copyApiToDocs">
-		<delete file="${distDir}/${appName}.docs.zip" />
-		<zip destfile="${distDir}/${appName}.docs.zip" basedir="docs" />
+	<!--将整个dist打成zip文件-->
+	<target name="zipDistToDist" depends="copyApiToDocs">
+		<delete file="${tmpDir}/${appName}_dist.zip" />
+		<zip destfile="${tmpDir}/${appName}_dist.zip" basedir="dist" />
 	</target>
 	
-	<target name="cleanAfterDist" depends="zipDocsToDist">
-		<delete dir="docs/api" />
+	<target name="cleanAfterDist" depends="zipDistToDist">
+		<delete dir="${distDir}/docs/api" />
 	</target>
 </project>

@@ -61,7 +61,7 @@ p,li{
 	min-height:500px;
 }
 .menu{
-	border:1px solid #EEEEEE;
+	background-color:#EEEEEE;
 	list-style:none;
 	padding:2px 2px 2px 2px;
 }

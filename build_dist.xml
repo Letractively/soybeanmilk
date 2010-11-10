@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="build_version" default="jar_src" basedir=".">
+<project name="build_version" default="cleanAfterDist" basedir=".">
 
 	<!--类文件夹-->
 	<property name="classDir" value="../bin" />
 	
-	<!--目标jar目录-->
-	<property name="destDir" value="dist" />
+	<!--发布目录-->
+	<property name="distDir" value="dist" />
 	
 	<!-- 版本 -->
 	<property name="appVersion" value="1.0-beta" />
@@ -13,9 +13,36 @@
 	<!-- 名称 -->
 	<property name="appName" value="soybeanMilk-${appVersion}" />
 	
-	<target name="jar_src">
-		<delete file="${destDir}/${appName}.jar" />  
-		<jar destfile="${destDir}/${appName}.jar" basedir="${classDir}"
+	<!-- 示例工程名 -->
+	<property name="exampleProjectName" value="soybeanMilkExample" />
+	
+	<!--打jar包-->
+	<target name="jarFramework">
+		<delete file="${distDir}/${appName}.jar" />
+		<jar destfile="${distDir}/${appName}.jar" basedir="${classDir}"
 			includes="org/**/*.class, org/**/*.dtd, org/**/*.xml" />
+	</target>
+	
+	<!--压缩示例工程-->
+	<target name="zipExampleProject" depends="jarFramework">
+		<delete file="docs/example/web/${exampleProjectName}.zip" />
+		<zip destfile="docs/example/web/${exampleProjectName}.zip" basedir="../../${exampleProjectName}" />
+	</target>
+	
+	<!--拷贝API到docs下-->
+	<target name="copyApiToDocs" depends="zipExampleProject">
+		<delete dir="docs/api" />
+		<mkdir dir="docs/api"/>
+		<copydir dest="docs/api" src="../api" />
+	</target>
+	
+	<!--将整个docs打成zip文件-->
+	<target name="zipDocsToDist" depends="copyApiToDocs">
+		<delete file="${distDir}/${appName}_docs.zip" />
+		<zip destfile="${distDir}/${appName}_docs.zip" basedir="docs" />
+	</target>
+	
+	<target name="cleanAfterDist" depends="zipDocsToDist">
+		<delete dir="docs/api" />
 	</target>
 </project>

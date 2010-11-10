@@ -26,7 +26,7 @@
 			<p>
 				如果你对java反射机制很熟悉，那么你会很容易理解这个框架，它实际上只是做如下四件事：<br>
 				<ul>
-					<li>依据参数配置来构造反射方法的参数值数组</li>
+					<li>依据参数配置来构造方法的参数值</li>
 					<li>在配置的对象上调用方法</li>
 					<li>保存方法的结果</li>
 					<li>处理URL转发</li>
@@ -42,7 +42,7 @@
 				它们都是对方法（java.lang.reflect.Method）的高级封装，一个<span class="glossary">动作</span>可以包含多个<span class="glossary">调用</span>，一个<span class="glossary">调用</span>对应一个方法。
 			</p>
 			<p>
-				<a href="javascript:void(0);" class="glossary">解决对象</a>是框架的一个重要概念，反射方法的调用目标即是它。
+				<a href="javascript:void(0);" class="glossary">解决对象</a>是框架的一个重要概念，方法的调用目标即是它。
 				它在框架中并没有明确的接口体现，因为它完全是由框架使用者定义的，你可以把它理解为你应用中的业务对象。
 			</p>
 			<p>
@@ -388,7 +388,7 @@
 					<li>
 						<span class="tagAttr">resolver</span>（<span class="required">不定</span>） <br />
 						定义<span class="glossary">解决对象</span>引用ID，这个ID可以是该文件域内的<span class="glossary">解决对象</span>ID，也可以是任何包含模块文件中的<span class="glossary">解决对象</span>ID。
-						如果该调用的Java反射方法不是类方法，这个属性必须被定义。
+						如果该<span class="glossary">调用</span>方法不是类方法，这个属性必须被定义。
 					</li>
 					<li>
 						<span class="tagAttr">result-key</span>（可选） <br />

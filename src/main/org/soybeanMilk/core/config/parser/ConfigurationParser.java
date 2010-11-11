@@ -390,9 +390,6 @@ public class ConfigurationParser
 				genericConverter = (GenericConverter)createClassInstance(clazz);
 			
 			configuration.setGenericConverter(genericConverter);
-			
-			if(_logDebugEnabled)
-				log.debug("set "+GenericConverter.class.getSimpleName()+" instance '"+genericConverter+"'");
 		}
 		
 		parseSupportConverters(genericConverter, cvtEl);

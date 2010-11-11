@@ -10,7 +10,7 @@
 
 通过这里的通用转换器配置，你可以为框架添加自定义的辅助转换器或者完全替换框架默认的通用转换器，比如：
 <generic-converter>
-	<converter src="java.lang.String" dest="java.util.Date" class="my.converter.DateConverter" />
+	<converter src="java.lang.String" target="java.util.Date" class="my.converter.DateConverter" />
 </generic-converter>
 将为框架添加字符串到日期的转换器（框架默认的将被替换掉）。
 而：

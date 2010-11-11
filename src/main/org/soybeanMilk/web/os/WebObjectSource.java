@@ -27,6 +27,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.core.ObjectSourceException;
+import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.web.WebConstants;
@@ -116,13 +117,13 @@ public class WebObjectSource extends ConvertableObjectSource
 				data = convertParamMap(request.getParameterMap(), subKey, objectType);
 			}
 			else if(scope.equals(WebConstants.Scope.REQUEST))
-				data = accessor ? request.getAttribute(subKey) :request;
+				data = accessor ? request.getAttribute(subKey) : convertServletObject(request, objectType);
 			else if(scope.equals(WebConstants.Scope.SESSION))
-				data = accessor ? request.getSession().getAttribute(subKey) : request.getSession();
+				data = accessor ? request.getSession().getAttribute(subKey) : convertServletObject(request.getSession(), objectType);
 			else if(scope.equals(WebConstants.Scope.APPLICATION))
-				data = accessor ? application.getAttribute(subKey) : application;
+				data = accessor ? application.getAttribute(subKey) : convertServletObject(application, objectType);
 			else if(scope.equals(WebConstants.Scope.RESPONSE) && !accessor)
-				data = response;
+				data = convertServletObject(response, objectType);
 			else
 			{
 				//只要包含访问符，那么就必须以框架允许的作用域开头
@@ -203,21 +204,21 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * 
 	 * @param rawRequestParams 原始的请求参数映射表，直接由<code>request.getParameterMap()</code>取得
 	 * @param keyFilter 主键筛选器，只有以此筛选器开头的Map关键字才会被转换，如果为null，则表明不做筛选
-	 * @param objetcType 目标类型
+	 * @param targetType 目标类型
 	 * 
 	 * @return
 	 */
-	public Object convertParamMap(Map<String,String[]> rawRequestParams, String keyFilter, Class<?> objetcType)
+	protected Object convertParamMap(Map<String,String[]> rawRequestParams, String keyFilter, Class<?> targetType)
 	{
 		GenericConverter genericConverter=getGenericConverter();
 		
 		if(keyFilter == null)
-			return genericConverter.convert(rawRequestParams, objetcType);
+			return genericConverter.convert(rawRequestParams, targetType);
 		
 		//明确的KEY，直接根据值转换
 		Object explicit = rawRequestParams.get(keyFilter);
 		if(explicit != null)
-			return genericConverter.convert(explicit, objetcType);
+			return genericConverter.convert(explicit, targetType);
 		else
 		{
 			String keyPrefix = keyFilter+WebConstants.ACCESSOR;
@@ -230,7 +231,42 @@ public class WebObjectSource extends ConvertableObjectSource
 					filtered.put(k.substring(keyPrefix.length()), rawRequestParams.get(k));
 			}
 			
-			return genericConverter.convert(filtered, objetcType);
+			return genericConverter.convert(filtered, targetType);
 		}
+	}
+	
+	/**
+	 * 转换servlet对象到目标类型的对象
+	 * @param obj servlet对象，包括：HttpServletRequest、HttpSession、HttpServletResponse、ServletContext
+	 * @param targetType
+	 * @return
+	 */
+	protected Object convertServletObject(Object obj, Class<?> targetType)
+	{
+		if(targetType == null || targetType.isAssignableFrom(obj.getClass()))
+			return obj;
+		
+		GenericConverter genericConverter=getGenericConverter();
+		
+		Class<?> sourceClass=null;
+		Converter converter=null;
+		
+		if(obj instanceof HttpServletRequest)
+			sourceClass=HttpServletRequest.class;
+		else if(obj instanceof HttpSession)
+			sourceClass=HttpSession.class;
+		else if(obj instanceof HttpServletResponse)
+			sourceClass=HttpServletResponse.class;
+		else if(obj instanceof ServletContext)
+			sourceClass=ServletContext.class;
+		else
+			throw new ObjectSourceException("unknown servlet object '"+obj.getClass().getName()+"'");
+		
+		converter=genericConverter.getConverter(sourceClass, targetType);
+		
+		if(converter == null)
+			throw new ObjectSourceException("no Converter defined for converting '"+sourceClass.getName()+"' to '"+targetType.getName()+"'");
+		
+		return converter.convert(obj, targetType);
 	}
 }

@@ -3,20 +3,18 @@
 
 	<!--类文件夹-->
 	<property name="classDir" value="../bin" />
-	
 	<!--发布目录-->
 	<property name="distDir" value="dist" />
-	
+	<!--临时目录-->
 	<property name="tmpDir" value="../tmp" />
-	
 	<!-- 版本 -->
 	<property name="appVersion" value="1.0-beta" />
-	
 	<!-- 名称 -->
 	<property name="appName" value="soybeanMilk-${appVersion}" />
-	
 	<!-- 示例工程名 -->
 	<property name="exampleProjectName" value="soybeanMilkExample" />
+	<!-- 示例工程位置 -->
+	<property name="exampleProjectDir" value="../../${exampleProjectName}" />
 	
 	<!--打jar包-->
 	<target name="jarFramework">
@@ -25,30 +23,32 @@
 			includes="org/**/*.class, org/**/*.dtd, org/**/*.xml" />
 	</target>
 	
+	<!--拷贝新生成的Jar包到示例工程下-->
 	<target name="copyJarToExampleProject" depends="jarFramework">
-		<delete file="../../${exampleProjectName}/WebContent/WEB-INF/lib/${appName}.jar" />
-		<copy file="${distDir}/${appName}.jar" todir="../../${exampleProjectName}/WebContent/WEB-INF/lib" />
+		<delete file="${exampleProjectDir}/WebContent/WEB-INF/lib/${appName}.jar" />
+		<copy file="${distDir}/${appName}.jar" todir="${exampleProjectDir}/WebContent/WEB-INF/lib" />
 	</target>
 	
 	<!--压缩示例工程-->
 	<target name="zipExampleProject" depends="copyJarToExampleProject">
 		<delete file="${distDir}/docs/example/web/${exampleProjectName}.zip" />
-		<zip destfile="${distDir}/docs/example/web/${exampleProjectName}.zip" basedir="../../${exampleProjectName}" />
+		<zip destfile="${distDir}/docs/example/web/${exampleProjectName}.zip" basedir="${exampleProjectDir}" />
 	</target>
 	
-	<!--拷贝API到docs下-->
+	<!--拷贝临时目录下的API到docs下-->
 	<target name="copyApiToDocs" depends="zipExampleProject">
 		<delete dir="${distDir}/docs/api" />
 		<mkdir dir="${distDir}/docs/api"/>
 		<copydir dest="${distDir}/docs/api" src="${tmpDir}/api" />
 	</target>
 	
-	<!--将整个dist打成zip文件-->
+	<!--将整个dist打成zip文件并放到临时目录下-->
 	<target name="zipDistToDist" depends="copyApiToDocs">
 		<delete file="${tmpDir}/${appName}.dist.zip" />
 		<zip destfile="${tmpDir}/${appName}.dist.zip" basedir="dist" />
 	</target>
 	
+	<!--清除-->
 	<target name="cleanAfterDist" depends="zipDistToDist">
 		<delete dir="${distDir}/docs/api" />
 	</target>

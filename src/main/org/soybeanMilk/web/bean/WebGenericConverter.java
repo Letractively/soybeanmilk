@@ -129,7 +129,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		
 		if(c == null)
-			throw new ConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
+			throw new ConvertException("no Converter defined for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
 		
 		if(_logDebugEnabled)
 				log.debug("find Converter '"+c.getClass().getName()+"' for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
@@ -347,7 +347,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		if(beanClass.isAssignableFrom(sourceClass) || getConverter(sourceClass, beanClass)!=null)
 			return;
 		else if(beanClass.isArray())
-			throw new ConvertException("no support Converter found for converting '"+sourceClass.getName()+"' to '"+beanClass.getName()+"'");
+			throw new ConvertException("no Converter defined for converting '"+sourceClass.getName()+"' to '"+beanClass.getName()+"'");
 		
 		PropertyDescriptor[] pds=null;
 		

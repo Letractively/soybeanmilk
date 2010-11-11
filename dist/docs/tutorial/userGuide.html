@@ -451,11 +451,12 @@
 							</li>
 							<li>
 								<span class="tagValue">param.myArgKey</span> <br/>
-								同上
+								同上。
 							</li>
 							<li>
 								<span class="tagValue">request</span> <br/>
-								请求HttpServletRequest对象。<span class="glossary">调用</span>方法的参数类型应该为“<span class="var">javax.servlet.http.HttpServletRequest</span>”
+								请求HttpServletRequest对象。框架本身并没有提供它的转换器，如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">HttpServletRequest</span>”，
+								那么你需要自定义“<span class="var">javax.servlet.http.HttpServletRequest</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
 							<li>
 								<span class="tagValue">request.myArgKey</span> <br/>
@@ -463,7 +464,8 @@
 							</li>
 							<li>
 								<span class="tagValue">session</span> <br/>
-								会话HttpSession对象。<span class="glossary">调用</span>方法的参数类型应该为“<span class="var">javax.servlet.http.HttpSession</span>”
+								会话HttpSession对象。框架本身并没有提供它的转换器，如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">HttpSession</span>”，
+								那么你需要自定义“<span class="var">javax.servlet.http.HttpSession</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
 							<li>
 								<span class="tagValue">session.myArgKey</span> <br/>
@@ -471,7 +473,8 @@
 							</li>
 							<li>
 								<span class="tagValue">application</span> <br/>
-								应用ServletContext对象。<span class="glossary">调用</span>方法的参数类型应该为“<span class="var">javax.servlet.ServletContext</span>”
+								应用ServletContext对象。如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">ServletContext</span>”，
+								那么你需要自定义“<span class="var">javax.servlet.ServletContext</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
 							<li>
 								<span class="tagValue">application.myArgKey</span> <br/>
@@ -479,13 +482,15 @@
 							</li>
 							<li>
 								<span class="tagValue">response</span> <br/>
-								回应HttpServletResponse对象。<span class="glossary">调用</span>方法的参数类型应该为“<span class="var">javax.servlet.http.HttpServletResponse</span>”
+								回应HttpServletResponse对象。如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">HttpServletResponse</span>”，
+								那么你需要自定义“<span class="var">javax.servlet.http.HttpServletResponse</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
 						</ul>
 					</li>
 					<li>
 						<span class="tagAttr">value</span>（<span class="required">不定</span>） <br />
-						直接定义参数的值，解析器会在解析时将这个字符串值转换为实际的参数类型对象。
+						直接定义参数的值，解析器会在解析时将这个字符串值转换为实际的参数类型对象（只支持基本类型）。
+						如果你指定了这个参数值，则<span class="tagAttr">key</span>是不需要的，框架会忽略它。
 					</li>
 				</ul>
 			</p>

@@ -11,11 +11,15 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.soybeanMilk.core.bean.Converter;
+import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 import org.soybeanMilk.web.os.WebObjectSource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
+
+import unit.web.TestWebGenericConverter.JavaBean;
 
 
 public class TestWebObjectSource
@@ -36,7 +40,7 @@ public class TestWebObjectSource
 	}
 	
 	@Test
-	public void getInternalObject()
+	public void getServletObject()
 	{
 		//request
 		{
@@ -79,9 +83,100 @@ public class TestWebObjectSource
 		}
 	}
 	
+	@Test
+	public void convertServletObject()
+	{
+		final JavaBean staticJavaBean=new JavaBean();
+		
+		GenericConverter genericConverter=webObjectSource.getGenericConverter();
+		
+		Converter converter=new Converter()
+		{
+			@Override
+			public Object convert(Object sourceObj, Class<?> targetClass) 
+			{
+				return staticJavaBean;
+			}
+		};
+		
+		{
+			genericConverter.addConverter(HttpServletRequest.class, JavaBean.class, converter);
+			Object dest=webObjectSource.get("request", JavaBean.class);
+			Assert.assertTrue( dest == staticJavaBean);
+		}
+		
+		{
+			genericConverter.addConverter(HttpSession.class, JavaBean.class, converter);
+			Object dest=webObjectSource.get("session", JavaBean.class);
+			Assert.assertTrue( dest == staticJavaBean);
+		}
+		
+		{
+			genericConverter.addConverter(HttpServletResponse.class, JavaBean.class, converter);
+			Object dest=webObjectSource.get("response", JavaBean.class);
+			Assert.assertTrue( dest == staticJavaBean);
+		}
+		
+		{
+			genericConverter.addConverter(ServletContext.class, JavaBean.class, converter);
+			Object dest=webObjectSource.get("application", JavaBean.class);
+			Assert.assertTrue( dest == staticJavaBean);
+		}
+	}
+	
+	@Test
+	public void convertServletObjectThrow()
+	{
+		String exceptionPrefix="no Converter defined for converting";
+		
+		{
+			try
+			{
+				webObjectSource.get("request", JavaBean.class);
+			}
+			catch(Exception e)
+			{
+				Assert.assertTrue( e.getMessage().startsWith(exceptionPrefix) );
+			}
+		}
+		
+		{
+			try
+			{
+				webObjectSource.get("session", JavaBean.class);
+			}
+			catch(Exception e)
+			{
+				Assert.assertTrue( e.getMessage().startsWith(exceptionPrefix) );
+			}
+		}
+		
+		{
+			try
+			{
+				webObjectSource.get("response", JavaBean.class);
+			}
+			catch(Exception e)
+			{
+				Assert.assertTrue( e.getMessage().startsWith(exceptionPrefix) );
+			}
+		}
+		
+		{
+			try
+			{
+				webObjectSource.get("application", JavaBean.class);
+			}
+			catch(Exception e)
+			{
+				Assert.assertTrue( e.getMessage().startsWith(exceptionPrefix) );
+			}
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void getInternalParameterMap()
+	public void getRawRequestParameterMap()
 	{
 		String value="12345";
 		request.setParameter("value", value);

@@ -41,12 +41,12 @@ public class FactoryResolverProvider implements ResolverProvider
 		this.resolverFactory = resolverFactory;
 		this.resolverId = resolverId;
 	}
-	
-	public ResolverFactory getBeanFactory() {
+
+	public ResolverFactory getResolverFactory() {
 		return resolverFactory;
 	}
-	public void setBeanFactory(ResolverFactory beanFactory) {
-		this.resolverFactory = beanFactory;
+	public void setResolverFactory(ResolverFactory resolverFactory) {
+		this.resolverFactory = resolverFactory;
 	}
 
 	public Serializable getResolverId() {

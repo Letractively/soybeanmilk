@@ -371,14 +371,15 @@
 				它包含如下属性：
 				<ul>
 					<li>
-						<span class="tagAttr">name</span>（可选） <br />
-						定义<span class="glossary">调用</span>的名称，只有当它是全局调用时，该属性才需要被配置 。
+						<span class="tagAttr">name</span>（<span class="required">必须</span>） <br />
+						如果<span class="glossary">调用</span>是全局的，那么它应该与动作一起是全局唯一的；如果是局部的，则不必如此
 					</li>
 					<li>
-						<span class="tagAttr">method</span>（<span class="required">必须</span>） <br />
+						<span class="tagAttr">method</span>（可选） <br />
 						定义<span class="glossary">调用</span>的方法名称，这个方法必须在<span class="tagAttr">resolver-class</span>或者<span class="tagAttr">resolver</span>类中存在。
 						配置解析器会在解析时根据这个名称查找对应的方法对象，如果你定义了<span class="tagAttr">resolver-class</span>属性，解析器会优先使用它来查找；
 						否则，使用<span class="tagAttr">resolver</span>定义的<span class="glossary">解决对象</span>来查找。
+						如果你没有配置，框架将使用<span class="tagAttr">name</span>作为方法名称来查找。
 					</li>
 					<li>
 						<span class="tagAttr">resolver-class</span>（<span class="required">不定</span>） <br />

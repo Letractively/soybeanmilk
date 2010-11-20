@@ -9,12 +9,12 @@
 	<executables>
 		
 		<action name="helloAction">
-			<invoke method="hello" resolver="helloResolver" result-key="helloResult">
+			<invoke name="hello" resolver="helloResolver" result-key="helloResult">
 				<arg key="helloTo" />
 				<arg key="helloRepeat" />
 			</invoke>
 			
-			<invoke method="printObject" resolver-class="example.resolver.HelloResolver">
+			<invoke name="printObject" resolver-class="example.resolver.HelloResolver">
 				<arg key="helloResult" />
 			</invoke>
 		</action>

@@ -69,11 +69,8 @@ WEB执行器默认是根据servlet路径（request.getServletPath()）来查找�
 <!ATTLIST action name CDATA #REQUIRED>
 <!ATTLIST ref name CDATA #REQUIRED>
 
-<!--
-调用配置的名称属性
-如果调用是全局的，名称的定义规则应该与动作名称的一样
--->
-<!ATTLIST invoke name CDATA #IMPLIED>
+
+<!ATTLIST invoke name CDATA #REQUIRED>
 <!ATTLIST invoke method CDATA #IMPLIED>
 <!ATTLIST invoke resolver-class CDATA #IMPLIED>
 <!ATTLIST invoke resolver CDATA #IMPLIED>

@@ -479,13 +479,11 @@ public class ConfigurationParser
 		String resolverClazz=getAttribute(element, TAG_INVOKE_ATTR_RESOLVER_CLASS);
 		String resultKey=getAttribute(element,TAG_INVOKE_ATTR_RESULT_KEY);
 		
-		if(name==null && methodName==null)
-			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_NAME+"] or ["+TAG_INVOKE_ATTR_METHOD+"] must not be null");
+		if(name==null)
+			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_NAME+"] must not be null");
 		
 		if(methodName == null)
 			methodName=name;
-		
-		assertNotEmpty(methodName, "<"+TAG_INVOKE+"> named '"+name+"' attribute ["+TAG_INVOKE_ATTR_METHOD+"] must not be null");
 		
 		if(resolverClazz==null && resolverId==null)
 			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_RESOLVER_OBJECT+"] or ["+TAG_INVOKE_ATTR_RESOLVER_CLASS+"] must not be null");

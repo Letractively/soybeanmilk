@@ -63,7 +63,7 @@
 		<arg key="printObject" />
 	</invoke>
 	<action name="calculate">
-		<invoke method="multiply" resolver="myResolver" result-key="printObject">
+		<invoke name="multiply" resolver="myResolver" result-key="printObject">
 			<arg key="mulArg1" />
 			<arg key="mulArg2" />
 		</invoke>
@@ -140,13 +140,13 @@ class 解决对象类名，它的值要能够被Class.forName("[class]").newInst
 
 <!--
 调用配置的名称属性
-如果调用是全局的，那么这个属性是必须的，且不能与其他全局调用和动作名称相同；
-而如果调用是局部的，这个属性不必指定
+如果调用是全局的，那么它应该与动作一起是全局唯一的；如果是局部的，则不必如此
 -->
-<!ATTLIST invoke name CDATA #IMPLIED>
+<!ATTLIST invoke name CDATA #REQUIRED>
 
 <!--
-调用执行的方法名称，它要能够在之后配置的resolver-class或者resolver类中找到
+调用执行的方法名称
+它要能够在之后配置的resolver-class或者resolver类中找到，默认与名称相同
 -->
 <!ATTLIST invoke method CDATA #IMPLIED>
 

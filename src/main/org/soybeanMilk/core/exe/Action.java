@@ -32,7 +32,7 @@ import org.soybeanMilk.core.ObjectSource;
  * @date 2010-5-9
  *
  */
-public class Action implements Executable,Serializable
+public class Action extends AbstractExecutable implements Serializable
 {
 	private static final long serialVersionUID = -8438224010529190055L;
 	

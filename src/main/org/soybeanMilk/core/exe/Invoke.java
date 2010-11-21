@@ -22,7 +22,6 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.ObjectSource;
 
@@ -33,7 +32,7 @@ import org.soybeanMilk.core.ObjectSource;
  * @author earthAngry@gmail.com
  * @date 2010-9-30
  */
-public class Invoke implements Executable,Serializable
+public class Invoke extends AbstractExecutable implements Serializable
 {
 	private static final long serialVersionUID = -6517860148774345653L;
 	

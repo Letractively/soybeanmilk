@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soybean-milk>
+
+	<!-- 定义解决对象 -->
+	<resolvers>
+		<resolver id="helloResolver" class="example.resolver.HelloResolver" />
+	</resolvers>
+	
+	<executables>
+		
+		<action name="helloAction">
+			<invoke>helloResult=helloResolver.hello(helloTo, helloRepeat)</invoke>
+			<invoke>helloResolver.printObject(helloResult)</invoke>
+		</action>
+		
+	</executables>
+	
+</soybean-milk>

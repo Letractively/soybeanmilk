@@ -39,9 +39,6 @@ public class Invoke extends AbstractExecutable implements Serializable
 	private static Log log=LogFactory.getLog(Invoke.class);
 	private static boolean _logDebugEnabled=log.isDebugEnabled();
 	
-	/**调用的名称*/
-	private String name;
-	
 	/**解决对象提供者，方法被调用时的对象参数将由它提供*/
 	private transient ResolverProvider resolverProvider;
 	
@@ -128,7 +125,7 @@ public class Invoke extends AbstractExecutable implements Serializable
 	 */
 	private void init(String name, Method method, Arg[] args, Serializable resultKey, ResolverProvider resolverProvider)
 	{
-		this.name = name;
+		super.setName(name);
 		this.method = method;
 		this.args = args;
 		this.resultKey = resultKey;
@@ -172,15 +169,6 @@ public class Invoke extends AbstractExecutable implements Serializable
 			log.debug("finish execute '"+this+"'");
 	}
 
-	@Override
-	public String getName()
-	{
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-	
 	public ResolverProvider getResolverProvider() {
 		return resolverProvider;
 	}
@@ -262,7 +250,7 @@ public class Invoke extends AbstractExecutable implements Serializable
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName()+" [name=" + name + ", method=" + method.getName() + ", resolver="
+		return getClass().getSimpleName()+" [name=" + getName() + ", method=" + method.getName() + ", resolverProvider="
 				+ resolverProvider + ", resultKey=" + resultKey + "]";
 	}
 	

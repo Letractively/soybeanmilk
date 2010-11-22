@@ -39,8 +39,6 @@ public class Action extends AbstractExecutable implements Serializable
 	private static Log log=LogFactory.getLog(Action.class);
 	private static boolean _logDebugEnabled=log.isDebugEnabled();
 	
-	/**动作名称*/
-	private String name;
 	/**动作包含的可执行对象集*/
 	private List<Executable> executables;
 	
@@ -54,7 +52,7 @@ public class Action extends AbstractExecutable implements Serializable
 	public Action(String name, List<Executable> executables)
 	{
 		super();
-		this.name = name;
+		super.setName(name);
 		this.executables = executables;
 	}
 	
@@ -76,14 +74,6 @@ public class Action extends AbstractExecutable implements Serializable
 			log.debug("finish execute '"+this+"'");
 	}
 
-	@Override
-	public String getName()
-	{
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
 	public List<Executable> getExecutables() {
 		return executables;
 	}
@@ -110,6 +100,6 @@ public class Action extends AbstractExecutable implements Serializable
 	@Override
 	public String toString()
 	{
-		return "Action [name=" + name + "]";
+		return "Action [name=" + getName() + "]";
 	}
 }

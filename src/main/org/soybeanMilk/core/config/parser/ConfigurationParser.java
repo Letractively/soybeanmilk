@@ -493,6 +493,8 @@ public class ConfigurationParser
 	{
 		String statement=getTextContent(element);
 		assertNotEmpty(statement, "<"+TAG_INVOKE+"> content must not be empty");
+		
+		new InvokeStatementParser(invoke, statement).parse();
 	}
 	
 	/**
@@ -1055,6 +1057,12 @@ public class ConfigurationParser
 	
 	protected static class InvokeStatementParser
 	{
+		private static final char[] FORMAT_WITH_BLANK={'\n', '\t', ' '};
+		
+		private static final char[] RESULT_KEY_END_DIV={'\n', '\t', ' ', '='};
+		private static final char[] METHOD_NAME_START_DIV={};
+		private static final char[] METHOD_NAME_END_DIV={'\n', '\t',' '};
+		
 		private Invoke invoke;
 		private char[] input;
 		private StringBuffer cache;
@@ -1072,33 +1080,96 @@ public class ConfigurationParser
 			this.currentIdx=0;
 		}
 		
-		protected void parse(int startIndex, boolean backward, char[] ignore, char... stopAt)
+		public int getCurrentIdx() {
+			return currentIdx;
+		}
+		public void setCurrentIdx(int currentIdx) {
+			this.currentIdx = currentIdx;
+		}
+		
+		public Invoke getInvoke() {
+			return invoke;
+		}
+		public void setInvoke(Invoke invoke) {
+			this.invoke = invoke;
+		}
+		
+		public void parse()
 		{
-			if(startIndex < 0)
-				startIndex=currentIdx;
+			int leftBracketIdx=indexOf('(');
+			if(leftBracketIdx < 0)
+				throw new ParseException("no '(' found in statement \""+new String(input)+"\"");
 			
-			if(backward)
-			{
-				for(currentIdx=startIndex;currentIdx>0;currentIdx--)
-				{
-					char c=input[currentIdx];
-					
-					if(isInChars(c, stopAt))
-						break;
-					
-					if(isInChars(c, ignore))
-						continue;
-					
-					cache.append(c);
-				}
-			}
+			int resultKeyEndIdx=indexOf('=', leftBracketIdx);
+			
+			parseUtil(true, FORMAT_WITH_BLANK, false);
+			
+			if(resultKeyEndIdx < 0)
+				invoke.setResultKey(null);
 			else
 			{
+				String rk=parseUtil(false, RESULT_KEY_END_DIV, false);
+				if(rk==null || rk.length()==0)
+					throw new ParseException("no result key segment found in statement \""+new String(input)+"\"");
 				
+				invoke.setResultKey(rk);
 			}
 		}
 		
-		private boolean isInChars(char c, char[] chars)
+		protected String parseUtil(boolean notIn, char[] refSet, boolean record)
+		{
+			for(;currentIdx<input.length;currentIdx++)
+			{
+				char c=input[currentIdx];
+				
+				if(notIn && !contain(refSet, c))
+					break;
+				else if(!notIn && contain(refSet, c))
+					break;
+				
+				if(record)
+					cache.append(c);
+			}
+			
+			String re=null;
+			if(record)
+				re=cache.toString();
+			else
+				re=null;
+			
+			cache.delete(0, cache.length());
+			
+			return re;
+		}
+		
+		protected char getCurrentChar()
+		{
+			return input[currentIdx];
+		}
+		
+		protected void locate(int idx)
+		{
+			this.currentIdx=idx;
+		}
+		
+		protected int indexOf(char c)
+		{
+			return indexOf(c, input.length);
+		}
+		
+		protected int indexOf(char c, int endIdx)
+		{
+			int re=-1;
+			for(int i=0;i<endIdx;i++)
+			{
+				if(input[i] == c)
+					re=i;
+			}
+			
+			return re;
+		}
+		
+		protected boolean contain(char[] chars, char c)
 		{
 			if(chars==null || chars.length==0)
 				return false;

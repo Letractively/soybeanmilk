@@ -10,13 +10,11 @@
 		<action name="helloAction">
 			<invoke>request.helloResult=helloResolver.hello(param.helloTo, param.helloRepeat)</invoke>
 			<invoke>helloResolver.printObject(request.helloResult)</invoke>
-			<invoke>testResolver.test( 3, 2.53f, " o k ", true, '2' )</invoke>
+			<invoke>testResolver.test( 3, 2.53f , " o k " , true, '2' )</invoke>
 			<invoke>
-				commonResolver.handleTarget(
-					request
-					,
-					response
-				)
+				commonResolver.handleTarget	(
+					request,
+					response)
 			</invoke>
 		</action>
 		

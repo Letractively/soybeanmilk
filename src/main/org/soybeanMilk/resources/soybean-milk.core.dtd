@@ -35,10 +35,10 @@
 <!--
 模块配置文件名，它可以是模糊的也可以是明确的
 比如：
-“my/cfg/*”			表示目录“my/cfg/”下面的所有XML文件（包括子目录）
+“my/cfg/*”			表示目录“my/cfg/”下面的所有XML文件（不包括子目录）
 “my/cfg/my.xml”		表示单一的配置文件
 -->
-<!ELEMENT file #PCDTATA>
+<!ELEMENT file (#PCDATA)>
 
 <!--
 解决对象配置
@@ -90,7 +90,7 @@
 调用配置
 如果是全局调用，你应该配置其“name”属性，而在配置局部调用时，则不需要
 -->
-<!ELEMENT invoke (arg*)>
+<!ELEMENT invoke (#PCDATA | arg)*>
 
 <!--
 参数配置

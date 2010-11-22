@@ -28,7 +28,7 @@
 <!ELEMENT exception-handler EMPTY>
 <!ELEMENT converter EMPTY>
 <!ELEMENT includes (file*)>
-<!ELEMENT file #PCDTATA>
+<!ELEMENT file (#PCDATA)>
 <!ELEMENT resolvers (resolver*)>
 <!ELEMENT resolver EMPTY>
 <!ELEMENT executables (invoke | action)*>
@@ -40,7 +40,7 @@
 target 动作的目标URL
 -->
 <!ELEMENT target EMPTY>
-<!ELEMENT invoke (arg*)>
+<!ELEMENT invoke (#PCDATA | arg)*>
 <!ELEMENT arg EMPTY>
 
 <!ATTLIST generic-converter class CDATA #IMPLIED>

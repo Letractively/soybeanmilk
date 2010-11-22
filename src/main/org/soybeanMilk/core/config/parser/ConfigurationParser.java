@@ -286,7 +286,7 @@ public class ConfigurationParser
 		
 		for(Element el : files)
 		{
-			String fileName=el.getTextContent();
+			String fileName=getTextContent(el);
 			assertNotEmpty(fileName, "<"+TAG_FILE+">'s content must not be null");
 			
 			Document[] docs=parseDocuments(fileName);
@@ -471,7 +471,36 @@ public class ConfigurationParser
 	 * @param invoke
 	 * @param element
 	 */
-	protected void setInvokeProperties(Invoke invoke,Element element)
+	protected void setInvokeProperties(Invoke invoke, Element element)
+	{
+		String resolverId=getAttribute(element,TAG_INVOKE_ATTR_RESOLVER_OBJECT);
+		String resolverClazz=getAttribute(element, TAG_INVOKE_ATTR_RESOLVER_CLASS);
+		
+		if(resolverClazz==null && resolverId==null)
+		{
+			setInvokePropertiesStatement(invoke, element);
+		}
+		else
+			setInvokePropertiesXml(invoke, element);
+	}
+	
+	/**
+	 * 设置以表达式方式定义的调用属性
+	 * @param invoke
+	 * @param element
+	 */
+	protected void setInvokePropertiesStatement(Invoke invoke, Element element)
+	{
+		String statement=getTextContent(element);
+		assertNotEmpty(statement, "<"+TAG_INVOKE+"> content must not be empty");
+	}
+	
+	/**
+	 * 设置以XML方式定义的调用属性
+	 * @param invoke
+	 * @param element
+	 */
+	protected void setInvokePropertiesXml(Invoke invoke,Element element)
 	{
 		String name=getAttribute(element,TAG_INVOKE_ATTR_NAME);
 		String methodName=getAttribute(element, TAG_INVOKE_ATTR_METHOD);
@@ -867,6 +896,18 @@ public class ConfigurationParser
 	}
 	
 	/**
+	 * 获取元素文本内容
+	 * @param element
+	 * @return
+	 */
+	protected String getTextContent(Element element)
+	{
+		String re=element.getTextContent();
+		
+		return re==null || re.length()==0 ? null : re;
+	}
+	
+	/**
 	 * 自定义可执行对象的名称，所有可执行对象的名称都将使用该自定义规则
 	 * @param rawName
 	 * @return
@@ -1009,6 +1050,64 @@ public class ConfigurationParser
 		public String toString()
 		{
 			return "Executable [name=" + refName + "]";
+		}
+	}
+	
+	protected static class InvokeStatementParser
+	{
+		private Invoke invoke;
+		private char[] input;
+		private StringBuffer cache;
+		
+		private int currentIdx;
+		
+		public InvokeStatementParser(Invoke invoke, String input)
+		{
+			if(input==null || input.length()==0)
+				throw new IllegalArgumentException();
+			
+			this.invoke=invoke;
+			this.input=input.toCharArray();
+			this.cache=new StringBuffer();
+			this.currentIdx=0;
+		}
+		
+		protected void parse(int startIndex, boolean backward, char[] ignore, char... stopAt)
+		{
+			if(startIndex < 0)
+				startIndex=currentIdx;
+			
+			if(backward)
+			{
+				for(currentIdx=startIndex;currentIdx>0;currentIdx--)
+				{
+					char c=input[currentIdx];
+					
+					if(isInChars(c, stopAt))
+						break;
+					
+					if(isInChars(c, ignore))
+						continue;
+					
+					cache.append(c);
+				}
+			}
+			else
+			{
+				
+			}
+		}
+		
+		private boolean isInChars(char c, char[] chars)
+		{
+			if(chars==null || chars.length==0)
+				return false;
+			
+			for(char ch : chars)
+				if(ch == c)
+					return true;
+			
+			return false;
 		}
 	}
 }

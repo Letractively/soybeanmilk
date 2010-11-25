@@ -8,7 +8,7 @@
 	
 	<executables>
 		
-		<action name="helloAction">
+		<action name="helloActionXml">
 			<invoke name="hello" resolver="helloResolver" result-key="helloResult">
 				<arg key="helloTo" />
 				<arg key="helloRepeat" />
@@ -17,6 +17,11 @@
 			<invoke name="printObject" resolver-class="example.resolver.HelloResolver">
 				<arg key="helloResult" />
 			</invoke>
+		</action>
+		
+		<action name="helloActionStatement">
+			<invoke> helloResult = helloResolver.hello(helloTo, 3) </invoke>
+			<invoke> helloResolver.printObject(helloResult); </invoke>
 		</action>
 		
 	</executables>

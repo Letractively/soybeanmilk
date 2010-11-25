@@ -1,5 +1,6 @@
 package example;
 
+import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.Executor;
 import org.soybeanMilk.core.DefaultExecutor;
 import org.soybeanMilk.core.config.Configuration;
@@ -12,8 +13,7 @@ public class ExampleConfigFile
 	public static void main(String[] args) throws Exception
 	{
 		Configuration cfg=new ConfigurationParser().parse(
-				//"example/"+Constants.DEFAULT_CONFIG_FILE);
-				"example/soybean-milk.config_1.xml");
+				"example/"+Constants.DEFAULT_CONFIG_FILE);
 		
 		Executor executor=new DefaultExecutor(cfg);
 		
@@ -22,6 +22,17 @@ public class ExampleConfigFile
 		os.set("helloTo", "mars");
 		os.set("helloRepeat", 3);
 		
-		executor.execute("helloAction", os);
+		printDiv();
+		
+		executor.execute("helloActionXml", os);
+		
+		printDiv();
+		
+		executor.execute("helloActionStatement", os);
+	}
+	
+	static void printDiv()
+	{
+		System.out.println("\n---------------------------------------\n");
 	}
 }

@@ -21,7 +21,7 @@
 		
 		<action name="helloActionStatement">
 			<invoke> helloResult = helloResolver.hello(helloTo, 3) </invoke>
-			<invoke> helloResolver.printObject(helloResult); </invoke>
+			<invoke> helloResolver . printObject ( helloResult ); </invoke>
 		</action>
 		
 	</executables>

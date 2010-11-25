@@ -8,13 +8,41 @@
 	<executables>
 		
 		<action name="helloAction">
-			<invoke>request.helloResult=helloResolver.hello(param.helloTo, param.helloRepeat)</invoke>
-			<invoke>helloResolver.printObject(request.helloResult)</invoke>
-			<invoke>testResolver.test( 3, 2.53f , " o k " , true, '2' )</invoke>
 			<invoke>
-				commonResolver.handleTarget	(
-					request,
-					response)
+				 request.helloResult = helloResolver.hello(
+				   helloTo ,
+				   10)
+			</invoke>
+			<invoke>
+				helloResolver.printObject(
+					request.helloResult)
+			</invoke>
+			<invoke>
+				helloResolver.printObject(true)
+			</invoke>
+			<invoke>
+				helloResolver.printObject(false)
+			</invoke>
+			<invoke>
+				helloResolver.printObject("I' am\t a \"string")
+			</invoke>
+			<invoke>
+				helloResolver.printObject('c')
+			</invoke>
+			<invoke>
+				helloResolver.printObject('\'')
+			</invoke>
+			<invoke>
+				helloResolver.printObject('\\')
+			</invoke>
+			<invoke>
+				helloResolver.printObject('\t')
+			</invoke>
+			<invoke>
+				helloResolver.printObject('\f')
+			</invoke>
+			<invoke>
+				helloResolver.printObject("''\"a\tb\ncd\ref")
 			</invoke>
 		</action>
 		

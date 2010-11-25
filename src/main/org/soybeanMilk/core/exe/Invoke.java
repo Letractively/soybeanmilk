@@ -247,11 +247,13 @@ public class Invoke extends AbstractExecutable implements Serializable
 		return values;
 	}
 	
+	
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName()+" [name=" + getName() + ", method=" + method.getName() + ", resolverProvider="
-				+ resolverProvider + ", resultKey=" + resultKey + "]";
+		return getClass().getSimpleName()+" [name=" + getName() + ", method=" + method
+				+ ", resultKey=" + resultKey + ", resolverProvider="
+				+ resolverProvider + ", args=" + Arrays.toString(args) + "]";
 	}
 	
 	/**
@@ -385,7 +387,7 @@ public class Invoke extends AbstractExecutable implements Serializable
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName()+" [key=" + key + ", type=" + type + ", value=" + value
+			return getClass().getSimpleName()+" [key=" + key + ", type=" + type + ", value=" + value + (value==null ? "" : "("+value.getClass().getName()+")")
 					+ "]";
 		}
 	}

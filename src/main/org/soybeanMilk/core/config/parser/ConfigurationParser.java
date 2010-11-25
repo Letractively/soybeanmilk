@@ -494,6 +494,10 @@ public class ConfigurationParser
 		String statement=getTextContent(element);
 		assertNotEmpty(statement, "<"+TAG_INVOKE+"> content must not be empty");
 		
+		String name=getAttribute(element,TAG_INVOKE_ATTR_NAME);
+		
+		invoke.setName(name);
+		
 		new InvokeStatementParser(invoke, statement).parse();
 	}
 	
@@ -1055,19 +1059,20 @@ public class ConfigurationParser
 		}
 	}
 	
-	protected static class InvokeStatementParser
+	/**
+	 * 调用语句解析器，它解析诸如"myReulst = myResolver.method(argKey0, argKey1)"之类字符串中的调用元素
+	 * @author zangzf
+	 * @date 2010-11-25
+	 *
+	 */
+	protected class InvokeStatementParser
 	{
-		private static final char[] FORMAT_WITH_BLANK={'\n', '\t', ' '};
-		
-		private static final char[] RESULT_KEY_END_DIV={'\n', '\t', ' ', '='};
-		private static final char[] METHOD_NAME_START_DIV={};
-		private static final char[] METHOD_NAME_END_DIV={'\n', '\t',' '};
-		
 		private Invoke invoke;
 		private char[] input;
 		private StringBuffer cache;
 		
 		private int currentIdx;
+		private int endIdx;
 		
 		public InvokeStatementParser(Invoke invoke, String input)
 		{
@@ -1077,14 +1082,34 @@ public class ConfigurationParser
 			this.invoke=invoke;
 			this.input=input.toCharArray();
 			this.cache=new StringBuffer();
+			
 			this.currentIdx=0;
+			this.endIdx=this.input.length;
 		}
 		
-		public int getCurrentIdx() {
-			return currentIdx;
+		protected int getCurrentIdx()
+		{
+			return this.currentIdx;
 		}
-		public void setCurrentIdx(int currentIdx) {
+		
+		/**
+		 * 设置解析当前位置
+		 * @param currentIdx
+		 */
+		protected void setCurrentIdx(int currentIdx) {
 			this.currentIdx = currentIdx;
+		}
+		
+		public int getEndIdx() {
+			return endIdx;
+		}
+		
+		/**
+		 * 设置解析结束位置
+		 * @param endIdx
+		 */
+		public void setEndIdx(int endIdx) {
+			this.endIdx = endIdx;
 		}
 		
 		public Invoke getInvoke() {
@@ -1096,39 +1121,228 @@ public class ConfigurationParser
 		
 		public void parse()
 		{
-			int leftBracketIdx=indexOf('(');
-			if(leftBracketIdx < 0)
-				throw new ParseException("no '(' found in statement \""+new String(input)+"\"");
+			//方法的左括弧
+			int methodLeftBracketIdx=indexOf('(');
+			if(methodLeftBracketIdx < 0)
+				throw new ParseException("no key character '(' found in statement \""+new String(input)+"\"");
 			
-			int resultKeyEndIdx=indexOf('=', leftBracketIdx);
+			//结果关键字位置
+			int resultKeyEndIdx=indexOf('=', methodLeftBracketIdx);
 			
-			parseUtil(true, FORMAT_WITH_BLANK, false);
+			//方法名之前的'.'访问符位置
+			int methodDotIdx=lastIndexOf('.', methodLeftBracketIdx);
+			if(methodDotIdx < 0)
+				throw new ParseException("no key character  '.' found in statement \""+new String(input)+"\"");
+			
+			setCurrentIdx(0);
+			
+			//解析方法的结果关键字
 			
 			if(resultKeyEndIdx < 0)
 				invoke.setResultKey(null);
 			else
 			{
-				String rk=parseUtil(false, RESULT_KEY_END_DIV, false);
-				if(rk==null || rk.length()==0)
+				ignoreFormatChars();
+				
+				String resultKey=parseUtil(KEY_CHAR_EQUAL, true, true, FORMAT_WITH_SPACE);
+				if(resultKey==null || resultKey.length()==0)
 					throw new ParseException("no result key segment found in statement \""+new String(input)+"\"");
 				
-				invoke.setResultKey(rk);
+				invoke.setResultKey(resultKey);
+				
+				//移到'='之后
+				setCurrentIdx(getCurrentIdx()+1);
+			}
+			
+			//解析解决对象ID
+			
+			ignoreFormatChars();
+			setEndIdx(methodDotIdx);
+			
+			String resolverId=parseUtil(null, true, true, FORMAT_WITH_SPACE);
+			if(resolverId==null || resolverId.length()==0)
+				throw new ParseException("no resolver id segment found in statement \""+new String(input)+"\"");
+			
+			Object resolverBean=configuration.getResolverFactory().getResolver(resolverId);
+			assertNotEmpty(resolverBean, "can not find resolver with id '"+resolverId+"' defined in statement \""+new String(input)+"\"");
+			
+			invoke.setResolverProvider(new FactoryResolverProvider(configuration.getResolverFactory(), resolverId));
+			
+			//移到'.'
+			setCurrentIdx(getCurrentIdx()+1);
+			
+			//解析方法名
+			
+			ignoreFormatChars();
+			setEndIdx(methodLeftBracketIdx);
+			
+			String methodName=parseUtil(null, true, true, FORMAT_WITH_SPACE);
+			if(methodName==null || methodName.length()==0)
+				throw new ParseException("no method name segment found in statement \""+new String(input)+"\"");
+			
+			//移到'('之后
+			setCurrentIdx(getCurrentIdx()+1);
+			
+			//解析方法参数
+			setEndIdx(this.input.length);
+			List<String> argStrList=new ArrayList<String>();
+			while(getCurrentIdx() < this.input.length)
+			{
+				ignoreFormatChars();
+				
+				char c=getCurrentChar();
+				
+				//遇到方法的右括弧
+				if(c == ')')
+					break;
+				//参数分隔符
+				else if(c == ',')
+				{
+					setCurrentIdx(getCurrentIdx()+1);
+				}
+				//字符串或者字符
+				else if(c == '"')
+				{
+					this.cache.append('"');
+					setCurrentIdx(getCurrentIdx()+1);
+					
+					String str=parseUtil(DOUBLE_QUOTE, true, true, null);
+					argStrList.add(str+"\"");
+					
+					setCurrentIdx(getCurrentIdx()+1);
+				}
+				else if(c == '\'')
+				{
+					this.cache.append('\'');
+					setCurrentIdx(getCurrentIdx()+1);
+					
+					String str=parseUtil(SINGLE_QUOTE, true, true, null);
+					argStrList.add(str+"'");
+					
+					setCurrentIdx(getCurrentIdx()+1);
+				}
+				else
+				{
+					String str=parseUtil(METHOD_ARG_END, true, true, null);
+					argStrList.add(str);
+				}
+			}
+			
+			Method method=Invoke.findMethodThrow(resolverBean.getClass(), methodName, argStrList.size());
+			invoke.setMethod(method);
+			
+			if(argStrList.size() > 0)
+			{
+				Class<?>[] argTypes=method.getParameterTypes();
+				Arg[] args=new Arg[argTypes.length];
+				
+				for(int i=0;i<argTypes.length;i++)
+				{
+					Arg arg=new Arg();
+					String key=null;
+					Object value=null;
+					
+					Class<?> wrapClass=DefaultGenericConverter.toWrapperClass(argTypes[i]);
+					String argStr=argStrList.get(i);
+					
+					if(Number.class.isAssignableFrom(wrapClass) && containNumber(argStr))
+					{
+						Converter c=configuration.getGenericConverter().getConverter(String.class, argTypes[i]);
+						if(c != null)
+						{
+							try
+							{
+								value = c.convert(argStr, argTypes[i]);
+							}
+							catch(Exception e)
+							{
+								key=argStr;
+							}
+						}
+						else
+							key=argStr;
+					}
+					else if(wrapClass.isAssignableFrom(Boolean.class) && "true".equals(argStr))
+					{
+						value=Boolean.TRUE;
+					}
+					else if(wrapClass.isAssignableFrom(Boolean.class) && "false".equals(argStr))
+					{
+						value=Boolean.FALSE;
+					}
+					else if(wrapClass.isAssignableFrom(String.class) && argStr.startsWith("\"") && argStr.endsWith("\"")
+							&& argStr.length()>1)
+					{
+						value=argStr.substring(1, argStr.length()-1);
+					}
+					else if(wrapClass.isAssignableFrom(Character.class) &&  argStr.startsWith("'") && argStr.endsWith("'")
+							&& argStr.length()>1)
+					{
+						value=argStr.charAt(1);
+					}
+					else
+						key=argStr;
+					
+					arg.setKey(key);
+					arg.setValue(value);
+					arg.setType(argTypes[i]);
+					
+					args[i]=arg;
+				}
+				
+				invoke.setArgs(args);
 			}
 		}
 		
-		protected String parseUtil(boolean notIn, char[] refSet, boolean record)
+		/**
+		 * 忽略所有格式字符
+		 */
+		protected void ignoreFormatChars()
 		{
-			for(;currentIdx<input.length;currentIdx++)
+			parseUtil(FORMAT_WITH_SPACE, false, false, null);
+		}
+		
+		/**
+		 * 从当前位置（{@link #getCurrentIdx()}）解析，直到遇到特殊字符或者不是特殊字符
+		 * @param specialChars 特殊字符集合
+		 * @param inSpecial 是否当遇到特殊字符时停止，否则，当不是特殊字符时停止
+		 * @param record 是否保存遇到的字符
+		 * @param ignoreChars 设置不保存的字符集合
+		 * @return
+		 */
+		protected String parseUtil(char[] specialChars, boolean inSpecial, boolean record, char[] ignoreChars)
+		{
+			boolean isEscChar=false;
+			
+			for(; currentIdx<endIdx; currentIdx++)
 			{
 				char c=input[currentIdx];
 				
-				if(notIn && !contain(refSet, c))
-					break;
-				else if(!notIn && contain(refSet, c))
-					break;
+				if(c == '\\' && !isEscChar)
+				{
+					isEscChar=true;
+					continue;
+				}
 				
-				if(record)
-					cache.append(c);
+				if(isEscChar)
+				{
+					c=getEscChar(c);
+					
+					if(record)
+						cache.append(c);
+					
+					isEscChar=false;
+				}
+				else
+				{
+					if(!inSpecial && !contain(specialChars, c))
+						break;
+					else if(inSpecial && contain(specialChars, c))
+						break;
+					
+					if(record && !contain(ignoreChars, c))
+						cache.append(c);
+				}
 			}
 			
 			String re=null;
@@ -1142,14 +1356,13 @@ public class ConfigurationParser
 			return re;
 		}
 		
+		/**
+		 * 取得当前位置的字符
+		 * @return
+		 */
 		protected char getCurrentChar()
 		{
 			return input[currentIdx];
-		}
-		
-		protected void locate(int idx)
-		{
-			this.currentIdx=idx;
 		}
 		
 		protected int indexOf(char c)
@@ -1159,14 +1372,27 @@ public class ConfigurationParser
 		
 		protected int indexOf(char c, int endIdx)
 		{
-			int re=-1;
-			for(int i=0;i<endIdx;i++)
+			int i=0;
+			for(; i<endIdx; i++)
 			{
 				if(input[i] == c)
-					re=i;
+					break;
 			}
 			
-			return re;
+			return i == endIdx ? -1 : i;
+		}
+		
+		protected int lastIndexOf(char c, int endIdx)
+		{
+			int i=endIdx-1;
+			
+			for(; i>=0; i--)
+			{
+				if(input[i] == c)
+					break;
+			}
+			
+			return i;
 		}
 		
 		protected boolean contain(char[] chars, char c)
@@ -1180,5 +1406,49 @@ public class ConfigurationParser
 			
 			return false;
 		}
+		
+		protected boolean containNumber(String s)
+		{
+			if(s==null || s.length()==0)
+				return false;
+			
+			for(int i=0;i<s.length();i++)
+			{
+				char c=s.charAt(i);
+				
+				if(c>='0' && c<='9')
+					return true;
+			}
+			
+			return false;
+		}
+		
+		protected char getEscChar(char c)
+		{
+			if(c == 'n')
+				return '\n';
+			else if(c == 't')
+				return '\t';
+			else if(c == 'b')
+				return '\b';
+			else if(c == 'r')
+				return '\r';
+			else if(c == 'f')
+				return '\f';
+			else if(c == '\'')
+				return c;
+			else if(c =='"')
+				return '"';
+			else if(c == '\\')
+				return c;
+			else
+				throw new ParseException("unknown ESC character '\\'"+c);
+		}
 	}
+	
+	private static final char[] FORMAT_WITH_SPACE={'\n', '\t', ' '};
+	private static final char[] KEY_CHAR_EQUAL={'='};
+	private static final char[] METHOD_ARG_END={'\n', '\t', ' ', ',', ')'};
+	private static final char[] SINGLE_QUOTE={'\''};
+	private static final char[] DOUBLE_QUOTE={'"'};
 }

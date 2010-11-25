@@ -235,7 +235,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @param type
 	 * @return
 	 */
-	protected Class<?> toWrapperClass(Class<?> type)
+	public static Class<?> toWrapperClass(Class<?> type)
 	{
 		if (type == null || !type.isPrimitive())
             return type;

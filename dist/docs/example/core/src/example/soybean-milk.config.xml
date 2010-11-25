@@ -20,8 +20,8 @@
 		</action>
 		
 		<action name="helloActionStatement">
-			<invoke> helloResult = helloResolver.hello(helloTo, 3) </invoke>
-			<invoke> helloResolver . printObject ( helloResult ); </invoke>
+			<invoke> statement.helloResult = helloResolver.hello(helloTo, 3) </invoke>
+			<invoke> helloResolver . printObject ( statement.helloResult ); </invoke>
 		</action>
 		
 	</executables>

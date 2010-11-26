@@ -8,7 +8,7 @@
 	<!--临时目录-->
 	<property name="tmpDir" value="../tmp" />
 	<!-- 版本 -->
-	<property name="appVersion" value="1.0-beta" />
+	<property name="appVersion" value="1.1-beta" />
 	<!-- 名称 -->
 	<property name="appName" value="soybeanMilk-${appVersion}" />
 	<!-- 示例工程名 -->

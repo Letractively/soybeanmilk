@@ -228,7 +228,7 @@ public class InvokeStatementParser
 		this.currentIdx = currentIdx;
 	}
 	
-	public int getEndIdx() {
+	protected int getEndIdx() {
 		return endIdx;
 	}
 	
@@ -236,7 +236,7 @@ public class InvokeStatementParser
 	 * 设置解析结束位置
 	 * @param endIdx
 	 */
-	public void setEndIdx(int endIdx) {
+	protected void setEndIdx(int endIdx) {
 		this.endIdx = endIdx;
 	}
 	
@@ -366,7 +366,7 @@ public class InvokeStatementParser
 	 * 设置{@link Arg}的关键字属性或者值属性，它根据字符串的语法格式（与Java语法一样）来确定应该设置哪个属性。<br>
 	 * 比如，["abc"]是字符串值、[myresult_key]是关键字、['a']是字符值、[3.5f]是数值
 	 * @param arg
-	 * @param stmt 符合Java语法的字符串，可以包含转义字符和'\u0000'格式字符
+	 * @param stmt 符合Java语法的字符串，可以包含转义字符和'\\uxxxx'格式字符
 	 */
 	public static void stringToArgProperty(Arg arg, String stmt)
 	{

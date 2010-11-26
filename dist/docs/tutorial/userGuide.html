@@ -478,7 +478,8 @@
 			<p>
 <pre class="code-xml">
 &lt;invoke name="yourGlobalInvokeName"&gt;
-	request.yourResultKey = yourResolver.yourMethod( param.arg1, true, 'a', '\u00EF', "hello\t hello", 100 )
+	request.yourResultKey = yourResolver.yourMethod(
+		param.arg1, true, 'a', '\u00EF', "hello\t hello", 100 )
 &lt;/invoke&gt;
 </pre>
 			</p>
@@ -488,15 +489,15 @@
 				<span class="tag bold">&lt;arg&gt;</span>（<span class="required">不定</span>） <br/>
 			</p>
 			<p>
-				<span class="glossary">调用</span>方法的参数配置。只有在你是以XML方式配置<span class="tag">&lt;invoke&gt;</span>时，才需要定义这个标签。<span class="tag">&lt;arg&gt;</span>的个数是由<span class="glossary">调用</span>方法决定的，
+				<span class="glossary">调用</span>方法的参数配置。只有在你是以XML方式配置<span class="tag">&lt;invoke&gt;</span>时，才需要定义此标签。<span class="tag">&lt;arg&gt;</span>的个数是由<span class="glossary">调用</span>方法决定的，
 				方法有几个参数，你就需要配置几个<span class="tag">&lt;arg&gt;</span>，
 				如果方法没有参数，你就不必要配置它。
 			</p>
 			<p>
-				它没有属性，只有标签内容。
+				它没有属性，只有标签内容。标签内容可以分为两大类，一是参数关键字、一是参数值，框架会自动识别它们。
 			</p>
 			<p>
-				标签内容可以分为两大类，一是参数关键字、一是参数值，下面是合法的内容：
+				下面是合法的内容：
 			</p>
 				<ul>
 					<li>参数关键字

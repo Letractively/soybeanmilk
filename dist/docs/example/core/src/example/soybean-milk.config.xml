@@ -7,12 +7,12 @@
 	
 	<executables>
 		<action name="helloActionXml">
-			<invoke name="hello" resolver="helloResolver" result-key="helloResult">
+			<invoke method="hello" resolver="helloResolver" result-key="helloResult">
 				<arg>helloTo</arg>
 				<arg>helloRepeat</arg>
 			</invoke>
 			
-			<invoke name="printObject" resolver-class="example.resolver.HelloResolver">
+			<invoke method="printObject" resolver-class="example.resolver.HelloResolver">
 				<arg>helloResult</arg>
 			</invoke>
 		</action>

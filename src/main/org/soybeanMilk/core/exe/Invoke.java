@@ -233,7 +233,7 @@ public class Invoke extends AbstractExecutable implements Serializable
 			for(int i=0;i<args.length;i++)
 			{
 				//优先取值
-				if(args[i].getValue() != null)
+				if(args[i].getValue()!=null || args[i].getKey()==null)
 					values[i]=args[i].getValue();
 				else
 					//如果对象源为null，则应该返回元素都为null的数组

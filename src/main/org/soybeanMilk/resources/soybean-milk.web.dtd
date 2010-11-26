@@ -41,7 +41,23 @@ target 动作的目标URL
 -->
 <!ELEMENT target EMPTY>
 <!ELEMENT invoke (#PCDATA | arg)*>
-<!ELEMENT arg EMPTY>
+
+<!--
+参数配置
+值设置与父dtd文件的相同，但是关键字却有更规范的设置，
+下面是合法的关键字定义方式：
+<arg>param</arg>					整个请求参数映射表
+<arg>param.beanKey</arg>			参数映射表中的以“beanKey.”开头的请求参数
+<arg>beanKey</arg>					同上
+<arg>request</arg>					请求对象HttpServletRequest
+<arg>request.beanKey</arg>			请求中的“beanKey”关键字对应的对象
+<arg>session</arg>					会话对象HttpSession
+<arg>session.beanKey</arg>			会话中的“beanKey”关键字对应的对象
+<arg>application</arg>				应用对象ServletContext
+<arg>application.beanKey</arg>		应用中的“beanKey”关键字对应的对象
+<arg>response</arg>					回应对象HttpServletResponse
+-->
+<!ELEMENT arg (#PCDATA)>
 
 <!ATTLIST generic-converter class CDATA #IMPLIED>
 <!ATTLIST converter src CDATA #REQUIRED>
@@ -85,25 +101,6 @@ session.beanKey			结果将以“beanKey”关键字被保存到“session”作
 application.beanKey		结果将以“beanKey”关键字被保存到“application”作用域中
 -->
 <!ATTLIST invoke result-key CDATA #IMPLIED>
-
-<!--
-参数配置的属性
-key 参数值在对象源中的关键字，如果这个key里面包含访问符'.'，
-那么它必须以框架支持的作用域开头（参考org.soybeanMilk.web.WebConstants.Scope类）。
-下面是合法的定义方式：
-param					整个请求参数映射表
-param.beanKey			参数映射表中的以“beanKey.”开头的请求参数
-beanKey					同上
-request					请求对象HttpServletRequest
-request.beanKey			请求中的“beanKey”关键字对应的对象
-session					会话对象HttpSession
-session.beanKey			会话中的“beanKey”关键字对应的对象
-application				应用对象ServletContext
-application.beanKey		应用中的“beanKey”关键字对应的对象
-response				回应对象HttpServletResponse
--->
-<!ATTLIST arg key CDATA #IMPLIED>
-<!ATTLIST arg value CDATA #IMPLIED>
 
 <!--
 动作目标配置属性

@@ -230,7 +230,7 @@
 				下面是一个自定义辅助日期转换器配置，框架内置的将被替换：
 <pre class="code-xml">
 &lt;generic-converter&gt;
-	&lt;converter src="java.lang.String" dest="java.util.Date" class="my.converter.DateConverter" /&gt;
+	&lt;converter src="java.lang.String" dest="java.util.Date" class="your.converter.DateConverter" /&gt;
 &lt;/generic-converter&gt;
 </pre>
 			</p>
@@ -271,7 +271,7 @@
 &lt;executables&gt;
 		&lt;action name="/handleException.do"&gt;
 			&lt;invoke method="handleException" resolver="exceptionResolver"&gt;
-				&lt;arg key="session.executeExceptoin" /&gt;
+				&lt;arg&gt;session.executeExceptoin&lt;/arg&gt;
 			&lt;/invoke&gt;
 			
 			&lt;target url="/error.jsp" /&gt;
@@ -304,11 +304,11 @@
 				下面是一个示例：
 <pre class="code-xml">
 &lt;includes&gt;
-	&lt;file&gt;my/config/module.1.xml&lt;/file&gt;
-	&lt;file&gt;my/config/module.2.xml&lt;/file&gt;
+	&lt;file&gt;your/config/module.1.xml&lt;/file&gt;
+	&lt;file&gt;your/config/module.2.xml&lt;/file&gt;
 	&lt;file&gt;/WEB-INF/config/module.3.xml&lt;/file&gt;
 	&lt;file&gt;/WEB-INF/config/module.4.xml&lt;/file&gt;
-	&lt;file&gt;/home/myapp/config/module.5.xml&lt;/file&gt;
+	&lt;file&gt;/home/yourapp/config/module.5.xml&lt;/file&gt;
 &lt;/includes&gt;
 </pre>
 			</p>
@@ -345,9 +345,9 @@
 				下面是一个示例：
 <pre class="code-xml">
 &lt;resolvers&gt;
-	&lt;resolver id="myResolver0" class="my.resolver.MyResolver0" /&gt;
-	&lt;resolver id="myResolver1" class="my.resolver.MyResolver0" /&gt;
-	&lt;resolver id="myResolver2" class="my.resolver.MyResolver1" /&gt;
+	&lt;resolver id="yourResolver0" class="your.resolver.MyResolver0" /&gt;
+	&lt;resolver id="yourResolver1" class="your.resolver.MyResolver0" /&gt;
+	&lt;resolver id="yourResolver2" class="your.resolver.MyResolver1" /&gt;
 &lt;/resolvers&gt;
 </pre>
 			</p>
@@ -368,26 +368,36 @@
 				<span class="glossary">调用</span>配置。它可以直接添加在<span class="tag">&lt;executables&gt;</span>标签下（全局的），也可以添加到<span class="tag">&lt;action&gt;</span>标签下（局部的）。
 			</p>
 			<p>
+				它有两种配置方式：
+				<ul>
+					<li><a href="#invoke_xml_spec">XML方式</a></li>
+					<li><a href="#invoke_java_spec">Java方式</a></li>
+				</ul>
+			</p>
+			<p>
+				<a name="invoke_xml_spec"></a>
+				<a href="javascript:void(0);">XML方式</a>
+			</p>
+			<p>
 				它包含如下属性：
 				<ul>
 					<li>
-						<span class="tagAttr">name</span>（<span class="required">必须</span>） <br />
-						如果<span class="glossary">调用</span>是全局的，那么它应该与动作一起是全局唯一的；如果是局部的，则不必如此
+						<span class="tagAttr">name</span>（可选） <br />
+						如果<span class="glossary">调用</span>是全局的，你需要定义它,并且应该与动作名称一起是全局唯一的；如果是局部的，则不必定义。
 					</li>
 					<li>
-						<span class="tagAttr">method</span>（可选） <br />
+						<span class="tagAttr">method</span>（<span class="required">必须</span>） <br />
 						定义<span class="glossary">调用</span>的方法名称，这个方法必须在<span class="tagAttr">resolver-class</span>或者<span class="tagAttr">resolver</span>类中存在。
 						配置解析器会在解析时根据这个名称查找对应的方法对象，如果你定义了<span class="tagAttr">resolver-class</span>属性，解析器会优先使用它来查找；
 						否则，使用<span class="tagAttr">resolver</span>定义的<span class="glossary">解决对象</span>来查找。
-						如果你没有配置，框架将使用<span class="tagAttr">name</span>作为方法名称来查找。
 					</li>
 					<li>
-						<span class="tagAttr">resolver-class</span>（<span class="required">不定</span>） <br />
+						<span class="tagAttr">resolver-class</span>（<span class="required">二选一</span>） <br />
 						定义<span class="glossary">解决对象</span>类名，如果方法是类方法，你仅需要定义这个属性即可，而不需定义下面的<span class="tagAttr">resolver</span>属性，
 						因为类方法执行时不需要<span class="glossary">解决对象</span>实例。
 					</li>
 					<li>
-						<span class="tagAttr">resolver</span>（<span class="required">不定</span>） <br />
+						<span class="tagAttr">resolver</span>（<span class="required">二选一</span>） <br />
 						定义<span class="glossary">解决对象</span>引用ID，这个ID可以是该文件域内的<span class="glossary">解决对象</span>ID，也可以是任何包含模块文件中的<span class="glossary">解决对象</span>ID。
 						如果该<span class="glossary">调用</span>方法不是类方法，这个属性必须被定义。
 					</li>
@@ -399,24 +409,78 @@
 						下面是合法的结果关键字：
 						<ul>
 							<li>
-								<span class="tagValue">myResultKey</span> <br/>
-								结果将以“<span class="var">myResultKey</span>”关键字被保存到“<span class="var">request</span>”作用域中
+								<span class="tagValue">yourResultKey</span> <br/>
+								结果将以“<span class="var">yourResultKey</span>”关键字被保存到“<span class="var">request</span>”作用域中
 							</li>
 							<li>
-								<span class="tagValue">request.myResultKey</span> <br/>
+								<span class="tagValue">request.yourResultKey</span> <br/>
 								同上
 							</li>
 							<li>
-								<span class="tagValue">session.myResultKey</span> <br/>
-								结果将以“<span class="var">myResultKey</span>”关键字被保存到“<span class="var">session</span>”作用域中
+								<span class="tagValue">session.yourResultKey</span> <br/>
+								结果将以“<span class="var">yourResultKey</span>”关键字被保存到“<span class="var">session</span>”作用域中
 							</li>
 							<li>
-								<span class="tagValue">application.myResultKey</span> <br/>
-								结果将以“<span class="var">myResultKey</span>”关键字被保存到“<span class="var">application</span>”作用域中
+								<span class="tagValue">application.yourResultKey</span> <br/>
+								结果将以“<span class="var">yourResultKey</span>”关键字被保存到“<span class="var">application</span>”作用域中
 							</li>
 						</ul>
 					</li>
 				</ul>
+			</p>
+			<p>
+			<a name="invoke_java_spec"></a>
+				<a href="javascript:void(0);">Java方式</a><br>
+			</p>
+			<p>
+					
+				它使你可以像书写Java代码一样配置<span class="glossary">调用</span>，下面是它的语法格式：<br>
+<pre>
+<span class="tag">&lt;invoke name="yourInvokeName"&gt;</span>
+	<span class="tagAttr">resultKey</span> = <span class="tagAttr">resolver</span>.<span class="tagAttr">method</span>(<span class="tagAttr">argument</span>, <span class="tagAttr">argument</span>, ...)
+<span class="tag">&lt;/invoke&gt;</span>
+</pre>
+				<ul>
+					<li>
+						<span class="tagAttr">resultKey</span> <br>
+						与上面<span class="tag">&lt;invoke&gt;</span>的<span class="tagAttr">result-key</span>属性用法一致
+					</li>
+					<li>
+						<span class="tagAttr">resolver</span> <br>
+						与上面<span class="tag">&lt;invoke&gt;</span>的<span class="tagAttr">resolver</span>或者<span class="tagAttr">resolver-class</span>属性用法一致，
+						框架会自动判断它是<span class="glossary">解决对象</span>ID还是<span class="glossary">解决对象</span>类名
+					</li>
+					<li>
+						<span class="tagAttr">method</span> <br>
+						与上面<span class="tag">&lt;invoke&gt;</span>的<span class="tagAttr">method</span>属性用法一致
+					</li>
+					<li>
+						<span class="tagAttr">argument</span> <br>
+						与下面<span class="tag">&lt;arg&gt;</span>的标签内容用法一致
+					</li>
+				</ul>
+			</p>
+			<p>
+				下面是一些Java方式配置示例：
+			</p>
+			<p>
+<pre class="code-xml">
+&lt;action name="/multiply.do"&gt;
+	&lt;invoke&gt;
+		request.multiplyResult = calculator.multiply( param.a, 100)
+	&lt;/invoke&gt;
+	&lt;invoke&gt;
+		your.util.Utils.printToConsole(request.multiplyResult);
+	&lt;/invoke&gt;
+&lt;/action&gt;
+</pre>
+			</p>
+			<p>
+<pre class="code-xml">
+&lt;invoke name="yourGlobalInvokeName"&gt;
+	request.yourResultKey = yourResolver.yourMethod( param.arg1, true, 'a', '\u00EF', "hello\t hello", 100 )
+&lt;/invoke&gt;
+</pre>
 			</p>
 			<div class="seprator"></div>
 			<p>
@@ -424,18 +488,18 @@
 				<span class="tag bold">&lt;arg&gt;</span>（<span class="required">不定</span>） <br/>
 			</p>
 			<p>
-				<span class="glossary">调用</span>方法的参数配置。<span class="tag">&lt;arg&gt;</span>的个数是由<span class="glossary">调用</span>方法决定的，
+				<span class="glossary">调用</span>方法的参数配置。只有在你是以XML方式配置<span class="tag">&lt;invoke&gt;</span>时，才需要定义这个标签。<span class="tag">&lt;arg&gt;</span>的个数是由<span class="glossary">调用</span>方法决定的，
 				方法有几个参数，你就需要配置几个<span class="tag">&lt;arg&gt;</span>，
 				如果方法没有参数，你就不必要配置它。
 			</p>
 			<p>
-				它包含如下属性：
+				它没有属性，只有标签内容。
+			</p>
+			<p>
+				标签内容可以分为两大类，一是参数关键字、一是参数值，下面是合法的内容：
+			</p>
 				<ul>
-					<li>
-						<span class="tagAttr">key</span>（<span class="required">不定</span>） <br />
-						定义<span class="glossary">调用</span>方法的参数关键字，框架将根据该关键字从<span class="glossary">对象源</span>取得参数值。
-						如果这个关键字里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。<br/>
-						下面是合法的参数关键字：
+					<li>参数关键字
 						<ul>
 							<li>
 								<span class="tagValue">param</span> <br/>
@@ -443,14 +507,14 @@
 								那么这个请求参数映射表会原封不动地传递给方法；如果是其他类型，框架会首先将此映射表转换为这个类型的对象，然后传递给方法。
 							</li>
 							<li>
-								<span class="tagValue">myArgKey</span> <br/>
-								请求参数映射表中以“<span class="var">myArgKey</span>”开头的请求参数。
-								如果这个参数有明确的值，框架会将这个值进行类型转换（需要的话）后传递给方法；否则，就根据“<span class="var">myArgKey</span>”来对参数映射表进行过滤，
-								产生一个新的映射表（它的关键字是原始关键字“<span class="var">myArgKey.</span>”之后的部分，比如由“<span class="var">beanName.propertyName</span>”变为“<span class="var">propertyName</span>”），
+								<span class="tagValue">yourArgKey</span> <br/>
+								请求参数映射表中以“<span class="var">yourArgKey</span>”开头的请求参数。
+								如果这个参数有明确的值，框架会将这个值进行类型转换（需要的话）后传递给方法；否则，就根据“<span class="var">yourArgKey</span>”来对参数映射表进行过滤，
+								产生一个新的映射表（它的关键字是原始关键字“<span class="var">yourArgKey.</span>”之后的部分，比如由“<span class="var">beanName.propertyName</span>”变为“<span class="var">propertyName</span>”），
 								然后，与上面提到的一样，根据<span class="glossary">调用</span>方法参数的类型直接传递这个新映射表或者传递转换后的对象。
 							</li>
 							<li>
-								<span class="tagValue">param.myArgKey</span> <br/>
+								<span class="tagValue">param.yourArgKey</span> <br/>
 								同上。
 							</li>
 							<li>
@@ -459,8 +523,8 @@
 								那么你需要自定义“<span class="var">javax.servlet.http.HttpServletRequest</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
 							<li>
-								<span class="tagValue">request.myArgKey</span> <br/>
-								请求属性中的“<span class="var">myArgKey</span>”关键字对应的对象。框架不会对此对象执行类型转换，<span class="glossary">调用</span>方法的参数类型应该与这个关键字对应的对象一致。
+								<span class="tagValue">request.yourArgKey</span> <br/>
+								请求属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。框架不会对此对象执行类型转换，<span class="glossary">调用</span>方法的参数类型应该与这个关键字对应的对象一致。
 							</li>
 							<li>
 								<span class="tagValue">session</span> <br/>
@@ -468,8 +532,8 @@
 								那么你需要自定义“<span class="var">javax.servlet.http.HttpSession</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
 							<li>
-								<span class="tagValue">session.myArgKey</span> <br/>
-								会话属性中的“<span class="var">myArgKey</span>”关键字对应的对象。框架不会对此对象执行类型转换。
+								<span class="tagValue">session.yourArgKey</span> <br/>
+								会话属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。框架不会对此对象执行类型转换。
 							</li>
 							<li>
 								<span class="tagValue">application</span> <br/>
@@ -477,8 +541,8 @@
 								那么你需要自定义“<span class="var">javax.servlet.ServletContext</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
 							<li>
-								<span class="tagValue">application.myArgKey</span> <br/>
-								应用属性中的“<span class="var">myArgKey</span>”关键字对应的对象。框架不会对此对象执行类型转换。
+								<span class="tagValue">application.yourArgKey</span> <br/>
+								应用属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。框架不会对此对象执行类型转换。
 							</li>
 							<li>
 								<span class="tagValue">response</span> <br/>
@@ -488,44 +552,88 @@
 						</ul>
 					</li>
 					<li>
-						<span class="tagAttr">value</span>（<span class="required">不定</span>） <br />
-						直接定义参数的值，解析器会在解析时将这个字符串值转换为实际的参数类型对象（只支持基本类型）。
-						如果你指定了这个参数值，则<span class="tagAttr">key</span>是不需要的，框架会忽略它。
+						参数值 <br>
+						参数值只支持基本类型和String类型，语法与对应的Java语法相同。下面是详细说明：
+						<ul>
+							<li>
+								<span class="tagValue">boolean</span> <br>
+								布尔值。对应的方法类型应该为“<span class="var">boolean</span>”或者“<span class="var">Boolean</span>”。
+							</li>
+							<li>
+								<span class="tagValue">byte</span> <br>
+								字节。对应的方法类型应该为“<span class="var">byte</span>”或者“<span class="var">Byte</span>”。
+							</li>
+							<li>
+								<span class="tagValue">char</span> <br>
+								字符。可以是普通字符（'a'、'b'、'c'、'1'、'5'）、Java转义字符（'\n'、'\r'、'\t'、'\''、'\\'、'\"'），或者unicode字符（'\uxxxx'）。
+								对应的方法类型应该为“<span class="var">char</span>”或者“<span class="var">Char</span>”。
+							</li>
+							<li>
+								<span class="tagValue">double</span> <br>
+								双精度小数。对应的方法类型应该为“<span class="var">double</span>”或者“<span class="var">Double</span>”。
+							</li>
+							<li>
+								<span class="tagValue">float</span> <br>
+								单精度小数。对应的方法类型应该为“<span class="var">float</span>”或者“<span class="var">Float</span>”。
+							</li>
+							<li>
+								<span class="tagValue">int</span> <br>
+								整型值。对应的方法类型应该为“<span class="var">int</span>”或者“<span class="var">Integer</span>”。
+							</li>
+							<li>
+								<span class="tagValue">long</span> <br>
+								长整型值。对应的方法类型应该为“<span class="var">long</span>”或者“<span class="var">Long</span>”。
+							</li>
+							<li>
+								<span class="tagValue">short</span> <br>
+								短整型值。对应的方法类型应该为“<span class="var">short</span>”或者“<span class="var">Short</span>”。
+							</li>
+							<li>
+								<span class="tagValue">String</span> <br>
+								字符串。它可以包含<span class="tagValue">char</span>中定义的字符。对应的方法类型应该为“<span class="var">String</span>”。
+							</li>
+							<li>
+								<span class="tagValue">null</span> <br>
+								空。对应的方法类型可以是除基本类型外的任何类型。
+							</li>
+						</ul>
 					</li>
 				</ul>
+			</p>
+			<p>
+				注意：如果标签内容是关键字，并且里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。
 			</p>
 			<p>
 				下面是一些配置示例：
 			</p>
 			<p>
-				假设<span class="glossary">解决对象</span><span class="tagValue">calculator</span>的方法定义为：
-<pre class="code-java">
-public int multiply(int a, int b);
-</pre>
-			</p>
-			<p>
-				那么这个配置：
 <pre class="code-xml">
-&lt;invoke name="/multiply.do" method="multiply" resolver="calculator" result-key="multiplyResult"&gt;
-	&lt;arg key="a" /&gt;
-	&lt;arg key="param.b" /&gt;
+&lt;invoke name="yourGlobalInvoke" method="yourMethod" resolver="yourResolver" result-key="yourResultKey"&gt;
+	&lt;arg&gt;arg1&lt;/arg&gt;
+	&lt;arg&gt;param.arg2&lt;/arg&gt;
+	&lt;arg&gt;request.arg3&lt;/arg&gt;
+	&lt;arg&gt;100&lt;/arg&gt;
+	&lt;arg&gt;2.35f&lt;/arg&gt;
+	&lt;arg&gt;'a'&lt;/arg&gt;
+	&lt;arg&gt;"hello\t hello"&lt;/arg&gt;
+	&lt;arg&gt;true&lt;/arg&gt;
+	&lt;arg&gt;null&lt;/arg&gt;
 &lt;/invoke&gt;
 </pre>
-				即是，从请求参数中取得<span class="tagValue">a</span>参数的值作为方法的第一个参数，取得<span class="tagValue">b</span>参数的值作为方法的第二个参数，
-				并将方法的执行结果以<span class="tagValue">multiplyResult</span>关键字保存到请求对象的属性中。
 			</p>
 			<p>
-				而对于方法：
-<pre class="code-java">
-public void doMultiply(HttpServletRequest request, HttpServletResponse response);
+<pre class="code-xml">
+&lt;invoke name="/multiply.do" method="multiply" resolver="calculator" result-key="multiplyResult"&gt;
+	&lt;arg&gt;a&lt;arg/&gt;
+	&lt;arg&gt;param.b&lt;arg/&gt;
+&lt;/invoke&gt;
 </pre>
-				应该这样配置：
-			</p>
+			<p>
 			<p>
 <pre class="code-xml">
 &lt;invoke name="/doMultiply.do" method="doMultiply" resolver="calculator"&gt;
-	&lt;arg key="request" /&gt;
-	&lt;arg key="response" /&gt;
+	&lt;arg&gt;request&lt;/arg&gt;
+	&lt;arg&gt;response&lt;arg/&gt;
 &lt;/invoke&gt;
 </pre>
 			</p>
@@ -550,12 +658,12 @@ public void doMultiply(HttpServletRequest request, HttpServletResponse response)
 			<p>
 				下面是一个<span class="glossary">动作</span>示例：
 <pre class="code-xml">
-&lt;action name="/myAction.do"&gt;
-	&lt;invoke method="method0" resolver="myResolver" result-key="result0" /&gt;
-	&lt;invoke method="method1" resolver="myResolver"&gt;
-		&lt;arg key="param.a" /&gt;
-		&lt;arg key="request.result0" /&gt;
-		&lt;arg value="true" /&gt;
+&lt;action name="/yourAction.do"&gt;
+	&lt;invoke method="method0" resolver="yourResolver" result-key="result0" /&gt;
+	&lt;invoke method="method1" resolver="yourResolver"&gt;
+		&lt;arg&gt;param.a&lt;arg/&gt;
+		&lt;arg&gt;request.result0&lt;arg/&gt;
+		&lt;arg&gt;true&lt;arg/&gt;
 	&lt;/invoke&gt;
 	&lt;ref name="gloablInvoke0" /&gt;
 	&lt;ref name="gloablInvoke1" /&gt;

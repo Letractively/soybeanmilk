@@ -1,27 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <soybean-milk>
-
-	<!-- 定义解决对象 -->
+	
 	<resolvers>
 		<resolver id="helloResolver" class="example.resolver.HelloResolver" />
 	</resolvers>
 	
 	<executables>
-		
 		<action name="helloActionXml">
 			<invoke name="hello" resolver="helloResolver" result-key="helloResult">
-				<arg key="helloTo" />
-				<arg key="helloRepeat" />
+				<arg>helloTo</arg>
+				<arg>helloRepeat</arg>
 			</invoke>
 			
 			<invoke name="printObject" resolver-class="example.resolver.HelloResolver">
-				<arg key="helloResult" />
+				<arg>helloResult</arg>
 			</invoke>
 		</action>
 		
 		<action name="helloActionStatement">
 			<invoke> statement.helloResult = helloResolver.hello(helloTo, 3) </invoke>
 			<invoke> example . resolver. HelloResolver . printObject ( statement.helloResult ); </invoke>
+		</action>
+		
+		<action name="testJavaSyntax">
+			<invoke>
+				example.resolver.HelloResolver.testJavaSyntax(
+					'a',
+					35,
+					true,
+					22222,
+					33333333333,
+					2.533f,
+					3.23423434089d,
+					"ab\tcd",
+					null
+				);
+			</invoke>
 		</action>
 		
 	</executables>

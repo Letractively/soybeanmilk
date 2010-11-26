@@ -95,15 +95,24 @@
 <!--
 参数配置
 每个调用的参数配置必须与其执行的方法是一一对应的，也即是方法有几个参数，这里你就要为其配置几个参数。
+你可以在标签内设置该参数的关键字，或者直接设置参数的值，语法与Java语法一致。
 比如对于方法
 int multiply(int a, int b);
 你可以这样配置
 <invoke method="multiply" ...>
-	<arg key="input_a" />
-	<arg key="input_b" />
+	<arg>input_a</arg>
+	<arg>5</arg>
 </invoke>
+
+需要要注意的是参数值的设置只支持基本类型和String类型，下面是一些设置示例：
+<arg>my.argKey</arg>	设置参数的关键字为"my.argKey"
+<arg>true</arg>			设置参数的值为true
+<arg>3.5f</arg>			设置参数的值为3.5f
+<arg>'c'</arg>			设置参数的值为字符'c'
+<arg>"abcdef"</arg>		设置参数的值为字符串"abcdef"
+<arg>null</arg>			设置参数的值为null
 -->
-<!ELEMENT arg EMPTY>
+<!ELEMENT arg (#PCDATA)>
 
 <!--
 自定义通用转换器完整类名，它的值需要能够被Class.forName("[class]").newInstance()正确使用
@@ -166,14 +175,3 @@ resolver 之前定义的解决对象ID
 无论方法是否有返回结果，只要你定义了“result-key”，框架总会执行保存操作，只不过无返回结果的话是以null值保存的。
 -->
 <!ATTLIST invoke result-key CDATA #IMPLIED>
-
-<!--
-参数的取得关键字，框架通过该关键字从对象源中取得参数值
--->
-<!ATTLIST arg key CDATA #IMPLIED>
-<!--
-参数的固定值配置
-如果你配置了此属性，它将优先被使用。
-配置解析器在解析时会使用上面定义的通用转换器将它的值转换为符合参数类型的对象
--->
-<!ATTLIST arg value CDATA #IMPLIED>

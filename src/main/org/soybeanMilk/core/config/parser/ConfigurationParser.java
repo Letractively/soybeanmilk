@@ -90,8 +90,8 @@ public class ConfigurationParser
 	public static final String TAG_INVOKE_ATTR_RESULT_KEY="result-key";
 	
 	public static final String TAG_ARG="arg";
-	public static final String TAG_ARG_ATTR_KEY="key";
-	public static final String TAG_ARG_ATTR_VALUE="value";
+	//public static final String TAG_ARG_ATTR_KEY="key";
+	//public static final String TAG_ARG_ATTR_VALUE="value";
 	
 	public static final String TAG_REF="ref";
 	public static final String TAG_REF_ATTR_NAME="name";
@@ -473,13 +473,10 @@ public class ConfigurationParser
 	 */
 	protected void setInvokeProperties(Invoke invoke, Element element)
 	{
-		String resolverId=getAttribute(element,TAG_INVOKE_ATTR_RESOLVER_OBJECT);
-		String resolverClazz=getAttribute(element, TAG_INVOKE_ATTR_RESOLVER_CLASS);
+		String methodName=getAttribute(element, TAG_INVOKE_ATTR_METHOD);
 		
-		if(resolverClazz==null && resolverId==null)
-		{
+		if(methodName == null)
 			setInvokePropertiesStatement(invoke, element);
-		}
 		else
 			setInvokePropertiesXml(invoke, element);
 	}
@@ -514,11 +511,8 @@ public class ConfigurationParser
 		String resolverClazz=getAttribute(element, TAG_INVOKE_ATTR_RESOLVER_CLASS);
 		String resultKey=getAttribute(element,TAG_INVOKE_ATTR_RESULT_KEY);
 		
-		if(name==null)
-			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_NAME+"] must not be null");
-		
 		if(methodName == null)
-			methodName=name;
+			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_METHOD+"] must not be null");
 		
 		if(resolverClazz==null && resolverId==null)
 			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_RESOLVER_OBJECT+"] or ["+TAG_INVOKE_ATTR_RESOLVER_CLASS+"] must not be null");
@@ -592,16 +586,12 @@ public class ConfigurationParser
 	 */
 	protected void setArgProperties(Arg arg,Element element)
 	{
-		String key=getAttribute(element,TAG_ARG_ATTR_KEY);
-		String valueStr=getAttribute(element, TAG_ARG_ATTR_VALUE);
+		String content=getTextContent(element);
 		
-		if(key==null && valueStr==null)
-			throw new ParseException("<"+TAG_ARG+"> must have either ["+TAG_ARG_ATTR_KEY+"] or ["+TAG_ARG_ATTR_VALUE+"] attribute");
+		if(content == null)
+			throw new ParseException("<"+TAG_ARG+"> must have text content");
 		
-		arg.setKey(key);
-		
-		if(valueStr != null)
-			arg.setValue(configuration.getGenericConverter().convert(valueStr, arg.getType()));
+		InvokeStatementParser.stringToArgProperty(arg, content);
 	}
 	
 	/**

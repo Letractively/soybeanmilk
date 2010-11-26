@@ -50,10 +50,16 @@ public class Calculator
 	&lt;executables&gt;
 		&lt;action name=&quot;/multiply.do&quot;&gt;
 			&lt;invoke method=&quot;multiply&quot; resolver=&quot;calculator&quot; result-key=&quot;multiplyResult&quot;&gt;
-				&lt;arg key=&quot;param.a&quot; /&gt;
-				&lt;arg value=&quot;10&quot; /&gt;
+				&lt;arg&gt;param.a&lt;/arg&gt;
+				&lt;arg&gt;10&lt;/arg&gt;
 			&lt;/invoke&gt;
-			
+			<span class="var">
+			&lt!--或者像写Java代码一样
+			&lt;invoke&gt;
+				multiplyResult = calculator.multiply(param.a, 10);
+			&lt;/invoke&gt;
+			--&gt
+			</span>
 			&lt;target url=&quot;/multiply_result.jsp&quot; /&gt;
 		&lt;/action&gt;
 	&lt;/executables&gt;

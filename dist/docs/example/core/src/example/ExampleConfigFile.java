@@ -23,12 +23,13 @@ public class ExampleConfigFile
 		os.set("helloRepeat", 3);
 		
 		printDiv();
-		
 		executor.execute("helloActionXml", os);
 		
 		printDiv();
-		
 		executor.execute("helloActionStatement", os);
+		
+		printDiv();
+		executor.execute("testJavaSyntax", os);
 	}
 	
 	static void printDiv()

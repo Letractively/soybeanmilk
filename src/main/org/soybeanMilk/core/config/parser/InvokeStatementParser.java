@@ -1,3 +1,17 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
+ */
+
 package org.soybeanMilk.core.config.parser;
 
 import java.lang.reflect.Method;
@@ -11,7 +25,7 @@ import org.soybeanMilk.core.resolver.FactoryResolverProvider;
 import org.soybeanMilk.core.resolver.ResolverFactory;
 
 /**
- * 调用语句解析器，它解析诸如"myReulst = myResolver.method(argKey0, argKey1)"之类字符串中的调用元素
+ * 调用语句解析器，它解析诸如"myReulst = myResolver.method(argKey0, argKey1, "string")"之类字符串中的与{@link Invoke 调用}对应的属性
  * @author earthAngry@gmail.com
  * @date 2010-11-25
  */
@@ -190,56 +204,9 @@ public class InvokeStatementParser
 			for(int i=0;i<argTypes.length;i++)
 			{
 				Arg arg=new Arg();
-				String key=null;
-				Object value=null;
-				
-				Class<?> wrapClass=DefaultGenericConverter.toWrapperClass(argTypes[i]);
-				String argStr=argStrList.get(i);
-				
-				//首字符为数字，则认为是数值
-				if(argStr.length()>0 && isNumberChar(argStr.charAt(0)))
-				{
-					if(Byte.class.equals(wrapClass))
-						value=new Byte(argStr);
-					else if(Double.class.equals(wrapClass))
-						value=new Double(argStr);
-					else if(Integer.class.equals(wrapClass))
-						value=new Integer(argStr);
-					else if(Float.class.equals(wrapClass))
-						value=new Float(argStr);
-					else if(Integer.class.equals(wrapClass))
-						value=new Integer(argStr);
-					else if(Long.class.equals(wrapClass))
-						value=new Long(argStr);
-					else if(Short.class.equals(wrapClass))
-						value=new Short(argStr);
-					else
-						throw new ParseException("can not create Number instance of class '"+argTypes[i]+"' with value \""+argStr+"\"");
-				}
-				else if("true".equals(argStr))
-				{
-					value=Boolean.TRUE;
-				}
-				else if("false".equals(argStr))
-				{
-					value=Boolean.FALSE;
-				}
-				else if(argStr.startsWith("\"") && argStr.endsWith("\"")
-						&& argStr.length()>1)
-				{
-					value=argStr.substring(1, argStr.length()-1);
-				}
-				else if(argStr.startsWith("'") && argStr.endsWith("'")
-						&& argStr.length()>1)
-				{
-					value=argStr.charAt(1);
-				}
-				else
-					key=argStr;
-				
-				arg.setKey(key);
-				arg.setValue(value);
 				arg.setType(argTypes[i]);
+				
+				stringToArgProperty(arg, argStrList.get(i));
 				
 				args[i]=arg;
 			}
@@ -291,36 +258,40 @@ public class InvokeStatementParser
 	 */
 	protected String parseUtil(char[] specialChars, boolean inSpecial, boolean record, char[] ignoreChars)
 	{
-		boolean isEscChar=false;
+		//前一个字符是否是转义标记'\'
+		boolean preEscMark=false;
 		
 		for(; currentIdx<endIdx; currentIdx++)
 		{
 			char c=getChar(currentIdx);
 			
-			if(c == '\\' && !isEscChar)
+			if(c == '\\' && !preEscMark)
 			{
-				isEscChar=true;
-				continue;
-			}
-			
-			if(isEscChar)
-			{
-				c=getEscChar(c);
+				preEscMark=true;
 				
 				if(record)
 					cache.append(c);
-				
-				isEscChar=false;
 			}
 			else
 			{
-				if(!inSpecial && !contain(specialChars, c))
-					break;
-				else if(inSpecial && contain(specialChars, c))
-					break;
-				
-				if(record && !contain(ignoreChars, c))
-					cache.append(c);
+				//如果前一个字符是'\'，则不对此字符做任何特殊过滤
+				if(preEscMark)
+				{
+					if(record)
+						cache.append(c);
+					
+					preEscMark=false;
+				}
+				else
+				{
+					if(!inSpecial && !contain(specialChars, c))
+						break;
+					else if(inSpecial && contain(specialChars, c))
+						break;
+					
+					if(record && !contain(ignoreChars, c))
+						cache.append(c);
+				}
 			}
 		}
 		
@@ -386,35 +357,179 @@ public class InvokeStatementParser
 		return false;
 	}
 	
-	protected boolean isNumberChar(char c)
-	{
-		return c>='0' && c<='9';
-	}
-	
 	protected char getChar(int idx)
 	{
 		return this.statement.charAt(idx);
 	}
 	
-	protected char getEscChar(char c)
+	/**
+	 * 设置{@link Arg}的关键字属性或者值属性，它根据字符串的语法格式（与Java语法一样）来确定应该设置哪个属性。<br>
+	 * 比如，["abc"]是字符串值、[myresult_key]是关键字、['a']是字符值、[3.5f]是数值
+	 * @param arg
+	 * @param stmt 符合Java语法的字符串，可以包含转义字符和'\u0000'格式字符
+	 */
+	public static void stringToArgProperty(Arg arg, String stmt)
 	{
-		if(c == 'n')
-			return '\n';
-		else if(c == 't')
-			return '\t';
-		else if(c == 'b')
-			return '\b';
-		else if(c == 'r')
-			return '\r';
-		else if(c == 'f')
-			return '\f';
-		else if(c == '\'')
-			return c;
-		else if(c =='"')
-			return '"';
-		else if(c == '\\')
-			return c;
+		if(stmt==null || stmt.length()==0)
+			return;
+		
+		if(arg.getType() == null)
+			throw new ParseException("the [type] property of this Arg must not be null");
+		
+		Class<?> wrapClass=DefaultGenericConverter.toWrapperClass(arg.getType());
+		
+		String key=null;
+		Object value=null;
+		
+		//首字符为数字，则认为是数值
+		if(stmt.length()>0 && isNumberChar(stmt.charAt(0)))
+		{
+			if(Byte.class.equals(wrapClass))
+				value=new Byte(stmt);
+			else if(Double.class.equals(wrapClass))
+				value=new Double(stmt);
+			else if(Float.class.equals(wrapClass))
+				value=new Float(stmt);
+			else if(Integer.class.equals(wrapClass))
+				value=new Integer(stmt);
+			else if(Long.class.equals(wrapClass))
+				value=new Long(stmt);
+			else if(Short.class.equals(wrapClass))
+				value=new Short(stmt);
+			else
+				throw new ParseException("can not create Number instance of class '"+arg.getType()+"' with value \""+stmt+"\"");
+		}
+		else if("true".equals(stmt))
+		{
+			value=Boolean.TRUE;
+		}
+		else if("false".equals(stmt))
+		{
+			value=Boolean.FALSE;
+		}
+		else if("null".equals(stmt))
+		{
+			if(arg.getType().isPrimitive())
+				throw new ParseException("can not set null to primitive type");
+			
+			value=null;
+		}
+		else if(stmt.startsWith("\"") && stmt.endsWith("\"")
+				&& stmt.length()>1)
+		{
+			stmt=unEscape(stmt);
+			
+			if(stmt.length()<2)
+				throw new ParseException("invalid String definition "+stmt+"");
+			
+			value=stmt.substring(1, stmt.length()-1);
+		}
+		else if(stmt.startsWith("'") && stmt.endsWith("'"))
+		{
+			stmt=unEscape(stmt);
+			
+			if(stmt.length() != 3)
+				throw new ParseException("invalid char definition "+stmt+"");
+			
+			value=stmt.charAt(1);
+		}
 		else
-			throw new ParseException("unknown ESC character '\\'"+c);
+			key=stmt;
+		
+		arg.setKey(key);
+		arg.setValue(value);
+	}
+	
+	/**
+	 * 反转义Java字符串
+	 * @param s
+	 * @return
+	 */
+	public static String unEscape(String s)
+	{
+		if(s==null || s.length()==0)
+			return s;
+		
+		StringBuffer sb=new StringBuffer();
+		
+		int i=0;
+		int len=s.length();
+		while(i < len)
+		{
+			char c=s.charAt(i);
+			
+			if(c == '\\')
+			{
+				if(i == len-1)
+					throw new ParseException("\""+s+"\" must not be end with '\\' ");
+				
+				i+=1;
+				
+				char next=s.charAt(i);
+				if(next == 'u')
+				{
+					i+=1;
+					int end=i+4;
+					
+					if(end > len)
+						throw new ParseException("invalid \\uxxxx encoding in \""+s+"\"");
+					
+					int v=0;
+					for (;i<end;i++)
+					{
+						next = s.charAt(i);
+				        switch (next)
+				        {
+				        	case '0': case '1': case '2': case '3': case '4':
+				        	case '5': case '6': case '7': case '8': case '9':
+				        		v = (v << 4) + next - '0';
+				        		break;
+				        	case 'a': case 'b': case 'c':
+				        	case 'd': case 'e': case 'f':
+				        		v = (v << 4) + 10 + next - 'a';
+				        		break;
+				        	case 'A': case 'B': case 'C':
+				        	case 'D': case 'E': case 'F':
+				        		v = (v << 4) + 10 + next - 'A';
+				        		break;
+				        	default:
+				        		throw new ParseException("invalid \\uxxxx encoding in \""+s+"\"");
+				        }
+					}
+					
+					sb.append((char)v);
+				}
+				else
+				{
+					if(next == 't') sb.append('\t');
+					else if(next == 'r') sb.append('\r');
+					else if(next == 'n') sb.append('\n');
+					else if(next == '\'') sb.append('\'');
+					else if(next == '\\') sb.append('\\');
+					else if(next == '"') sb.append('"');
+					else
+						throw new ParseException("unknown escape character '\\"+next+"' ");
+					
+					i++;
+				}
+			}
+			else
+			{
+				sb.append(c);
+				i++;
+			}
+		}
+		
+		return sb.toString();
+	}
+	
+	/**
+	 * 判断字符是否是数字[0-9]
+	 * @param c
+	 * @return
+	 */
+	public static boolean isNumberChar(char c)
+	{
+		return c>='0' && c<='9';
 	}
 }

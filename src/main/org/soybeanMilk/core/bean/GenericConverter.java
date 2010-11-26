@@ -18,8 +18,7 @@ package org.soybeanMilk.core.bean;
  * 通用转换器，通过添加辅助转换器，它可以将任何类型的对象转换到目标类型对象。
  * 它应用于以下场景：<br>
  * <ol>
- * 	<li>{@linkplain org.soybeanMilk.core.config.parser.ConfigurationParser 配置解析器}解析配置中的字符串值时</li>
- * 	<li>框架从{@linkplain org.soybeanMilk.core.os.ConvertableObjectSource 可转换对象源}取得对象时</li>
+ * 	<li>框架从{@linkplain org.soybeanMilk.core.os.ConvertableObjectSource 可转换对象源}取得对象类型与期望的类型不匹配时</li>
  * </ol>
  * @author earthAngry@gmail.com
  * @date 2010-10-10

@@ -5,6 +5,8 @@
 	<property name="classDir" value="../bin" />
 	<!--发布目录-->
 	<property name="distDir" value="dist" />
+	<!--发布目录-->
+	<property name="versionDir" value="versions" />
 	<!--临时目录-->
 	<property name="tmpDir" value="../tmp" />
 	<!-- 版本 -->
@@ -42,14 +44,19 @@
 		<copydir dest="${distDir}/docs/api" src="${tmpDir}/api" />
 	</target>
 	
-	<!--将整个dist打成zip文件并放到临时目录下-->
-	<target name="zipDistToDist" depends="copyApiToDocs">
-		<delete file="${tmpDir}/${appName}.dist.zip" />
-		<zip destfile="${tmpDir}/${appName}.dist.zip" basedir="dist" />
+	<!--将整个dist打成zip文件并放到versions录下-->
+	<target name="zipDist" depends="copyApiToDocs">
+		<delete file="${versionDir}/${appName}.dist.zip" />
+		<zip destfile="${versionDir}/${appName}.dist.zip">
+			<zipfileset dir="${distDir}/docs" prefix="docs" />
+			<zipfileset dir="${distDir}/lib/optional" prefix="lib/optional" />
+			<zipfileset dir="${distDir}/lib/required" prefix="lib/required" />
+			<fileset dir="${distDir}" includes="${appName}.jar" />
+		</zip>
 	</target>
 	
 	<!--清除-->
-	<target name="cleanAfterDist" depends="zipDistToDist">
+	<target name="cleanAfterDist" depends="zipDist">
 		<delete dir="${distDir}/docs/api" />
 	</target>
 </project>

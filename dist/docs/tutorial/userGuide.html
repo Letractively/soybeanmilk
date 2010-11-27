@@ -50,117 +50,126 @@
 				下面从可配置项开始，来详细介绍框架。<br>
 				<ul>
 					<li>
-						<a href="#tag_global-config"><span class="tag">&lt;global-config&gt;</span></a>
+						<a href="javascript:void(0);">&lt;soybean-milk&gt;</a>
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						全局配置块
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						根元素
 						<ul>
 							<li>
-								<a href="#tag_generic-converter"><span class="tag">&lt;generic-converter&gt;</span></a>
+								<a href="#tag_global-config"><span class="tag">&lt;global-config&gt;</span></a>
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-								通用转换器
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								全局配置块
 								<ul>
 									<li>
-										<a href="#tag_converter"><span class="tag">&lt;converter&gt;</span></a>
+										<a href="#tag_generic-converter"><span class="tag">&lt;generic-converter&gt;</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										&nbsp;&nbsp;
-										 辅助转换器
+										通用转换器
+										<ul>
+											<li>
+												<a href="#tag_converter"><span class="tag">&lt;converter&gt;</span></a>
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												&nbsp;&nbsp;
+												 辅助转换器
+											</li>
+										</ul>
+									</li>
+									<li>
+										<a href="#tag_interceptor"><span class="tag">&lt;interceptor&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										 拦截器
 									</li>
 								</ul>
 							</li>
 							<li>
-								<a href="#tag_interceptor"><span class="tag">&lt;interceptor&gt;</span></a>
+								<a href="#tag_includes"><span class="tag">&lt;includes&gt;</span></a>
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-								 拦截器
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;&nbsp;&nbsp;&nbsp;
+								 包含模块
+								<ul>
+									<li>
+										<a href="#tag_file"><span class="tag">&lt;file&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;&nbsp;
+										 模块配置文件 
+									</li>
+								</ul>
 							</li>
-						</ul>
-					</li>
-					<li>
-						<a href="#tag_includes"><span class="tag">&lt;includes&gt;</span></a>
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						&nbsp;&nbsp;&nbsp;&nbsp;
-						 包含模块
-						<ul>
 							<li>
-								<a href="#tag_file"><span class="tag">&lt;file&gt;</span></a>
+								<a href="#tag_resolvers"><span class="tag">&lt;resolvers&gt;</span></a>
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								&nbsp;&nbsp;&nbsp;
-								 模块配置文件 
-							</li>
-						</ul>
-					</li>
-					<li>
-						<a href="#tag_resolvers"><span class="tag">&lt;resolvers&gt;</span></a>
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						&nbsp;&nbsp;&nbsp;
-						 解决对象配置块
-						<ul>
-							<li>
-								<a href="#tag_resolver"><span class="tag">&lt;resolver&gt;</span></a>
-								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-								 解决对象
-							</li>
-						</ul>
-					</li>
-					<li>
-						<a href="#tag_executables"><span class="tag">&lt;executables&gt;</span></a>
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						&nbsp;
-						 可执行对象配置块
-						<ul>
-							<li>
-								<a href="#tag_invoke"><span class="tag">&lt;invoke&gt;</span></a>
-								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-								&nbsp;
-								 全局调用
+								 解决对象配置块
 								<ul>
 									<li>
-										<a href="#tag_arg"><span class="tag">&lt;arg&gt;</span></a>
+										<a href="#tag_resolver"><span class="tag">&lt;resolver&gt;</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										调用的方法参数配置
+										 解决对象
 									</li>
 								</ul>
 							</li>
 							<li>
-								<a href="#tag_action"><span class="tag">&lt;action&gt;</span></a>
+								<a href="#tag_executables"><span class="tag">&lt;executables&gt;</span></a>
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								&nbsp;
-								 全局动作
+								 可执行对象配置块
 								<ul>
 									<li>
 										<a href="#tag_invoke"><span class="tag">&lt;invoke&gt;</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										 局部调用
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;
+										 全局调用
 										<ul>
 											<li>
 												<a href="#tag_arg"><span class="tag">&lt;arg&gt;</span></a>
 												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-												&nbsp;&nbsp;&nbsp;
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 												调用的方法参数配置
 											</li>
 										</ul>
 									</li>
 									<li>
-										<a href="#tag_ref"><span class="tag">&lt;ref&gt;</span></a>
+										<a href="#tag_action"><span class="tag">&lt;action&gt;</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										 可执行对象引用
-									</li>
-									<li>
-										<a href="#tag_target"><span class="tag">&lt;target&gt;</span></a>
-										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										 目标
+										&nbsp;
+										 全局动作
+										<ul>
+											<li>
+												<a href="#tag_invoke"><span class="tag">&lt;invoke&gt;</span></a>
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												 局部调用
+												<ul>
+													<li>
+														<a href="#tag_arg"><span class="tag">&lt;arg&gt;</span></a>
+														&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+														&nbsp;&nbsp;&nbsp;
+														调用的方法参数配置
+													</li>
+												</ul>
+											</li>
+											<li>
+												<a href="#tag_ref"><span class="tag">&lt;ref&gt;</span></a>
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												 可执行对象引用
+											</li>
+											<li>
+												<a href="#tag_target"><span class="tag">&lt;target&gt;</span></a>
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												 目标
+											</li>
+										</ul>
 									</li>
 								</ul>
 							</li>

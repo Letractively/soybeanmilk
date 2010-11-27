@@ -2,7 +2,7 @@
 <!--该定义是由soybean-milk.core.dtd继承而来，大部分的说明可以参考它-->
 
 <!ELEMENT soybean-milk (global-config?,includes?,resolvers?,executables)>
-<!ELEMENT global-config (generic-converter?,exception-handler?)>
+<!ELEMENT global-config (generic-converter?,interceptor?)>
 <!ELEMENT generic-converter (converter*)>
 
 <!--
@@ -27,6 +27,7 @@
 -->
 <!ELEMENT exception-handler EMPTY>
 <!ELEMENT converter EMPTY>
+<!ELEMENT interceptor EMPTY>
 <!ELEMENT includes (file*)>
 <!ELEMENT file (#PCDATA)>
 <!ELEMENT resolvers (resolver*)>
@@ -63,6 +64,11 @@ target 动作的目标URL
 <!ATTLIST converter src CDATA #REQUIRED>
 <!ATTLIST converter target CDATA #REQUIRED>
 <!ATTLIST converter class CDATA #REQUIRED>
+
+<!ATTLIST interceptor before CDATA #IMPLIED>
+<!ATTLIST interceptor after CDATA #IMPLIED>
+<!ATTLIST interceptor exception CDATA #IMPLIED>
+<!ATTLIST interceptor exception-arg-key CDATA #IMPLIED>
 
 <!--
 可执行对象的名称，这个可执行对象将被用来处理执行异常

@@ -69,9 +69,10 @@
 								</ul>
 							</li>
 							<li>
-								<a href="#tag_exception-handler"><span class="tag">&lt;exception-handler&gt;</span></a>
+								<a href="#tag_interceptor"><span class="tag">&lt;interceptor&gt;</span></a>
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-								 异常处理器
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								 拦截器
 							</li>
 						</ul>
 					</li>
@@ -236,26 +237,35 @@
 			</p>
 			<div class="seprator"></div>
 			<p>
-				<a name="tag_exception-handler"></a>
-				<span class="tag bold">&lt;exception-handler&gt;</span>（可选） <br/>
+				<a name="tag_interceptor"></a>
+				<span class="tag bold">&lt;interceptor&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				异常处理器配置。当框架出现执行异常时，会将异常转交给这个异常处理器。
-				可能的源异常都定义在<a href="../api/org/soybeanMilk/core/ExecuteException.ExceptionType.html">ExceptionType</a>类中，
-				一般你只需要处理<a href="../api/org/soybeanMilk/core/ExecuteException.ExceptionType.html#INVOCATION">INVOCATION</a>异常。<br />
+				拦截器配置。你可以通过该配置来为<a href="../api/org/soybeanMilk/core/Executor.html">执行器</a>添加执行前、执行后、异常时的拦截器。
 			</p>
 			<p>
-				如果你不配置异常处理器，执行异常将会一直向上抛出。
+				
 			</p>
 			<p>
 				它包含如下属性：
 				<ul>
+					
 					<li>
-						<span class="tagAttr">executable-name</span>（<span class="required">必须</span>） <br />
-						处理异常的<span class="glossary">可执行对象</span>名称，你应该在之后定义该名称的<span class="glossary">可执行对象</span>
+						<span class="tagAttr">before</span>（可选） <br />
+						设置作为前切点处理器的全局<span class="glossary">可执行对象</span>名称。<span class="glossary">执行器</span>会在执行全局<span class="glossary">可执行对象</span>前首先执行它。
 					</li>
 					<li>
-						<span class="tagAttr">exception-arg-key</span>（<span class="required">必须</span>） <br />
+						<span class="tagAttr">after</span>（可选） <br />
+						设置作为后切点处理器的全局<span class="glossary">可执行对象</span>名称。<span class="glossary">执行器</span>会在正常地执行了全局<span class="glossary">可执行对象</span>后执行它。
+					</li>
+					<li>
+						<span class="tagAttr">exception</span>（可选） <br />
+						设置作为异常处理器的全局<span class="glossary">可执行对象</span>名称。<span class="glossary">执行器</span>会在执行<span class="glossary">可执行对象</span>遇到异常后执行它。
+						可能的源异常都定义在<a href="../api/org/soybeanMilk/core/ExecuteException.ExceptionType.html">ExceptionType</a>类中，
+				一般你只需要处理<a href="../api/org/soybeanMilk/core/ExecuteException.ExceptionType.html#INVOCATION">INVOCATION</a>异常。如果你不配置异常处理器，执行异常将会一直向上抛出。
+					</li>
+					<li>
+						<span class="tagAttr">exception-arg-key</span>（可选） <br />
 						执行异常对象的存储关键字。它告诉框架应该如何存储执行异常，以便之后的异常处理<span class="glossary">可执行对象</span>能根据这个关键字取得它。
 					</li>
 				</ul>
@@ -264,7 +274,7 @@
 				下面是一个异常处理器配置示例，当出现执行异常时，框架将执行<span class="glossary">动作</span>“<span class="var">/handleException.do</span>”：
 <pre class="code-xml">
 &lt;global-config&gt;		
-		&lt;exception-handler executable-name="/handleException.do"
+		&lt;interceptor exception="/handleException.do"
 			exception-arg-key="session.executeExceptoin" /&gt;
 &lt;/global-config&gt;
 

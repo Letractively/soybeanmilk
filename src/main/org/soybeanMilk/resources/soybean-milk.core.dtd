@@ -3,7 +3,7 @@
 <!ELEMENT soybean-milk (global-config?,includes?,resolvers?,executables)>
 
 <!--全局配置-->
-<!ELEMENT global-config (generic-converter)>
+<!ELEMENT global-config (generic-converter?,interceptor?)>
 
 <!--
 通用转换器配置
@@ -27,6 +27,8 @@
 自定义的辅助转换器，它将被添加到通用转换器中以提供转换支持，后添加的将会替换掉先添加的
 -->
 <!ELEMENT converter EMPTY>
+
+<!ELEMENT interceptor EMPTY>
 
 <!--
 包含的模块配置文件，模块配置中应该仅包含resolvers和executables，其他配置都是无效的
@@ -129,6 +131,11 @@ class 转换器类，它的值要能够被Class.forName("[class]").newInstance()
 <!ATTLIST converter target CDATA #REQUIRED>
 <!ATTLIST converter class CDATA #REQUIRED>
 
+<!ATTLIST interceptor before CDATA #IMPLIED>
+<!ATTLIST interceptor after CDATA #IMPLIED>
+<!ATTLIST interceptor exception CDATA #IMPLIED>
+<!ATTLIST interceptor exception-arg-key CDATA #IMPLIED>
+
 <!--
 解决对象配置属性
 class 解决对象类名，它的值要能够被Class.forName("[class]").newInstance()正确使用
@@ -151,13 +158,13 @@ class 解决对象类名，它的值要能够被Class.forName("[class]").newInst
 调用配置的名称属性
 如果调用是全局的，那么它应该与动作一起是全局唯一的；如果是局部的，则不必如此
 -->
-<!ATTLIST invoke name CDATA #REQUIRED>
+<!ATTLIST invoke name CDATA #IMPLIED>
 
 <!--
 调用执行的方法名称
 它要能够在之后配置的resolver-class或者resolver类中找到，默认与名称相同
 -->
-<!ATTLIST invoke method CDATA #IMPLIED>
+<!ATTLIST invoke method CDATA #REQUIRED>
 
 <!--
 调用的解决对象配置，配置解析器通过它来查找方法对象并确定参数类型

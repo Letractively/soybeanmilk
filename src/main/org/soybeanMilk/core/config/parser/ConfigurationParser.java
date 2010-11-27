@@ -37,6 +37,7 @@ import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.config.Configuration;
+import org.soybeanMilk.core.config.InterceptorInfo;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
@@ -69,6 +70,12 @@ public class ConfigurationParser
 	public static final String TAG_CONVERTER_ATTR_TARGET="target";
 	public static final String TAG_CONVERTER_ATTR_CLASS=TAG_GENERIC_CONVERTER_ATTR_CLASS;
 	
+	public static final String TAG_INTERCEPROT="interceptor";
+	public static final String TAG_INTERCEPROT_ATTR_BEFORE="before";
+	public static final String TAG_INTERCEPROT_ATTR_AFTER="after";
+	public static final String TAG_INTERCEPROT_ATTR_EXCEPTION="exception";
+	public static final String TAG_INTERCEPROT_ATTR_EXCEPTION_ARG_KEY="exception-arg-key";
+	
 	public static final String TAG_INCLUDES="includes";
 	public static final String TAG_FILE="file";
 	
@@ -90,8 +97,6 @@ public class ConfigurationParser
 	public static final String TAG_INVOKE_ATTR_RESULT_KEY="result-key";
 	
 	public static final String TAG_ARG="arg";
-	//public static final String TAG_ARG_ATTR_KEY="key";
-	//public static final String TAG_ARG_ATTR_VALUE="value";
 	
 	public static final String TAG_REF="ref";
 	public static final String TAG_REF_ATTR_NAME="name";
@@ -270,6 +275,8 @@ public class ConfigurationParser
 		Element parent=getSingleElementByTagName(getCurrentDocumentRoot(), TAG_GLOBAL_CONFIG);
 		
 		parseGenericConverter(parent);
+		
+		parseInterceptor(parent);
 	}
 	
 	/**
@@ -369,6 +376,7 @@ public class ConfigurationParser
 	protected void parseRefs()
 	{
 		processExecutableRefs();
+		processInterceptorInfoRefs();
 	}
 	
 	/**
@@ -418,6 +426,37 @@ public class ConfigurationParser
 			
 			genericConverter.addConverter(toClass(src), toClass(target), (Converter)createClassInstance(clazz));
 		}
+	}
+	
+	/**
+	 * 解析拦截器信息
+	 * @param element 父元素
+	 */
+	protected void parseInterceptor(Element parent)
+	{
+		Element el=getSingleElementByTagName(parent, TAG_INTERCEPROT);
+		if(el == null)
+			return;
+		
+		String before=getAttribute(el, TAG_INTERCEPROT_ATTR_BEFORE);
+		String after=getAttribute(el, TAG_INTERCEPROT_ATTR_AFTER);
+		String exception=getAttribute(el, TAG_INTERCEPROT_ATTR_EXCEPTION);
+		String exceptionArgKey=getAttribute(el, TAG_INTERCEPROT_ATTR_EXCEPTION_ARG_KEY);
+		
+		if(before==null && after==null && exception==null && exceptionArgKey==null)
+			return;
+		
+		InterceptorInfo ii=createInterceptorInfoInstance();
+		
+		ii.setBeforeHandler(new ExecutableRefProxy(before));
+		ii.setAfterHandler(new ExecutableRefProxy(after));
+		ii.setExceptionHandler(new ExecutableRefProxy(exception));
+		ii.setExceptionArgKey(exceptionArgKey);
+		
+		if(_logDebugEnabled)
+			log.debug("parsed '"+ii+"'");
+		
+		getConfiguration().setInterceptorInfo(ii);
 	}
 	
 	/**
@@ -632,6 +671,50 @@ public class ConfigurationParser
 						actionExes.set(i, refExe);
 					}
 				}
+			}
+		}
+	}
+	
+
+	/**
+	 * 替换拦截器的代理为真实的可执行对象
+	 */
+	protected void processInterceptorInfoRefs()
+	{
+		InterceptorInfo ii=getConfiguration().getInterceptorInfo();
+		if(ii == null)
+			return;
+		{	
+			Executable before=ii.getBeforeHandler();
+			if(before instanceof ExecutableRefProxy)
+			{
+				Executable real = getConfiguration().getExecutable(((ExecutableRefProxy)before).getRefName());
+				if(real == null)
+					throw new ParseException("can not find before interceptor named '"+((ExecutableRefProxy)before).getRefName()+"'");
+				
+				ii.setBeforeHandler(real);
+			}
+		}
+		{
+			Executable after=ii.getAfterHandler();
+			if(after instanceof ExecutableRefProxy)
+			{
+				Executable real = getConfiguration().getExecutable(((ExecutableRefProxy)after).getRefName());
+				if(real == null)
+					throw new ParseException("can not find after interceptor named '"+((ExecutableRefProxy)after).getRefName()+"'");
+				
+				ii.setAfterHandler(real);
+			}
+		}
+		{
+			Executable exception=ii.getExceptionHandler();
+			if(exception instanceof ExecutableRefProxy)
+			{
+				Executable real = getConfiguration().getExecutable(((ExecutableRefProxy)exception).getRefName());
+				if(real == null)
+					throw new ParseException("can not find exception interceptor named '"+((ExecutableRefProxy)exception).getRefName()+"'");
+				
+				ii.setExceptionHandler(real);
 			}
 		}
 	}
@@ -934,6 +1017,15 @@ public class ConfigurationParser
 	protected GenericConverter createGenericConverterInstance()
 	{
 		return new DefaultGenericConverter();
+	}
+	
+	/**
+	 * 创建空的拦截器信息对象，用于设置其属性
+	 * @return
+	 */
+	protected InterceptorInfo createInterceptorInfoInstance()
+	{
+		return new InterceptorInfo();
 	}
 	
 	/**

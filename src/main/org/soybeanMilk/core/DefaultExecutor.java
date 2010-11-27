@@ -15,6 +15,7 @@
 package org.soybeanMilk.core;
 
 import org.soybeanMilk.core.config.Configuration;
+import org.soybeanMilk.core.config.InterceptorInfo;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 
 /**
@@ -55,15 +56,30 @@ public class DefaultExecutor implements Executor
 		if(objSource instanceof ConvertableObjectSource)
 			((ConvertableObjectSource)objSource).setGenericConverter(cfg.getGenericConverter());
 		
+		InterceptorInfo ii = configuration.getInterceptorInfo();
+		
+		if(ii!=null && ii.getBeforeHandler()!=null)
+			ii.getBeforeHandler().execute(objSource);
+		
 		try
 		{
 			exe.execute(objSource);
+			
+			if(ii!=null && ii.getAfterHandler()!=null)
+				ii.getAfterHandler().execute(objSource);
 		}
 		catch(ExecuteException e)
 		{
 			e.setSource(exe);
+			if(ii==null || ii.getExceptionHandler()==null)
+				throw e;
 			
-			throw e;
+			//存入异常对象到对象源
+			if(ii.getExceptionArgKey() != null)
+				objSource.set(ii.getExceptionArgKey(), e);
+			
+			Executable eh = ii.getExceptionHandler();
+			eh.execute(objSource);
 		}
 	}
 }

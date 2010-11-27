@@ -20,15 +20,12 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.bean.WebGenericConverter;
-import org.soybeanMilk.web.config.ExceptionHandlerInfo;
-import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
 import org.w3c.dom.Element;
@@ -42,10 +39,6 @@ public class WebConfigurationParser extends ConfigurationParser
 {
 	private static Log log=LogFactory.getLog(WebConfigurationParser.class);
 	private static boolean _logDebugEnabled=log.isDebugEnabled();
-	
-	public static final String TAG_EXCEPTION_HANDLER="exception-handler";
-	public static final String TAG_EXCEPTION_HANDLER_ATTR_EXECUTABLE="executable-name";
-	public static final String TAG_EXCEPTION_HANDLER_ATTR_ARG_KEY="exception-arg-key";
 	
 	public static final String TAG_TARGET="target";
 	public static final String TAG_TARGET_ATTR_URL="url";
@@ -79,48 +72,6 @@ public class WebConfigurationParser extends ConfigurationParser
 	
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
-	}
-	
-	@Override
-	protected void parseGlobalConfigs()
-	{
-		super.parseGlobalConfigs();
-		
-		Element parent=getSingleElementByTagName(getCurrentDocumentRoot(), TAG_GLOBAL_CONFIG);
-		
-		parseExceptionHandlerInfo(parent);
-	}
-	
-	@Override
-	protected void parseRefs()
-	{
-		processExceptionHanderInfoRefs();
-		super.parseRefs();
-	}
-	
-	/**
-	 * 解析父元素下的异常处理器信息对象。
-	 * @param parent
-	 */
-	protected void parseExceptionHandlerInfo(Element parent)
-	{
-		Element element=getSingleElementByTagName(parent, TAG_EXCEPTION_HANDLER);
-		if(element == null)
-			return;
-		
-		String exeName=getAttribute(element, TAG_EXCEPTION_HANDLER_ATTR_EXECUTABLE);
-		assertNotEmpty(exeName, "<"+TAG_EXCEPTION_HANDLER+"> attribute ["+TAG_EXCEPTION_HANDLER_ATTR_EXECUTABLE+"] must not be null");
-		String argKey=getAttribute(element, TAG_EXCEPTION_HANDLER_ATTR_ARG_KEY);
-		assertNotEmpty(exeName, "<"+TAG_EXCEPTION_HANDLER+"> attribute ["+TAG_EXCEPTION_HANDLER_ATTR_ARG_KEY+"] must not be null");
-		
-		ExceptionHandlerInfo info=createExceptionHandlerInfoInstane();
-		info.setExceptionHandler(new ExecutableRefProxy(customizeExecutableName(exeName)));
-		info.setExceptionArgKey(argKey);
-		
-		if(_logDebugEnabled)
-			log.debug("parsed '"+info+"'");
-		
-		getWebConfiguration().setExceptionHandlerInfo(info);
 	}
 	
 	@Override
@@ -165,24 +116,6 @@ public class WebConfigurationParser extends ConfigurationParser
 		targetInfo.setType(type);
 	}
 	
-	/**
-	 * 替换异常处理器的代理为真实的可执行对象
-	 */
-	protected void processExceptionHanderInfoRefs()
-	{
-		ExceptionHandlerInfo hi=getWebConfiguration().getExceptionHandlerInfo();
-		if(hi == null)
-			return;
-		
-		Executable he=hi.getExceptionHandler();
-		
-		if(he instanceof ExecutableRefProxy)
-		{
-			Executable handler = getWebConfiguration().getExecutable(((ExecutableRefProxy)he).getRefName());
-			hi.setExceptionHandler(handler);
-		}
-	}
-	
 	@Override
 	protected String formatIncludeFileName(String rawFileName)
 	{
@@ -201,12 +134,6 @@ public class WebConfigurationParser extends ConfigurationParser
 	}
 	
 	@Override
-	protected Configuration createConfigurationInstance()
-	{
-		return new WebConfiguration();
-	}
-	
-	@Override
 	protected GenericConverter createGenericConverterInstance()
 	{
 		return new WebGenericConverter();
@@ -216,16 +143,6 @@ public class WebConfigurationParser extends ConfigurationParser
 	protected Action createActionIntance()
 	{
 		return new WebAction();
-	}
-	
-	protected WebConfiguration getWebConfiguration()
-	{
-		return (WebConfiguration)getConfiguration();
-	}
-	
-	protected ExceptionHandlerInfo createExceptionHandlerInfoInstane()
-	{
-		return new ExceptionHandlerInfo();
 	}
 	
 	protected Target createTargetInstance()

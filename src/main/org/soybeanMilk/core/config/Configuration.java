@@ -41,6 +41,9 @@ public class Configuration
 	/**通用转换器，它负责将配置文件中定义的字符串参数值转换为实际的参数对象*/
 	private GenericConverter genericConverter;
 	
+	/**拦截器信息*/
+	private InterceptorInfo interceptorInfo;
+	
 	/**可执行对象集*/
 	private Map<String, Executable> executables;
 	
@@ -65,6 +68,12 @@ public class Configuration
 	}
 	public void setGenericConverter(GenericConverter genericConverter) {
 		this.genericConverter = genericConverter;
+	}
+	public InterceptorInfo getInterceptorInfo() {
+		return interceptorInfo;
+	}
+	public void setInterceptorInfo(InterceptorInfo interceptorInfo) {
+		this.interceptorInfo = interceptorInfo;
 	}
 	public Map<String, Executable> getExecutables() {
 		return executables;

@@ -30,6 +30,12 @@ public class ExampleConfigFile
 		
 		printDiv();
 		executor.execute("testJavaSyntax", os);
+		
+		printDiv();
+		executor.execute("testAfterBefore", os);
+		
+		printDiv();
+		executor.execute("testException", os);
 	}
 	
 	static void printDiv()

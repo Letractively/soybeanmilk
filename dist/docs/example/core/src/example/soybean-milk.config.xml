@@ -1,11 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <soybean-milk>
 	
+	<global-config>
+		<interceptor before="beforeHandler" after="afterHandler" exception="exceptionHandler"
+			exception-arg-key="exceptionKey" />
+	</global-config>
+	
 	<resolvers>
 		<resolver id="helloResolver" class="example.resolver.HelloResolver" />
+		<resolver id="interceptor" class="example.resolver.InterceptorResolver" />
 	</resolvers>
 	
 	<executables>
+		<invoke name="beforeHandler" method="before" resolver="interceptor" />
+		<invoke name="afterHandler" method="after" resolver="interceptor" />
+		<invoke name="exceptionHandler" method="exception" resolver="interceptor">
+			<arg>exceptionKey</arg>
+		</invoke>
+		
 		<action name="helloActionXml">
 			<invoke method="hello" resolver="helloResolver" result-key="helloResult">
 				<arg>helloTo</arg>
@@ -35,6 +47,18 @@
 					"ab\tcd",
 					null
 				);
+			</invoke>
+		</action>
+		
+		<action name="testAfterBefore">
+			<invoke>
+				interceptor.invokeNormal()
+			</invoke>
+		</action>
+		
+		<action name="testException">
+			<invoke>
+				interceptor.invokeThrow()
 			</invoke>
 		</action>
 		

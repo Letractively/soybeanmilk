@@ -266,7 +266,7 @@
 					</li>
 					<li>
 						<span class="tagAttr">exception-arg-key</span>（可选） <br />
-						执行异常对象的存储关键字。它告诉框架应该如何存储执行异常，以便作为异常处理的<span class="glossary">可执行对象</span>能根据这个关键字取得它。
+						<a href="../api/org/soybeanMilk/core/ExecuteException.html">执行异常</a>对象的存储关键字。它告诉框架应该如何存储执行异常，以便作为异常处理的<span class="glossary">可执行对象</span>能根据这个关键字取得它。
 					</li>
 				</ul>
 			</p>
@@ -413,7 +413,7 @@
 					</li>
 					<li>
 						<span class="tagAttr">result-key</span>（可选） <br />
-						<span class="glossary">调用</span>方法结果在对象源中中的保存关键字。无论方法是否有返回结果，只要你定义了<span class="tagAttr">result-key</span>，
+						<span class="glossary">调用</span>方法结果在对象源中的保存关键字。无论方法是否有返回结果，只要你定义了<span class="tagAttr">result-key</span>，
 						框架总会执行保存操作，只不过无返回结果的话是以null值保存的；反之，则不会保存。
 						如果这个结果关键字里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。<br />
 						下面是合法的结果关键字：
@@ -445,9 +445,9 @@
 			<p>
 					
 				它使你可以像书写Java代码一样配置<span class="glossary">调用</span>，下面是它的语法格式：<br>
-<pre>
+<pre class="code-xml">
 <span class="tag">&lt;invoke name="yourInvokeName"&gt;</span>
-	<span class="tagAttr">resultKey</span> = <span class="tagAttr">resolver</span>.<span class="tagAttr">method</span>(<span class="tagAttr">argument</span>, <span class="tagAttr">argument</span>, ...)
+	<span class="tagAttr">resultKey</span> = <span class="tagAttr">resolver</span>.<span class="tagAttr">method</span>(<span class="tagAttr">arg</span>, <span class="tagAttr">arg</span>, ...)
 <span class="tag">&lt;/invoke&gt;</span>
 </pre>
 				<ul>
@@ -465,7 +465,7 @@
 						与上面<span class="tag">&lt;invoke&gt;</span>的<span class="tagAttr">method</span>属性用法一致
 					</li>
 					<li>
-						<span class="tagAttr">argument</span> <br>
+						<span class="tagAttr">arg</span> <br>
 						与下面<span class="tag">&lt;arg&gt;</span>的标签内容用法一致
 					</li>
 				</ul>
@@ -507,7 +507,7 @@
 				它没有属性，只有标签内容。标签内容可以分为两大类，一是参数关键字、一是参数值，框架会自动识别它们。
 			</p>
 			<p>
-				下面是合法的内容：
+				下面是合法的标签内容：
 			</p>
 				<ul>
 					<li>参数关键字
@@ -572,7 +572,7 @@
 							</li>
 							<li>
 								<span class="tagValue">byte</span> <br>
-								字节。对应的方法类型应该为“<span class="var">byte</span>”或者“<span class="var">Byte</span>”。
+								字节值。对应的方法类型应该为“<span class="var">byte</span>”或者“<span class="var">Byte</span>”。
 							</li>
 							<li>
 								<span class="tagValue">char</span> <br>

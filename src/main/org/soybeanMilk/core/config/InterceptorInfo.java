@@ -20,7 +20,7 @@ import org.soybeanMilk.core.Executable;
 
 /**
  * 框架执行拦截器设置信息，你可以定义执行前切点处理器、后切点处理器，以及异常处理器
- * @author zangzf
+ * @author earthAngry@gmail.com
  * @date 2010-11-27
  *
  */

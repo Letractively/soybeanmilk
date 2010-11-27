@@ -75,19 +75,19 @@ public class InvokeStatementParser
 		if(methodLeftBracketIdx < 0)
 			throw new ParseException("no key character '(' found in statement \""+this.statement+"\"");
 		
-		//结果关键字位置
-		int resultKeyEndIdx=indexOf('=', methodLeftBracketIdx);
+		//等号位置
+		int equalCharIdx=indexOf('=', methodLeftBracketIdx);
 		
 		//方法名之前的'.'访问符位置
-		int methodDotIdx=lastIndexOf('.', methodLeftBracketIdx);
-		if(methodDotIdx < 0)
+		int methodLeftDotIdx=lastIndexOf('.', methodLeftBracketIdx);
+		if(methodLeftDotIdx < 0)
 			throw new ParseException("no key character  '.' found in statement \""+this.statement+"\"");
 		
 		setCurrentIdx(0);
 		
 		//解析方法的结果关键字
 		
-		if(resultKeyEndIdx < 0)
+		if(equalCharIdx < 0)
 			invoke.setResultKey(null);
 		else
 		{
@@ -100,13 +100,13 @@ public class InvokeStatementParser
 			invoke.setResultKey(resultKey);
 			
 			//移到'='之后
-			setCurrentIdx(getCurrentIdx()+1);
+			setCurrentIdx(equalCharIdx+1);
 		}
 		
 		//解析解决对象
 		
 		ignoreFormatChars();
-		setEndIdx(methodDotIdx);
+		setEndIdx(methodLeftDotIdx);
 		
 		Class<?> resolverClass=null;
 		
@@ -114,7 +114,7 @@ public class InvokeStatementParser
 		if(resolver==null || resolver.length()==0)
 			throw new ParseException("no resolver id segment found in statement \""+this.statement+"\"");
 		
-		Object resolverBean=resolverFactory.getResolver(resolver);
+		Object resolverBean= resolverFactory == null ? null : resolverFactory.getResolver(resolver);
 		
 		if(resolverBean != null)
 		{
@@ -134,7 +134,7 @@ public class InvokeStatementParser
 		}
 		
 		//移到'.'
-		setCurrentIdx(getCurrentIdx()+1);
+		setCurrentIdx(methodLeftDotIdx+1);
 		
 		//解析方法名
 		
@@ -146,7 +146,7 @@ public class InvokeStatementParser
 			throw new ParseException("no method name segment found in statement \""+this.statement+"\"");
 		
 		//移到'('之后
-		setCurrentIdx(getCurrentIdx()+1);
+		setCurrentIdx(methodLeftBracketIdx+1);
 		
 		//解析方法参数
 		setEndIdx(this.length);

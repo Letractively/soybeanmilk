@@ -44,8 +44,6 @@ public class WebExecutor extends DefaultExecutor
 	private static Log log=LogFactory.getLog(WebExecutor.class);
 	private static boolean _logDebugEnabled=log.isDebugEnabled();
 	
-	private Configuration configuration;
-	
 	public WebExecutor(Configuration configuration)
 	{
 		super(configuration);
@@ -69,9 +67,9 @@ public class WebExecutor extends DefaultExecutor
 			throws ServletException, IOException, ExecutableNotFoundException
 	{
 		if(objSource.getGenericConverter() == null)
-			objSource.setGenericConverter(configuration.getGenericConverter());
+			objSource.setGenericConverter(getConfiguration().getGenericConverter());
 		
-		InterceptorInfo ii = configuration.getInterceptorInfo();
+		InterceptorInfo ii = getConfiguration().getInterceptorInfo();
 		
 		Executable exe = findRequestExecutable(objSource);
 		
@@ -115,7 +113,7 @@ public class WebExecutor extends DefaultExecutor
 		
 		String servletPath=request.getServletPath();
 		
-		Executable exe = configuration.getExecutable(servletPath);
+		Executable exe = getConfiguration().getExecutable(servletPath);
 		if(exe == null)
 			throw new ExecutableNotFoundException(servletPath);
 		

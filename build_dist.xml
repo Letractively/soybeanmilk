@@ -22,7 +22,13 @@
 	<target name="jarFramework">
 		<delete file="${distDir}/${appName}.jar" />
 		<jar destfile="${distDir}/${appName}.jar" basedir="${classDir}"
-			includes="org/**/*.class, org/**/*.dtd, org/**/*.xml" />
+			includes="org/**/*.class, org/**/*.dtd, org/**/*.xml">
+			
+			<manifest>
+				<attribute name="Author" value="earthAngry@gmail.com"/>
+			</manifest>
+			
+		</jar>
 	</target>
 	
 	<!--拷贝新生成的Jar包到示例工程下-->

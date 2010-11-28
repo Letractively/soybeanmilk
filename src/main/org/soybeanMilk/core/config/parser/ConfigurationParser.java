@@ -286,7 +286,7 @@ public class ConfigurationParser
 	{
 		List<Element> files=getChildrenByTagName(getSingleElementByTagName(getCurrentDocumentRoot(), TAG_INCLUDES), TAG_FILE);
 		
-		if(files == null || files.size()==0)
+		if(files == null || files.isEmpty())
 			return;
 		
 		this.modules = new ArrayList<Document>();
@@ -312,7 +312,7 @@ public class ConfigurationParser
 	{
 		List<Element> children=getChildrenByTagName(getSingleElementByTagName(getCurrentDocumentRoot(), TAG_RESOLVERS), TAG_RESOLVER);
 		
-		if(children!=null && children.size()>0)
+		if(children!=null && !children.isEmpty())
 		{
 			ResolverFactory rf = configuration.getResolverFactory();
 			if(rf == null)
@@ -411,7 +411,7 @@ public class ConfigurationParser
 	protected void parseSupportConverters(GenericConverter genericConverter, Element parent)
 	{
 		List<Element> children=getChildrenByTagName(parent, TAG_CONVERTER);
-		if(children==null || children.size()==0)
+		if(children==null || children.isEmpty())
 			return;
 		
 		for(Element e : children)

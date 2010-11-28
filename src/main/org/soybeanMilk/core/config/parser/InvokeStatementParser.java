@@ -196,7 +196,7 @@ public class InvokeStatementParser
 		Method method=Invoke.findMethodThrow(resolverClass, methodName, argStrList.size());
 		invoke.setMethod(method);
 		
-		if(argStrList.size() > 0)
+		if(!argStrList.isEmpty())
 		{
 			Class<?>[] argTypes=method.getParameterTypes();
 			Arg[] args=new Arg[argTypes.length];

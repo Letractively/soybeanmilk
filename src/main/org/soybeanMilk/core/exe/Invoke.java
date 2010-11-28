@@ -154,15 +154,15 @@ public class Invoke extends AbstractExecutable implements Serializable
 		}
 		catch(InvocationTargetException e)
 		{
-			throw new ExecuteException(this, e,ExecuteException.ExceptionType.INVOCATION);
+			throw new ExecuteException(ExecuteException.ExceptionType.INVOCATION, e);
 		}
 		catch(IllegalArgumentException e)
 		{
-			throw new ExecuteException(this, e,ExecuteException.ExceptionType.ARGUMENT);
+			throw new ExecuteException(ExecuteException.ExceptionType.ARGUMENT, e);
 		}
 		catch(IllegalAccessException e)
 		{
-			throw new ExecuteException(this, e,ExecuteException.ExceptionType.ACCESS);
+			throw new ExecuteException(ExecuteException.ExceptionType.ACCESS, e);
 		}
 		
 		if(_logDebugEnabled)

@@ -134,7 +134,7 @@ class 转换器类，它的值要能够被Class.forName("[class]").newInstance()
 <!ATTLIST interceptor before CDATA #IMPLIED>
 <!ATTLIST interceptor after CDATA #IMPLIED>
 <!ATTLIST interceptor exception CDATA #IMPLIED>
-<!ATTLIST interceptor exception-arg-key CDATA #IMPLIED>
+<!ATTLIST interceptor execution-key CDATA #IMPLIED>
 
 <!--
 解决对象配置属性

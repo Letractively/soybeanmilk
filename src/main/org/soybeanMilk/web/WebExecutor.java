@@ -26,6 +26,7 @@ import org.soybeanMilk.core.DefaultExecutor;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecutableNotFoundException;
 import org.soybeanMilk.core.ExecuteException;
+import org.soybeanMilk.core.Execution;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.InterceptorInfo;
@@ -69,32 +70,41 @@ public class WebExecutor extends DefaultExecutor
 		if(objSource.getGenericConverter() == null)
 			objSource.setGenericConverter(getConfiguration().getGenericConverter());
 		
-		InterceptorInfo ii = getConfiguration().getInterceptorInfo();
-		
 		Executable exe = findRequestExecutable(objSource);
+		
+		InterceptorInfo itptInfo = getConfiguration().getInterceptorInfo();
+		
+		//保存执行语境信息
+		Execution context=null;
+		if(itptInfo!=null && itptInfo.getExecutionKey()!=null)
+		{
+			context=new Execution(exe, objSource);
+			objSource.set(itptInfo.getExecutionKey(), context);
+		}
+		
+		//before
+		if(itptInfo!=null && itptInfo.getBeforeHandler()!=null)
+			executeReticently(itptInfo.getBeforeHandler(), objSource);
 		
 		try
 		{
-			if(ii!=null && ii.getBeforeHandler()!=null)
-				executeReticently(ii.getBeforeHandler(), objSource);
-			
 			exe.execute(objSource);
 			processTarget(exe, objSource);
 			
-			if(ii!=null && ii.getAfterHandler()!=null)
-				executeReticently(ii.getAfterHandler(), objSource);
+			//after
+			if(itptInfo!=null && itptInfo.getAfterHandler()!=null)
+				executeReticently(itptInfo.getAfterHandler(), objSource);
 		}
 		catch(ExecuteException e)
 		{
-			e.setSource(exe);
-			if(ii==null || ii.getExceptionHandler()==null)
+			if(itptInfo==null || itptInfo.getExceptionHandler()==null)
 				throw new ServletException(e);
 			
-			//存入异常对象到对象源
-			if(ii.getExceptionArgKey() != null)
-				objSource.set(ii.getExceptionArgKey(), e);
+			if(context != null)
+				context.setExecuteException(e);
 			
-			Executable eh = ii.getExceptionHandler();
+			//exception
+			Executable eh = itptInfo.getExceptionHandler();
 			executeReticently(eh, objSource);
 			processTarget(eh, objSource);
 		}

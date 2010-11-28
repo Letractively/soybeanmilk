@@ -19,7 +19,7 @@ import java.io.Serializable;
 import org.soybeanMilk.core.Executable;
 
 /**
- * 框架执行拦截器设置信息，你可以定义执行前切点处理器、后切点处理器，以及异常处理器
+ * 框架执行拦截器信息，你可以定义执行前切点处理器、后切点处理器，以及异常处理器
  * @author earthAngry@gmail.com
  * @date 2010-11-27
  *
@@ -34,8 +34,8 @@ public class InterceptorInfo implements Serializable
 	private Executable afterHandler;
 	/**执行异常处理器*/
 	private Executable exceptionHandler;
-	/**执行异常保存关键字*/
-	private Serializable exceptionArgKey;
+	/**执行语境对象保存关键字*/
+	private Serializable executionKey;
 	
 	public InterceptorInfo()
 	{
@@ -43,13 +43,13 @@ public class InterceptorInfo implements Serializable
 	}
 	
 	public InterceptorInfo(Executable beforeHandler, Executable afterHandler,
-			Executable exceptionHandler, Serializable exceptionArgKey)
+			Executable exceptionHandler, Serializable executionKey)
 	{
 		super();
 		this.beforeHandler = beforeHandler;
 		this.afterHandler = afterHandler;
 		this.exceptionHandler = exceptionHandler;
-		this.exceptionArgKey = exceptionArgKey;
+		this.executionKey = executionKey;
 	}
 	
 	public Executable getBeforeHandler() {
@@ -70,19 +70,19 @@ public class InterceptorInfo implements Serializable
 	public void setExceptionHandler(Executable exceptionHandler) {
 		this.exceptionHandler = exceptionHandler;
 	}
-	public Serializable getExceptionArgKey() {
-		return exceptionArgKey;
+	public Serializable getExecutionKey() {
+		return executionKey;
 	}
-	public void setExceptionArgKey(Serializable exceptionArgKey) {
-		this.exceptionArgKey = exceptionArgKey;
+	public void setExecutionKey(Serializable executionKey) {
+		this.executionKey = executionKey;
 	}
-	
+
 	@Override
 	public String toString()
 	{
 		return "InterceptorInfo [beforeHandler=" + beforeHandler
 				+ ", afterHandler=" + afterHandler + ", exceptionHandler="
-				+ exceptionHandler + ", exceptionArgKey=" + exceptionArgKey
+				+ exceptionHandler + ", executionKey=" + executionKey
 				+ "]";
 	}
 }

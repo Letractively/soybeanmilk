@@ -74,7 +74,7 @@ public class ConfigurationParser
 	public static final String TAG_INTERCEPROT_ATTR_BEFORE="before";
 	public static final String TAG_INTERCEPROT_ATTR_AFTER="after";
 	public static final String TAG_INTERCEPROT_ATTR_EXCEPTION="exception";
-	public static final String TAG_INTERCEPROT_ATTR_EXCEPTION_ARG_KEY="exception-arg-key";
+	public static final String TAG_INTERCEPROT_ATTR_EXECUTION_KEY="execution-key";
 	
 	public static final String TAG_INCLUDES="includes";
 	public static final String TAG_FILE="file";
@@ -441,9 +441,9 @@ public class ConfigurationParser
 		String before=getAttribute(el, TAG_INTERCEPROT_ATTR_BEFORE);
 		String after=getAttribute(el, TAG_INTERCEPROT_ATTR_AFTER);
 		String exception=getAttribute(el, TAG_INTERCEPROT_ATTR_EXCEPTION);
-		String exceptionArgKey=getAttribute(el, TAG_INTERCEPROT_ATTR_EXCEPTION_ARG_KEY);
+		String executionKey=getAttribute(el, TAG_INTERCEPROT_ATTR_EXECUTION_KEY);
 		
-		if(before==null && after==null && exception==null && exceptionArgKey==null)
+		if(before==null && after==null && exception==null && executionKey==null)
 			return;
 		
 		InterceptorInfo ii=createInterceptorInfoInstance();
@@ -451,7 +451,7 @@ public class ConfigurationParser
 		ii.setBeforeHandler(new ExecutableRefProxy(before));
 		ii.setAfterHandler(new ExecutableRefProxy(after));
 		ii.setExceptionHandler(new ExecutableRefProxy(exception));
-		ii.setExceptionArgKey(exceptionArgKey);
+		ii.setExecutionKey(executionKey);
 		
 		if(_logDebugEnabled)
 			log.debug("parsed '"+ii+"'");

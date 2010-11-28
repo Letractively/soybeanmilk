@@ -1,6 +1,6 @@
 package example.resolver;
 
-import org.soybeanMilk.core.ExecuteException;
+import org.soybeanMilk.core.Execution;
 
 public class InterceptorResolver
 {
@@ -24,8 +24,8 @@ public class InterceptorResolver
 		HelloResolver.printObject("after handler");
 	}
 	
-	public void exception(ExecuteException e)
+	public void exception(Execution execution)
 	{
-		HelloResolver.printObject("exception handler: "+e.getMessage());
+		HelloResolver.printObject("exception handler: "+execution);
 	}
 }

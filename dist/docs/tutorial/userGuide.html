@@ -274,8 +274,8 @@
 				一般你只需要处理<a href="../api/org/soybeanMilk/core/ExecuteException.ExceptionType.html#INVOCATION">INVOCATION</a>异常。如果你不配置异常处理器，执行异常将会一直向上抛出。
 					</li>
 					<li>
-						<span class="tagAttr">exception-arg-key</span>（可选） <br />
-						<a href="../api/org/soybeanMilk/core/ExecuteException.html">执行异常</a>对象的存储关键字。它告诉框架应该如何存储执行异常，以便作为异常处理的<span class="glossary">可执行对象</span>能根据这个关键字取得它。
+						<span class="tagAttr">execution-key</span>（可选） <br />
+						<a href="../api/org/soybeanMilk/core/Execution.html">执行语境信息</a>对象的存储关键字。你可以在作为拦截器的<span class="glossary">可执行对象</span>中使用这个关键字取得它。
 					</li>
 				</ul>
 			</p>
@@ -284,13 +284,13 @@
 <pre class="code-xml">
 &lt;global-config&gt;		
 		&lt;interceptor exception="/handleException.do"
-			exception-arg-key="session.executeExceptoin" /&gt;
+			execution-key="session.execution" /&gt;
 &lt;/global-config&gt;
 
 &lt;executables&gt;
 		&lt;action name="/handleException.do"&gt;
 			&lt;invoke method="handleException" resolver="exceptionResolver"&gt;
-				&lt;arg&gt;session.executeExceptoin&lt;/arg&gt;
+				&lt;arg&gt;session.execution&lt;/arg&gt;
 			&lt;/invoke&gt;
 			
 			&lt;target url="/error.jsp" /&gt;
@@ -298,6 +298,17 @@
 		...
 		...
 &lt;/executables&gt;
+</pre>
+			</p>
+			<p>
+				对应的Java方法应该为：
+			</p>
+			<p>
+<pre class="code-java">
+public void handleException(Execution execution)
+{
+	...
+}
 </pre>
 			</p>
 			<div class="seprator"></div>

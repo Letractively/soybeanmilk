@@ -23,27 +23,17 @@ public class ExecuteException extends Exception
 {
 	private static final long serialVersionUID = 3370475438251845697L;
 	
-	private transient Executable source;
 	private int exceptionType;
 	
 	/**
 	 * 创建执行异常对象
-	 * @param source 出现异常的可执行对象
-	 * @param cause 源异常
 	 * @param exceptionType 源异常类型
+	 * @param cause 源异常
 	 */
-	public ExecuteException(Executable source, Throwable cause, int exceptionType)
+	public ExecuteException(int exceptionType, Throwable cause)
 	{
 		super(cause);
-		this.source=source;
 		this.exceptionType=exceptionType;
-	}
-	
-	public Executable getSource() {
-		return source;
-	}
-	public void setSource(Executable source) {
-		this.source = source;
 	}
 
 	public int getExceptionType() {
@@ -56,7 +46,7 @@ public class ExecuteException extends Exception
 	@Override
 	public String toString()
 	{
-		return "ExecuteException [source=" + source + ", exceptionType="
+		return "ExecuteException [exceptionType="
 				+ exceptionType + "]";
 	}
 	

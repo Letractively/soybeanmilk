@@ -3,7 +3,7 @@
 	
 	<global-config>
 		<interceptor before="beforeHandler" after="afterHandler" exception="exceptionHandler"
-			exception-arg-key="exceptionKey" />
+			execution-key="executionKey" />
 	</global-config>
 	
 	<resolvers>
@@ -15,7 +15,7 @@
 		<invoke name="beforeHandler" method="before" resolver="interceptor" />
 		<invoke name="afterHandler" method="after" resolver="interceptor" />
 		<invoke name="exceptionHandler" method="exception" resolver="interceptor">
-			<arg>exceptionKey</arg>
+			<arg>executionKey</arg>
 		</invoke>
 		
 		<action name="helloActionXml">

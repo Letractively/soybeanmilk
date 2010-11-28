@@ -56,30 +56,38 @@ public class DefaultExecutor implements Executor
 		if(objSource instanceof ConvertableObjectSource)
 			((ConvertableObjectSource)objSource).setGenericConverter(cfg.getGenericConverter());
 		
-		InterceptorInfo ii = configuration.getInterceptorInfo();
+		InterceptorInfo itptInfo = configuration.getInterceptorInfo();
 		
-		if(ii!=null && ii.getBeforeHandler()!=null)
-			ii.getBeforeHandler().execute(objSource);
+		//保存执行语境信息
+		Execution context=null;
+		if(itptInfo!=null && itptInfo.getExecutionKey()!=null)
+		{
+			context=new Execution(exe, objSource);
+			objSource.set(itptInfo.getExecutionKey(), context);
+		}
+		
+		//before
+		if(itptInfo!=null && itptInfo.getBeforeHandler()!=null)
+			itptInfo.getBeforeHandler().execute(objSource);
 		
 		try
 		{
 			exe.execute(objSource);
 			
-			if(ii!=null && ii.getAfterHandler()!=null)
-				ii.getAfterHandler().execute(objSource);
+			//after
+			if(itptInfo!=null && itptInfo.getAfterHandler()!=null)
+				itptInfo.getAfterHandler().execute(objSource);
 		}
 		catch(ExecuteException e)
 		{
-			e.setSource(exe);
-			if(ii==null || ii.getExceptionHandler()==null)
+			if(itptInfo==null || itptInfo.getExceptionHandler()==null)
 				throw e;
 			
-			//存入异常对象到对象源
-			if(ii.getExceptionArgKey() != null)
-				objSource.set(ii.getExceptionArgKey(), e);
+			if(context != null)
+				context.setExecuteException(e);
 			
-			Executable eh = ii.getExceptionHandler();
-			eh.execute(objSource);
+			//exception
+			itptInfo.getExceptionHandler().execute(objSource);
 		}
 	}
 }

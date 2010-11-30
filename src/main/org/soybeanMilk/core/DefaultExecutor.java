@@ -42,19 +42,25 @@ public class DefaultExecutor implements Executor
 	public void setConfiguration(Configuration configuration) {
 		this.configuration = configuration;
 	}
-
+	
 	@Override
-	public void execute(String exeName, ObjectSource objSource)
+	public Executable execute(String exeName, ObjectSource objSource)
 			throws ExecuteException, ExecutableNotFoundException
 	{
-		Configuration cfg=getConfiguration();
-		
-		Executable exe = cfg.getExecutable(exeName);
-		if(exe == null)
-			throw new ExecutableNotFoundException(exeName);
-		
+		return execute(findExecutable(exeName), objSource);
+	}
+	
+	/**
+	 * 执行，并返回最终执行的那个可执行对象。如果正常执行，则返回参数给定的；如果出现异常，则返回作为异常处理器的那个。
+	 * @param exe
+	 * @param objSource
+	 * @return
+	 * @throws ExecuteException
+	 */
+	protected Executable execute(Executable exe, ObjectSource objSource) throws ExecuteException
+	{
 		if(objSource instanceof ConvertableObjectSource)
-			((ConvertableObjectSource)objSource).setGenericConverter(cfg.getGenericConverter());
+			((ConvertableObjectSource)objSource).setGenericConverter(getConfiguration().getGenericConverter());
 		
 		InterceptorInfo itptInfo = configuration.getInterceptorInfo();
 		
@@ -68,7 +74,7 @@ public class DefaultExecutor implements Executor
 		
 		//before
 		if(itptInfo!=null && itptInfo.getBeforeHandler()!=null)
-			itptInfo.getBeforeHandler().execute(objSource);
+			executeInterceptor(itptInfo.getBeforeHandler(), objSource);
 		
 		try
 		{
@@ -76,18 +82,82 @@ public class DefaultExecutor implements Executor
 			
 			//after
 			if(itptInfo!=null && itptInfo.getAfterHandler()!=null)
-				itptInfo.getAfterHandler().execute(objSource);
+				executeInterceptor(itptInfo.getAfterHandler(), objSource);
+			
+			return exe;
 		}
 		catch(ExecuteException e)
 		{
-			if(itptInfo==null || itptInfo.getExceptionHandler()==null)
-				throw e;
-			
 			if(context != null)
 				context.setExecuteException(e);
 			
+			Executable expExe= itptInfo == null ? null : itptInfo.getExceptionHandler();
+			if(expExe == null)
+				throw e;
+			
 			//exception
-			itptInfo.getExceptionHandler().execute(objSource);
+			executeInterceptor(expExe, objSource);
+			
+			return expExe;
+		}
+	}
+	
+	/**
+	 * 根据名称查找可执行对象
+	 * @param name
+	 * @return
+	 * @throws ExecutableNotFoundException
+	 */
+	protected Executable findExecutable(String name) throws ExecutableNotFoundException
+	{
+		Executable exe = getConfiguration().getExecutable(name);
+		if(exe == null)
+			throw new ExecutableNotFoundException(name);
+		
+		return exe;
+	}
+	
+	/**
+	 * 执行拦截器，它不会抛出执行异常
+	 * @param exeInterceptor
+	 * @param objSource
+	 */
+	protected void executeInterceptor(Executable exeInterceptor, ObjectSource objSource)
+	{
+		try
+		{
+			exeInterceptor.execute(objSource);
+		}
+		catch(ExecuteException e)
+		{
+			throw new InterceptorException(e);
+		}
+	}
+	
+	/**
+	 * 拦截器异常
+	 * @author zangzf
+	 * @date 2010-11-30
+	 *
+	 */
+	public static class InterceptorException extends RuntimeException
+	{
+		private static final long serialVersionUID = -1443863310934331790L;
+
+		public InterceptorException() {
+			super();
+		}
+
+		public InterceptorException(String message, Throwable cause) {
+			super(message, cause);
+		}
+
+		public InterceptorException(String message) {
+			super(message);
+		}
+
+		public InterceptorException(Throwable cause){
+			super(cause);
 		}
 	}
 }

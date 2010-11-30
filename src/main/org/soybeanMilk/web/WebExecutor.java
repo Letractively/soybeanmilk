@@ -26,10 +26,8 @@ import org.soybeanMilk.core.DefaultExecutor;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecutableNotFoundException;
 import org.soybeanMilk.core.ExecuteException;
-import org.soybeanMilk.core.Execution;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.config.Configuration;
-import org.soybeanMilk.core.config.InterceptorInfo;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
 import org.soybeanMilk.web.os.WebObjectSource;
@@ -51,14 +49,14 @@ public class WebExecutor extends DefaultExecutor
 	}
 	
 	@Override
-	public void execute(String exeName, ObjectSource objSource)
+	public Executable execute(String exeName, ObjectSource objSource)
 			throws ExecuteException, ExecutableNotFoundException
 	{
-		throw new UnsupportedOperationException("this method is not support here");
+		return super.execute(exeName, objSource);
 	}
 	
 	/**
-	 * 执行，它根据请求查找可执行对象并执行对应的动作
+	 * 执行。它根据请求URL查找可执行对象，然后执行，并且它还会处理可能的目标分发
 	 * @param objSource WEB对象源，你不需要要设置它的{@linkplain GenericConverter 通用转换器}属性，这个方法会自动设置它
 	 * @throws ServletException
 	 * @throws IOException
@@ -67,68 +65,22 @@ public class WebExecutor extends DefaultExecutor
 	public void execute(WebObjectSource objSource)
 			throws ServletException, IOException, ExecutableNotFoundException
 	{
-		if(objSource.getGenericConverter() == null)
-			objSource.setGenericConverter(getConfiguration().getGenericConverter());
-		
-		Executable exe = findRequestExecutable(objSource);
-		
-		InterceptorInfo itptInfo = getConfiguration().getInterceptorInfo();
-		
-		//保存执行语境信息
-		Execution context=null;
-		if(itptInfo!=null && itptInfo.getExecutionKey()!=null)
-		{
-			context=new Execution(exe, objSource);
-			objSource.set(itptInfo.getExecutionKey(), context);
-		}
-		
-		//before
-		if(itptInfo!=null && itptInfo.getBeforeHandler()!=null)
-			executeReticently(itptInfo.getBeforeHandler(), objSource);
-		
-		try
-		{
-			exe.execute(objSource);
-			processTarget(exe, objSource);
-			
-			//after
-			if(itptInfo!=null && itptInfo.getAfterHandler()!=null)
-				executeReticently(itptInfo.getAfterHandler(), objSource);
-		}
-		catch(ExecuteException e)
-		{
-			if(itptInfo==null || itptInfo.getExceptionHandler()==null)
-				throw new ServletException(e);
-			
-			if(context != null)
-				context.setExecuteException(e);
-			
-			//exception
-			Executable eh = itptInfo.getExceptionHandler();
-			executeReticently(eh, objSource);
-			processTarget(eh, objSource);
-		}
-	}
-	
-	/**
-	 * 查找处理请求的{@linkplain Executable 可执行对象}，{@link #execute(WebObjectSource)}使用这个方法来确定哪个可执行对象来处理该请求
-	 * @param objSource
-	 * @return
-	 * @throws ExecutableNotFoundException
-	 */
-	protected Executable findRequestExecutable(WebObjectSource objSource)
-			throws ExecutableNotFoundException
-	{
 		HttpServletRequest request = objSource.getRequest();
 		
 		String servletPath=request.getServletPath();
 		
-		Executable exe = getConfiguration().getExecutable(servletPath);
-		if(exe == null)
-			throw new ExecutableNotFoundException(servletPath);
-		
-		return exe;
+		try
+		{
+			Executable finalExe=execute(findExecutable(servletPath), objSource);
+			
+			processTarget(finalExe, objSource);
+		}
+		catch(ExecuteException e)
+		{
+			throw new ServletException(e);
+		}
 	}
+	
 	/**
 	 * 处理可执行对象的目标
 	 * @param executable
@@ -136,9 +88,11 @@ public class WebExecutor extends DefaultExecutor
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	protected void processTarget(Executable executable, WebObjectSource objSource) throws ServletException, IOException
+	public static void processTarget(Executable executable, WebObjectSource objSource) throws ServletException, IOException
 	{
-		Target target = getTarget(executable);
+		Target target=null;
+		if(executable instanceof WebAction)
+			target = ((WebAction)executable).getTarget();
 		
 		if(target == null)
 		{
@@ -168,31 +122,6 @@ public class WebExecutor extends DefaultExecutor
 			
 			if(_logDebugEnabled)
 				log.debug("forward request to '"+target.getUrl()+"'");
-		}
-	}
-	
-	/**
-	 * 返回可执行对象的{@linkplain Target 目标}，如果没有，则可以返回null（比如{@link org.soybeanMilk.core.exe.Invoke 调用}类并没有定义<i>目标</i>属性）
-	 * @param exe
-	 * @return
-	 */
-	protected Target getTarget(Executable exe)
-	{
-		if(exe instanceof WebAction)
-			return ((WebAction)exe).getTarget();
-		else
-			return null;
-	}
-	
-	private void executeReticently(Executable exe, WebObjectSource objSource) throws ServletException
-	{
-		try
-		{
-			exe.execute(objSource);
-		}
-		catch(ExecuteException e)
-		{
-			throw new ServletException(e);
 		}
 	}
 }

@@ -31,12 +31,12 @@ public interface Executor
 	Configuration getConfiguration();
 	
 	/**
-	 * 执行
+	 * 执行，并返回对应的可执行对象
 	 * @param exeName 可执行对象名称
 	 * @param objSource 对象源
 	 * @throws ExecuteException
 	 * @throws ExecutableNotFoundException
 	 */
-	void execute(String exeName, ObjectSource objSource)
+	Executable execute(String exeName, ObjectSource objSource)
 			throws ExecuteException, ExecutableNotFoundException;
 }

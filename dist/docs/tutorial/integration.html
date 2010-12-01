@@ -110,7 +110,7 @@
 				<span class="tag bold">external-resolver-factory</span>（可选）
 			</p>
 			<p>
-				指定外部<a href="../api/org/soybeanMilk/core/resolver/ResolverFactory.html" class="glossary">解决对象工厂</a>在应用（ServletContext）属性中的关键字。
+				指定外部<a href="../api/org/soybeanMilk/core/resolver/ResolverFactory.html" class="glossary">解决对象工厂</a>在应用（ServletContext）中的关键字。
 				如果你设置了这个初始化参数，<span class="glossary">DispatchServlet</span>将会从应用中查找外部<span class="glossary">解决对象工厂</span>并将它整合到框架中。
 			</p>
 			<p>
@@ -122,21 +122,19 @@
 			<p>
 				首先，定义一个<span class="glossary">解决对象工厂</span>类：
 <pre class="code-java">
-public class MySpringResolverFactory implements ResolverFactory
+public class SpringResolverFactory implements ResolverFactory
 {
-	private BeanFactory webApplicationContext;
+	private BeanFactory beanFactory;
 	
-	public MySpringResolverFactory(){}
-	
-	public void setWebApplicationContext(WebApplicationContext webAppContext)
+	public MySpringResolverFactory(BeanFactory beanFactory)
 	{
-		this.webApplicationContext=webAppContext;
+		this.beanFactory=beanFactory;
 	}
 	
 	@Override
-	public Object Object(Serializable resolverId)
+	public Object getResolver(Serializable resolverId)
 	{
-		return webApplicationContext.getBean(resolverId);
+		return beanFactory == null ? null : beanFactory.getBean(resolverId);
 	}
 }
 </pre>
@@ -144,21 +142,21 @@ public class MySpringResolverFactory implements ResolverFactory
 			<p>
 				定义一个应用监听器，并把它配置在web.xml中Spring初始化监听器之后：
 <pre class="code-java">
-public class MySpringResolverFactoryInitListener implements ServletContextListener
+public class SpringResolverFactoryInitListener implements ServletContextListener
 {
-	public void contextDestroyed(ServletContextEvent sce)
+	public void contextDestroyed(ServletContextEvent event)
 	{
 		
 	}
 	
-	public void contextInitialized(ServletContextEvent sce)
+	public void contextInitialized(ServletContextEvent event)
 	{
-		BeanFactory springContext=ContextLoader.getCurrentWebApplicationContext(sce.getServletContext());
+		ServletContext context=event.getServletContext();
 		
-		MySpringResolverFactory rf=new MySpringResolverFactory();
-		rf.setWebApplicationContext(springContext);
+		BeanFactory springContext=WebApplicationContextUtils.getWebApplicationContext(context);
+		SpringResolverFactory srf=new SpringResolverFactory(springContext);
 		
-		sce.getServletContext().setAttribute("mySpringAppContextResolverFactory",rf);
+		sce.getServletContext().setAttribute("springAppContextResolverFactory",rf);
 	}
 }
 </pre>
@@ -169,12 +167,12 @@ public class MySpringResolverFactoryInitListener implements ServletContextListen
     &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
 &lt;/listener&gt;
 &lt;listener&gt;
-    &lt;listener-class&gt;my.MySpringResolverFactoryInitListener&lt;/listener-class&gt;
+    &lt;listener-class&gt;my.SpringResolverFactoryInitListener&lt;/listener-class&gt;
 &lt;/listener&gt;
 </pre>
 			</p>
 			<p>
-				然后，将你的<span class="glossary">DispatchServlet</span>初始化参数<span class="tag">external-resolver-factory</span>的值设置为“<span class="var">mySpringAppContextResolverFactory</span>”。
+				然后，将你的<span class="glossary">DispatchServlet</span>初始化参数<span class="tag">external-resolver-factory</span>的值设置为“<span class="var">springAppContextResolverFactory</span>”。
 			</p>
 			<p>
 				这样，你就可以在框架配置文件<span class="tag">&lt;invoke&gt;</span>标签的<span class="tagAttr">resolver</span>属性中使用在Spring中定义的那些<span class="tag">&lt;bean&gt;</span>的<span class="tagAttr">id</span>了。

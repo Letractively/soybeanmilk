@@ -32,42 +32,54 @@
 package my.biz;
 public class Calculator
 {
-	public int multiply(int a, int b)
-	{
-		return a*b;
-	} 
+        public int multiply(int a, int b)
+        {
+                return a*b;
+        }
+        public int add(int a, int b)
+        {
+                return a+b;
+        }
 }
 </pre>
 			</p>
 			<p>
 					然后，定义“/WEB-INF/soybean-milk.config.xml”配置文件：
-                <pre class="code-xml">
-&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;soybean-milk&gt;<br>	&lt;resolvers&gt;
-		&lt;resolver id=&quot;calculator&quot; class=&quot;my.biz.Calculator&quot; /&gt;
-	&lt;/resolvers&gt;
+<pre class="code-xml">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;soybean-milk&gt;
+        &lt;resolvers&gt;
+                &lt;resolver id="calculator" class="my.biz.Calculator" /&gt;
+        &lt;/resolvers&gt;
 
-	&lt;executables&gt;
-		&lt;action name=&quot;/multiply.do&quot;&gt;
-			&lt;invoke&gt;
-				multiplyResult = calculator.multiply(param.a, 10);
-			&lt;/invoke&gt;
-			<span class="var">
-			&lt!--或者使用结构更清晰的XML方式
-			&lt;invoke method=&quot;multiply&quot; resolver=&quot;calculator&quot; result-key=&quot;multiplyResult&quot;&gt;
-				&lt;arg&gt;param.a&lt;/arg&gt;
-				&lt;arg&gt;10&lt;/arg&gt;
-			&lt;/invoke&gt;
-			--&gt
-			</span>
-			&lt;target url=&quot;/multiply_result.jsp&quot; /&gt;
-		&lt;/action&gt;
-	&lt;/executables&gt;
+        &lt;executables&gt;
+                &lt;action name="/calculate.do"&gt;
+                        &lt;invoke&gt;
+                            multiplyResult = calculator.multiply(param.a, 10);
+                        &lt;/invoke&gt;
+                        &lt;invoke&gt;
+                            calculateResult = calculator.add(request.multiplyResult, 10)
+                        &lt;/invoke&gt;
+                        <span style="color:#999999">
+                        &lt;!--或者使用结构更清晰的XML方式
+                        &lt;invoke method="multiply" resolver="calculator" result-key="multiplyResult"&gt;
+                            &lt;arg&gt;param.a&lt;/arg&gt;
+                            &lt;arg&gt;10&lt;/arg&gt;
+                        &lt;/invoke&gt;
+                        &lt;invoke method="add" resolver="calculator" result-key="calculateResult"&gt;
+                            &lt;arg&gt;request.multiplyResult&lt;/arg&gt;
+                            &lt;arg&gt;10&lt;/arg&gt;
+                        &lt;/invoke&gt;
+                        --&gt;
+                        </span>
+                        &lt;target url="/calculate_result.jsp" /&gt;
+                &lt;/action&gt;
+        &lt;/executables&gt;
 &lt;/soybean-milk&gt;
 </pre>
 			</p>
 			<p>
-					接下来，编写“/multiply_result.jsp”展示页面：
+					接下来，编写“/calculate_result.jsp”展示页面：
 <pre class="code-xml">
 &lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot; pageEncoding=&quot;UTF-8&quot;%&gt;
 &lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;
@@ -77,7 +89,7 @@ public class Calculator
 &lt;title&gt;计算结果&lt;/title&gt;
 &lt;/head&gt;
 &lt;body&gt;
-	计算结果：${multiplyResult}
+	计算结果：${calculateResult}
 &lt;/body&gt;
 &lt;/html&gt;
 </pre>
@@ -107,12 +119,12 @@ soybeanMilk-[<span class="var">version</span>].jar
 commons-beanutils-1.8.2.jar
 commons-logging-1.0.4.jar
 commons-logging-api-1.1.jar
-<span style="color:#999999">log4j-1.2.14.jar</span>
+<span style="color:#999999">log4j-1.2.14.jar（可选）</span>
 </pre>
 			  	放入/WEB-INF/lib目录下。
 			</p>
 			<p>
-			  	最后，启动服务器，在浏览器中输入“http://[<span class="var">youApp</span>]/multiply.do?a=3”，完成！
+			  	最后，启动服务器，在浏览器中输入“http://[<span class="var">youApp</span>]/multiply.do?a=3”，页面上将显示“计算结果：40”。
 			</p>
 		</div>
 	</div>

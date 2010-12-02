@@ -2,8 +2,8 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>指南 - soybeanMilk</title>
-<link href="resources/style.css" rel="stylesheet" type="text/css" />
+<title>Manual - soybeanMilk</title>
+<link href="../resources/style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <div class="pageHeader">
@@ -13,41 +13,56 @@
 <div class="pageBody">
 	<div class="bodyMenu">
 		<ul class="menu">
-			<li><a href="index.html">主&nbsp;页</a></li>
-			<li><a href="quickStart.html">入&nbsp;门</a></li>
-			<li class="current"><a href="userGuide.html">指&nbsp;南</a></li>
-			<li><a href="integration.html">整&nbsp;合</a></li>
-			<li><a href="faq.html">问&nbsp;答</a></li>
-			<li><a href="../api/index.html">API</a></li>
+			<li><a href="index.html">Home</a></li>
+			<li><a href="quickStart.html">Quick start</a></li>
+			<li class="current"><a href="manual.html">Manual</a></li>
+			<li><a href="integration.html">Integration</a></li>
+			<li><a href="faq.html">FAQ</a></li>
+			<li><a href="../../api/index.html">API</a></li>
 		</ul>
 	</div>
 	<div class="bodyContent">
 		<div class="content">
 			<p>
-				如果你对java反射机制很熟悉，那么你会很容易理解这个框架，它实际上只是做如下四件事：<br>
+				This framework will be very easy understanding if you are familiar with Java Reflection.
+				It just do four things:
+				<br>
 				<ul>
-					<li>依据参数配置来构造方法的参数值</li>
-					<li>在配置的对象上调用方法</li>
-					<li>保存方法的结果</li>
-					<li>处理URL转发</li>
+					<li>
+						Construct argument values of the method you written, by getting them from <a href="../../api/org/soybeanMilk/core/ObjectSource.html" class="glossary">ObjectSource</a>.
+					</li>
+					<li>
+						Invoke the method on the target object.
+					</li>
+					<li>
+						Save the method result to <a href="../../api/org/soybeanMilk/core/ObjectSource.html" class="glossary">ObjectSource</a>.
+					</li>
+					<li>
+						Process the URL dispatching.
+					</li>
 				</ul>
 			</p>
 			<p>
-				<a href="../api/org/soybeanMilk/core/ObjectSource.html" class="glossary">对象源</a>是框架的核心接口，用于获取和保存对象。
-				你使用此框架要做的大部分工作就是告诉框架如何从<span class="glossary">对象源</span>中取得参数值，以及如何保存方法的结果。
+				<a href="../../api/org/soybeanMilk/core/ObjectSource.html" class="glossary">ObjectSource</a> is the core interface of this framework, for getting and saving objects.
+				The most work you are doing is to tell this framework how to get object from <span class="glossary">ObjectSource</span>, and save object into <span class="glossary">ObjectSource</span>. 
 			</p>
 			<p>
-				<a href="../api/org/soybeanMilk/core/Executable.html" class="glossary">可执行对象</a>是框架的另一核心接口，
-				它仅依赖<span class="glossary">对象源</span>就可以自我执行。它在框架中有两个实现，一是<a href="../api/org/soybeanMilk/core/exe/Invoke.html" class="glossary">调用</a>、一是<a href="../api/org/soybeanMilk/core/exe/Action.html" class="glossary">动作</a>，
-				它们都是对方法（java.lang.reflect.Method）的高级封装，一个<span class="glossary">动作</span>可以包含多个<span class="glossary">调用</span>，一个<span class="glossary">调用</span>对应一个方法。
+				<a href="../../api/org/soybeanMilk/core/Executable.html" class="glossary">Executable</a> is another core interface.
+				It can be executed only with an <span class="glossary">ObjectSource</span>.There is two implementation of this interface, one is
+				<a href="../../api/org/soybeanMilk/core/exe/Invoke.html" class="glossary">Invoke</a>, and another is <a href="../../api/org/soybeanMilk/core/exe/Action.html" class="glossary">Action</a>.
+				They both are advanced encapsulation of Java <span class="glossary">Method</span> object, an <span class="glossary">Action</span> can have one or more <span class="glossary">Invoke</span>s,
+				and an <span class="glossary">Invoke</span> are conresponding to a <span class="glossary">Method</span>.
 			</p>
 			<p>
-				<a href="javascript:void(0);" class="glossary">解决对象</a>是框架的一个重要概念，方法的调用目标即是它。
-				它在框架中并没有明确的接口体现，因为它完全是由框架使用者定义的，你可以把它理解为你应用中的业务对象。
+				<a href="javascript:void(0);" class="glossary">Resolver</a> is an important concept, it is the target of <span class="glossary">Invoke</span>'s method.
+				But there is no interface defined for it, because it is writing by you. You may call it "Business object".
 			</p>
-			
 			<p>
-				下面从配置文件结构开始，来详细介绍框架：<br>
+				<a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">Converter</a> help <span class="glossary">ObjectSource</span> convert the object it stored to the <span class="glossary">Invoke</span>'s method argument type.
+				
+			</p>
+			<p>
+				下面从配置文件结构开始，来详细介绍框架：
 				<ul>
 					<li>
 						<a href="javascript:void(0);">&lt;soybean-milk&gt;</a>
@@ -192,7 +207,7 @@
 			</p>
 			<p>
 				通用转换器配置。框架的一个内置功能是支持类型转换，当<span class="glossary">对象源</span>中保存的对象与要取得对象的类型不匹配时，
-				框架会尝试进行类型转换（参考<a href="../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">通用转换器</a>接口）。
+				框架会尝试进行类型转换（参考<a href="../../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">通用转换器</a>接口）。
 				比如，如果在配置文件中直接定义了调用方法参数的值，那么解析器会在解析时将这个字符串值转换为实际参数类型的对象。
 			</p>
 			<p>
@@ -204,8 +219,8 @@
 					<li>
 						<span class="tagAttr">class</span>（可选） <br />
 						自定义通用转换器实现类，你可以配置它来完全替换框架的实现。
-						要注意的是，这个类必须实现<a href="../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">通用转换器</a>接口并提供默认无参构造方法。<br />
-						如果你不配置这个属性，框架将使用默认的<a href="../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>。
+						要注意的是，这个类必须实现<a href="../../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">通用转换器</a>接口并提供默认无参构造方法。<br />
+						如果你不配置这个属性，框架将使用默认的<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>。
 					</li>
 				</ul>
 			</p>
@@ -216,7 +231,7 @@
 			</p>
 			<p>
 				辅助转换器配置。你可以配置多个辅助转换器，来为通用转换器添加更多的类型转换支持，或者替换旧的辅助转换器（后添加的将替换掉先前添加的）。<br />
-				默认的<a href="../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>已经添加了大部分常用的辅助转换器（参考<a href="../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a>类说明），
+				默认的<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>已经添加了大部分常用的辅助转换器（参考<a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a>类说明），
 				它还支持将“<span class="var">java.util.Map</span>”转换为JavaBean对象。
 			</p>
 			<p>
@@ -250,7 +265,7 @@
 				<span class="tag bold">&lt;interceptor&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				拦截器配置。你可以通过该配置来为<a href="../api/org/soybeanMilk/core/Executor.html">执行器</a>添加执行前、执行后、异常时的拦截器。
+				拦截器配置。你可以通过该配置来为<a href="../../api/org/soybeanMilk/core/Executor.html">执行器</a>添加执行前、执行后、异常时的拦截器。
 			</p>
 			<p>
 				
@@ -270,12 +285,12 @@
 					<li>
 						<span class="tagAttr">exception</span>（可选） <br />
 						设置作为异常处理器的全局<span class="glossary">可执行对象</span>名称。<span class="glossary">执行器</span>会在执行<span class="glossary">可执行对象</span>遇到异常后执行它。
-						可能的源异常都定义在<a href="../api/org/soybeanMilk/core/ExecuteException.ExceptionType.html">ExceptionType</a>类中，
-				一般你只需要处理<a href="../api/org/soybeanMilk/core/ExecuteException.ExceptionType.html#INVOCATION">INVOCATION</a>异常。如果你不配置异常处理器，执行异常将会一直向上抛出。
+						可能的源异常都定义在<a href="../../api/org/soybeanMilk/core/ExecuteException.ExceptionType.html">ExceptionType</a>类中，
+				一般你只需要处理<a href="../../api/org/soybeanMilk/core/ExecuteException.ExceptionType.html#INVOCATION">INVOCATION</a>异常。如果你不配置异常处理器，执行异常将会一直向上抛出。
 					</li>
 					<li>
 						<span class="tagAttr">execution-key</span>（可选） <br />
-						<a href="../api/org/soybeanMilk/core/Execution.html">执行语境信息</a>对象的存储关键字。你可以在作为拦截器的<span class="glossary">可执行对象</span>中使用这个关键字取得它。
+						<a href="../../api/org/soybeanMilk/core/Execution.html">执行语境信息</a>对象的存储关键字。你可以在作为拦截器的<span class="glossary">可执行对象</span>中使用这个关键字取得它。
 					</li>
 				</ul>
 			</p>
@@ -435,7 +450,7 @@ public void handleException(Execution execution)
 						<span class="tagAttr">result-key</span>（可选） <br />
 						<span class="glossary">调用</span>方法结果在对象源中的保存关键字。无论方法是否有返回结果，只要你定义了<span class="tagAttr">result-key</span>，
 						框架总会执行保存操作，只不过无返回结果的话是以null值保存的；反之，则不会保存。
-						如果这个结果关键字里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。<br />
+						如果这个结果关键字里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。<br />
 						下面是合法的结果关键字：
 						<ul>
 							<li>
@@ -632,7 +647,7 @@ public void handleException(Execution execution)
 				</ul>
 			</p>
 			<p>
-				注意：如果标签内容是关键字，并且里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。
+				注意：如果标签内容是关键字，并且里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。
 			</p>
 			<p>
 				下面是一些配置示例：

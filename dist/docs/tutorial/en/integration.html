@@ -2,8 +2,8 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>整合 - soybeanMilk</title>
-<link href="resources/style.css" rel="stylesheet" type="text/css" />
+<title>Integration - soybeanMilk</title>
+<link href="../resources/style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <div class="pageHeader">
@@ -13,19 +13,19 @@
 <div class="pageBody">
 	<div class="bodyMenu">
 		<ul class="menu">
-			<li><a href="index.html">主&nbsp;页</a></li>
-			<li><a href="quickStart.html">入&nbsp;门</a></li>
-			<li><a href="userGuide.html">指&nbsp;南</a></li>
-			<li class="current"><a href="integration.html">整&nbsp;合</a></li>
-			<li><a href="faq.html">问&nbsp;答</a></li>
-			<li><a href="../api/index.html">API</a></li>
+			<li><a href="index.html">Home</a></li>
+			<li><a href="quickStart.html">Quick start</a></li>
+			<li><a href="manual.html">Manual</a></li>
+			<li class="current"><a href="integration.html">Integration</a></li>
+			<li><a href="faq.html">FAQ</a></li>
+			<li><a href="../../api/index.html">API</a></li>
 		</ul>
 	</div>
 	<div class="bodyContent">
 		<div class="content">
 			<p>
-				框架本身已提供了一个整合servlet <a href="../api/org/soybeanMilk/web/servlet/DispatchServlet.html">DispatchServlet</a>，
-				它会依据初始化参数构造一个<a href="../api/org/soybeanMilk/web/WebExecutor.html">WEB执行器</a>。
+				框架本身已提供了一个整合servlet <a href="../../api/org/soybeanMilk/web/servlet/DispatchServlet.html">DispatchServlet</a>，
+				它会依据初始化参数构造一个<a href="../../api/org/soybeanMilk/web/WebExecutor.html">WEB执行器</a>。
 				在运行时，所有到这个servlet的请求都会被交给这个<span class="glossary">WEB执行器</span>来处理。
 			</p>
 			<p>
@@ -62,7 +62,7 @@
 </pre>
 			</p>
 			<p>
-				上面这个示例包含了<a href="../api/org/soybeanMilk/web/servlet/DispatchServlet.html">DispatchServlet</a>允许的所有初始化参数：
+				上面这个示例包含了<a href="../../api/org/soybeanMilk/web/servlet/DispatchServlet.html">DispatchServlet</a>允许的所有初始化参数：
 				<ul>
 					<li>
 						<a href="#init_encoding">encoding</a>
@@ -110,7 +110,7 @@
 				<span class="tag bold">external-resolver-factory</span>（可选）
 			</p>
 			<p>
-				指定外部<a href="../api/org/soybeanMilk/core/resolver/ResolverFactory.html" class="glossary">解决对象工厂</a>在应用（ServletContext）中的关键字。
+				指定外部<a href="../../api/org/soybeanMilk/core/resolver/ResolverFactory.html" class="glossary">解决对象工厂</a>在应用（ServletContext）中的关键字。
 				如果你设置了这个初始化参数，<span class="glossary">DispatchServlet</span>将会从应用中查找外部<span class="glossary">解决对象工厂</span>并将它整合到框架中。
 			</p>
 			<p>

@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>入门 - soybeanMilk</title>
-<link href="resources/style.css" rel="stylesheet" type="text/css" />
+<link href="../resources/style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
 <div class="pageHeader">
@@ -15,10 +15,10 @@
 		<ul class="menu">
 			<li><a href="index.html">主&nbsp;页</a></li>
 			<li class="current"><a href="quickStart.html">入&nbsp;门</a></li>
-			<li><a href="userGuide.html">指&nbsp;南</a></li>
+			<li><a href="manual.html">指&nbsp;南</a></li>
 			<li><a href="integration.html">整&nbsp;合</a></li>
 			<li><a href="faq.html">问&nbsp;答</a></li>
-			<li><a href="../api/index.html">API</a></li>
+			<li><a href="../../api/index.html">API</a></li>
 		</ul>
 	</div>
 	<div class="bodyContent">
@@ -29,7 +29,7 @@
 			<p>
 					首先，你需要编写你的Java业务类，比如下面的计算器示例：
 <pre class="code-java">
-package my.biz;
+package my;
 public class Calculator
 {
         public int multiply(int a, int b)
@@ -49,7 +49,7 @@ public class Calculator
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;soybean-milk&gt;
         &lt;resolvers&gt;
-                &lt;resolver id="calculator" class="my.biz.Calculator" /&gt;
+                &lt;resolver id="calculator" class="my.Calculator" /&gt;
         &lt;/resolvers&gt;
 
         &lt;executables&gt;
@@ -124,7 +124,7 @@ commons-logging-api-1.1.jar
 			  	放入/WEB-INF/lib目录下。
 			</p>
 			<p>
-			  	最后，启动服务器，在浏览器中输入“http://[<span class="var">youApp</span>]/multiply.do?a=3”，页面上将显示“计算结果：40”。
+			  	最后，启动服务器，在浏览器中输入“http://[<span class="var">youApp</span>]/calculate.do?a=3”，页面上将显示“计算结果：40”。
 			</p>
 		</div>
 	</div>

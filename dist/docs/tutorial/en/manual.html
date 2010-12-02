@@ -62,31 +62,31 @@
 				
 			</p>
 			<p>
-				下面从配置文件结构开始，来详细介绍框架：
+				The detail structure of <span class="mainTitle">SoybeanMilk</span> configuration file is listing bellow:
 				<ul>
 					<li>
 						<a href="javascript:void(0);">&lt;soybean-milk&gt;</a>
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						根元素
+						Root element
 						<ul>
 							<li>
 								<a href="#tag_global-config"><span class="tag">&lt;global-config&gt;</span></a>
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-								全局配置块
+								Global configuration block
 								<ul>
 									<li>
 										<a href="#tag_generic-converter"><span class="tag">&lt;generic-converter&gt;</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										通用转换器
+										Generic Converter
 										<ul>
 											<li>
 												<a href="#tag_converter"><span class="tag">&lt;converter&gt;</span></a>
 												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 												&nbsp;&nbsp;
-												 辅助转换器
+												 Support Converter
 											</li>
 										</ul>
 									</li>
@@ -94,7 +94,7 @@
 										<a href="#tag_interceptor"><span class="tag">&lt;interceptor&gt;</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										 拦截器
+										 Interceptor
 									</li>
 								</ul>
 							</li>
@@ -103,14 +103,14 @@
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								&nbsp;&nbsp;&nbsp;&nbsp;
-								 包含模块
+								 Included modules
 								<ul>
 									<li>
 										<a href="#tag_file"><span class="tag">&lt;file&gt;</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										&nbsp;&nbsp;&nbsp;
-										 模块配置文件 
+										 Module file
 									</li>
 								</ul>
 							</li>
@@ -119,13 +119,13 @@
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								&nbsp;&nbsp;&nbsp;
-								 解决对象配置块
+								 Resolver configuration block
 								<ul>
 									<li>
 										<a href="#tag_resolver"><span class="tag">&lt;resolver&gt;</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										 解决对象
+										 Resolver
 									</li>
 								</ul>
 							</li>
@@ -134,20 +134,20 @@
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								&nbsp;
-								 可执行对象配置块
+								 Executable configuration block
 								<ul>
 									<li>
 										<a href="#tag_invoke"><span class="tag">&lt;invoke&gt;</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										&nbsp;
-										 全局调用
+										 Global Invoke
 										<ul>
 											<li>
 												<a href="#tag_arg"><span class="tag">&lt;arg&gt;</span></a>
 												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-												调用的方法参数配置
+												Arguments configuration
 											</li>
 										</ul>
 									</li>
@@ -156,19 +156,19 @@
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										&nbsp;
-										 全局动作
+										 Global Action
 										<ul>
 											<li>
 												<a href="#tag_invoke"><span class="tag">&lt;invoke&gt;</span></a>
 												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-												 局部调用
+												 Local Invoke
 												<ul>
 													<li>
 														<a href="#tag_arg"><span class="tag">&lt;arg&gt;</span></a>
 														&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 														&nbsp;&nbsp;&nbsp;
-														调用的方法参数配置
+														Arguments configuration
 													</li>
 												</ul>
 											</li>
@@ -176,13 +176,13 @@
 												<a href="#tag_ref"><span class="tag">&lt;ref&gt;</span></a>
 												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-												 可执行对象引用
+												 Reference to global Executable
 											</li>
 											<li>
 												<a href="#tag_target"><span class="tag">&lt;target&gt;</span></a>
 												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-												 目标
+												 Target
 											</li>
 										</ul>
 									</li>
@@ -195,64 +195,66 @@
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_global-config"></a>
-				<span class="tag bold">&lt;global-config&gt;</span>（可选） <br/>
+				<span class="tag bold">&lt;global-config&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				全局配置块。它只是作为一个父标签，包含框架的一些全局配置项，本身没有任何属性。
+				Global configuration block. It is just defined as a parent tag with no attribute. 
 			</p>
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_generic-converter"></a>
-				<span class="tag bold">&lt;generic-converter&gt;</span>（可选） <br/>
+				<span class="tag bold">&lt;generic-converter&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				通用转换器配置。框架的一个内置功能是支持类型转换，当<span class="glossary">对象源</span>中保存的对象与要取得对象的类型不匹配时，
-				框架会尝试进行类型转换（参考<a href="../../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">通用转换器</a>接口）。
-				比如，如果在配置文件中直接定义了调用方法参数的值，那么解析器会在解析时将这个字符串值转换为实际参数类型的对象。
+				Generic Converter configuration. Type conversion is a nest function of this framework,
+				it works when you want to get an object which has different type with the object stored in <span class="glossary">ObjectSource</span>
+				(See <a href="../../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">GenericConverter</a> interface).
 			</p>
 			<p>
-				特别是在WEB环境下，请求参数值都是字符串，而<span class="glossary">调用</span>的方法参数可能是任何类型的，类型转换尤为重要。
+				Especially in web environment, the request values are all Strings, but the argument of <span class="glossary">Invoke</span> method may be any type.
 			</p>
 			<p>
-				它包含如下属性：
+				It contains the following attributes:
 				<ul>
 					<li>
-						<span class="tagAttr">class</span>（可选） <br />
-						自定义通用转换器实现类，你可以配置它来完全替换框架的实现。
-						要注意的是，这个类必须实现<a href="../../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">通用转换器</a>接口并提供默认无参构造方法。<br />
-						如果你不配置这个属性，框架将使用默认的<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>。
+						<span class="tagAttr">class</span> (Optional) <br />
+						Customized generic converter class with which you can completely replace the nest generic converter.
+						This customized generic converter must be an implementaion of <a href="../../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">GenericConverter</a> interface.<br />
+						The nest generic converter <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a> will be used if you didn't set this attribute.
 					</li>
 				</ul>
 			</p>
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_converter"></a>
-				<span class="tag bold">&lt;converter&gt;</span>（可选） <br/>
+				<span class="tag bold">&lt;converter&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				辅助转换器配置。你可以配置多个辅助转换器，来为通用转换器添加更多的类型转换支持，或者替换旧的辅助转换器（后添加的将替换掉先前添加的）。<br />
-				默认的<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>已经添加了大部分常用的辅助转换器（参考<a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a>类说明），
-				它还支持将“<span class="var">java.util.Map</span>”转换为JavaBean对象。
+				Support converter. You can add new support converters or replace old converters to enhance the generic converter.<br />
+				The nest generic converter implementation <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a>
+				has add most common support converter
+				(see <a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a> class),
+				and it also can convert "<span class="var">java.util.Map</span>" to JavaBean object.
 			</p>
 			<p>
-				它包含如下属性：
+				It contains the following attributes:
 				<ul>
 					<li>
-						<span class="tagAttr">src</span>（<span class="required">必须</span>） <br />
-						转换器支持转换的源类型
+						<span class="tagAttr">src</span> (<span class="required">Required</span>) <br />
+						The source type it can convert from.
 					</li>
 					<li>
-						<span class="tagAttr">dest</span>（<span class="required">必须</span>） <br />
-						转换器支持转换的目标类型
+						<span class="tagAttr">dest</span> (<span class="required">Required</span>) <br />
+						The destination type it can convert to.
 					</li>
 					<li>
-						<span class="tagAttr">class</span>（<span class="required">必须</span>） <br />
-						转换器类
+						<span class="tagAttr">class</span> (<span class="required">Required</span>) <br />
+						The class of this converter.
 					</li>
 				</ul>
 			</p>
 			<p>
-				下面是一个自定义辅助日期转换器配置，框架内置的将被替换：
+				The following is a customized converter for converting Date, the nest will be replaced: 
 <pre class="code-xml">
 &lt;generic-converter&gt;
 	&lt;converter src="java.lang.String" dest="java.util.Date" class="your.converter.DateConverter" /&gt;
@@ -262,40 +264,40 @@
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_interceptor"></a>
-				<span class="tag bold">&lt;interceptor&gt;</span>（可选） <br/>
+				<span class="tag bold">&lt;interceptor&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				拦截器配置。你可以通过该配置来为<a href="../../api/org/soybeanMilk/core/Executor.html">执行器</a>添加执行前、执行后、异常时的拦截器。
+				Interceptor configuration.
+				You can add "before", "after", "exception" interceptor for <a href="../../api/org/soybeanMilk/core/Executor.html">Executor</a> using this configuration.
 			</p>
 			<p>
-				
-			</p>
-			<p>
-				它包含如下属性：
+				It contains the following attributes:
 				<ul>
-					
 					<li>
-						<span class="tagAttr">before</span>（可选） <br />
-						设置作为前切点处理器的全局<span class="glossary">可执行对象</span>名称。<span class="glossary">执行器</span>会在执行全局<span class="glossary">可执行对象</span>前首先执行它。
+						<span class="tagAttr">before</span> (Optional) <br />
+						Set the "before" interceptor's global <span class="glossary">Executable</span> name.
+						<span class="glossary">Executor</span> will execute it first.
 					</li>
 					<li>
-						<span class="tagAttr">after</span>（可选） <br />
-						设置作为后切点处理器的全局<span class="glossary">可执行对象</span>名称。<span class="glossary">执行器</span>会在正常地执行了全局<span class="glossary">可执行对象</span>后执行它。
+						<span class="tagAttr">after</span> (Optional) <br />
+						Set the "after" interceptor's global <span class="glossary">Executable</span> name.
+						<span class="glossary">Executor</span> will execute it after correctly executing the current <span class="glossary">Executable</span>.
 					</li>
 					<li>
-						<span class="tagAttr">exception</span>（可选） <br />
-						设置作为异常处理器的全局<span class="glossary">可执行对象</span>名称。<span class="glossary">执行器</span>会在执行<span class="glossary">可执行对象</span>遇到异常后执行它。
-						可能的源异常都定义在<a href="../../api/org/soybeanMilk/core/ExecuteException.ExceptionType.html">ExceptionType</a>类中，
-				一般你只需要处理<a href="../../api/org/soybeanMilk/core/ExecuteException.ExceptionType.html#INVOCATION">INVOCATION</a>异常。如果你不配置异常处理器，执行异常将会一直向上抛出。
+						<span class="tagAttr">exception</span> (Optional) <br />
+						Set the "exception" interceptor's global <span class="glossary">Executable</span> name.
+						<span class="glossary">Executor</span> will execute it if exception thrown when executing the current <span class="glossary">Executable</span>.
 					</li>
 					<li>
-						<span class="tagAttr">execution-key</span>（可选） <br />
-						<a href="../../api/org/soybeanMilk/core/Execution.html">执行语境信息</a>对象的存储关键字。你可以在作为拦截器的<span class="glossary">可执行对象</span>中使用这个关键字取得它。
+						<span class="tagAttr">execution-key</span> (Optional) <br />
+						Saving keyword of the execution context object <a href="../../api/org/soybeanMilk/core/Execution.html">Execution</a>.
+						With this object, you can get the execution context information in your interceptor.
 					</li>
 				</ul>
 			</p>
 			<p>
-				下面是一个异常处理器配置示例，当出现执行异常时，框架将执行<span class="glossary">动作</span>“<span class="var">/handleException.do</span>”：
+				The following is an "exception" interceptor example, the framework will execute <span class="glossary">Action</span> "<span class="var">/handleException.do</span>"
+				when exception occuring:
 <pre class="code-xml">
 &lt;global-config&gt;		
 		&lt;interceptor exception="/handleException.do"
@@ -316,7 +318,7 @@
 </pre>
 			</p>
 			<p>
-				对应的Java方法应该为：
+				It's corresponding Java method must be:
 			</p>
 			<p>
 <pre class="code-java">
@@ -329,24 +331,24 @@ public void handleException(Execution execution)
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_includes"></a>
-				<span class="tag bold">&lt;includes&gt;</span>（可选） <br/>
+				<span class="tag bold">&lt;includes&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				包含模块。它只是作为一个父标签，本身没有任何属性。
+				Included modules configuration. It is just defined as a parent tag with no attribute.
 			</p>
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_file"></a>
-				<span class="tag bold">&lt;file&gt;</span>（可选） <br/>
+				<span class="tag bold">&lt;file&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				模块配置文件。这个配置文件可以是类路径的资源文件，也可以是应用“<span class="var">/WEB-INF</span>”下的文件。
+				The file of module configuration. It can be a resource file in classpath, or file in "<span class="var">/WEB-INF</span>" folder of your application.
 			</p>
 			<p>
-				注意，模块配置文件中只有<span class="tag">&lt;resolvers&gt;</span>和<span class="tag">&lt;executables&gt;</span>才是有效的。
+				Note that only <span class="tag">&lt;resolvers&gt;</span> and <span class="tag">&lt;executables&gt;</span> tags are valid in module configuration files.
 			</p>
 			<p>
-				下面是一个示例：
+				It's an example below:
 <pre class="code-xml">
 &lt;includes&gt;
 	&lt;file&gt;your/config/module.1.xml&lt;/file&gt;
@@ -360,34 +362,35 @@ public void handleException(Execution execution)
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_resolvers"></a>
-				<span class="tag bold">&lt;resolvers&gt;</span>（可选） <br/>
+				<span class="tag bold">&lt;resolvers&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				<span class="glossary">解决对象</span>配置块。它只是作为一个父标签，没有任何属性。
+				<span class="glossary">Resolver</span> configuration block. It is just defined as a parent tag with no attribute.
 			</p>
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_resolver"></a>
-				<span class="tag bold">&lt;resolver&gt;</span>（可选） <br/>
+				<span class="tag bold">&lt;resolver&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				<span class="glossary">解决对象</span>配置。你可以配置多个解决对象，以供后面的<span class="glossary">可执行对象</span>使用。
+				<span class="glossary">Resolver</span> configuration. You may add many <span class="tag">&lt;resolver&gt;</span> tags here using later.
 			</p>
 			<p>
-				它包含如下属性：
+				It contains the following attributes:
 				<ul>
 					<li>
-						<span class="tagAttr">id</span>（<span class="required">必须</span>） <br />
-						<span class="glossary">解决对象</span>ID，后面的<span class="glossary">可执行对象</span>通过这个ID来引用它
+						<span class="tagAttr">id</span> (<span class="required">Required</span>)<br />
+						The id of <span class="glossary">Resolver</span>, and will be used when you defining <span class="glossary">Executable</span>s.
 					</li>
 					<li>
-						<span class="tagAttr">class</span>（<span class="required">必须</span>） <br />
-						<span class="glossary">解决对象</span>类名，配置解析器会在解析时创建它的单一实例，供所有与之相关的<span class="glossary">可执行对象</span>使用
+						<span class="tagAttr">class</span> (<span class="required">Required</span>) <br />
+						The class of <span class="glossary">Resolver</span>.
+						It single instance will be created by the parser of this framework, and using by all referenced <span class="glossary">Executable</span>s.
 					</li>
 				</ul>
 			</p>
 			<p>
-				下面是一个示例：
+				This is an example below:
 <pre class="code-xml">
 &lt;resolvers&gt;
 	&lt;resolver id="yourResolver0" class="your.resolver.MyResolver0" /&gt;
@@ -399,55 +402,62 @@ public void handleException(Execution execution)
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_executables"></a>
-				<span class="tag bold">&lt;executables&gt;</span>（可选） <br/>
+				<span class="tag bold">&lt;executables&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				<span class="glossary">可执行对象</span>配置块。它只是作为一个父标签，没有任何属性。
+				<span class="glossary">Executable</span> configuration block. It is just defined as a parent tag with no attribute.
 			</p>
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_invoke"></a>
-				<span class="tag bold">&lt;invoke&gt;</span>（可选） <br/>
+				<span class="tag bold">&lt;invoke&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				<span class="glossary">调用</span>配置。它可以直接添加在<span class="tag">&lt;executables&gt;</span>标签下（全局的），也可以添加到<span class="tag">&lt;action&gt;</span>标签下（局部的）。
+				<span class="glossary">Invoke</span> configuration. It can be directly added under the <span class="tag">&lt;executables&gt;</span> tag (as global),
+				or added under the <span class="tag">&lt;action&gt;</span> tag (as local).
 			</p>
 			<p>
-				它有两种配置方式：
+				It has tow configuration mode:
 				<ul>
-					<li><a href="#invoke_xml_spec">XML方式</a></li>
-					<li><a href="#invoke_java_spec">Java方式</a></li>
+					<li><a href="#invoke_xml_spec">XML mode</a></li>
+					<li><a href="#invoke_java_spec">Java mode</a></li>
 				</ul>
 			</p>
 			<p>
 				<a name="invoke_xml_spec"></a>
-				<a href="javascript:void(0);">XML方式</a>
+				<a href="javascript:void(0);">XML mode</a>
 			</p>
 			<p>
-				它包含如下属性：
+				It contains the following attributes:
 				<ul>
 					<li>
-						<span class="tagAttr">name</span>（可选） <br />
-						如果<span class="glossary">调用</span>是全局的，你需要定义它,并且应该与动作名称一起是全局唯一的；如果是局部的，则不必定义。
+						<span class="tagAttr">name</span> (Optional)  <br />
+						Your must set this attribute if this <span class="glossary">Invoke</span> is global,
+						and it must be unique together with <span class="glossary">Action</span>'s name attribute.
+						It is optional if this <span class="glossary">Invoke</span> is local.
 					</li>
 					<li>
-						<span class="tagAttr">method</span>（<span class="required">必须</span>） <br />
-						定义<span class="glossary">调用</span>的方法名称，这个方法必须在<span class="tagAttr">resolver-class</span>或者<span class="tagAttr">resolver</span>类中存在。
-						配置解析器会在解析时根据这个名称查找对应的方法对象，如果你定义了<span class="tagAttr">resolver-class</span>属性，解析器会优先使用它来查找；
-						否则，使用<span class="tagAttr">resolver</span>定义的<span class="glossary">解决对象</span>来查找。
+						<span class="tagAttr">method</span> (<span class="required">Required</span>) <br />
+						Set the method name of this <span class="glossary">Invoke</span>,
+						it must be defined in <span class="tagAttr">resolver-class</span> or <span class="tagAttr">resolver</span> class.
+						The configuration parser will use this attribute to find the <span class="glossary">Method</span> object.
+						If you set the <span class="tagAttr">resolver-class</span> attribute, it's class will be first used for finding,
+						or the <span class="tagAttr">resolver</span> attribute's class will be used.
 					</li>
 					<li>
-						<span class="tagAttr">resolver-class</span>（<span class="required">二选一</span>） <br />
-						定义<span class="glossary">解决对象</span>类名，如果方法是类方法，你仅需要定义这个属性即可，而不需定义下面的<span class="tagAttr">resolver</span>属性，
-						因为类方法执行时不需要<span class="glossary">解决对象</span>实例。
+						<span class="tagAttr">resolver-class</span> (<span class="required">Alternatively</span>) <br />
+						Set the <span class="glossary">Resolver</span> class name of this <span class="glossary">Invoke</span>.
+						If the <span class="glossary">Invoke</span> method is static,
+						you can only set this attribute, because static method can be exeucted without instance.
 					</li>
 					<li>
-						<span class="tagAttr">resolver</span>（<span class="required">二选一</span>） <br />
-						定义<span class="glossary">解决对象</span>引用ID，这个ID可以是该文件域内的<span class="glossary">解决对象</span>ID，也可以是任何包含模块文件中的<span class="glossary">解决对象</span>ID。
-						如果该<span class="glossary">调用</span>方法不是类方法，这个属性必须被定义。
+						<span class="tagAttr">resolver</span> (<span class="required">Alternatively</span>) <br />
+						Set  the <span class="glossary">Resolver</span> id of this <span class="glossary">Invoke</span> defined in <span class="tag">&lt;resolvers&gt;</span> tag.
+						All the ID defined in module files can be used here.
+						If the <span class="glossary">Invoke</span> method is not static, this attribute is required.
 					</li>
 					<li>
-						<span class="tagAttr">result-key</span>（可选） <br />
+						<span class="tagAttr">result-key</span> (Optional) <br />
 						<span class="glossary">调用</span>方法结果在对象源中的保存关键字。无论方法是否有返回结果，只要你定义了<span class="tagAttr">result-key</span>，
 						框架总会执行保存操作，只不过无返回结果的话是以null值保存的；反之，则不会保存。
 						如果这个结果关键字里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。<br />

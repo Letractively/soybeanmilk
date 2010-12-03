@@ -458,26 +458,27 @@ public void handleException(Execution execution)
 					</li>
 					<li>
 						<span class="tagAttr">result-key</span> (Optional) <br />
-						<span class="glossary">调用</span>方法结果在对象源中的保存关键字。无论方法是否有返回结果，只要你定义了<span class="tagAttr">result-key</span>，
-						框架总会执行保存操作，只不过无返回结果的话是以null值保存的；反之，则不会保存。
-						如果这个结果关键字里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。<br />
-						下面是合法的结果关键字：
+						The saving keyword of this <span class="glossary">Invoke</span> method result.
+						The result will always be saved if you set this attribute, and "<span class="var">null</span>" is saved if the method has no return value.
+						Contrarily, nothing will be saved.
+						If this attribute contains accessor symbol '.', it must be start with scopes defined in this framework (See <a href="../../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>).<br />
+						Iegal result keywords are listing below:
 						<ul>
 							<li>
 								<span class="tagValue">yourResultKey</span> <br/>
-								结果将以“<span class="var">yourResultKey</span>”关键字被保存到“<span class="var">request</span>”作用域中
+								The result will be saved in "<span class="var">request</span>" scope with keyword "<span class="var">yourResultKey</span>".
 							</li>
 							<li>
 								<span class="tagValue">request.yourResultKey</span> <br/>
-								同上
+								The same as above.
 							</li>
 							<li>
 								<span class="tagValue">session.yourResultKey</span> <br/>
-								结果将以“<span class="var">yourResultKey</span>”关键字被保存到“<span class="var">session</span>”作用域中
+								The result will be saved in "<span class="var">session</span>" scope with keyword "<span class="var">yourResultKey</span>".
 							</li>
 							<li>
 								<span class="tagValue">application.yourResultKey</span> <br/>
-								结果将以“<span class="var">yourResultKey</span>”关键字被保存到“<span class="var">application</span>”作用域中
+								The result will be saved in "<span class="var">application</span>" scope with keyword "<span class="var">yourResultKey</span>".
 							</li>
 						</ul>
 					</li>
@@ -485,11 +486,11 @@ public void handleException(Execution execution)
 			</p>
 			<p>
 			<a name="invoke_java_spec"></a>
-				<a href="javascript:void(0);">Java方式</a><br>
+				<a href="javascript:void(0);">Java mode</a><br>
 			</p>
 			<p>
-					
-				它使你可以像书写Java代码一样配置<span class="glossary">调用</span>，下面是它的语法格式：<br>
+				It makes your configuration for <span class="glossary">Invoke</span> just like writing Java codes.
+				The syntax is listed below:
 <pre class="code-xml">
 <span class="tag">&lt;invoke name="yourInvokeName"&gt;</span>
 	<span class="tagAttr">resultKey</span> = <span class="tagAttr">resolver</span>.<span class="tagAttr">method</span>(<span class="tagAttr">arg</span>, <span class="tagAttr">arg</span>, ...)
@@ -498,25 +499,25 @@ public void handleException(Execution execution)
 				<ul>
 					<li>
 						<span class="tagAttr">resultKey</span> <br>
-						与上面<span class="tag">&lt;invoke&gt;</span>的<span class="tagAttr">result-key</span>属性用法一致
+						The same meaning to the above attribute <span class="tagAttr">result-key</span> of <span class="tag">&lt;invoke&gt;</span>.
 					</li>
 					<li>
 						<span class="tagAttr">resolver</span> <br>
-						与上面<span class="tag">&lt;invoke&gt;</span>的<span class="tagAttr">resolver</span>或者<span class="tagAttr">resolver-class</span>属性用法一致，
-						框架会自动判断它是<span class="glossary">解决对象</span>ID还是<span class="glossary">解决对象</span>类名
+						The same meaning to the above attribute <span class="tagAttr">resolver</span> or <span class="tagAttr">resolver-class</span> of <span class="tag">&lt;invoke&gt;</span>.
+						The framework can recognise which attribute it is.
 					</li>
 					<li>
 						<span class="tagAttr">method</span> <br>
-						与上面<span class="tag">&lt;invoke&gt;</span>的<span class="tagAttr">method</span>属性用法一致
+						The same meaning to the above attribute <span class="tagAttr">method</span> of <span class="tag">&lt;invoke&gt;</span>.
 					</li>
 					<li>
 						<span class="tagAttr">arg</span> <br>
-						与下面<span class="tag">&lt;arg&gt;</span>的标签内容用法一致
+						The same meaning to the below tag <span class="tag">&lt;arg&gt;</span>.
 					</li>
 				</ul>
 			</p>
 			<p>
-				下面是一些Java方式配置示例：
+				These are some configuration example using Java mode:
 			</p>
 			<p>
 <pre class="code-xml">
@@ -541,12 +542,15 @@ public void handleException(Execution execution)
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_arg"></a>
-				<span class="tag bold">&lt;arg&gt;</span>（<span class="required">不定</span>） <br/>
+				<span class="tag bold">&lt;arg&gt;</span> (<span class="required">Unsure</span>) <br/>
 			</p>
 			<p>
 				<span class="glossary">调用</span>方法的参数配置。只有在你是以XML方式配置<span class="tag">&lt;invoke&gt;</span>时，才需要定义此标签。<span class="tag">&lt;arg&gt;</span>的个数是由<span class="glossary">调用</span>方法决定的，
 				方法有几个参数，你就需要配置几个<span class="tag">&lt;arg&gt;</span>，
 				如果方法没有参数，你就不必要配置它。
+				
+				The argument configuration of an <span class="glossary">Invoke</span> method.
+				It may be need only if you are using XML mode to configure your <span class="tag">&lt;invoke&gt;</span>
 			</p>
 			<p>
 				它没有属性，只有标签内容。标签内容可以分为两大类，一是参数关键字、一是参数值，框架会自动识别它们。

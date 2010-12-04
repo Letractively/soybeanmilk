@@ -230,7 +230,8 @@
 				<span class="tag bold">&lt;converter&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				Support converter. You can add new support converters or replace old converters to enhance the generic converter.<br />
+				Support <a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">Converter</a> object.
+				You can add new support converters or replace old converters to enhance the generic converter.<br />
 				The nest generic converter implementation <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a>
 				has add most common support converter
 				(see <a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a> class),
@@ -545,126 +546,156 @@ public void handleException(Execution execution)
 				<span class="tag bold">&lt;arg&gt;</span> (<span class="required">Unsure</span>) <br/>
 			</p>
 			<p>
-				<span class="glossary">调用</span>方法的参数配置。只有在你是以XML方式配置<span class="tag">&lt;invoke&gt;</span>时，才需要定义此标签。<span class="tag">&lt;arg&gt;</span>的个数是由<span class="glossary">调用</span>方法决定的，
-				方法有几个参数，你就需要配置几个<span class="tag">&lt;arg&gt;</span>，
-				如果方法没有参数，你就不必要配置它。
-				
 				The argument configuration of an <span class="glossary">Invoke</span> method.
-				It may be need only if you are using XML mode to configure your <span class="tag">&lt;invoke&gt;</span>
+				It may be need only if you are using XML mode to configure your <span class="tag">&lt;invoke&gt;</span>.
 			</p>
 			<p>
-				它没有属性，只有标签内容。标签内容可以分为两大类，一是参数关键字、一是参数值，框架会自动识别它们。
+				It contains no attributes, but only content.
+				There are two types of <span class="tag">&lt;arg&gt;</span> content, one is keyword, and another is value.
+				The framework can recognize them.
 			</p>
 			<p>
-				下面是合法的标签内容：
+				The legal content is listing below:
 			</p>
 				<ul>
-					<li>参数关键字
+					<li>Keyword
 						<ul>
 							<li>
 								<span class="tagValue">param</span> <br/>
-								整个请求参数映射表。如果<span class="glossary">调用</span>方法参数是<span class="var">java.util.Map</span>类型，
-								那么这个请求参数映射表会原封不动地传递给方法；如果是其他类型，框架会首先将此映射表转换为这个类型的对象，然后传递给方法。
+								The entire request parameter map.
+								If the <span class="glossary">Invoke</span> method is <span class="var">java.util.Map</span> type,
+								then this entire map will be directly passed to the method.
+								And if it is the other type, the framework will first convert it to the target type, then pass it to the method. 
 							</li>
 							<li>
 								<span class="tagValue">yourArgKey</span> <br/>
-								请求参数映射表中以“<span class="var">yourArgKey</span>”开头的请求参数。
-								如果这个参数有明确的值，框架会将这个值进行类型转换（需要的话）后传递给方法；否则，就根据“<span class="var">yourArgKey</span>”来对参数映射表进行过滤，
-								产生一个新的映射表（它的关键字是原始关键字“<span class="var">yourArgKey.</span>”之后的部分，比如由“<span class="var">beanName.propertyName</span>”变为“<span class="var">propertyName</span>”），
-								然后，与上面提到的一样，根据<span class="glossary">调用</span>方法参数的类型直接传递这个新映射表或者传递转换后的对象。
+								The parameters start with "<span class="var">yourArgKey</span>" in request parameter map.
+								The framework will simplely convert it to the <span class="glossary">Invoke</span> method type and then pass it,
+								if it is explicitly (only one value).
+								Otherwise, the framework will first creat a new map who contains parameters only start with "<span class="var">yourArgKey</span>",
+								and it's key will also be truncated from "<span class="var">beanName.propertyName</span>" to "<span class="var">propertyName</span>".
+								Then, it will directly pass this new map or pass the converted object mentioned as above.
 							</li>
 							<li>
 								<span class="tagValue">param.yourArgKey</span> <br/>
-								同上。
+								The same as above.
 							</li>
 							<li>
 								<span class="tagValue">request</span> <br/>
-								请求HttpServletRequest对象。框架本身并没有提供它的转换器，如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">HttpServletRequest</span>”，
-								那么你需要自定义“<span class="var">javax.servlet.http.HttpServletRequest</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
+								The <span class="var">HttpServletRequest</span> object.
+								By default, the framework can not convert it.
+								So, you must define your own <a href="#tag_converter">support converter</a>
+								who converting "<span class="var">javax.servlet.http.HttpSession</span>" source to your destination type
+								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpServletRequest</span>.
 							</li>
 							<li>
 								<span class="tagValue">request.yourArgKey</span> <br/>
-								请求属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。框架不会对此对象执行类型转换，<span class="glossary">调用</span>方法的参数类型应该与这个关键字对应的对象一致。
+								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">request</span> scope.
+								The framework will not convert it, so the <span class="glossary">Invoke</span> method argument must be the same type with it.
 							</li>
 							<li>
 								<span class="tagValue">session</span> <br/>
-								会话HttpSession对象。框架本身并没有提供它的转换器，如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">HttpSession</span>”，
-								那么你需要自定义“<span class="var">javax.servlet.http.HttpSession</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
+								The <span class="var">HttpSession</span> object.
+								By default, the framework can not convert it.
+								So, you must define your own <a href="#tag_converter">support converter</a>
+								who converting "<span class="var">javax.servlet.http.HttpSession</span>" source to your destination type
+								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpSession</span>.
 							</li>
 							<li>
 								<span class="tagValue">session.yourArgKey</span> <br/>
-								会话属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。框架不会对此对象执行类型转换。
+								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">session</span> scope.
+								The framework will not convert it.
 							</li>
 							<li>
 								<span class="tagValue">application</span> <br/>
-								应用ServletContext对象。如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">ServletContext</span>”，
-								那么你需要自定义“<span class="var">javax.servlet.ServletContext</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
+								The <span class="var">ServletContext</span> object.
+								The framework can not convert it by default.
+								So, you must define your own <a href="#tag_converter">support converter</a>
+								who converting "<span class="var">javax.servlet.ServletContext</span>" source to your destination type
+								if the <span class="glossary">Invoke</span> method argument is not <span class="var">ServletContext</span>.
 							</li>
 							<li>
 								<span class="tagValue">application.yourArgKey</span> <br/>
-								应用属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。框架不会对此对象执行类型转换。
+								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">application</span> scope.
+								The framework will not convert it.
 							</li>
 							<li>
 								<span class="tagValue">response</span> <br/>
-								回应HttpServletResponse对象。如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">HttpServletResponse</span>”，
-								那么你需要自定义“<span class="var">javax.servlet.http.HttpServletResponse</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
+								The <span class="var">HttpServletResponse</span> object.
+								The framework can not convert it by default.
+								So, you must define your own <a href="#tag_converter">support converter</a>
+								who converting "<span class="var">javax.servlet.http.HttpServletResponse</span>" source to your destination type
+								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpServletResponse</span>.
 							</li>
 						</ul>
 					</li>
 					<li>
-						参数值 <br>
-						参数值只支持基本类型和String类型，语法与对应的Java语法相同。下面是详细说明：
+						Value <br>
+						It can only be Java primitive type, <span class="var">String</span> or <span class="var">null</span>
+						with the same syntax as Java language.
 						<ul>
 							<li>
 								<span class="tagValue">boolean</span> <br>
-								布尔值。对应的方法类型应该为“<span class="var">boolean</span>”或者“<span class="var">Boolean</span>”。
+								Boolean value (<span class="var">true</span> or <span class="var">false</span>).
+								The coresponding argument must be "<span class="var">boolean</span>" or "<span class="var">Boolean</span>" type.
 							</li>
 							<li>
 								<span class="tagValue">byte</span> <br>
-								字节值。对应的方法类型应该为“<span class="var">byte</span>”或者“<span class="var">Byte</span>”。
+								Byte value.
+								The coresponding argument must be "<span class="var">byte</span>" or "<span class="var">Byte</span>" type.
 							</li>
 							<li>
 								<span class="tagValue">char</span> <br>
-								字符。可以是普通字符（'a'、'b'、'c'、'1'、'5'）、Java转义字符（'\n'、'\r'、'\t'、'\''、'\\'、'\"'），或者unicode字符（'\uxxxx'）。
-								对应的方法类型应该为“<span class="var">char</span>”或者“<span class="var">Char</span>”。
+								Character.
+								It can be normal character (such as 'a', 'b', 'c', '1', '5'), 
+								Java ESC character ('\n', '\r', '\t', '\'', '\\', '\"'), or unicode character ('\uxxxx').
+								The coresponding argument must be "<span class="var">char</span>" or "<span class="var">Character</span>" type.
 							</li>
 							<li>
 								<span class="tagValue">double</span> <br>
-								双精度小数。对应的方法类型应该为“<span class="var">double</span>”或者“<span class="var">Double</span>”。
+								Double value.
+								The coresponding argument must be "<span class="var">double</span>" or "<span class="var">Double</span>" type.
 							</li>
 							<li>
 								<span class="tagValue">float</span> <br>
-								单精度小数。对应的方法类型应该为“<span class="var">float</span>”或者“<span class="var">Float</span>”。
+								Float value.
+								The coresponding argument must be "<span class="var">float</span>" or "<span class="var">Float</span>" type.
 							</li>
 							<li>
 								<span class="tagValue">int</span> <br>
-								整型值。对应的方法类型应该为“<span class="var">int</span>”或者“<span class="var">Integer</span>”。
+								Int value.
+								The coresponding argument must be "<span class="var">int</span>" or "<span class="var">Integer</span>" type.
 							</li>
 							<li>
 								<span class="tagValue">long</span> <br>
-								长整型值。对应的方法类型应该为“<span class="var">long</span>”或者“<span class="var">Long</span>”。
+								Long value.
+								The coresponding argument must be "<span class="var">long</span>" or "<span class="var">Long</span>" type.
 							</li>
 							<li>
 								<span class="tagValue">short</span> <br>
-								短整型值。对应的方法类型应该为“<span class="var">short</span>”或者“<span class="var">Short</span>”。
+								Short value.
+								The coresponding argument must be "<span class="var">short</span>" or "<span class="var">Short</span>" type.
 							</li>
 							<li>
 								<span class="tagValue">String</span> <br>
-								字符串。它可以包含<span class="tagValue">char</span>中定义的字符。对应的方法类型应该为“<span class="var">String</span>”。
+								String value.
+								It can contain characters defined in <span class="tagValue">char</span> segment above.
+								The coresponding argument must be "<span class="var">String</span>" type.
 							</li>
 							<li>
 								<span class="tagValue">null</span> <br>
-								空。对应的方法类型可以是除基本类型外的任何类型。
+								Null.
+								The coresponding argument can be any type except primitive. 
 							</li>
 						</ul>
 					</li>
 				</ul>
 			</p>
 			<p>
-				注意：如果标签内容是关键字，并且里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。
+				Note, if the content contains accessor symbol '.', it must be start with scopes defined in this framework (See <a href="../../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>).
 			</p>
 			<p>
-				下面是一些配置示例：
+				The following are some examples:
 			</p>
 			<p>
 <pre class="code-xml">
@@ -700,23 +731,24 @@ public void handleException(Execution execution)
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_action"></a>
-				<span class="tag bold">&lt;action&gt;</span>（可选） <br/>
+				<span class="tag bold">&lt;action&gt;</span> (Optional)<br/>
 			</p>
 			<p>
-				<span class="glossary">动作</span>配置。你可以为其配置多个<span class="tag">&lt;invoke&gt;</span>和<span class="tag">&lt;ref&gt;</span>子元素，
-				它们将被顺序地执行。
+				<span class="glossary">Action</span> configuration.
+				You can add many <span class="tag">&lt;invoke&gt;</span> and <span class="tag">&lt;ref&gt;</span> tags into it,
+				and they will be executed orderly.
 			</p>
 			<p>
-				它包含如下属性：
+				It contains the following attributes:
 				<ul>
 					<li>
-						<span class="tagAttr">name</span>（<span class="required">必须</span>） <br />
-						定义<span class="glossary">动作</span>的名称。
+						<span class="tagAttr">name</span> (<span class="required">Required</span>) <br />
+						Set the name of this <span class="glossary">Action</span>.
 					</li>
 				</ul>
 			</p>
 			<p>
-				下面是一个<span class="glossary">动作</span>示例：
+				It is an example below:
 <pre class="code-xml">
 &lt;action name="/yourAction.do"&gt;
 	&lt;invoke method="method0" resolver="yourResolver" result-key="result0" /&gt;
@@ -735,39 +767,42 @@ public void handleException(Execution execution)
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_ref"></a>
-				<span class="tag bold">&lt;ref&gt;</span>（可选） <br/>
+				<span class="tag bold">&lt;ref&gt;</span> (Optional)<br/>
 			</p>
 			<p>
-				引用配置。你可以将多个全局<span class="glossary">可执行对象</span>添加到这个动作中。
+				Reference configuration.
+				It helps you add one or more global <span class="glossary">Executable</span> into this <span class="glossary">Action</span>.
 			</p>
 			<p>
-				它包含如下属性：
+				It contains the following attributes:
 				<ul>
 					<li>
-						<span class="tagAttr">name</span>（<span class="required">必须</span>） <br />
-						要引用的全局<span class="glossary">可执行对象</span>名。
+						<span class="tagAttr">name</span> (<span class="required">Required</span>) <br />
+						Set the global name of <span class="glossary">Executable</span> you want to reference.
 					</li>
 				</ul>
 			</p>
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_target"></a>
-				<span class="tag bold">&lt;target&gt;</span>（可选） <br/>
+				<span class="tag bold">&lt;target&gt;</span> (Optional)<br/>
 			</p>
 			<p>
-				<span class="glossary">动作</span>的目标配置。你可以使用它定义<span class="glossary">动作</span>的转发URL。
+				The target configuration of this <span class="glossary">Action</span>.
 			</p>
 			<p>
-				它包含如下属性：
+				It contains the following attributes:
 				<ul>
 					<li>
-						<span class="tagAttr">url</span>（<span class="required">必须</span>） <br />
-						目标URL，如果是应用内的URL，则必须以“<span class="var">/</span>”开头。
+						<span class="tagAttr">url</span> (<span class="required">Required</span>)<br />
+						The target URL.
+						It must be start with "<span class="var">/</span>" if it is an URL in your application.
 					</li>
 					<li>
-						<span class="tagAttr">type</span>（可选） <br />
-						类型，它仅有两个可用的值：<span class="tagValue">forward</span>和<span class="tagValue">redirect</span>。
-						如果你没有定义，框架将默认按照<span class="tagValue">forward</span>来处理目标。
+						<span class="tagAttr">type</span> (Optional)<br />
+						The target type.
+						It has only two values : "<span class="tagValue">forward</span>" or "<span class="tagValue">redirect</span>".
+						The framework will treat it as "<span class="tagValue">forward</span>" type if you did not set it.
 					</li>
 				</ul>
 			</p>

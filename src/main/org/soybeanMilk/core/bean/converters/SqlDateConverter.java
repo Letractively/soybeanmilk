@@ -15,11 +15,14 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
+ * SQL日期转换器，它可以将“yyyy-MM-dd”格式的字符串转换为java.sql.Date类型的对象。
  * @author earthAngry@gmail.com
- *
+ * @date 2010-10-3
  */
 public class SqlDateConverter extends AbstractConverter
 {
+	private static String[] PATTERNS=new String[]{"yyyy-MM-dd"};
+	
 	private org.apache.commons.beanutils.converters.SqlDateConverter c;
 	
 	public SqlDateConverter()
@@ -27,9 +30,9 @@ public class SqlDateConverter extends AbstractConverter
 		super();
 		
 		c = new org.apache.commons.beanutils.converters.SqlDateConverter();
-		c.setPatterns(DateConverter.PATTERNS);
+		c.setPatterns(PATTERNS);
 	}
-
+	
 	@Override
 	public Object convert(Object sourceObj, Class<?> targetClass)
 	{

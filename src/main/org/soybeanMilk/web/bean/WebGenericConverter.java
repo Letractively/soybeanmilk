@@ -33,7 +33,7 @@ import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.web.WebConstants;
 
 /**
- * WEB通用转换器，除了继承的转换支持，它还支持将WEB请求参数映射表{@link Map Map&lt;String,String[]&gt;}转换为JavaBean对象
+ * WEB通用转换器，除了继承的转换支持，它还支持将{@link Map Map&lt;String,String&gt;}和{@link Map Map&lt;String,String[]&gt;}转换为JavaBean对象
  * @author earthAngry@gmail.com
  * @date 2010-10-8
  */

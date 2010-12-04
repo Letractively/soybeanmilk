@@ -3,7 +3,6 @@ package unit.core;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 import junit.framework.Assert;
@@ -164,52 +163,6 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringToCalendar()
-	{
-		{
-			String src = "2010";
-			Calendar dest = (Calendar)converter.convert(src, Calendar.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10";
-			Calendar dest = (Calendar)converter.convert(src, Calendar.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12";
-			Calendar dest = (Calendar)converter.convert(src, Calendar.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12 13";
-			Calendar dest = (Calendar)converter.convert(src, Calendar.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12 13:00";
-			Calendar dest = (Calendar)converter.convert(src, Calendar.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH:mm").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12 13:00:00";
-			Calendar dest = (Calendar)converter.convert(src, Calendar.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dest.getTime()));
-		}
-	}
-	
-	@Test
 	public void stringToCharacter()
 	{
 		{
@@ -270,6 +223,13 @@ public class TestDefaultGenericConverter
 			Date dest = (Date)converter.convert(src, Date.class);
 			
 			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dest.getTime()));
+		}
+
+		{
+			String src = "2010-10-12 13:00:00.555";
+			Date dest = (Date)converter.convert(src, Date.class);
+			
+			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(dest.getTime()));
 		}
 	}
 	
@@ -408,45 +368,10 @@ public class TestDefaultGenericConverter
 	public void stringToSqlDate()
 	{
 		{
-			String src = "2010";
-			java.sql.Date dest = (java.sql.Date)converter.convert(src, java.sql.Date.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10";
-			java.sql.Date dest = (java.sql.Date)converter.convert(src, java.sql.Date.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM").format(dest.getTime()));
-		}
-		
-		{
 			String src = "2010-10-12";
 			java.sql.Date dest = (java.sql.Date)converter.convert(src, java.sql.Date.class);
 			
 			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12 13";
-			java.sql.Date dest = (java.sql.Date)converter.convert(src, java.sql.Date.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12 13:00";
-			java.sql.Date dest = (java.sql.Date)converter.convert(src, java.sql.Date.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH:mm").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12 13:00:00";
-			java.sql.Date dest = (java.sql.Date)converter.convert(src, java.sql.Date.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dest.getTime()));
 		}
 	}
 	
@@ -454,45 +379,17 @@ public class TestDefaultGenericConverter
 	public void stringToSqlTime()
 	{
 		{
-			String src = "2010";
+			String src = "15:30:20";
 			java.sql.Time dest = (java.sql.Time)converter.convert(src, java.sql.Time.class);
 			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy").format(dest.getTime()));
+			Assert.assertEquals(src, new SimpleDateFormat("HH:mm:ss").format(dest.getTime()));
 		}
 		
 		{
-			String src = "2010-10";
+			String src = "15:30:20.333";
 			java.sql.Time dest = (java.sql.Time)converter.convert(src, java.sql.Time.class);
 			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12";
-			java.sql.Time dest = (java.sql.Time)converter.convert(src, java.sql.Time.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12 13";
-			java.sql.Time dest = (java.sql.Time)converter.convert(src, java.sql.Time.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12 13:00";
-			java.sql.Time dest = (java.sql.Time)converter.convert(src, java.sql.Time.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH:mm").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12 13:00:00";
-			java.sql.Time dest = (java.sql.Time)converter.convert(src, java.sql.Time.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dest.getTime()));
+			Assert.assertEquals(src, new SimpleDateFormat("HH:mm:ss.SSS").format(dest.getTime()));
 		}
 	}
 	
@@ -500,45 +397,18 @@ public class TestDefaultGenericConverter
 	public void stringToSqlTimestamp()
 	{
 		{
-			String src = "2010";
-			java.sql.Timestamp dest = (java.sql.Timestamp)converter.convert(src, java.sql.Timestamp.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10";
-			java.sql.Timestamp dest = (java.sql.Timestamp)converter.convert(src, java.sql.Timestamp.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12";
-			java.sql.Timestamp dest = (java.sql.Timestamp)converter.convert(src, java.sql.Timestamp.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12 13";
-			java.sql.Timestamp dest = (java.sql.Timestamp)converter.convert(src, java.sql.Timestamp.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH").format(dest.getTime()));
-		}
-		
-		{
-			String src = "2010-10-12 13:00";
-			java.sql.Timestamp dest = (java.sql.Timestamp)converter.convert(src, java.sql.Timestamp.class);
-			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH:mm").format(dest.getTime()));
-		}
-		
-		{
 			String src = "2010-10-12 13:00:00";
 			java.sql.Timestamp dest = (java.sql.Timestamp)converter.convert(src, java.sql.Timestamp.class);
 			
-			Assert.assertEquals(src, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dest.getTime()));
+			String destStr=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(dest.getTime());
+			Assert.assertEquals(src, destStr);
+		}
+		{
+			String src = "2010-10-12 13:00:00.555";
+			java.sql.Timestamp dest = (java.sql.Timestamp)converter.convert(src, java.sql.Timestamp.class);
+			
+			String destStr=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(dest.getTime());
+			Assert.assertEquals(src, destStr);
 		}
 	}
 	

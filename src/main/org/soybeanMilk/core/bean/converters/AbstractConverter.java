@@ -18,5 +18,6 @@ import org.soybeanMilk.core.bean.Converter;
 
 /**
  * @author earthAngry@gmail.com
+ * @date 2010-10-3
  */
 public abstract class AbstractConverter implements Converter{}

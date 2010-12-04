@@ -15,19 +15,23 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
- * 默认日期转换器
+ * 日期转换器，它可以将如下格式的字符串转换为java.util.Date对象：
+ * <ul>
+ *   <li>yyyy</li>
+ *   <li>yyyy-MM</li>
+ *   <li>yyyy-MM-dd</li>
+ *   <li>yyyy-MM-dd HH</li>
+ *   <li>yyyy-MM-dd HH:mm</li>
+ *   <li>yyyy-MM-dd HH:mm:ss</li>
+ *   <li>yyyy-MM-dd HH:mm:ss.SSS</li>
+ * </ul>
  * @author earthAngry@gmail.com
  * @date 2010-1-29
- *
  */
 public class DateConverter extends AbstractConverter
 {
-	/**
-	 * 日期转换支持的字符串格式，包括：<br>
-	 * "yyyy","yyyy-MM","yyyy-MM-dd","yyyy-MM-ddd HH", "yyyy-MM-ddd HH:mm","yyyy-MM-ddd HH:mm:ss"
-	 */
-	public static String[] PATTERNS = new String[]{"yyyy","yyyy-MM","yyyy-MM-dd","yyyy-MM-ddd HH",
-		"yyyy-MM-ddd HH:mm","yyyy-MM-ddd HH:mm:ss"};
+	private static String[] PATTERNS = new String[]{"yyyy","yyyy-MM","yyyy-MM-dd","yyyy-MM-dd HH",
+		"yyyy-MM-dd HH:mm","yyyy-MM-dd HH:mm:ss","yyyy-MM-dd HH:mm:ss.SSS"};
 	
 	private org.apache.commons.beanutils.converters.DateConverter c;
 	

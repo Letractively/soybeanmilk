@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -424,7 +425,7 @@ public class ConfigurationParser
 			assertNotEmpty(target, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_TARGET+"] must not be empty");
 			assertNotEmpty(clazz, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_CLASS+"] must not be empty");
 			
-			genericConverter.addConverter(toClass(src), toClass(target), (Converter)createClassInstance(clazz));
+			genericConverter.addConverter(converterClassAttrToClass(src), converterClassAttrToClass(target), (Converter)createClassInstance(clazz));
 		}
 	}
 	
@@ -847,9 +848,28 @@ public class ConfigurationParser
 		return doc;
 	}
 	
+	/**
+	 * 格式化包含模块文件
+	 * @param rawFileName
+	 * @return
+	 */
 	protected String formatIncludeFileName(String rawFileName)
 	{
 		return rawFileName;
+	}
+	
+	/**
+	 * 将converter元素里面的src或者dest属性的值转换为它所代表的类型
+	 * @param name
+	 * @return
+	 */
+	protected Class<?> converterClassAttrToClass(String name)
+	{
+		Class<?> re=ShortNameToClass.get(name);
+		if(re == null)
+			re=toClass(name);
+		
+		return re;
 	}
 	
 	/**
@@ -1138,6 +1158,107 @@ public class ConfigurationParser
 		public String toString()
 		{
 			return "Executable [name=" + refName + "]";
+		}
+	}
+	
+	protected static class ShortNameToClass
+	{
+		private static Map<String, Class<?>> nameMaps=new HashMap<String, Class<?>>();
+		static
+		{
+			nameMaps.put("boolean", boolean.class);
+			nameMaps.put("boolean[]", boolean[].class);
+			nameMaps.put("Boolean", Boolean.class);
+			nameMaps.put("Boolean[]", Boolean[].class);
+			nameMaps.put("java.lang.Boolean", Boolean.class);
+			nameMaps.put("java.lang.Boolean[]", Boolean[].class);
+			
+			nameMaps.put("byte", byte.class);
+			nameMaps.put("byte[]", byte[].class);
+			nameMaps.put("Byte", Byte.class);
+			nameMaps.put("Byte[]", Byte[].class);
+			nameMaps.put("java.lang.Byte", Byte.class);
+			nameMaps.put("java.lang.Byte[]", Byte[].class);
+			
+			nameMaps.put("char", char.class);
+			nameMaps.put("char[]", char[].class);
+			nameMaps.put("Character", Character.class);
+			nameMaps.put("Character[]", Character[].class);
+			nameMaps.put("java.lang.Character", Character.class);
+			nameMaps.put("java.lang.Character[]", Character[].class);
+			
+			nameMaps.put("double", double.class);
+			nameMaps.put("double[]", double[].class);
+			nameMaps.put("Double", Double.class);
+			nameMaps.put("Double[]", Double[].class);
+			nameMaps.put("java.lang.Double", Double.class);
+			nameMaps.put("java.lang.Double[]", Double[].class);
+			
+			nameMaps.put("float", float.class);
+			nameMaps.put("float[]", float[].class);
+			nameMaps.put("Float", Float.class);
+			nameMaps.put("Float[]", Float[].class);
+			nameMaps.put("java.lang.Float", Float.class);
+			nameMaps.put("java.lang.Float[]", Float[].class);
+			
+			nameMaps.put("int", int.class);
+			nameMaps.put("int[]", int[].class);
+			nameMaps.put("Integer", Integer.class);
+			nameMaps.put("Integer[]", Integer[].class);
+			nameMaps.put("java.lang.Integer", Integer.class);
+			nameMaps.put("java.lang.Integer[]", Integer[].class);
+			
+			nameMaps.put("long", long.class);
+			nameMaps.put("long[]", long[].class);
+			nameMaps.put("Long", Long.class);
+			nameMaps.put("Long[]", Long[].class);
+			nameMaps.put("java.lang.Long", Long.class);
+			nameMaps.put("java.lang.Long[]", Long[].class);
+			
+			nameMaps.put("short", short.class);
+			nameMaps.put("short[]", short[].class);
+			nameMaps.put("Short", Short.class);
+			nameMaps.put("Short[]", Short[].class);
+			nameMaps.put("java.lang.Short", Short.class);
+			nameMaps.put("java.lang.Short[]", Short[].class);
+			
+			nameMaps.put("java.math.BigDecimal", java.math.BigDecimal.class);
+			nameMaps.put("java.math.BigDecimal[]", java.math.BigDecimal[].class);
+			
+			nameMaps.put("java.math.BigInteger", java.math.BigInteger.class);
+			nameMaps.put("java.math.BigInteger[]", java.math.BigInteger[].class);
+			
+			nameMaps.put("java.util.Date", java.util.Date.class);
+			nameMaps.put("java.util.Date[]", java.util.Date[].class);
+			
+			nameMaps.put("java.sql.Date", java.sql.Date.class);
+			nameMaps.put("java.sql.Date[]", java.sql.Date[].class);
+			
+			nameMaps.put("java.sql.Time", java.sql.Time.class);
+			nameMaps.put("java.sql.Time[]", java.sql.Time[].class);
+			
+			nameMaps.put("java.sql.Timestamp", java.sql.Timestamp.class);
+			nameMaps.put("java.sql.Timestamp[]", java.sql.Timestamp[].class);
+			
+			nameMaps.put("String", String.class);
+			nameMaps.put("string", String.class);
+			nameMaps.put("java.lang.String", String.class);
+			nameMaps.put("String[]", String[].class);
+			nameMaps.put("string[]", String[].class);
+			nameMaps.put("java.lang.String[]", String[].class);
+		}
+		
+		/**
+		 * 由简称获取类型
+		 * @param shortName
+		 * @return
+		 */
+		public static Class<?> get(String shortName)
+		{
+			if(shortName==null || shortName.length()==0)
+				return null;
+			
+			return nameMaps.get(shortName);
 		}
 	}
 }

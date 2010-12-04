@@ -2,6 +2,10 @@
 <soybean-milk>
 	
 	<global-config>
+		<generic-converter>
+			<converter src="string" target="int" class="org.soybeanMilk.core.bean.converters.IntegerConverter" />
+		</generic-converter>
+		
 		<interceptor before="beforeHandler" after="afterHandler" exception="exceptionHandler"
 			execution-key="executionKey" />
 	</global-config>

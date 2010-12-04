@@ -25,7 +25,6 @@ import org.soybeanMilk.core.bean.converters.BigDecimalConverter;
 import org.soybeanMilk.core.bean.converters.BigIntegerConverter;
 import org.soybeanMilk.core.bean.converters.BooleanConverter;
 import org.soybeanMilk.core.bean.converters.ByteConverter;
-import org.soybeanMilk.core.bean.converters.CalendarConverter;
 import org.soybeanMilk.core.bean.converters.CharacterConverter;
 import org.soybeanMilk.core.bean.converters.DateConverter;
 import org.soybeanMilk.core.bean.converters.DoubleConverter;
@@ -38,34 +37,44 @@ import org.soybeanMilk.core.bean.converters.SqlTimeConverter;
 import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
 
 /**
- * 通用转换器的默认实现。默认地，它支持将字符串转换为以下类型的对象：<br>
- * <ul>
- * 	<li>boolean</li>
- * 	<li>byte</li>
- * 	<li>char</li>
- * 	<li>double</li>
- * 	<li>float</li>
- * 	<li>int</li>
- * 	<li>long</li>
- * 	<li>short</li>
- * 	<li>Boolean</li>
- * 	<li>Byte</li>
- * 	<li>Character</li>
- * 	<li>Double</li>
- * 	<li>Float</li>
- * 	<li>Integer</li>
- * 	<li>Long</li>
- * 	<li>Short</li>
- * 	<li>java.math.BigDecimal</li>
- * 	<li>java.math.BigInteger</li>
- * 	<li>java.util.Date</li>
- * 	<li>java.util.Calendar</li>
- * 	<li>java.sql.Date</li>
- * 	<li>java.sql.Time</li>
- * 	<li>java.sql.Timestamp</li>
- * </ul><br>
- * 同时也支持将字符串数组转换为上述各类型的数组。<br>
- * 其中，与日期相关的转换器支持的字符串格式定义在{@link DateConverter#PATTERNS}中。<br>
+ * 通用转换器的默认实现。<br>
+ * 它默认支持的类型转换如下所示：<br>
+ * <table border="1" cellspacing="1" cellpadding="3">
+ *   <tr><td>源类型</td><td>目标类型</td></tr>
+ *   <tr><td rowspan="14">String</td><td>boolean, Boolean</td></tr>
+ *   <tr><td>byte, Byte</td></tr>
+ *   <tr><td>char, Character</td></tr>
+ *   <tr><td>double, Double</td></tr>
+ *   <tr><td>float, Float</td></tr>
+ *   <tr><td>int, Integer</td></tr>
+ *   <tr><td>long, Long</td></tr>
+ *   <tr><td>short, Short</td></tr>
+ *   
+ *   <tr><td>java.math.BigDecimal</td></tr>
+ *   <tr><td>java.math.BigInteger</td></tr>
+ *   <tr><td>java.util.Date</td></tr>
+ *   <tr><td>java.sql.Date</td></tr>
+ *   <tr><td>java.sql.Time</td></tr>
+ *   <tr><td>java.sql.Timestamp</td></tr>
+ *   
+ *   
+ *   <tr><td rowspan="14">String[]</td><td>boolean[], Boolean[]</td></tr>
+ *   <tr><td>byte[], Byte[]</td></tr>
+ *   <tr><td>char[], Character[]</td></tr>
+ *   <tr><td>double[], Double[]</td></tr>
+ *   <tr><td>float[], Float[]</td></tr>
+ *   <tr><td>int[], Integer[]</td></tr>
+ *   <tr><td>long[], Long[]</td></tr>
+ *   <tr><td>short[], Short[]</td></tr>
+ *   
+ *   <tr><td>java.math.BigDecimal[]</td></tr>
+ *   <tr><td>java.math.BigInteger[]</td></tr>
+ *   <tr><td>java.util.Date[]</td></tr>
+ *   <tr><td>java.sql.Date[]</td></tr>
+ *   <tr><td>java.sql.Time[]</td></tr>
+ *   <tr><td>java.sql.Timestamp[]</td></tr>
+ * </table>
+ * <br>
  * 你也可以通过{@link #addConverter(Class, Class, Converter)}为它添加其他转换器，使其支持更多的类型转换。
  * @author earthAngry@gmail.com
  * @date 2010-10-6
@@ -189,7 +198,6 @@ public class DefaultGenericConverter implements GenericConverter
 		addConverter(String.class, java.math.BigDecimal.class, new BigDecimalConverter());
 		addConverter(String.class, java.math.BigInteger.class, new BigIntegerConverter());
 		addConverter(String.class, java.util.Date.class, new DateConverter());
-		addConverter(String.class, java.util.Calendar.class, new CalendarConverter());
 		addConverter(String.class, java.sql.Date.class, new SqlDateConverter());
 		addConverter(String.class, java.sql.Time.class, new SqlTimeConverter());
 		addConverter(String.class, java.sql.Timestamp.class, new SqlTimestampConverter());
@@ -224,7 +232,6 @@ public class DefaultGenericConverter implements GenericConverter
 		addConverter(String[].class, java.math.BigDecimal[].class, new ArrayConverter(new BigDecimalConverter()));
 		addConverter(String[].class, java.math.BigInteger[].class, new ArrayConverter(new BigIntegerConverter()));
 		addConverter(String[].class, java.util.Date[].class, new ArrayConverter(new DateConverter()));
-		addConverter(String[].class, java.util.Calendar[].class, new ArrayConverter(new CalendarConverter()));
 		addConverter(String[].class, java.sql.Date[].class, new ArrayConverter(new SqlDateConverter()));
 		addConverter(String[].class, java.sql.Time[].class, new ArrayConverter(new SqlTimeConverter()));
 		addConverter(String[].class, java.sql.Timestamp[].class, new ArrayConverter(new SqlTimestampConverter()));

@@ -15,11 +15,14 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
+ * SQL时间转换器，它可以将“HH:mm:ss”或“HH:mm:ss.SSS”格式的字符串转换为java.sql.Time类型的对象。
  * @author earthAngry@gmail.com
- *
+ * @date 2010-10-3
  */
 public class SqlTimeConverter extends AbstractConverter
 {
+	private static String[] PATTERNS=new String[]{"HH:mm:ss", "HH:mm:ss.SSS"};
+	
 	private org.apache.commons.beanutils.converters.SqlTimeConverter c;
 	
 	public SqlTimeConverter()
@@ -27,9 +30,9 @@ public class SqlTimeConverter extends AbstractConverter
 		super();
 		
 		c = new org.apache.commons.beanutils.converters.SqlTimeConverter();
-		c.setPatterns(DateConverter.PATTERNS);
+		c.setPatterns(PATTERNS);
 	}
-
+	
 	@Override
 	public Object convert(Object sourceObj, Class<?> targetClass)
 	{

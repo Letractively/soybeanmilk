@@ -35,7 +35,7 @@
 						Invoke the method on the target object.
 					</li>
 					<li>
-						Save the method result to <a href="../../api/org/soybeanMilk/core/ObjectSource.html" class="glossary">ObjectSource</a>.
+						Save the method result into <a href="../../api/org/soybeanMilk/core/ObjectSource.html" class="glossary">ObjectSource</a>.
 					</li>
 					<li>
 						Process the URL dispatching.
@@ -48,7 +48,7 @@
 			</p>
 			<p>
 				<a href="../../api/org/soybeanMilk/core/Executable.html" class="glossary">Executable</a> is another core interface.
-				It can be executed only with an <span class="glossary">ObjectSource</span>.There is two implementation of this interface, one is
+				It can be executed only with an <span class="glossary">ObjectSource</span>.There are two implementations of this interface, one is
 				<a href="../../api/org/soybeanMilk/core/exe/Invoke.html" class="glossary">Invoke</a>, and another is <a href="../../api/org/soybeanMilk/core/exe/Action.html" class="glossary">Action</a>.
 				They both are advanced encapsulation of Java <span class="glossary">Method</span> object, an <span class="glossary">Action</span> can have one or more <span class="glossary">Invoke</span>s,
 				and an <span class="glossary">Invoke</span> are conresponding to a <span class="glossary">Method</span>.
@@ -58,7 +58,7 @@
 				But there is no interface defined for it, because it is writing by you. You may call it "Business object".
 			</p>
 			<p>
-				<a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">Converter</a> help <span class="glossary">ObjectSource</span> convert the object it stored to the <span class="glossary">Invoke</span>'s method argument type.
+				<a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">Converter</a> helps <span class="glossary">ObjectSource</span> converting the object it stored to the <span class="glossary">Invoke</span>'s method argument type.
 				
 			</p>
 			<p>
@@ -255,7 +255,7 @@
 				</ul>
 			</p>
 			<p>
-				The following is a customized converter for converting Date, the nest will be replaced: 
+				The following is a support converter for converting Date, the nested will be replaced: 
 <pre class="code-xml">
 &lt;generic-converter&gt;
 	&lt;converter src="java.lang.String" dest="java.util.Date" class="your.converter.DateConverter" /&gt;
@@ -277,7 +277,7 @@
 					<li>
 						<span class="tagAttr">before</span> (Optional) <br />
 						Set the "before" interceptor's global <span class="glossary">Executable</span> name.
-						<span class="glossary">Executor</span> will execute it first.
+						<span class="glossary">Executor</span> will execute it first before the current <span class="glossary">Executable</span>.
 					</li>
 					<li>
 						<span class="tagAttr">after</span> (Optional) <br />
@@ -374,7 +374,7 @@ public void handleException(Execution execution)
 				<span class="tag bold">&lt;resolver&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				<span class="glossary">Resolver</span> configuration. You may add many <span class="tag">&lt;resolver&gt;</span> tags here using later.
+				<span class="glossary">Resolver</span> configuration. You may add many resolvers here and using later.
 			</p>
 			<p>
 				It contains the following attributes:
@@ -547,7 +547,7 @@ public void handleException(Execution execution)
 			</p>
 			<p>
 				The argument configuration of an <span class="glossary">Invoke</span> method.
-				It may be need only if you are using XML mode to configure your <span class="tag">&lt;invoke&gt;</span>.
+				It may be needed only if you are using XML mode to configure your <span class="tag">&lt;invoke&gt;</span>.
 			</p>
 			<p>
 				It contains no attributes, but only content.
@@ -563,9 +563,9 @@ public void handleException(Execution execution)
 							<li>
 								<span class="tagValue">param</span> <br/>
 								The entire request parameter map.
-								If the <span class="glossary">Invoke</span> method is <span class="var">java.util.Map</span> type,
+								If the <span class="glossary">Invoke</span> method argument is <span class="var">java.util.Map</span> type,
 								then this entire map will be directly passed to the method.
-								And if it is the other type, the framework will first convert it to the target type, then pass it to the method. 
+								And if the argument is other type, the framework will first convert it to the target type, then pass it to the method. 
 							</li>
 							<li>
 								<span class="tagValue">yourArgKey</span> <br/>
@@ -585,7 +585,7 @@ public void handleException(Execution execution)
 								The <span class="var">HttpServletRequest</span> object.
 								By default, the framework can not convert it.
 								So, you must define your own <a href="#tag_converter">support converter</a>
-								who converting "<span class="var">javax.servlet.http.HttpSession</span>" source to your destination type
+								who converting "<span class="var">javax.servlet.http.HttpServletRequest</span>" source to your destination type
 								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpServletRequest</span>.
 							</li>
 							<li>
@@ -692,7 +692,7 @@ public void handleException(Execution execution)
 				</ul>
 			</p>
 			<p>
-				Note, if the content contains accessor symbol '.', it must be start with scopes defined in this framework (See <a href="../../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>).
+				Note, if the content is keyword and contains accessor symbol '.', it must be start with scopes defined in this framework (See <a href="../../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>).
 			</p>
 			<p>
 				The following are some examples:

@@ -25,7 +25,7 @@
 		<div class="content">
 			<p>
 				This framework has a nest servlet <a href="../../api/org/soybeanMilk/web/servlet/DispatchServlet.html">DispatchServlet</a> for integration.
-				It can construct a <a href="../../api/org/soybeanMilk/web/WebExecutor.html">WebExecutor</a> from its init parameter,
+				It can construct a <a href="../../api/org/soybeanMilk/web/WebExecutor.html">WebExecutor</a> from its init parameters,
 				and dispatching all requests to this <span class="glossary">WebExecutor</span> at runtime.
 			</p>
 			<p>
@@ -99,7 +99,7 @@
 				<span class="tag bold">soybean-milk-config</span> (Optional)
 			</p>
 			<p>
-				Set the core configuratoin file of this framework.
+				Set the configuration file of this framework.
 				It can be a file in classpath (such as "<span class="var">my/config/soybean-milk.cfg.xml</span>"),
 				or a file in "<span class="var">/WEB-INF</span>" folder of your application (such as "<span class="var">/WEB-INF/cfg/soybean-milk.cfg.xml</span>").
 			</p>
@@ -158,7 +158,7 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 		BeanFactory springContext=WebApplicationContextUtils.getWebApplicationContext(context);
 		SpringResolverFactory srf=new SpringResolverFactory(springContext);
 		
-		context.setAttribute("springAppContextResolverFactory",rf);
+		context.setAttribute("<span style="color:red;">springAppContextResolverFactory</span>",rf);
 	}
 }
 </pre>
@@ -174,7 +174,7 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 </pre>
 			</p>
 			<p>
-				Then, setting <span class="tag">external-resolver-factory</span> value to be "<span class="var">springAppContextResolverFactory</span>".
+				Then, setting <span class="tag">external-resolver-factory</span> value to be "<span class="var" style="color:red;">springAppContextResolverFactory</span>".
 			</p>
 			<p>
 				Now, you can use any <span class="tagAttr">id</span> of <span class="tag">&lt;bean&gt;</span> defined in Spring as the <span class="tagAttr">resolver</span> attribute of <span class="tag">&lt;invoke&gt;</span>.
@@ -186,7 +186,7 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 			</p>
 			<p>
 				Set the <span class="glossary">WebExecutor</span> object key in your application (ServletContext).
-				It makes you can getting all the information of this framework at runtime. 
+				It helps you getting all the information of this framework at runtime. 
 			</p>
 			<p>
 				And noting will be saved in your application (ServletContext) if you did not set it.

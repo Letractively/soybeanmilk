@@ -52,8 +52,8 @@
 	
 	<!--将整个dist打成zip文件并放到versions录下-->
 	<target name="zipDist" depends="copyApiToDocs">
-		<delete file="${versionDir}/${appName}.dist.zip" />
-		<zip destfile="${versionDir}/${appName}.dist.zip">
+		<delete file="${versionDir}/${appName}.all.zip" />
+		<zip destfile="${versionDir}/${appName}.all.zip">
 			<zipfileset dir="${distDir}/docs" prefix="docs" />
 			<zipfileset dir="${distDir}/lib/optional" prefix="lib/optional" />
 			<zipfileset dir="${distDir}/lib/required" prefix="lib/required" />

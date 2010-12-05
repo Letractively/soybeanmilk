@@ -1170,66 +1170,50 @@ public class ConfigurationParser
 			nameMaps.put("boolean[]", boolean[].class);
 			nameMaps.put("Boolean", Boolean.class);
 			nameMaps.put("Boolean[]", Boolean[].class);
-			nameMaps.put("java.lang.Boolean", Boolean.class);
-			nameMaps.put("java.lang.Boolean[]", Boolean[].class);
 			
 			nameMaps.put("byte", byte.class);
 			nameMaps.put("byte[]", byte[].class);
 			nameMaps.put("Byte", Byte.class);
 			nameMaps.put("Byte[]", Byte[].class);
-			nameMaps.put("java.lang.Byte", Byte.class);
-			nameMaps.put("java.lang.Byte[]", Byte[].class);
 			
 			nameMaps.put("char", char.class);
 			nameMaps.put("char[]", char[].class);
 			nameMaps.put("Character", Character.class);
 			nameMaps.put("Character[]", Character[].class);
-			nameMaps.put("java.lang.Character", Character.class);
-			nameMaps.put("java.lang.Character[]", Character[].class);
 			
 			nameMaps.put("double", double.class);
 			nameMaps.put("double[]", double[].class);
 			nameMaps.put("Double", Double.class);
 			nameMaps.put("Double[]", Double[].class);
-			nameMaps.put("java.lang.Double", Double.class);
-			nameMaps.put("java.lang.Double[]", Double[].class);
 			
 			nameMaps.put("float", float.class);
 			nameMaps.put("float[]", float[].class);
 			nameMaps.put("Float", Float.class);
 			nameMaps.put("Float[]", Float[].class);
-			nameMaps.put("java.lang.Float", Float.class);
-			nameMaps.put("java.lang.Float[]", Float[].class);
 			
 			nameMaps.put("int", int.class);
 			nameMaps.put("int[]", int[].class);
 			nameMaps.put("Integer", Integer.class);
 			nameMaps.put("Integer[]", Integer[].class);
-			nameMaps.put("java.lang.Integer", Integer.class);
-			nameMaps.put("java.lang.Integer[]", Integer[].class);
 			
 			nameMaps.put("long", long.class);
 			nameMaps.put("long[]", long[].class);
 			nameMaps.put("Long", Long.class);
 			nameMaps.put("Long[]", Long[].class);
-			nameMaps.put("java.lang.Long", Long.class);
-			nameMaps.put("java.lang.Long[]", Long[].class);
 			
 			nameMaps.put("short", short.class);
 			nameMaps.put("short[]", short[].class);
 			nameMaps.put("Short", Short.class);
 			nameMaps.put("Short[]", Short[].class);
-			nameMaps.put("java.lang.Short", Short.class);
-			nameMaps.put("java.lang.Short[]", Short[].class);
 			
-			nameMaps.put("java.math.BigDecimal", java.math.BigDecimal.class);
-			nameMaps.put("java.math.BigDecimal[]", java.math.BigDecimal[].class);
+			nameMaps.put("BigDecimal", java.math.BigDecimal.class);
+			nameMaps.put("BigDecimal[]", java.math.BigDecimal[].class);
 			
-			nameMaps.put("java.math.BigInteger", java.math.BigInteger.class);
-			nameMaps.put("java.math.BigInteger[]", java.math.BigInteger[].class);
+			nameMaps.put("BigInteger", java.math.BigInteger.class);
+			nameMaps.put("BigInteger[]", java.math.BigInteger[].class);
 			
-			nameMaps.put("java.util.Date", java.util.Date.class);
-			nameMaps.put("java.util.Date[]", java.util.Date[].class);
+			nameMaps.put("Date", java.util.Date.class);
+			nameMaps.put("Date[]", java.util.Date[].class);
 			
 			nameMaps.put("java.sql.Date", java.sql.Date.class);
 			nameMaps.put("java.sql.Date[]", java.sql.Date[].class);
@@ -1241,10 +1225,8 @@ public class ConfigurationParser
 			nameMaps.put("java.sql.Timestamp[]", java.sql.Timestamp[].class);
 			
 			nameMaps.put("String", String.class);
-			nameMaps.put("string", String.class);
-			nameMaps.put("java.lang.String", String.class);
 			nameMaps.put("String[]", String[].class);
-			nameMaps.put("string[]", String[].class);
+			nameMaps.put("java.lang.String", String.class);
 			nameMaps.put("java.lang.String[]", String[].class);
 		}
 		

@@ -62,19 +62,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		else
 		{
 			if(sourceObj instanceof Map)
-			{
-				if(targetClass.isAssignableFrom(sourceObj.getClass()))
-					return sourceObj;
-				else
-				{
-					//框架使用者可以自定义转换器
-					Converter customizedConverter=getConverter(Map.class, targetClass);
-					if(customizedConverter != null)
-						return customizedConverter.convert(sourceObj, targetClass);
-					else
-						return convertMapToJavaBean((Map<String, Object>)sourceObj, targetClass);
-				}
-			}
+				return convertMap((Map<String, Object>)sourceObj, targetClass);
 			else
 				return safeConvert(sourceObj, targetClass);
 		}
@@ -150,18 +138,21 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 将映射表转换成<code>javaBeanClass</code>类的对象
-	 * @param valueMap 值映射表，它也可能包含不是<code>javaBeanClass</code>类属性的关键字
-	 * @param javaBeanClass
+	 * 将映射表转换成<code>targetClass</code>类型的对象
+	 * @param valueMap 值映射表，它也可能包含与<code>targetClass</code>类属性无关的关键字
+	 * @param targetClass
 	 * @return
 	 */
-	protected Object convertMapToJavaBean(Map<String, Object> valueMap, Class<?> javaBeanClass)
+	protected Object convertMap(Map<String, Object> valueMap, Class<?> targetClass)
 	{
 		if(valueMap==null || valueMap.size()==0)
 			return null;
 		
+		if(targetClass.isAssignableFrom(valueMap.getClass()))
+			return valueMap;
+		
 		Object bean = null;
-		BeanInfo beanInfo=getBeanInfo(javaBeanClass);
+		BeanInfo beanInfo=getBeanInfo(targetClass);
 		
 		Set<String> keys=valueMap.keySet();
 		for(String k : keys)

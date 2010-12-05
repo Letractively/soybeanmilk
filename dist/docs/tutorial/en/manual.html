@@ -232,10 +232,12 @@
 			<p>
 				Support <a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">Converter</a> object.
 				You can add new support converters or replace old converters to enhance the generic converter.<br />
-				The nest generic converter implementation <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a>
-				has add most common support converter
+			</p>
+			<p>
+				The nested generic converter implementation <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a>
+				has add most common support converters
 				(see <a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a> class),
-				and it also can convert "<span class="var">java.util.Map</span>" to JavaBean object.
+				and it also can convert "<span class="var">java.util.Map&lt;String, String[]&gt;</span>" to JavaBean object.
 			</p>
 			<p>
 				It contains the following attributes:
@@ -243,10 +245,12 @@
 					<li>
 						<span class="tagAttr">src</span> (<span class="required">Required</span>) <br />
 						The source type it can convert from.
+						Such as "java.lang.String" (String class), "[Ljava.lang.String;" (String[] class).
 					</li>
 					<li>
-						<span class="tagAttr">dest</span> (<span class="required">Required</span>) <br />
-						The destination type it can convert to.
+						<span class="tagAttr">target</span> (<span class="required">Required</span>) <br />
+						The target type it can convert to.
+						Such as "int" (int class), "[I" (int[] class)
 					</li>
 					<li>
 						<span class="tagAttr">class</span> (<span class="required">Required</span>) <br />
@@ -255,10 +259,65 @@
 				</ul>
 			</p>
 			<p>
-				The following is a support converter for converting Date, the nested will be replaced: 
+				The <span class="tagAttr">src</span> attribute value here is limited because the object saved in <span class="glossary">ObjectSource</span> at web environment is limited.<br/>
+				The following are all the <span class="tagAttr">src</span> values you can use:
+				<table border="1" cellspacing="1" cellpadding="5">
+					<tr>
+						<td align="center"><b>Value</b></td>
+						<td align="center"><b>Note</b></td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">String</span></td>
+						<td>Shortname for java.lang.String class</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">String[]</span></td>
+						<td>Shortname for java.lang.String[] class</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">request</span></td>
+						<td>Shortname for javax.servlet.http.HttpServletRequest class</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">session</span></td>
+						<td>Shortname for javax.servlet.http.HttpSession class</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">application</span></td>
+						<td>Shortname for javax.servlet.ServletContext class</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">response</span></td>
+						<td>Shortname for javax.servlet.http.HttpServletResponse class</td>
+					</tr>
+				</table>
+			</p>
+			<p>
+				The framework also defines some shortname for <span class="tagAttr">target</span> attribute value,
+				The rule is listing below:
+				<ul>
+					<li>
+						Primitive type, their wrapper type, and String, BigDecimal, BigInteger, java.util.Date type, also with their array type, <br/>
+						are the same with their Java syntax, and do not need its package prefix, such as :<br/>
+						"<span class="tagValue">int</span>", "<span class="tagValue">Integer</span>", "<span class="tagValue">int[]</span>", "<span class="tagValue">Integer[]</span>", "<span class="tagValue">String</span>", "<span class="tagValue">String[]</span>", "<span class="tagValue">Date[]</span>", "<span class="tagValue">BigDecimal[]</span>".
+					</li>
+					<li>
+						The following types<br/>
+						java.sql.Date<br>
+						java.sql.Time<br>
+						java.sql.Timestamp<br>
+						are familiar with above, but package prefix is required, such as :<br/>
+						"<span class="tagValue">java.sql.Time</span>", "<span class="tagValue">java.sql.Time[]</span>".
+					</li>
+				</ul>
+			</p>
+			<p>
+				The following is a support converter example, the nested will be replaced: 
 <pre class="code-xml">
 &lt;generic-converter&gt;
-	&lt;converter src="java.lang.String" dest="java.util.Date" class="your.converter.DateConverter" /&gt;
+	&lt;converter src="String" target="Date" class="your.converter.DateConverter" /&gt;
+	&lt;converter src="String[]" target="Date[]" class="your.converter.DateArrayConverter" /&gt;
+	&lt;converter src="request" target="java.io.File" class="your.converter.FileConverter" /&gt;
 &lt;/generic-converter&gt;
 </pre>
 			</p>

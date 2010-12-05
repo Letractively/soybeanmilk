@@ -17,6 +17,9 @@ package org.soybeanMilk.web.config.parser;
 import java.io.File;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -125,6 +128,21 @@ public class WebConfigurationParser extends ConfigurationParser
 			return getServletContext().getRealPath("").replace(File.separatorChar, '/')+"/"+rawFileName;
 		else
 			return rawFileName;
+	}
+	
+	@Override
+	protected Class<?> converterClassAttrToClass(String name)
+	{
+		if(WebConstants.Scope.REQUEST.equals(name))
+			return HttpServletRequest.class;
+		else if(WebConstants.Scope.SESSION.equals(name))
+			return HttpSession.class;
+		if(WebConstants.Scope.APPLICATION.equals(name))
+			return ServletContext.class;
+		if(WebConstants.Scope.RESPONSE.equals(name))
+			return HttpServletResponse.class;
+		else
+			return super.converterClassAttrToClass(name);
 	}
 	
 	@Override

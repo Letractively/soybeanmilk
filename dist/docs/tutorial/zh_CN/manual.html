@@ -216,20 +216,22 @@
 				<span class="tag bold">&lt;converter&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				辅助转换器配置。你可以配置多个辅助转换器，来为通用转换器添加更多的类型转换支持，或者替换旧的辅助转换器（后添加的将替换掉先前添加的）。<br />
+				辅助转换器配置。你可以配置多个辅助转换器，来为通用转换器添加更多的类型转换支持，或者替换旧的辅助转换器（后添加的将替换掉先前添加的）。
+			</p>
+			<p>
 				默认的<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>已经添加了大部分常用的辅助转换器（参考<a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a>类说明），
-				它还支持将“<span class="var">java.util.Map</span>”转换为JavaBean对象。
+				它还支持将“<span class="var">java.util.Map&lt;String, String[]&gt;</span>”转换为JavaBean对象。
 			</p>
 			<p>
 				它包含如下属性：
 				<ul>
 					<li>
 						<span class="tagAttr">src</span>（<span class="required">必须</span>） <br />
-						转换器支持转换的源类型
+						转换器支持转换的源类型，比如“java.lang.String”（String类型）、“[Ljava.lang.String;”（String[]类型）
 					</li>
 					<li>
-						<span class="tagAttr">dest</span>（<span class="required">必须</span>） <br />
-						转换器支持转换的目标类型
+						<span class="tagAttr">target</span>（<span class="required">必须</span>） <br />
+						转换器支持转换的目标类型，比如“int”（int类型）、“[I”（int[]类型）
 					</li>
 					<li>
 						<span class="tagAttr">class</span>（<span class="required">必须</span>） <br />
@@ -238,10 +240,64 @@
 				</ul>
 			</p>
 			<p>
-				下面是一个自定义辅助日期转换器配置，框架内置的将被替换：
+				由于在WEB环境下<span class="glossary">对象源</span>存储对象的类型也是有限的，因此这里<span class="tagAttr">src</span>属性的可用值也是有限的。<br>
+				下面是所有可用的<span class="tagAttr">src</span>属性值：
+				<table border="1" cellspacing="1" cellpadding="5">
+					<tr>
+						<td align="center"><b>属性值</b></td>
+						<td align="center"><b>说明</b></td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">String</span></td>
+						<td>字符串类型简写</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">String[]</span></td>
+						<td>字符串数组类型简写</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">request</span></td>
+						<td>javax.servlet.http.HttpServletRequest类的简写</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">session</span></td>
+						<td>javax.servlet.http.HttpSession类的简写</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">application</span></td>
+						<td>javax.servlet.ServletContext类的简写</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">response</span></td>
+						<td>javax.servlet.http.HttpServletResponse类的简写</td>
+					</tr>
+				</table>
+			</p>
+			<p>
+				框架也为<span class="tagAttr">target</span>属性的一些常用值定义了简写，规则如下：
+				<ul>
+					<li>
+						基本类型、其包装类型，和String、BigDecimal、BigInteger、java.util.Date类型，以及它们的一维数组类型，<br/>
+						格式与Java语法一样，并且不需要包含包名，比如：<br/>
+						“<span class="tagValue">int</span>”、“<span class="tagValue">Integer</span>”、“<span class="tagValue">int[]</span>”、“<span class="tagValue">Integer[]</span>”、“<span class="tagValue">String</span>”、“<span class="tagValue">String[]</span>”、“<span class="tagValue">Date[]</span>”、“<span class="tagValue">BigDecimal[]</span>”。
+					</li>
+					<li>
+						如下类型<br/>
+						java.sql.Date<br>
+						java.sql.Time<br>
+						java.sql.Timestamp<br>
+						与上面类似，但是必须包含包名，比如：<br/>
+						“<span class="tagValue">java.sql.Time</span>”、“<span class="tagValue">java.sql.Time[]</span>”。
+					</li>
+				</ul>
+			</p>
+			<p>
+				下面是一个自定义辅助转换器配置，框架内置的将被替换：
 <pre class="code-xml">
 &lt;generic-converter&gt;
-	&lt;converter src="java.lang.String" dest="java.util.Date" class="your.converter.DateConverter" /&gt;
+	&lt;converter src="String" target="Date" class="your.converter.DateConverter" /&gt;
+	&lt;converter src="String[]" target="Date[]" class="your.converter.DateArrayConverter" /&gt;
+	&lt;converter src="request" target="java.io.File" class="your.converter.FileConverter" /&gt;
 &lt;/generic-converter&gt;
 </pre>
 			</p>

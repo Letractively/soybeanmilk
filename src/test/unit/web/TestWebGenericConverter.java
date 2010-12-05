@@ -53,31 +53,6 @@ public class TestWebGenericConverter
 	}
 	
 	/**
-	 * 自定义Map转换器
-	 */
-	@Test
-	public void convertMapCustomized()
-	{
-		final JavaBean staticJavaBean=new JavaBean();
-		Converter c=new Converter()
-		{
-			@Override
-			public Object convert(Object sourceObj, Class<?> targetClass)
-			{
-				return staticJavaBean;
-			}
-		};
-		
-		converter.addConverter(Map.class, JavaBean.class, c);
-		
-		Map<String,Integer> src=new HashMap<String, Integer>();
-		
-		Object dest=converter.convert(src, JavaBean.class);
-		
-		Assert.assertTrue(dest == staticJavaBean);
-	}
-	
-	/**
 	 * 内置Map转换
 	 */
 	@Test

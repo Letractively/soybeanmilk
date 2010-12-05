@@ -145,10 +145,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 */
 	protected Object convertMap(Map<String, Object> valueMap, Class<?> targetClass)
 	{
-		if(valueMap==null || valueMap.size()==0)
-			return null;
-		
-		if(targetClass.isAssignableFrom(valueMap.getClass()))
+		if(valueMap==null || targetClass.isAssignableFrom(valueMap.getClass()))
 			return valueMap;
 		
 		Object bean = null;

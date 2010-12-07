@@ -198,6 +198,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * @param objectType
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	protected Object getWithUnknownScope(String scope, String keyInScope, Class<?> objectType)
 	{
 		if(scope != null)

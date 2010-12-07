@@ -31,7 +31,7 @@ public class Execution implements Serializable
 	
 	private transient Executable executable;
 	private transient ObjectSource objectSource;
-	private transient ExecuteException executeException;
+	private ExecuteException executeException;
 	
 	public Execution()
 	{

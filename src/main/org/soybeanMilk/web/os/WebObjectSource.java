@@ -34,6 +34,9 @@ import org.soybeanMilk.web.WebConstants;
 
 /**
  * 用于WEB应用的对象源，它的实例的生命周期与一次请求的生命周期相同。
+ * 传递给它的关键字会被理解为由两个部分组成：[scope].[keyInThisScope]，其中
+ * “[scope]”表示作用域，“[keyInThisScope]”则是真正的该作用域下的关键字。<br>
+ * 实际上，你在配置文件中定义的&lt;arg&gt;关键字的格式就是由它决定的。
  * @author earthAngry@gmail.com
  * @date 2010-7-19
  *
@@ -105,45 +108,50 @@ public class WebObjectSource extends ConvertableObjectSource
 				throw new ObjectSourceException("[key] must not be empty.");
 			
 			int accessorIdx=strKey.indexOf(WebConstants.ACCESSOR);
-			boolean accessor = accessorIdx>0 && accessorIdx<strKey.length()-1;
-			String scope = accessor ? strKey.substring(0, accessorIdx) : strKey;
-			String subKey = accessor ? strKey.substring(accessorIdx+1) : null;
+			if(accessorIdx==0 || accessorIdx >= strKey.length()-1)
+				throw new ObjectSourceException("invalid key '"+strKey+"'");
 			
-			if(scope.equals(WebConstants.Scope.PARAM))
+			String scope = accessorIdx > 0 ? strKey.substring(0, accessorIdx) : null;
+			String subKey = accessorIdx > 0 ? strKey.substring(accessorIdx+1) : strKey;
+			
+			if(scope == null)
 			{
-				if(objectType == null)
-					throw new ObjectSourceException("[objectType] must not be null while getting object from '"+scope+"'");
-				
-				data = convertParamMap(request.getParameterMap(), subKey, objectType);
+				if(WebConstants.Scope.PARAM.equals(subKey))
+					data=convertParamMap(request.getParameterMap(), null, objectType);
+				else if(WebConstants.Scope.REQUEST.equals(subKey))
+					data=convertServletObject(request, objectType);
+				else if(WebConstants.Scope.SESSION.equals(subKey))
+					data=convertServletObject(request.getSession(), objectType);
+				else if(WebConstants.Scope.APPLICATION.equals(subKey))
+					data=convertServletObject(application, objectType);
+				else if(WebConstants.Scope.RESPONSE.equals(subKey))
+					data=convertServletObject(response, objectType);
+				else
+					data=getWithUnknownScope(scope, subKey, objectType);
 			}
-			else if(scope.equals(WebConstants.Scope.REQUEST))
-				data = accessor ? request.getAttribute(subKey) : convertServletObject(request, objectType);
-			else if(scope.equals(WebConstants.Scope.SESSION))
-				data = accessor ? request.getSession().getAttribute(subKey) : convertServletObject(request.getSession(), objectType);
-			else if(scope.equals(WebConstants.Scope.APPLICATION))
-				data = accessor ? application.getAttribute(subKey) : convertServletObject(application, objectType);
-			else if(scope.equals(WebConstants.Scope.RESPONSE) && !accessor)
-				data = convertServletObject(response, objectType);
 			else
 			{
-				//只要包含访问符，那么就必须以框架允许的作用域开头
-				//否则，从默认作用域取
-				if(accessor)
-					throw new ObjectSourceException("the scope in key '"+key+"' is invalid, it must be one of '"+WebConstants.Scope.PARAM+"', '"+WebConstants.Scope.REQUEST+"', '"+WebConstants.Scope.SESSION+"', '"+WebConstants.Scope.APPLICATION+"', '"+WebConstants.Scope.RESPONSE+"'");
-				else
+				if(WebConstants.Scope.PARAM.equals(scope))
+					data=convertParamMap(request.getParameterMap(), subKey, objectType);
+				else if(WebConstants.Scope.REQUEST.equals(scope))
+					data=request.getAttribute(subKey);
+				else if(WebConstants.Scope.SESSION.equals(scope))
+					data=request.getSession().getAttribute(subKey);
+				else if(WebConstants.Scope.APPLICATION.equals(scope))
+					data=application.getAttribute(subKey);
+				else if(WebConstants.Scope.RESPONSE.equals(scope))
 				{
-					data = convertParamMap(request.getParameterMap(), strKey, objectType);
+					if(subKey != null)
+						throw new ObjectSourceException("key '"+key+"' is invalid, you can not get data from '"+WebConstants.Scope.RESPONSE+"' scope");
 					
-					if(_logDebugEnabled)
-					{
-						scope=WebConstants.Scope.PARAM;
-						subKey=strKey;
-					}
+					data=convertServletObject(response, objectType);
 				}
+				else
+					data=getWithUnknownScope(scope, subKey, objectType);
 			}
 			
 			if(_logDebugEnabled)
-				log.debug("get '"+data+"' from '"+scope+"' with key '"+subKey+"'");
+				log.debug("get '"+data+"' from scope '"+scope+"' with key '"+subKey+"'");
 		}
 		
 		return data;
@@ -159,40 +167,57 @@ public class WebObjectSource extends ConvertableObjectSource
 			throw new ObjectSourceException("[key] must not be empty.");
 		
 		int accessorIdx=strKey.indexOf(WebConstants.ACCESSOR);
-		boolean accessor = accessorIdx>0 && accessorIdx<strKey.length()-1;
-		String scope = accessor ? strKey.substring(0, accessorIdx) : strKey;
-		String subKey = accessor ? strKey.substring(accessorIdx+1) : null;
+		if(accessorIdx==0 || accessorIdx >= strKey.length()-1)
+			throw new ObjectSourceException("invalid key '"+strKey+"'");
 		
-		if(scope.equals(WebConstants.Scope.PARAM))
-			throw new ObjectSourceException("'"+key+"' is invalid, can not save object into '"+WebConstants.Scope.PARAM+"'");
-		else if(scope.equals(WebConstants.Scope.REQUEST))
+		String scope = accessorIdx > 0 ? strKey.substring(0, accessorIdx) : null;
+		String subKey = accessorIdx > 0 ? strKey.substring(accessorIdx+1) : strKey;
+		
+		if(WebConstants.Scope.PARAM.equals(scope))
+			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.PARAM+"'");
+		
+		else if(WebConstants.Scope.REQUEST.equals(scope))
 			request.setAttribute(subKey, obj);
-		else if(scope.equals(WebConstants.Scope.SESSION))
+		else if(WebConstants.Scope.SESSION.equals(scope))
 			request.getSession().setAttribute(subKey, obj);
-		else if(scope.equals(WebConstants.Scope.APPLICATION))
+		else if(WebConstants.Scope.APPLICATION.equals(scope))
 			application.setAttribute(subKey, obj);
-		else if(scope.equals(WebConstants.Scope.RESPONSE))
-			throw new ObjectSourceException("'"+key+"' is invalid, can not save object into '"+WebConstants.Scope.RESPONSE+"'");
+		else if(WebConstants.Scope.RESPONSE.equals(scope))
+			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.RESPONSE+"'");
 		else
-		{
-			//只要包含访问符，那么就必须以框架允许的作用域开头
-			//否则，保存到默认作用域
-			if(accessor)
-				throw new ObjectSourceException("the scope in key '"+key+"' is invalid, it must be one of '"+WebConstants.Scope.PARAM+"', '"+WebConstants.Scope.REQUEST+"', '"+WebConstants.Scope.SESSION+"', '"+WebConstants.Scope.APPLICATION+"', '"+WebConstants.Scope.RESPONSE+"'");
-			else
-			{
-				request.setAttribute(strKey, obj);
-				
-				if(_logDebugEnabled)
-				{
-					scope=WebConstants.Scope.REQUEST;
-					subKey=strKey;
-				}
-			}
-		}
+			setWithUnknownScope(scope, subKey, obj);
 		
 		if(_logDebugEnabled)
 			log.debug("save '"+obj+"' into '"+scope+"' with key '"+subKey+"'");
+	}
+	
+	/**
+	 * 从默认无法识别的作用域取得对象（作用域为null或者未知）
+	 * @param scope 作用域
+	 * @param keyInScope 该作用域下的关键字，它不会为null
+	 * @param objectType
+	 * @return
+	 */
+	protected Object getWithUnknownScope(String scope, String keyInScope, Class<?> objectType)
+	{
+		if(scope != null)
+			throw new ObjectSourceException("scope '"+scope+"' in key '"+(scope+WebConstants.ACCESSOR+keyInScope)+"' is invalid, it must be one of '"+WebConstants.Scope.PARAM+"', '"+WebConstants.Scope.REQUEST+"', '"+WebConstants.Scope.SESSION+"', '"+WebConstants.Scope.APPLICATION+"', '"+WebConstants.Scope.RESPONSE+"'");
+		
+		return convertParamMap(request.getParameterMap(), keyInScope, objectType);
+	}
+	
+	/**
+	 * 将对象存储到默认无法识别的作用域中（作用域为null或者未知）
+	 * @param scope 作用域
+	 * @param keyInScope 该作用域下的关键字，它不会为null
+	 * @param obj
+	 */
+	protected void setWithUnknownScope(String scope, String keyInScope, Object obj)
+	{
+		if(scope != null)
+			throw new ObjectSourceException("scope '"+scope+"' in key '"+(scope+WebConstants.ACCESSOR+keyInScope)+"' is invalid, it must be one of '"+WebConstants.Scope.PARAM+"', '"+WebConstants.Scope.REQUEST+"', '"+WebConstants.Scope.SESSION+"', '"+WebConstants.Scope.APPLICATION+"', '"+WebConstants.Scope.RESPONSE+"'");
+		
+		request.setAttribute(keyInScope, obj);
 	}
 	
 	/**

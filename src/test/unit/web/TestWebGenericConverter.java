@@ -9,7 +9,6 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 
 

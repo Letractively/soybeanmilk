@@ -56,7 +56,9 @@ public class WebExecutor extends DefaultExecutor
 	}
 	
 	/**
-	 * 执行。它根据请求URL查找可执行对象，然后执行，并且它还会处理可能的目标分发
+	 * 执行。它的核心处理逻辑与{@linkplain #execute(String, ObjectSource)}一样，
+	 * 只不过它会把{@linkplain HttpServletRequest#getServletPath()}返回的字符串作为可执行对象名，
+	 * 并且它还会处理可能的{@linkplain Target 目标}分发。
 	 * @param objSource WEB对象源，你不需要要设置它的{@linkplain GenericConverter 通用转换器}属性，这个方法会自动设置它
 	 * @throws ServletException
 	 * @throws IOException

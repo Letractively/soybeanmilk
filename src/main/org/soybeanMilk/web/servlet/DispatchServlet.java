@@ -120,12 +120,23 @@ public class DispatchServlet extends HttpServlet
 		
 		try
 		{
-			webExecutor.execute(new WebObjectSource(request, response, getServletContext()));
+			webExecutor.execute(createWebObjectSourceForRequest(request, response));
 		}
 		catch(ExecutableNotFoundException e)
 		{
 			response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getExecutableName());
 		}
+	}
+	
+	/**
+	 * 创建请求对应的WEB对象源，它将被传递给WEB执行器
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	protected WebObjectSource createWebObjectSourceForRequest(HttpServletRequest request, HttpServletResponse response)
+	{
+		return new WebObjectSource(request, response, getServletContext());
 	}
 	
 	/**

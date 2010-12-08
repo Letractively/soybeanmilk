@@ -68,7 +68,6 @@ public class WebExecutor extends DefaultExecutor
 			throws ServletException, IOException, ExecutableNotFoundException
 	{
 		HttpServletRequest request = objSource.getRequest();
-		
 		String servletPath=request.getServletPath();
 		
 		try

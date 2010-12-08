@@ -491,8 +491,7 @@ public void handleException(Execution execution)
 					<li>
 						<span class="tagAttr">result-key</span>（可选） <br />
 						<span class="glossary">调用</span>方法结果在对象源中的保存关键字。无论方法是否有返回结果，只要你定义了<span class="tagAttr">result-key</span>，
-						框架总会执行保存操作，只不过无返回结果的话是以null值保存的；反之，则不会保存。
-						如果这个结果关键字里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。<br />
+						框架总会执行保存操作，只不过无返回结果的话是以null值保存的；反之，则不会保存。<br />
 						下面是合法的结果关键字：
 						<ul>
 							<li>
@@ -512,6 +511,8 @@ public void handleException(Execution execution)
 								结果将以“<span class="var">yourResultKey</span>”关键字被保存到“<span class="var">application</span>”作用域中
 							</li>
 						</ul>
+						实际上，这里的关键字格式是由<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>类决定的，
+						因为它们会被直接传递给它的<span class="var">set(...)</span>方法。
 					</li>
 				</ul>
 			</p>
@@ -520,7 +521,6 @@ public void handleException(Execution execution)
 				<a href="javascript:void(0);">Java方式</a><br>
 			</p>
 			<p>
-					
 				它使你可以像书写Java代码一样配置<span class="glossary">调用</span>，下面是它的语法格式：<br>
 <pre class="code-xml">
 <span class="tag">&lt;invoke name="yourInvokeName"&gt;</span>
@@ -638,6 +638,8 @@ public void handleException(Execution execution)
 								那么你需要自定义“<span class="var">javax.servlet.http.HttpServletResponse</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
 						</ul>
+						实际上，这里的关键字格式是由<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>类决定的，
+						因为它们会被直接传递给它的<span class="var">get(...)</span>方法。
 					</li>
 					<li>
 						参数值 <br>
@@ -687,9 +689,6 @@ public void handleException(Execution execution)
 						</ul>
 					</li>
 				</ul>
-			</p>
-			<p>
-				注意：如果标签内容是关键字，并且里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考<a href="../../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>类说明）。
 			</p>
 			<p>
 				下面是一些配置示例：

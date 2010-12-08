@@ -34,12 +34,91 @@ import org.soybeanMilk.web.WebConstants;
 
 /**
  * 用于WEB应用的对象源，它的实例的生命周期与一次请求的生命周期相同。
- * 传递给它的关键字会被理解为由两个部分组成：[scope].[keyInThisScope]，其中
- * “[scope]”表示作用域，“[keyInThisScope]”则是真正的该作用域下的关键字。<br>
+ * <br>
+ * 传递给它的关键字会被理解为由两个部分组成：[scope].[yourKey]，其中
+ * “[scope]”表示作用域，“[yourKey]”则是真正的该作用域下的关键字。
+ * <br>
+ * 它目前所支持的关键字格式及其说明如下：
+ * <ul>
+ * 	<li>
+ *   set
+ *   <ul>
+ *  	<li>
+ *  		<span class="tagValue">yourKey</span> <br/>
+ *  		结果将以“<span class="var">yourKey</span>”关键字被保存到“<span class="var">request</span>”作用域中
+ *  	</li>
+ *  	<li>
+ *  		<span class="tagValue">request.yourKey</span> <br/>
+ *  		同上
+ *  	</li>
+ *  	<li>
+ *  		<span class="tagValue">session.yourKey</span> <br/>
+ *  		结果将以“<span class="var">yourKey</span>”关键字被保存到“<span class="var">session</span>”作用域中
+ *  	</li>
+ *  	<li>
+ *  		<span class="tagValue">application.yourKey</span> <br/>
+ *  		结果将以“<span class="var">yourKey</span>”关键字被保存到“<span class="var">application</span>”作用域中
+ *  	</li>
+ *   </ul>
+ *  </li>
+ *  <li>
+ *  	get
+ *  	<ul>
+ *  	<li>
+ *  		<span class="tagValue">param</span> <br/>
+ *  		整个请求参数映射表。如果目标类型是<span class="var">java.util.Map</span>，
+ *  		那么它不会做任何处理而直接返回整个参数映射表；如果是其他类型，它会首先将此映射表转换为这个类型的对象，然后返回此对象。
+ *  	</li>
+ *  	<li>
+ *  		<span class="tagValue">yourKey</span> <br/>
+ *  		请求参数映射表中以“<span class="var">yourKey</span>”开头的请求参数。
+ *  		如果这个参数有明确的值，它将对这个值进行类型转换（需要的话），然后返回转换后的对象；否则，就根据“<span class="var">yourKey</span>”来对参数映射表进行过滤，
+ *  		产生一个新的映射表（它的主键是原始关键字“<span class="var">yourKey.</span>”之后的部分，比如由“<span class="var">beanName.propertyName</span>”变为“<span class="var">propertyName</span>”），
+ *  		然后，与上面提到的一样，根据目标类型直接返回这个新映射表或者返回转换后的对象。
+ *  	</li>
+ *  	<li>
+ *  		<span class="tagValue">param.yourKey</span> <br/>
+ *  		同上。
+ *  	</li>
+ *  	<li>
+ *  		<span class="tagValue">request</span> <br/>
+ *  		请求HttpServletRequest对象。框架本身并没有提供它的转换器，如果目标类型不是“<span class="var">HttpServletRequest</span>”，
+ *  		那么你需要为它的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletRequest</span>”到目标类型的辅助{@linkplain Converter 转换器}。
+ *  	</li>
+ *  	<li>
+ *  		<span class="tagValue">request.yourKey</span> <br/>
+ *  		请求属性中的“<span class="var">yourKey</span>”关键字对应的对象。它不会对此对象执行类型转换，目标类型应该与这个关键字对应的对象一致。
+ *  	</li>
+ *  	<li>
+ *  		<span class="tagValue">session</span> <br/>
+ *  		会话HttpSession对象。框架本身并没有提供它的转换器，如果目标类型不是“<span class="var">HttpSession</span>”，
+ *  		那么你需要为它的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpSession</span>”到目标类型的辅助{@linkplain Converter 转换器}。
+ *  	</li>
+ *  	<li>
+ *  		<span class="tagValue">session.yourKey</span> <br/>
+ *  		会话属性中的“<span class="var">yourKey</span>”关键字对应的对象。它不会对此对象执行类型转换。
+ *  	</li>
+ *  	<li>
+ *  		<span class="tagValue">application</span> <br/>
+ *  		应用ServletContext对象。如果目标类型不是“<span class="var">ServletContext</span>”，
+ *  		那么你需要为它的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.ServletContext</span>”到目标类型的辅助{@linkplain Converter 转换器}。
+ *  	</li>
+ *  	<li>
+ *  		<span class="tagValue">application.yourKey</span> <br/>
+ *  		应用属性中的“<span class="var">yourKey</span>”关键字对应的对象。它不会对此对象执行类型转换。
+ *  	</li>
+ *  	<li>
+ *  		<span class="tagValue">response</span> <br/>
+ *  		回应HttpServletResponse对象。如果目标类型不是“<span class="var">HttpServletResponse</span>”，
+ *  		那么你需要为它的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletResponse</span>”到目标类型辅助{@linkplain Converter 转换器}。
+ *  	</li>
+ *   </ul>
+ *  </li>
+ * </ul>
+ * <br>
  * 实际上，你在配置文件中定义的&lt;arg&gt;关键字的格式就是由它决定的。
  * @author earthAngry@gmail.com
  * @date 2010-7-19
- *
  */
 public class WebObjectSource extends ConvertableObjectSource
 {

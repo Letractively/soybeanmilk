@@ -520,8 +520,7 @@ public void handleException(Execution execution)
 						<span class="tagAttr">result-key</span> (Optional) <br />
 						The saving keyword of this <span class="glossary">Invoke</span> method result.
 						The result will always be saved if you set this attribute, and "<span class="var">null</span>" is saved if the method has no return value.
-						Contrarily, nothing will be saved.
-						If this attribute contains accessor symbol '.', it must be start with scopes defined in this framework (See <a href="../../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>).<br />
+						Contrarily, nothing will be saved.<br />
 						Iegal result keywords are listing below:
 						<ul>
 							<li>
@@ -541,6 +540,8 @@ public void handleException(Execution execution)
 								The result will be saved in "<span class="var">application</span>" scope with keyword "<span class="var">yourResultKey</span>".
 							</li>
 						</ul>
+						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
+						because they will be directly passed to its <span class="var">get(...)</span> method.
 					</li>
 				</ul>
 			</p>
@@ -687,6 +688,8 @@ public void handleException(Execution execution)
 								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpServletResponse</span>.
 							</li>
 						</ul>
+						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
+						because they will be directly passed to its <span class="var">get(...)</span> method.
 					</li>
 					<li>
 						Value <br>
@@ -749,9 +752,6 @@ public void handleException(Execution execution)
 						</ul>
 					</li>
 				</ul>
-			</p>
-			<p>
-				Note, if the content is keyword and contains accessor symbol '.', it must be start with scopes defined in this framework (See <a href="../../api/org/soybeanMilk/web/WebConstants.Scope.html">WebConstants.Scope</a>).
 			</p>
 			<p>
 				The following are some examples:

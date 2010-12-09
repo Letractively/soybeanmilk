@@ -8,6 +8,9 @@ a,a:visited{
 .required{
 	color:red;
 }
+.highlight{
+	color:red;
+}
 .bold{
 	font-weight:bold;
 }

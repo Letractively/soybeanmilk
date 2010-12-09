@@ -195,7 +195,7 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 			<p>
 				设置自定义的<a href="../../api/org/soybeanMilk/web/servlet/WebObjectSourceFactory.html">WEB对象源工厂</a>。
 				设置它，你可以让框架使用你自定义的<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>。
-				比如，自定义一个支持更多作用域的<span class="glossary">WEB对象源</span>，从而使<span class="glossary">调用</span>方法的的参数和返回结果支持更多的作用域。
+				比如，自定义一个支持更多作用域的<span class="glossary">WEB对象源</span>，从而使<span class="glossary">调用</span>方法的参数和返回结果支持更多的作用域。
 			</p>
 			<p>
 				你可以使用这个初始化参数来整合其他视图层框架，比如Velocity和FreeMarker。
@@ -265,7 +265,7 @@ public class MyVelocityViewServlet extends HttpServlet
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException
 	{
-		Context vc=(Context)req.getAttribute("myVelocityContext");
+		Context vc=(Context)req.getAttribute("<span class="highlight">myVelocityContext</span>");
 		
 		//...
 	}

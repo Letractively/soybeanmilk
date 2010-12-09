@@ -16,6 +16,7 @@ package org.soybeanMilk.web.servlet;
 
 import java.io.IOException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +49,9 @@ public class DispatchServlet extends HttpServlet
 	/**WEB执行器*/
 	private WebExecutor webExecutor;
 	
+	/**WEB对象源工厂*/
+	private WebObjectSourceFactory webObjectSourceFactory;
+	
 	/**编码*/
 	private String encoding;
 	
@@ -62,11 +66,27 @@ public class DispatchServlet extends HttpServlet
 	public WebExecutor getWebExecutor() {
 		return webExecutor;
 	}
+	public void setWebExecutor(WebExecutor webExecutor) {
+		this.webExecutor = webExecutor;
+	}
+	public WebObjectSourceFactory getWebObjectSourceFactory() {
+		return webObjectSourceFactory;
+	}
+	public void setWebObjectSourceFactory(
+			WebObjectSourceFactory webObjectSourceFactory) {
+		this.webObjectSourceFactory = webObjectSourceFactory;
+	}
 	public String getEncoding() {
 		return encoding;
 	}
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
 	public String getAppExecutorKey() {
 		return appExecutorKey;
+	}
+	public void setAppExecutorKey(String appExecutorKey) {
+		this.appExecutorKey = appExecutorKey;
 	}
 	
 	@Override
@@ -82,7 +102,7 @@ public class DispatchServlet extends HttpServlet
 	{
 		doProcess(req,resp);
 	}
-
+	
 	@Override
 	public void destroy()
 	{
@@ -100,6 +120,8 @@ public class DispatchServlet extends HttpServlet
 		
 		initEncoding();
 		initWebExecutor();
+		initWebObjectSourceFactory();
+		initAppExecutorKey();
 		
 		if(appExecutorKey != null)
 			getServletContext().setAttribute(appExecutorKey, webExecutor);
@@ -120,7 +142,7 @@ public class DispatchServlet extends HttpServlet
 		
 		try
 		{
-			webExecutor.execute(createWebObjectSourceForRequest(request, response));
+			webExecutor.execute(webObjectSourceFactory.create(request, response, getServletContext()));
 		}
 		catch(ExecutableNotFoundException e)
 		{
@@ -129,22 +151,11 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 创建请求对应的WEB对象源，它将被传递给WEB执行器
-	 * @param request
-	 * @param response
-	 * @return
-	 */
-	protected WebObjectSource createWebObjectSourceForRequest(HttpServletRequest request, HttpServletResponse response)
-	{
-		return new WebObjectSource(request, response, getServletContext());
-	}
-	
-	/**
 	 * 初始化框架编码
 	 * 如果你配置了{@link WebConstants.ServletInitParams#ENCODING}参数，框架将使用这个编码，
 	 * 否则，将使用{@link WebConstants#DEFAULT_ENCODING}定义的编码
 	 */
-	protected void initEncoding()
+	protected void initEncoding() throws ServletException
 	{
 		encoding=getInitParameter(WebConstants.ServletInitParams.ENCODING);
 		if(encoding==null || encoding.length()==0)
@@ -154,7 +165,7 @@ public class DispatchServlet extends HttpServlet
 	/**
 	 * 初始化执行器在应用中的存储关键字
 	 */
-	protected void initAppExecutorKey()
+	protected void initAppExecutorKey() throws ServletException
 	{
 		appExecutorKey=getInitParameter(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY);
 	}
@@ -165,7 +176,7 @@ public class DispatchServlet extends HttpServlet
 	 * 否则，将使用{@link WebConstants#DEFAULT_CONFIG_FILE}。
 	 * 它还会尝试从<code>application</code>作用域中查找标识为{@link WebConstants.ServletInitParams#EXTERNAL_RESOLVER_FACTORY}的外部{@linkplain ResolverFactory 解决对象工厂}并加入框架。
 	 */
-	protected void initWebExecutor()
+	protected void initWebExecutor() throws ServletException
 	{
 		DefaultResolverFactory rf=new DefaultResolverFactory();
 		rf.setExternalResolverFactory(findExternalResolverFactory());
@@ -182,20 +193,50 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 查找应用的外部解决对象工厂
+	 * 初始化{@linkplain WebObjectSourceFactory WEB对象源工厂}
+	 */
+	protected void initWebObjectSourceFactory() throws ServletException
+	{
+		String clazz=getInitParameter(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY);
+		if(clazz!=null && clazz.length()!=0)
+		{
+			try
+			{
+				this.webObjectSourceFactory=(WebObjectSourceFactory)Class.forName(clazz).newInstance();
+			}
+			catch(Exception e)
+			{
+				throw new ServletException(e);
+			}
+		}
+		else
+		{
+			this.webObjectSourceFactory=new WebObjectSourceFactory()
+			{
+				@Override
+				public WebObjectSource create(HttpServletRequest request, HttpServletResponse response, ServletContext application)
+				{
+					return new WebObjectSource(request, response, application);
+				}
+			};
+		}
+	}
+	
+	/**
+	 * 查找应用中的外部解决对象工厂，它将被整合到框架中。
 	 * @return
 	 */
-	protected ResolverFactory findExternalResolverFactory()
+	protected ResolverFactory findExternalResolverFactory() throws ServletException
 	{
 		String erfKey=getInitParameter(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY);
 		
 		ResolverFactory erf=null;
 		
-		if(erfKey != null)
+		if(erfKey!=null && erfKey.length()!=0)
 		{
 			erf=(ResolverFactory)getServletContext().getAttribute(erfKey);
 			if(erf == null)
-				throw new NullPointerException("can not find external ResolverFactory in application with key '"+erfKey+"'");
+				throw new ServletException("can not find external ResolverFactory in application with key '"+erfKey+"'");
 			
 			if(_logDebugEnabled)
 				log.debug("find external resolver factory '"+erf.getClass().getName()+"' in 'application' scope");

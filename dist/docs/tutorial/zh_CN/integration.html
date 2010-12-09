@@ -29,6 +29,9 @@
 				在运行时，所有到这个servlet的请求都会被交给这个<span class="glossary">WEB执行器</span>来处理。
 			</p>
 			<p>
+				它还提供了一些用于扩展和整合其他框架（比如Spring、Velocity、FreeMarker）的初始化参数。
+			</p>
+			<p>
 				你只需要将这个servlet添加到应用的web.xml中， 配置一些初始化参数，然后设置它可以处理URL即可。
 			</p>
 			<p>
@@ -46,8 +49,12 @@
 		&lt;param-value&gt;/WEB-INF/soybean-milk-config.xml&lt;/param-value&gt;
 	&lt;/init-param&gt;
 	&lt;init-param&gt;
-		&lt;param-name&gt;external-resolver-factory&lt;/param-name&gt;
+		&lt;param-name&gt;external-resolver-factory-key&lt;/param-name&gt;
 		&lt;param-value&gt;mySpringAppContextResolverFactory&lt;/param-value&gt;
+	&lt;/init-param&gt;
+	&lt;init-param&gt;
+		&lt;param-name&gt;webObjectSoruce-factory-class&lt;/param-name&gt;
+		&lt;param-value&gt;my.MyWebObjectSourceFactory&lt;/param-value&gt;
 	&lt;/init-param&gt;
 	&lt;init-param&gt;
 		&lt;param-name&gt;application-executor-key&lt;/param-name&gt;
@@ -71,7 +78,10 @@
 						<a href="#init_soybean-milk-config">soybean-milk-config</a>
 					</li>
 					<li>
-						<a href="#init_external-resolver-factory">external-resolver-factory</a>
+						<a href="#init_external-resolver-factory-key">external-resolver-factory-key</a>
+					</li>
+					<li>
+						<a href="#init_webObjectSoruce-factory-class">webObjectSoruce-factory-class</a>
 					</li>
 					<li>
 						<a href="#init_application-executor-key">application-executor-key</a>
@@ -106,8 +116,8 @@
 			</p>
 			<div class="seprator"></div>
 			<p>
-				<a name="init_external-resolver-factory"></a>
-				<span class="tag bold">external-resolver-factory</span>（可选）
+				<a name="init_external-resolver-factory-key"></a>
+				<span class="tag bold">external-resolver-factory-key</span>（可选）
 			</p>
 			<p>
 				指定外部<a href="../../api/org/soybeanMilk/core/resolver/ResolverFactory.html" class="glossary">解决对象工厂</a>在应用（ServletContext）中的关键字。
@@ -172,10 +182,23 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 </pre>
 			</p>
 			<p>
-				然后，将你的<span class="glossary">DispatchServlet</span>初始化参数<span class="tag">external-resolver-factory</span>的值设置为“<span class="var">springAppContextResolverFactory</span>”。
+				然后，将你的<span class="glossary">DispatchServlet</span>初始化参数<span class="tag">external-resolver-factory-key</span>的值设置为“<span class="var">springAppContextResolverFactory</span>”。
 			</p>
 			<p>
 				这样，你就可以在框架配置文件<span class="tag">&lt;invoke&gt;</span>标签的<span class="tagAttr">resolver</span>属性中使用在Spring中定义的那些<span class="tag">&lt;bean&gt;</span>的<span class="tagAttr">id</span>了。
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="init_webObjectSoruce-factory-class"></a>
+				<span class="tag bold">webObjectSoruce-factory-class</span>（可选）
+			</p>
+			<p>
+				设置自定义的<a href="../../api/org/soybeanMilk/web/servlet/WebObjectSourceFactory.html">WEB对象源工厂</a>。
+				设置它，你可以让框架使用你自定义的<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>。
+				比如，自定义一个支持更多作用域的<span class="glossary">WEB对象源</span>，从而使<span class="glossary">调用</span>方法的的参数和返回结果支持更多的作用域。
+			</p>
+			<p>
+				你可以使用这个初始化参数来整合其他视图层框架，比如Velocity和FreeMarker。
 			</p>
 			<div class="seprator"></div>
 			<p>

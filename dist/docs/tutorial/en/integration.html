@@ -29,6 +29,9 @@
 				and dispatching all requests to this <span class="glossary">WebExecutor</span> at runtime.
 			</p>
 			<p>
+				It also has some init parameters for extending, or intergrating with other frameworks (Such as Spring, Velocity, Freeemarker).
+			</p>
+			<p>
 				You only need to add this servlet into you <span class="var">web.xml</span>,
 				then set some init parameters and the URL it can processing.
 			</p>
@@ -47,8 +50,12 @@
 		&lt;param-value&gt;/WEB-INF/soybean-milk-config.xml&lt;/param-value&gt;
 	&lt;/init-param&gt;
 	&lt;init-param&gt;
-		&lt;param-name&gt;external-resolver-factory&lt;/param-name&gt;
+		&lt;param-name&gt;external-resolver-factory-key&lt;/param-name&gt;
 		&lt;param-value&gt;mySpringAppContextResolverFactory&lt;/param-value&gt;
+	&lt;/init-param&gt;
+	&lt;init-param&gt;
+		&lt;param-name&gt;webObjectSoruce-factory-class&lt;/param-name&gt;
+		&lt;param-value&gt;my.MyWebObjectSourceFactory&lt;/param-value&gt;
 	&lt;/init-param&gt;
 	&lt;init-param&gt;
 		&lt;param-name&gt;application-executor-key&lt;/param-name&gt;
@@ -72,7 +79,10 @@
 						<a href="#init_soybean-milk-config">soybean-milk-config</a>
 					</li>
 					<li>
-						<a href="#init_external-resolver-factory">external-resolver-factory</a>
+						<a href="#init_external-resolver-factory-key">external-resolver-factory-key</a>
+					</li>
+					<li>
+						<a href="#init_webObjectSoruce-factory-class">webObjectSoruce-factory-class</a>
 					</li>
 					<li>
 						<a href="#init_application-executor-key">application-executor-key</a>
@@ -108,8 +118,8 @@
 			</p>
 			<div class="seprator"></div>
 			<p>
-				<a name="init_external-resolver-factory"></a>
-				<span class="tag bold">external-resolver-factory</span> (Optional)
+				<a name="init_external-resolver-factory-key"></a>
+				<span class="tag bold">external-resolver-factory-key</span> (Optional)
 			</p>
 			<p>
 				Set the external <a href="../../api/org/soybeanMilk/core/resolver/ResolverFactory.html" class="glossary">ResolverFactory</a> key in your application (ServletContext).
@@ -174,10 +184,18 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 </pre>
 			</p>
 			<p>
-				Then, setting <span class="tag">external-resolver-factory</span> value to be "<span class="var" style="color:red;">springAppContextResolverFactory</span>".
+				Then, setting <span class="tag">external-resolver-factory-key</span> value to be "<span class="var" style="color:red;">springAppContextResolverFactory</span>".
 			</p>
 			<p>
 				Now, you can use any <span class="tagAttr">id</span> of <span class="tag">&lt;bean&gt;</span> defined in Spring as the <span class="tagAttr">resolver</span> attribute of <span class="tag">&lt;invoke&gt;</span>.
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="init_webObjectSoruce-factory-class"></a>
+				<span class="tag bold">webObjectSoruce-factory-class</span> (Optional)
+			</p>
+			<p>
+				
 			</p>
 			<div class="seprator"></div>
 			<p>

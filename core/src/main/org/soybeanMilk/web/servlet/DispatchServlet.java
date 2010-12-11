@@ -47,16 +47,16 @@ public class DispatchServlet extends HttpServlet
 	private static boolean _logDebugEnabled=log.isDebugEnabled();
 	
 	/**WEB执行器*/
-	private WebExecutor webExecutor;
+	protected WebExecutor webExecutor;
 	
 	/**WEB对象源工厂*/
-	private WebObjectSourceFactory webObjectSourceFactory;
+	protected WebObjectSourceFactory webObjectSourceFactory;
 	
 	/**编码*/
-	private String encoding;
+	protected String encoding;
 	
 	/**WEB执行器存储关键字*/
-	private String appExecutorKey;
+	protected String appExecutorKey;
 	
 	public DispatchServlet()
 	{
@@ -118,11 +118,32 @@ public class DispatchServlet extends HttpServlet
 	{
 		super.init();
 		
-		initEncoding();
-		initWebExecutor();
-		initWebObjectSourceFactory();
-		initAppExecutorKey();
+		//编码
+		String ec=getInitEncoding();
+		if(ec==null || ec.length()==0)
+			ec=WebConstants.DEFAULT_ENCODING;
+		this.encoding=ec;
 		
+		//执行器
+		this.webExecutor=getInitWebExecutor();
+		
+		//WEB对象源工厂
+		WebObjectSourceFactory wsf=getInitWebObjectSourceFactory();
+		if(wsf == null)
+		{
+			wsf=new WebObjectSourceFactory()
+			{
+				@Override
+				public WebObjectSource create(HttpServletRequest request, HttpServletResponse response, ServletContext application)
+				{
+					return new WebObjectSource(request, response, application);
+				}
+			};
+		}
+		this.webObjectSourceFactory=wsf;
+		
+		//执行器存储关键字
+		this.appExecutorKey=getInitAppExecutorKey();
 		if(appExecutorKey != null)
 			getServletContext().setAttribute(appExecutorKey, webExecutor);
 	}
@@ -151,35 +172,28 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 初始化框架编码
-	 * 如果你配置了{@link WebConstants.ServletInitParams#ENCODING}参数，框架将使用这个编码，
-	 * 否则，将使用{@link WebConstants#DEFAULT_ENCODING}定义的编码
+	 * 取得初始化编码
 	 */
-	protected void initEncoding() throws ServletException
+	protected String getInitEncoding() throws ServletException
 	{
-		encoding=getInitParameter(WebConstants.ServletInitParams.ENCODING);
-		if(encoding==null || encoding.length()==0)
-			encoding=WebConstants.DEFAULT_ENCODING;
+		return getInitParameter(WebConstants.ServletInitParams.ENCODING);
 	}
 	
 	/**
-	 * 初始化执行器在应用中的存储关键字
+	 * 取得执行器在应用中的存储关键字
 	 */
-	protected void initAppExecutorKey() throws ServletException
+	protected String getInitAppExecutorKey() throws ServletException
 	{
-		appExecutorKey=getInitParameter(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY);
+		return getInitParameter(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY);
 	}
 	
 	/**
-	 * 初始化{@link WebExecutor WEB执行器}对象。
-	 * 如果你配置了{@link WebConstants.ServletInitParams#SOYBEAN_MILK_CONFIG}参数，框架将使用它初始化，
-	 * 否则，将使用{@link WebConstants#DEFAULT_CONFIG_FILE}。
-	 * 它还会尝试从<code>application</code>作用域中查找标识为{@link WebConstants.ServletInitParams#EXTERNAL_RESOLVER_FACTORY}的外部{@linkplain ResolverFactory 解决对象工厂}并加入框架。
+	 * 取得初始化{@link WebExecutor WEB执行器}对象
 	 */
-	protected void initWebExecutor() throws ServletException
+	protected WebExecutor getInitWebExecutor() throws ServletException
 	{
 		DefaultResolverFactory rf=new DefaultResolverFactory();
-		rf.setExternalResolverFactory(findExternalResolverFactory());
+		rf.setExternalResolverFactory(getInitExternalResolverFactory());
 		
 		Configuration configuration=new Configuration(rf);
 		
@@ -189,46 +203,39 @@ public class DispatchServlet extends HttpServlet
 		
 		parser.parse(configFileName);
 		
-		this.webExecutor=new WebExecutor(configuration);
+		return new WebExecutor(configuration);
 	}
 	
 	/**
-	 * 初始化{@linkplain WebObjectSourceFactory WEB对象源工厂}
+	 * 取得初始化{@linkplain WebObjectSourceFactory WEB对象源工厂}
 	 */
-	protected void initWebObjectSourceFactory() throws ServletException
+	protected WebObjectSourceFactory getInitWebObjectSourceFactory() throws ServletException
 	{
+		WebObjectSourceFactory wsf=null;
+		
 		String clazz=getInitParameter(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY);
 		if(clazz!=null && clazz.length()!=0)
 		{
 			try
 			{
-				this.webObjectSourceFactory=(WebObjectSourceFactory)Class.forName(clazz).newInstance();
+				wsf=(WebObjectSourceFactory)Class.forName(clazz).newInstance();
 			}
 			catch(Exception e)
 			{
 				throw new ServletException(e);
 			}
 		}
-		else
-		{
-			this.webObjectSourceFactory=new WebObjectSourceFactory()
-			{
-				@Override
-				public WebObjectSource create(HttpServletRequest request, HttpServletResponse response, ServletContext application)
-				{
-					return new WebObjectSource(request, response, application);
-				}
-			};
-		}
+		
+		return wsf;
 	}
 	
 	/**
-	 * 查找应用中的外部解决对象工厂，它将被整合到框架中。
+	 * 取得初始化外部解决对象工厂，它将被整合到框架中
 	 * @return
 	 */
-	protected ResolverFactory findExternalResolverFactory() throws ServletException
+	protected ResolverFactory getInitExternalResolverFactory() throws ServletException
 	{
-		String erfKey=getInitParameter(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY);
+		String erfKey=getInitParameter(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY_KEY);
 		
 		ResolverFactory erf=null;
 		

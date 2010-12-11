@@ -1,0 +1,875 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Manual - soybeanMilk</title>
+<link href="../resources/style.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div class="pageHeader">
+	<span class="mainTitle">SoybeanMilk</span>
+</div>
+<hr>
+<div class="pageBody">
+	<div class="bodyMenu">
+		<ul class="menu">
+			<li><a href="index.html">Home</a></li>
+			<li><a href="quickStart.html">Quick start</a></li>
+			<li class="current"><a href="manual.html">Manual</a></li>
+			<li><a href="integration.html">Integration</a></li>
+			<li><a href="faq.html">FAQ</a></li>
+			<li><a href="../../api/index.html">API</a></li>
+		</ul>
+	</div>
+	<div class="bodyContent">
+		<div class="content">
+			<p>
+				This framework will be very easy understanding if you are familiar with Java Reflection.
+				It just do four things:
+				<br>
+				<ul>
+					<li>
+						Construct argument values of the method you written, by getting them from <a href="../../api/org/soybeanMilk/core/ObjectSource.html" class="glossary">ObjectSource</a>.
+					</li>
+					<li>
+						Invoke the method on the target object.
+					</li>
+					<li>
+						Save the method result into <a href="../../api/org/soybeanMilk/core/ObjectSource.html" class="glossary">ObjectSource</a>.
+					</li>
+					<li>
+						Process the URL dispatching.
+					</li>
+				</ul>
+			</p>
+			<p>
+				<a href="../../api/org/soybeanMilk/core/ObjectSource.html" class="glossary">ObjectSource</a> is the core interface of this framework, for getting and saving objects.
+				The most work you are doing is to tell this framework how to get object from <span class="glossary">ObjectSource</span>, and save object into <span class="glossary">ObjectSource</span>. 
+			</p>
+			<p>
+				<a href="../../api/org/soybeanMilk/core/Executable.html" class="glossary">Executable</a> is another core interface.
+				It can be executed only with an <span class="glossary">ObjectSource</span>.There are two implementations of this interface, one is
+				<a href="../../api/org/soybeanMilk/core/exe/Invoke.html" class="glossary">Invoke</a>, and another is <a href="../../api/org/soybeanMilk/core/exe/Action.html" class="glossary">Action</a>.
+				They both are advanced encapsulation of Java <span class="glossary">Method</span> object, an <span class="glossary">Action</span> can have one or more <span class="glossary">Invoke</span>s,
+				and an <span class="glossary">Invoke</span> are conresponding to a <span class="glossary">Method</span>.
+			</p>
+			<p>
+				<a href="javascript:void(0);" class="glossary">Resolver</a> is an important concept, it is the target of <span class="glossary">Invoke</span>'s method.
+				But there is no interface defined for it, because it is writing by you. You may call it "Business object".
+			</p>
+			<p>
+				<a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">Converter</a> helps <span class="glossary">ObjectSource</span> converting the object it stored to the <span class="glossary">Invoke</span>'s method argument type.
+				
+			</p>
+			<p>
+				The detail structure of <span class="mainTitle">SoybeanMilk</span> configuration file is listing bellow:
+				<ul>
+					<li>
+						<a href="javascript:void(0);">&lt;soybean-milk&gt;</a>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						Root element
+						<ul>
+							<li>
+								<a href="#tag_global-config"><span class="tag">&lt;global-config&gt;</span></a>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								Global configuration block
+								<ul>
+									<li>
+										<a href="#tag_generic-converter"><span class="tag">&lt;generic-converter&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										Generic Converter
+										<ul>
+											<li>
+												<a href="#tag_converter"><span class="tag">&lt;converter&gt;</span></a>
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												&nbsp;&nbsp;
+												 Support Converter
+											</li>
+										</ul>
+									</li>
+									<li>
+										<a href="#tag_interceptor"><span class="tag">&lt;interceptor&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										 Interceptor
+									</li>
+								</ul>
+							</li>
+							<li>
+								<a href="#tag_includes"><span class="tag">&lt;includes&gt;</span></a>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;&nbsp;&nbsp;&nbsp;
+								 Included modules
+								<ul>
+									<li>
+										<a href="#tag_file"><span class="tag">&lt;file&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;&nbsp;
+										 Module file
+									</li>
+								</ul>
+							</li>
+							<li>
+								<a href="#tag_resolvers"><span class="tag">&lt;resolvers&gt;</span></a>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;&nbsp;&nbsp;
+								 Resolver configuration block
+								<ul>
+									<li>
+										<a href="#tag_resolver"><span class="tag">&lt;resolver&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										 Resolver
+									</li>
+								</ul>
+							</li>
+							<li>
+								<a href="#tag_executables"><span class="tag">&lt;executables&gt;</span></a>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								&nbsp;
+								 Executable configuration block
+								<ul>
+									<li>
+										<a href="#tag_invoke"><span class="tag">&lt;invoke&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;
+										 Global Invoke
+										<ul>
+											<li>
+												<a href="#tag_arg"><span class="tag">&lt;arg&gt;</span></a>
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												Arguments configuration
+											</li>
+										</ul>
+									</li>
+									<li>
+										<a href="#tag_action"><span class="tag">&lt;action&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&nbsp;
+										 Global Action
+										<ul>
+											<li>
+												<a href="#tag_invoke"><span class="tag">&lt;invoke&gt;</span></a>
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												 Local Invoke
+												<ul>
+													<li>
+														<a href="#tag_arg"><span class="tag">&lt;arg&gt;</span></a>
+														&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+														&nbsp;&nbsp;&nbsp;
+														Arguments configuration
+													</li>
+												</ul>
+											</li>
+											<li>
+												<a href="#tag_ref"><span class="tag">&lt;ref&gt;</span></a>
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												 Reference to global Executable
+											</li>
+											<li>
+												<a href="#tag_target"><span class="tag">&lt;target&gt;</span></a>
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												 Target
+											</li>
+										</ul>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_global-config"></a>
+				<span class="tag bold">&lt;global-config&gt;</span> (Optional) <br/>
+			</p>
+			<p>
+				Global configuration block. It is just defined as a parent tag with no attribute. 
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_generic-converter"></a>
+				<span class="tag bold">&lt;generic-converter&gt;</span> (Optional) <br/>
+			</p>
+			<p>
+				Generic Converter configuration. Type conversion is a nest function of this framework,
+				it works when you want to get an object which has different type with the object stored in <span class="glossary">ObjectSource</span>
+				(See <a href="../../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">GenericConverter</a> interface).
+			</p>
+			<p>
+				Especially in web environment, the request values are all Strings, but the argument of <span class="glossary">Invoke</span> method may be any type.
+			</p>
+			<p>
+				It contains the following attributes:
+				<ul>
+					<li>
+						<span class="tagAttr">class</span> (Optional) <br />
+						Customized generic converter class with which you can completely replace the nest generic converter.
+						This customized generic converter must be an implementaion of <a href="../../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">GenericConverter</a> interface.<br />
+						The nest generic converter <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a> will be used if you didn't set this attribute.
+					</li>
+				</ul>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_converter"></a>
+				<span class="tag bold">&lt;converter&gt;</span> (Optional) <br/>
+			</p>
+			<p>
+				Support <a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">Converter</a> object.
+				You can add new support converters or replace old converters to enhance the generic converter.<br />
+			</p>
+			<p>
+				The nested generic converter implementation <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a>
+				has add most common support converters
+				(see <a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a> class),
+				and it also can convert "<span class="var">java.util.Map&lt;String, String&gt;</span>" and "<span class="var">java.util.Map&lt;String, String[]&gt;</span>" to JavaBean object.
+			</p>
+			<p>
+				It contains the following attributes:
+				<ul>
+					<li>
+						<span class="tagAttr">src</span> (<span class="required">Required</span>) <br />
+						The source type it can convert from.
+						Such as "java.lang.String" (String class), "[Ljava.lang.String;" (String[] class).
+					</li>
+					<li>
+						<span class="tagAttr">target</span> (<span class="required">Required</span>) <br />
+						The target type it can convert to.
+						Such as "int" (int class), "[I" (int[] class)
+					</li>
+					<li>
+						<span class="tagAttr">class</span> (<span class="required">Required</span>) <br />
+						The class of this converter.
+					</li>
+				</ul>
+			</p>
+			<p>
+				The <span class="tagAttr">src</span> attribute value here is limited because the object saved in <span class="glossary">ObjectSource</span> at web environment is limited.<br/>
+				The following are all the <span class="tagAttr">src</span> values you can use:
+				<table border="1" cellspacing="1" cellpadding="5">
+					<tr>
+						<td align="center"><b>Value</b></td>
+						<td align="center"><b>Note</b></td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">String</span></td>
+						<td>Shortname for java.lang.String class</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">String[]</span></td>
+						<td>Shortname for java.lang.String[] class</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">request</span></td>
+						<td>Shortname for javax.servlet.http.HttpServletRequest class</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">session</span></td>
+						<td>Shortname for javax.servlet.http.HttpSession class</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">application</span></td>
+						<td>Shortname for javax.servlet.ServletContext class</td>
+					</tr>
+					<tr>
+						<td><span class="tagValue">response</span></td>
+						<td>Shortname for javax.servlet.http.HttpServletResponse class</td>
+					</tr>
+				</table>
+			</p>
+			<p>
+				The framework also defines some shortname for <span class="tagAttr">target</span> attribute value,
+				The rule is listing below:
+				<ul>
+					<li>
+						Primitive type, their wrapper type, and String, BigDecimal, BigInteger, java.util.Date type, also with their array type,
+						are the same with their Java syntax, and do not need its package prefix, such as :<br/>
+						"<span class="tagValue">int</span>", "<span class="tagValue">Integer</span>", "<span class="tagValue">int[]</span>", "<span class="tagValue">Integer[]</span>", "<span class="tagValue">String</span>", "<span class="tagValue">String[]</span>", "<span class="tagValue">Date[]</span>", "<span class="tagValue">BigDecimal[]</span>".
+					</li>
+					<li>
+						The following types<br/>
+						java.sql.Date<br>
+						java.sql.Time<br>
+						java.sql.Timestamp<br>
+						are familiar with above, but package prefix is required, such as :<br/>
+						"<span class="tagValue">java.sql.Time</span>", "<span class="tagValue">java.sql.Time[]</span>".
+					</li>
+				</ul>
+			</p>
+			<p>
+				The following is a support converter example, the nested will be replaced: 
+<pre class="code-xml">
+&lt;generic-converter&gt;
+	&lt;converter src="String" target="Date" class="your.converter.DateConverter" /&gt;
+	&lt;converter src="String[]" target="Date[]" class="your.converter.DateArrayConverter" /&gt;
+	&lt;converter src="request" target="java.io.File" class="your.converter.FileConverter" /&gt;
+&lt;/generic-converter&gt;
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_interceptor"></a>
+				<span class="tag bold">&lt;interceptor&gt;</span> (Optional) <br/>
+			</p>
+			<p>
+				Interceptor configuration.
+				You can add "before", "after", "exception" interceptor for <a href="../../api/org/soybeanMilk/core/Executor.html">Executor</a> using this configuration.
+			</p>
+			<p>
+				It contains the following attributes:
+				<ul>
+					<li>
+						<span class="tagAttr">before</span> (Optional) <br />
+						Set the "before" interceptor's global <span class="glossary">Executable</span> name.
+						<span class="glossary">Executor</span> will execute it first before the current <span class="glossary">Executable</span>.
+					</li>
+					<li>
+						<span class="tagAttr">after</span> (Optional) <br />
+						Set the "after" interceptor's global <span class="glossary">Executable</span> name.
+						<span class="glossary">Executor</span> will execute it after correctly executing the current <span class="glossary">Executable</span>.
+					</li>
+					<li>
+						<span class="tagAttr">exception</span> (Optional) <br />
+						Set the "exception" interceptor's global <span class="glossary">Executable</span> name.
+						<span class="glossary">Executor</span> will execute it if exception thrown when executing the current <span class="glossary">Executable</span>.
+					</li>
+					<li>
+						<span class="tagAttr">execution-key</span> (Optional) <br />
+						Saving keyword of the execution context object <a href="../../api/org/soybeanMilk/core/Execution.html">Execution</a>.
+						With this object, you can get the execution context information in your interceptor.
+					</li>
+				</ul>
+			</p>
+			<p>
+				The following is an "exception" interceptor example, the framework will execute <span class="glossary">Action</span> "<span class="var">/handleException.do</span>"
+				when exception occuring:
+<pre class="code-xml">
+&lt;global-config&gt;		
+		&lt;interceptor exception="/handleException.do"
+			execution-key="session.execution" /&gt;
+&lt;/global-config&gt;
+
+&lt;executables&gt;
+		&lt;action name="/handleException.do"&gt;
+			&lt;invoke method="handleException" resolver="exceptionResolver"&gt;
+				&lt;arg&gt;session.execution&lt;/arg&gt;
+			&lt;/invoke&gt;
+			
+			&lt;target url="/error.jsp" /&gt;
+		&lt;/action&gt;
+		...
+		...
+&lt;/executables&gt;
+</pre>
+			</p>
+			<p>
+				It's corresponding Java method must be:
+			</p>
+			<p>
+<pre class="code-java">
+public void handleException(Execution execution)
+{
+	...
+}
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_includes"></a>
+				<span class="tag bold">&lt;includes&gt;</span> (Optional) <br/>
+			</p>
+			<p>
+				Included modules configuration. It is just defined as a parent tag with no attribute.
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_file"></a>
+				<span class="tag bold">&lt;file&gt;</span> (Optional) <br/>
+			</p>
+			<p>
+				The file of module configuration. It can be a resource file in classpath, or file in "<span class="var">/WEB-INF</span>" folder of your application.
+			</p>
+			<p>
+				Note that only <span class="tag">&lt;resolvers&gt;</span> and <span class="tag">&lt;executables&gt;</span> tags are valid in module configuration files.
+			</p>
+			<p>
+				It's an example below:
+<pre class="code-xml">
+&lt;includes&gt;
+	&lt;file&gt;your/config/module.1.xml&lt;/file&gt;
+	&lt;file&gt;your/config/module.2.xml&lt;/file&gt;
+	&lt;file&gt;/WEB-INF/config/module.3.xml&lt;/file&gt;
+	&lt;file&gt;/WEB-INF/config/module.4.xml&lt;/file&gt;
+	&lt;file&gt;/home/yourapp/config/module.5.xml&lt;/file&gt;
+&lt;/includes&gt;
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_resolvers"></a>
+				<span class="tag bold">&lt;resolvers&gt;</span> (Optional) <br/>
+			</p>
+			<p>
+				<span class="glossary">Resolver</span> configuration block. It is just defined as a parent tag with no attribute.
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_resolver"></a>
+				<span class="tag bold">&lt;resolver&gt;</span> (Optional) <br/>
+			</p>
+			<p>
+				<span class="glossary">Resolver</span> configuration. You may add many resolvers here and using later.
+			</p>
+			<p>
+				It contains the following attributes:
+				<ul>
+					<li>
+						<span class="tagAttr">id</span> (<span class="required">Required</span>)<br />
+						The id of <span class="glossary">Resolver</span>, and will be used when you defining <span class="glossary">Executable</span>s.
+					</li>
+					<li>
+						<span class="tagAttr">class</span> (<span class="required">Required</span>) <br />
+						The class of <span class="glossary">Resolver</span>.
+						It single instance will be created by the parser of this framework, and using by all referenced <span class="glossary">Executable</span>s.
+					</li>
+				</ul>
+			</p>
+			<p>
+				This is an example below:
+<pre class="code-xml">
+&lt;resolvers&gt;
+	&lt;resolver id="yourResolver0" class="your.resolver.MyResolver0" /&gt;
+	&lt;resolver id="yourResolver1" class="your.resolver.MyResolver0" /&gt;
+	&lt;resolver id="yourResolver2" class="your.resolver.MyResolver1" /&gt;
+&lt;/resolvers&gt;
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_executables"></a>
+				<span class="tag bold">&lt;executables&gt;</span> (Optional) <br/>
+			</p>
+			<p>
+				<span class="glossary">Executable</span> configuration block. It is just defined as a parent tag with no attribute.
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_invoke"></a>
+				<span class="tag bold">&lt;invoke&gt;</span> (Optional) <br/>
+			</p>
+			<p>
+				<span class="glossary">Invoke</span> configuration. It can be directly added under the <span class="tag">&lt;executables&gt;</span> tag (as global),
+				or added under the <span class="tag">&lt;action&gt;</span> tag (as local).
+			</p>
+			<p>
+				It has tow configuration mode:
+				<ul>
+					<li><a href="#invoke_xml_spec">XML mode</a></li>
+					<li><a href="#invoke_java_spec">Java mode</a></li>
+				</ul>
+			</p>
+			<p>
+				<a name="invoke_xml_spec"></a>
+				<a href="javascript:void(0);">XML mode</a>
+			</p>
+			<p>
+				It contains the following attributes:
+				<ul>
+					<li>
+						<span class="tagAttr">name</span> (Optional)  <br />
+						Your must set this attribute if this <span class="glossary">Invoke</span> is global,
+						and it must be unique together with <span class="glossary">Action</span>'s name attribute.
+						It is optional if this <span class="glossary">Invoke</span> is local.
+					</li>
+					<li>
+						<span class="tagAttr">method</span> (<span class="required">Required</span>) <br />
+						Set the method name of this <span class="glossary">Invoke</span>,
+						it must be defined in <span class="tagAttr">resolver-class</span> or <span class="tagAttr">resolver</span> class.
+						The configuration parser will use this attribute to find the <span class="glossary">Method</span> object.
+						If you set the <span class="tagAttr">resolver-class</span> attribute, it's class will be first used for finding,
+						or the <span class="tagAttr">resolver</span> attribute's class will be used.
+					</li>
+					<li>
+						<span class="tagAttr">resolver-class</span> (<span class="required">Alternatively</span>) <br />
+						Set the <span class="glossary">Resolver</span> class name of this <span class="glossary">Invoke</span>.
+						If the <span class="glossary">Invoke</span> method is static,
+						you can only set this attribute, because static method can be exeucted without instance.
+					</li>
+					<li>
+						<span class="tagAttr">resolver</span> (<span class="required">Alternatively</span>) <br />
+						Set  the <span class="glossary">Resolver</span> id of this <span class="glossary">Invoke</span> defined in <span class="tag">&lt;resolvers&gt;</span> tag.
+						All the ID defined in module files can be used here.
+						If the <span class="glossary">Invoke</span> method is not static, this attribute is required.
+					</li>
+					<li>
+						<span class="tagAttr">result-key</span> (Optional) <br />
+						The saving keyword of this <span class="glossary">Invoke</span> method result.
+						The result will always be saved if you set this attribute, and "<span class="var">null</span>" is saved if the method has no return value.
+						Contrarily, nothing will be saved.<br />
+						Iegal result keywords are listing below:
+						<ul>
+							<li>
+								<span class="tagValue">yourResultKey</span> <br/>
+								The result will be saved in "<span class="var">request</span>" scope with keyword "<span class="var">yourResultKey</span>".
+							</li>
+							<li>
+								<span class="tagValue">request.yourResultKey</span> <br/>
+								The same as above.
+							</li>
+							<li>
+								<span class="tagValue">session.yourResultKey</span> <br/>
+								The result will be saved in "<span class="var">session</span>" scope with keyword "<span class="var">yourResultKey</span>".
+							</li>
+							<li>
+								<span class="tagValue">application.yourResultKey</span> <br/>
+								The result will be saved in "<span class="var">application</span>" scope with keyword "<span class="var">yourResultKey</span>".
+							</li>
+						</ul>
+						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
+						because they will be directly passed to its <span class="var">set(...)</span> method.
+					</li>
+				</ul>
+			</p>
+			<p>
+			<a name="invoke_java_spec"></a>
+				<a href="javascript:void(0);">Java mode</a><br>
+			</p>
+			<p>
+				It makes your configuration for <span class="glossary">Invoke</span> just like writing Java codes.
+				The syntax is listed below:
+<pre class="code-xml">
+<span class="tag">&lt;invoke name="yourInvokeName"&gt;</span>
+	<span class="tagAttr">resultKey</span> = <span class="tagAttr">resolver</span>.<span class="tagAttr">method</span>(<span class="tagAttr">arg</span>, <span class="tagAttr">arg</span>, ...)
+<span class="tag">&lt;/invoke&gt;</span>
+</pre>
+				<ul>
+					<li>
+						<span class="tagAttr">resultKey</span> <br>
+						The same meaning to the above attribute <span class="tagAttr">result-key</span> of <span class="tag">&lt;invoke&gt;</span>.
+					</li>
+					<li>
+						<span class="tagAttr">resolver</span> <br>
+						The same meaning to the above attribute <span class="tagAttr">resolver</span> or <span class="tagAttr">resolver-class</span> of <span class="tag">&lt;invoke&gt;</span>.
+						The framework can recognise which attribute it is.
+					</li>
+					<li>
+						<span class="tagAttr">method</span> <br>
+						The same meaning to the above attribute <span class="tagAttr">method</span> of <span class="tag">&lt;invoke&gt;</span>.
+					</li>
+					<li>
+						<span class="tagAttr">arg</span> <br>
+						The same meaning to the below tag <span class="tag">&lt;arg&gt;</span>.
+					</li>
+				</ul>
+			</p>
+			<p>
+				These are some configuration example using Java mode:
+			</p>
+			<p>
+<pre class="code-xml">
+&lt;action name="/multiply.do"&gt;
+	&lt;invoke&gt;
+		request.multiplyResult = calculator.multiply( param.a, 100)
+	&lt;/invoke&gt;
+	&lt;invoke&gt;
+		your.util.Utils.printToConsole(request.multiplyResult);
+	&lt;/invoke&gt;
+&lt;/action&gt;
+</pre>
+			</p>
+			<p>
+<pre class="code-xml">
+&lt;invoke name="yourGlobalInvokeName"&gt;
+	request.yourResultKey = yourResolver.yourMethod(
+		param.arg1, true, 'a', '\u00EF', "hello\t hello", 100 )
+&lt;/invoke&gt;
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_arg"></a>
+				<span class="tag bold">&lt;arg&gt;</span> (<span class="required">Unsure</span>) <br/>
+			</p>
+			<p>
+				The argument configuration of an <span class="glossary">Invoke</span> method.
+				It may be needed only if you are using XML mode to configure your <span class="tag">&lt;invoke&gt;</span>.
+			</p>
+			<p>
+				It contains no attributes, but only content.
+				There are two types of <span class="tag">&lt;arg&gt;</span> content, one is keyword, and another is value.
+				The framework can recognize them.
+			</p>
+			<p>
+				The legal content is listing below:
+			</p>
+				<ul>
+					<li>Keyword
+						<ul>
+							<li>
+								<span class="tagValue">param</span> <br/>
+								The entire request parameter map.
+								If the <span class="glossary">Invoke</span> method argument is <span class="var">java.util.Map</span> type,
+								then this entire map will be directly passed to the method.
+								And if the argument is other type, the framework will first convert it to the target type, then pass it to the method. 
+							</li>
+							<li>
+								<span class="tagValue">yourArgKey</span> <br/>
+								The parameters start with "<span class="var">yourArgKey</span>" in request parameter map.
+								The framework will simplely convert it to the <span class="glossary">Invoke</span> method type and then pass it,
+								if it is explicitly (only one value).
+								Otherwise, the framework will first creat a new map who contains parameters only start with "<span class="var">yourArgKey</span>",
+								and it's key will also be truncated from "<span class="var">beanName.propertyName</span>" to "<span class="var">propertyName</span>".
+								Then, it will directly pass this new map or pass the converted object mentioned as above.
+							</li>
+							<li>
+								<span class="tagValue">param.yourArgKey</span> <br/>
+								The same as above.
+							</li>
+							<li>
+								<span class="tagValue">request</span> <br/>
+								The <span class="var">HttpServletRequest</span> object.
+								By default, the framework can not convert it.
+								So, you must define your own <a href="#tag_converter">support converter</a>
+								who converting "<span class="var">javax.servlet.http.HttpServletRequest</span>" source to your destination type
+								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpServletRequest</span>.
+							</li>
+							<li>
+								<span class="tagValue">request.yourArgKey</span> <br/>
+								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">request</span> scope.
+								The framework will not convert it, so the <span class="glossary">Invoke</span> method argument must be the same type with it.
+							</li>
+							<li>
+								<span class="tagValue">session</span> <br/>
+								The <span class="var">HttpSession</span> object.
+								By default, the framework can not convert it.
+								So, you must define your own <a href="#tag_converter">support converter</a>
+								who converting "<span class="var">javax.servlet.http.HttpSession</span>" source to your destination type
+								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpSession</span>.
+							</li>
+							<li>
+								<span class="tagValue">session.yourArgKey</span> <br/>
+								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">session</span> scope.
+								The framework will not convert it.
+							</li>
+							<li>
+								<span class="tagValue">application</span> <br/>
+								The <span class="var">ServletContext</span> object.
+								The framework can not convert it by default.
+								So, you must define your own <a href="#tag_converter">support converter</a>
+								who converting "<span class="var">javax.servlet.ServletContext</span>" source to your destination type
+								if the <span class="glossary">Invoke</span> method argument is not <span class="var">ServletContext</span>.
+							</li>
+							<li>
+								<span class="tagValue">application.yourArgKey</span> <br/>
+								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">application</span> scope.
+								The framework will not convert it.
+							</li>
+							<li>
+								<span class="tagValue">response</span> <br/>
+								The <span class="var">HttpServletResponse</span> object.
+								The framework can not convert it by default.
+								So, you must define your own <a href="#tag_converter">support converter</a>
+								who converting "<span class="var">javax.servlet.http.HttpServletResponse</span>" source to your destination type
+								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpServletResponse</span>.
+							</li>
+						</ul>
+						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
+						because they will be directly passed to its <span class="var">get(...)</span> method.
+					</li>
+					<li>
+						Value <br>
+						It can only be Java primitive type, <span class="var">String</span> or <span class="var">null</span>
+						with the same syntax as Java language.
+						<ul>
+							<li>
+								<span class="tagValue">boolean</span> <br>
+								Boolean value (<span class="var">true</span> or <span class="var">false</span>).
+								The coresponding argument must be "<span class="var">boolean</span>" or "<span class="var">Boolean</span>" type.
+							</li>
+							<li>
+								<span class="tagValue">byte</span> <br>
+								Byte value.
+								The coresponding argument must be "<span class="var">byte</span>" or "<span class="var">Byte</span>" type.
+							</li>
+							<li>
+								<span class="tagValue">char</span> <br>
+								Character.
+								It can be normal character (such as 'a', 'b', 'c', '1', '5'), 
+								Java ESC character ('\n', '\r', '\t', '\'', '\\', '\"'), or unicode character ('\uxxxx').
+								The coresponding argument must be "<span class="var">char</span>" or "<span class="var">Character</span>" type.
+							</li>
+							<li>
+								<span class="tagValue">double</span> <br>
+								Double value.
+								The coresponding argument must be "<span class="var">double</span>" or "<span class="var">Double</span>" type.
+							</li>
+							<li>
+								<span class="tagValue">float</span> <br>
+								Float value.
+								The coresponding argument must be "<span class="var">float</span>" or "<span class="var">Float</span>" type.
+							</li>
+							<li>
+								<span class="tagValue">int</span> <br>
+								Int value.
+								The coresponding argument must be "<span class="var">int</span>" or "<span class="var">Integer</span>" type.
+							</li>
+							<li>
+								<span class="tagValue">long</span> <br>
+								Long value.
+								The coresponding argument must be "<span class="var">long</span>" or "<span class="var">Long</span>" type.
+							</li>
+							<li>
+								<span class="tagValue">short</span> <br>
+								Short value.
+								The coresponding argument must be "<span class="var">short</span>" or "<span class="var">Short</span>" type.
+							</li>
+							<li>
+								<span class="tagValue">String</span> <br>
+								String value.
+								It can contain characters defined in <span class="tagValue">char</span> segment above.
+								The coresponding argument must be "<span class="var">String</span>" type.
+							</li>
+							<li>
+								<span class="tagValue">null</span> <br>
+								Null.
+								The coresponding argument can be any type except primitive. 
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</p>
+			<p>
+				The following are some examples:
+			</p>
+			<p>
+<pre class="code-xml">
+&lt;invoke name="yourGlobalInvoke" method="yourMethod" resolver="yourResolver" result-key="yourResultKey"&gt;
+	&lt;arg&gt;arg1&lt;/arg&gt;
+	&lt;arg&gt;param.arg2&lt;/arg&gt;
+	&lt;arg&gt;request.arg3&lt;/arg&gt;
+	&lt;arg&gt;100&lt;/arg&gt;
+	&lt;arg&gt;2.35f&lt;/arg&gt;
+	&lt;arg&gt;'a'&lt;/arg&gt;
+	&lt;arg&gt;"hello\t hello"&lt;/arg&gt;
+	&lt;arg&gt;true&lt;/arg&gt;
+	&lt;arg&gt;null&lt;/arg&gt;
+&lt;/invoke&gt;
+</pre>
+			</p>
+			<p>
+<pre class="code-xml">
+&lt;invoke name="/multiply.do" method="multiply" resolver="calculator" result-key="multiplyResult"&gt;
+	&lt;arg&gt;a&lt;arg/&gt;
+	&lt;arg&gt;param.b&lt;arg/&gt;
+&lt;/invoke&gt;
+</pre>
+			<p>
+			<p>
+<pre class="code-xml">
+&lt;invoke name="/doMultiply.do" method="doMultiply" resolver="calculator"&gt;
+	&lt;arg&gt;request&lt;/arg&gt;
+	&lt;arg&gt;response&lt;arg/&gt;
+&lt;/invoke&gt;
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_action"></a>
+				<span class="tag bold">&lt;action&gt;</span> (Optional)<br/>
+			</p>
+			<p>
+				<span class="glossary">Action</span> configuration.
+				You can add many <span class="tag">&lt;invoke&gt;</span> and <span class="tag">&lt;ref&gt;</span> tags into it,
+				and they will be executed orderly.
+			</p>
+			<p>
+				It contains the following attributes:
+				<ul>
+					<li>
+						<span class="tagAttr">name</span> (<span class="required">Required</span>) <br />
+						Set the name of this <span class="glossary">Action</span>.
+					</li>
+				</ul>
+			</p>
+			<p>
+				It is an example below:
+<pre class="code-xml">
+&lt;action name="/yourAction.do"&gt;
+	&lt;invoke method="method0" resolver="yourResolver" result-key="result0" /&gt;
+	&lt;invoke method="method1" resolver="yourResolver"&gt;
+		&lt;arg&gt;param.a&lt;arg/&gt;
+		&lt;arg&gt;request.result0&lt;arg/&gt;
+		&lt;arg&gt;true&lt;arg/&gt;
+	&lt;/invoke&gt;
+	&lt;ref name="gloablInvoke0" /&gt;
+	&lt;ref name="gloablInvoke1" /&gt;
+	
+	&lt;target url="/action_result.jsp" /&gt;
+&lt;/action&gt;
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_ref"></a>
+				<span class="tag bold">&lt;ref&gt;</span> (Optional)<br/>
+			</p>
+			<p>
+				Reference configuration.
+				It helps you add one or more global <span class="glossary">Executable</span> into this <span class="glossary">Action</span>.
+			</p>
+			<p>
+				It contains the following attributes:
+				<ul>
+					<li>
+						<span class="tagAttr">name</span> (<span class="required">Required</span>) <br />
+						Set the global name of <span class="glossary">Executable</span> you want to reference.
+					</li>
+				</ul>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_target"></a>
+				<span class="tag bold">&lt;target&gt;</span> (Optional)<br/>
+			</p>
+			<p>
+				The target configuration of this <span class="glossary">Action</span>.
+			</p>
+			<p>
+				It contains the following attributes:
+				<ul>
+					<li>
+						<span class="tagAttr">url</span> (<span class="required">Required</span>)<br />
+						The target URL.
+						It must be start with "<span class="var">/</span>" if it is an URL in your application.
+					</li>
+					<li>
+						<span class="tagAttr">type</span> (Optional)<br />
+						The target type.
+						It has only two values : "<span class="tagValue">forward</span>" or "<span class="tagValue">redirect</span>".
+						The framework will treat it as "<span class="tagValue">forward</span>" type if you did not set it.
+					</li>
+				</ul>
+			</p>
+		</div>
+	</div>
+</div>
+<hr size="1">
+<div class="pageFooter">
+</div>
+</body>
+</html>

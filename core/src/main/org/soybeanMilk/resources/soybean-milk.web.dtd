@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--该定义是由soybean-milk.core.dtd继承而来，大部分的说明可以参考它-->
+
+<!ELEMENT soybean-milk (global-config?,includes?,resolvers?,executables)>
+<!ELEMENT global-config (generic-converter?,interceptor?)>
+<!ELEMENT generic-converter (converter*)>
+
+<!--
+异常处理器，执行器在遇到执行异常时，会将异常转交给它所定义的可执行对象来处理，比如配置：
+<global-config>
+		<exception-handler executable-name="/handleException.do" exception-arg-key="session.executeExceptoin" />
+</global-config>
+<executables>
+	<action name="/handleException.do">
+		<invoke method="handleException" resolver-class="my.utils.ExceptionHandler">
+			<arg key="session.userId" />
+			<arg key="session.executeExceptoin" />
+		</invoke>
+		
+		<target url="/error.jsp" />
+	</action>
+	...
+	...
+</executables>
+当其他可执行对象出现执行异常时，框架将会执行名称为“/handleException.do”的动作，
+该动作接收异常对象参数，处理后转到“/error.jsp”页面。
+-->
+<!ELEMENT exception-handler EMPTY>
+<!ELEMENT converter EMPTY>
+<!ELEMENT interceptor EMPTY>
+<!ELEMENT includes (file*)>
+<!ELEMENT file (#PCDATA)>
+<!ELEMENT resolvers (resolver*)>
+<!ELEMENT resolver EMPTY>
+<!ELEMENT executables (invoke | action)*>
+
+<!ELEMENT action ((invoke | ref)*,target?)>
+<!ELEMENT ref EMPTY>
+
+<!--
+target 动作的目标URL
+-->
+<!ELEMENT target EMPTY>
+<!ELEMENT invoke (#PCDATA | arg)*>
+
+<!--
+参数配置
+值设置与父dtd文件的相同，但是关键字却有更规范的设置，
+下面是合法的关键字定义方式：
+<arg>param</arg>					整个请求参数映射表
+<arg>param.beanKey</arg>			参数映射表中的以“beanKey.”开头的请求参数
+<arg>beanKey</arg>					同上
+<arg>request</arg>					请求对象HttpServletRequest
+<arg>request.beanKey</arg>			请求中的“beanKey”关键字对应的对象
+<arg>session</arg>					会话对象HttpSession
+<arg>session.beanKey</arg>			会话中的“beanKey”关键字对应的对象
+<arg>application</arg>				应用对象ServletContext
+<arg>application.beanKey</arg>		应用中的“beanKey”关键字对应的对象
+<arg>response</arg>					回应对象HttpServletResponse
+-->
+<!ELEMENT arg (#PCDATA)>
+
+<!ATTLIST generic-converter class CDATA #IMPLIED>
+<!ATTLIST converter src CDATA #REQUIRED>
+<!ATTLIST converter target CDATA #REQUIRED>
+<!ATTLIST converter class CDATA #REQUIRED>
+
+<!ATTLIST interceptor before CDATA #IMPLIED>
+<!ATTLIST interceptor after CDATA #IMPLIED>
+<!ATTLIST interceptor exception CDATA #IMPLIED>
+<!ATTLIST interceptor execution-key CDATA #IMPLIED>
+
+<!--
+可执行对象的名称，这个可执行对象将被用来处理执行异常
+-->
+<!ATTLIST exception-handler executable-name CDATA #REQUIRED>
+
+<!--
+执行异常(ExecuteException)对象以该关键字保存到对象源中，并在之后传递给这个可执行对象
+-->
+<!ATTLIST exception-handler exception-arg-key CDATA #REQUIRED>
+
+<!ATTLIST resolver id ID #REQUIRED>
+<!ATTLIST resolver class CDATA #REQUIRED>
+
+<!--
+动作配置的名称属性
+WEB执行器默认是根据servlet路径（request.getServletPath()）来查找可执行对象的，所以这个名称应该定义为servlet路径。
+比如“/user/login”。
+-->
+<!ATTLIST action name CDATA #REQUIRED>
+<!ATTLIST ref name CDATA #REQUIRED>
+
+
+<!ATTLIST invoke name CDATA #REQUIRED>
+<!ATTLIST invoke method CDATA #IMPLIED>
+<!ATTLIST invoke resolver-class CDATA #IMPLIED>
+<!ATTLIST invoke resolver CDATA #IMPLIED>
+
+<!--
+方法执行结果配置属性
+如果result-key里面包含访问符'.'，那么它必须以框架支持的作用域开头（参考org.soybeanMilk.web.WebConstants.Scope类）。
+下面是合法的定义方式：
+beanKey					结果将以“beanKey”关键字被保存到“request”作用域中
+request.beanKey			同上
+session.beanKey			结果将以“beanKey”关键字被保存到“session”作用域中
+application.beanKey		结果将以“beanKey”关键字被保存到“application”作用域中
+-->
+<!ATTLIST invoke result-key CDATA #IMPLIED>
+
+<!--
+动作目标配置属性
+url 目标URL，如果是上下文内的URL，则必须以'/'开头
+type 目标类型（转向或者重定向）
+-->
+<!ATTLIST target url CDATA #REQUIRED>
+<!ATTLIST target type (forward | redirect) #IMPLIED>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soybean-milk>
+	
+	<global-config>
+		<generic-converter>
+			<converter src="String" target="int" class="org.soybeanMilk.core.bean.converters.IntegerConverter" />
+		</generic-converter>
+		
+		<interceptor before="beforeHandler" after="afterHandler" exception="exceptionHandler"
+			execution-key="executionKey" />
+	</global-config>
+	
+	<resolvers>
+		<resolver id="helloResolver" class="example.resolver.HelloResolver" />
+		<resolver id="interceptor" class="example.resolver.InterceptorResolver" />
+	</resolvers>
+	
+	<executables>
+		<invoke name="beforeHandler" method="before" resolver="interceptor" />
+		<invoke name="afterHandler" method="after" resolver="interceptor" />
+		<invoke name="exceptionHandler" method="exception" resolver="interceptor">
+			<arg>executionKey</arg>
+		</invoke>
+		
+		<action name="helloActionXml">
+			<invoke method="hello" resolver="helloResolver" result-key="helloResult">
+				<arg>helloTo</arg>
+				<arg>helloRepeat</arg>
+			</invoke>
+			
+			<invoke method="printObject" resolver-class="example.resolver.HelloResolver">
+				<arg>helloResult</arg>
+			</invoke>
+		</action>
+		
+		<action name="helloActionStatement">
+			<invoke> statement.helloResult = helloResolver.hello(helloTo, 3) </invoke>
+			<invoke> example . resolver. HelloResolver . printObject ( statement.helloResult ); </invoke>
+		</action>
+		
+		<action name="testJavaSyntax">
+			<invoke>
+				example.resolver.HelloResolver.testJavaSyntax(
+					'a',
+					35,
+					true,
+					22222,
+					33333333333,
+					2.533f,
+					3.23423434089d,
+					"ab\tcd",
+					null
+				);
+			</invoke>
+		</action>
+		
+		<action name="testAfterBefore">
+			<invoke>
+				interceptor.invokeNormal()
+			</invoke>
+		</action>
+		
+		<action name="testException">
+			<invoke>
+				interceptor.invokeThrow()
+			</invoke>
+		</action>
+		
+	</executables>
+	
+</soybean-milk>

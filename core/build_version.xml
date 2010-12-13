@@ -2,13 +2,13 @@
 <project name="build_version" default="cleanAfterDist" basedir=".">
 
 	<!--类文件夹-->
-	<property name="classDir" value="../bin" />
+	<property name="classDir" value="../../bin" />
 	<!--发布目录-->
 	<property name="distDir" value="dist" />
 	<!--发布目录-->
 	<property name="versionDir" value="versions" />
 	<!--临时目录-->
-	<property name="tmpDir" value="../tmp" />
+	<property name="tmpDir" value="../../tmp" />
 	<!-- 版本 -->
 	<property name="appVersion" value="1.0-beta" />
 	<!-- 名称 -->
@@ -16,7 +16,7 @@
 	<!-- 示例工程名 -->
 	<property name="exampleProjectName" value="soybeanMilkExample" />
 	<!-- 示例工程位置 -->
-	<property name="exampleProjectDir" value="../../${exampleProjectName}" />
+	<property name="exampleProjectDir" value="../../../${exampleProjectName}" />
 	
 	<!--打jar包-->
 	<target name="jarFramework">

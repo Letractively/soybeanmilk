@@ -136,7 +136,7 @@ public class DefaultExecutor implements Executor
 	
 	/**
 	 * 拦截器异常
-	 * @author zangzf
+	 * @author earthAngry@gmail.com
 	 * @date 2010-11-30
 	 *
 	 */

@@ -57,7 +57,7 @@ public class WebConstants extends Constants
 		/**
 		 * WEB对象源工厂的类名。框架将使用它来为请求创建WEB对象源
 		 */
-		public static final String WEB_OBJECT_SOURCE_FACTORY="webObjectSoruce-factory-class";
+		public static final String WEB_OBJECT_SOURCE_FACTORY_CLASS="webObjectSoruce-factory-class";
 		
 		/**
 		 * WEB执行器对象在应用中的存储关键字。如果指定，框架会将创建的WEB执行器存储到应用中；如果不指定，则不会存储

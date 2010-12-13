@@ -213,7 +213,7 @@ public class DispatchServlet extends HttpServlet
 	{
 		WebObjectSourceFactory wsf=null;
 		
-		String clazz=getInitParameter(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY);
+		String clazz=getInitParameter(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY_CLASS);
 		if(clazz!=null && clazz.length()!=0)
 		{
 			try

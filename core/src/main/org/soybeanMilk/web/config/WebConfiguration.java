@@ -15,7 +15,6 @@
 package org.soybeanMilk.web.config;
 
 import java.util.Collection;
-import java.util.SortedSet;
 
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecuteException;

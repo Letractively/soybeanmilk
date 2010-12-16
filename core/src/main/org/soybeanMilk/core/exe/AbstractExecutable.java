@@ -25,6 +25,8 @@ import org.soybeanMilk.core.ObjectSource;
  */
 public abstract class AbstractExecutable implements Executable
 {
+	private static final long serialVersionUID = 8600625732310639588L;
+	
 	/**可执行对象名称*/
 	private String name;
 	

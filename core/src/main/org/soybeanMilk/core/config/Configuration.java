@@ -14,6 +14,7 @@
 
 package org.soybeanMilk.core.config;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,16 +37,16 @@ public class Configuration
 	private static boolean _logDebugEnabled=log.isDebugEnabled();
 	
 	/**解决对象工厂*/
-	private ResolverFactory resolverFactory;
+	protected ResolverFactory resolverFactory;
 	
 	/**通用转换器，它负责将配置文件中定义的字符串参数值转换为实际的参数对象*/
-	private GenericConverter genericConverter;
+	protected GenericConverter genericConverter;
 	
 	/**拦截器信息*/
-	private InterceptorInfo interceptorInfo;
+	protected InterceptorInfo interceptorInfo;
 	
 	/**可执行对象集*/
-	private Map<String, Executable> executables;
+	protected Map<String, Executable> executables;
 	
 	public Configuration()
 	{
@@ -75,11 +76,27 @@ public class Configuration
 	public void setInterceptorInfo(InterceptorInfo interceptorInfo) {
 		this.interceptorInfo = interceptorInfo;
 	}
-	public Map<String, Executable> getExecutables() {
-		return executables;
+	
+	/**
+	 * 获取此配置包含的所有可执行对象集合
+	 * @return
+	 */
+	public Collection<Executable> getExecutables()
+	{
+		if(this.executables == null)
+			return null;
+		
+		return this.executables.values();
 	}
-	public void setExecutables(Map<String, Executable> executables) {
-		this.executables = executables;
+	
+	/**
+	 * 添加集合中的所有可执行对象
+	 * @param executables
+	 */
+	public void addExecutables(Collection<Executable> executables)
+	{
+		for(Executable e : executables)
+			this.addExecutable(e);
 	}
 	
 	/**
@@ -101,8 +118,7 @@ public class Configuration
 		if(executables == null)
 			executables=new HashMap<String,Executable>();
 		
-		if(exe.getName() == null)
-			throw new IllegalArgumentException("Executable.getName() must not be null.");
+		checkNameNotNull(exe);
 		
 		if(executables.get(exe.getName()) != null)
 			throw new IllegalArgumentException("duplicate Executable name '"+exe.getName()+"'");
@@ -111,5 +127,15 @@ public class Configuration
 		
 		if(_logDebugEnabled)
 			log.debug("add '"+exe+"' to '"+this+"'");
+	}
+	
+	/**
+	 * 校验名称，添加到此对象中的可执行对象的名称不能为null
+	 * @param exe
+	 */
+	protected void checkNameNotNull(Executable exe)
+	{
+		if(exe.getName() == null)
+			throw new IllegalArgumentException("Executable.getName() must not be null.");
 	}
 }

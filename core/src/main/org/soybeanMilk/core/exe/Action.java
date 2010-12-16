@@ -14,7 +14,6 @@
 
 package org.soybeanMilk.core.exe;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +31,7 @@ import org.soybeanMilk.core.ObjectSource;
  * @date 2010-5-9
  *
  */
-public class Action extends AbstractExecutable implements Serializable
+public class Action extends AbstractExecutable
 {
 	private static final long serialVersionUID = -8438224010529190055L;
 	

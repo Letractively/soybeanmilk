@@ -20,10 +20,10 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -640,16 +640,12 @@ public class ConfigurationParser
 	 */
 	protected void processExecutableRefs()
 	{
-		Map<String, Executable> executables=configuration.getExecutables();
+		Collection<Executable> executables=configuration.getExecutables();
 		if(executables == null)
 			return;
 		
-		Set<String> exeNames=executables.keySet();
-		
-		for(String nameKey : exeNames)
+		for(Executable exe : executables)
 		{
-			Executable exe=executables.get(nameKey);
-			
 			if(exe instanceof Action)
 			{
 				Action action=(Action)exe;
@@ -1126,6 +1122,8 @@ public class ConfigurationParser
 	 */
 	protected static class ExecutableRefProxy implements Executable
 	{
+		private static final long serialVersionUID = 1L;
+		
 		private String refName;
 
 		public ExecutableRefProxy(String refName)

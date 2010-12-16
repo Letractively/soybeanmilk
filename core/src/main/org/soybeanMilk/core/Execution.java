@@ -29,7 +29,7 @@ public class Execution implements Serializable
 {
 	private static final long serialVersionUID = -1593312435424212387L;
 	
-	private transient Executable executable;
+	private Executable executable;
 	private transient ObjectSource objectSource;
 	private ExecuteException executeException;
 	

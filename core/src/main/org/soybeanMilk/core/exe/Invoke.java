@@ -32,7 +32,7 @@ import org.soybeanMilk.core.ObjectSource;
  * @author earthAngry@gmail.com
  * @date 2010-9-30
  */
-public class Invoke extends AbstractExecutable implements Serializable
+public class Invoke extends AbstractExecutable
 {
 	private static final long serialVersionUID = -6517860148774345653L;
 	

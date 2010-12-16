@@ -29,6 +29,7 @@ import org.soybeanMilk.core.config.parser.ConfigurationParser;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.bean.WebGenericConverter;
+import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
 import org.w3c.dom.Element;
@@ -151,6 +152,12 @@ public class WebConfigurationParser extends ConfigurationParser
 		return WebConstants.DEFAULT_CONFIG_FILE;
 	}
 	
+	@Override
+	protected Configuration createConfigurationInstance()
+	{
+		return new WebConfiguration();
+	}
+
 	@Override
 	protected GenericConverter createGenericConverterInstance()
 	{

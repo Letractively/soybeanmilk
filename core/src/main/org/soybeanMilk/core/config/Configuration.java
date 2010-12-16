@@ -101,32 +101,35 @@ public class Configuration
 	
 	/**
 	 * 根据名称查找可执行对象
-	 * @param name
+	 * @param executableName
 	 * @return
 	 */
-	public Executable getExecutable(String name)
+	public Executable getExecutable(String executableName)
 	{
-		return executables == null ? null : executables.get(name);
+		if(executableName == null)
+			return null;
+		
+		return executables == null ? null : executables.get(executableName);
 	}
 	
 	/**
 	 * 添加一个可执行对象
-	 * @param exe
+	 * @param executable
 	 */
-	public void addExecutable(Executable exe)
+	public void addExecutable(Executable executable)
 	{
 		if(executables == null)
 			executables=new HashMap<String,Executable>();
 		
-		checkNameNotNull(exe);
+		checkNameNotNull(executable);
 		
-		if(executables.get(exe.getName()) != null)
-			throw new IllegalArgumentException("duplicate Executable name '"+exe.getName()+"'");
+		if(executables.get(executable.getName()) != null)
+			throw new IllegalArgumentException("duplicate Executable name '"+executable.getName()+"'");
 		
-		executables.put(exe.getName(), exe);
+		executables.put(executable.getName(), executable);
 		
 		if(_logDebugEnabled)
-			log.debug("add '"+exe+"' to '"+this+"'");
+			log.debug("add '"+executable+"' to '"+this+"'");
 	}
 	
 	/**

@@ -12,12 +12,12 @@
  * limitations under the License. 
  */
 
-package org.soybeanMilk.web.config.restful;
+package org.soybeanMilk.web.restful;
 
 import java.io.Serializable;
 
 /**
- * 路径的节点。
+ * 路径的节点，该节点可能是变量节点，也可能是值节点。
  * @author earthAngry@gmail.com
  * @date 2010-12-16
  *
@@ -26,32 +26,29 @@ public class PathNode implements Comparable<PathNode>,Serializable
 {
 	private static final long serialVersionUID = 2874050175900495860L;
 	
-	private String value;
+	private String nodeValue;
 	private boolean isVariable;
 	
-	public PathNode(String value)
+	public PathNode(String nodeValue)
 	{
-		if(isVariableString(value))
+		if(isVariableString(nodeValue))
 		{
 			this.isVariable=true;
-			this.value=value.substring(1, value.length()-1);
+			this.nodeValue=nodeValue.substring(1, nodeValue.length()-1);
 		}
 		else
-			this.value=value;
+			this.nodeValue=nodeValue;
 	}
 	
-	public String getName() {
-		return value;
+	public String getNodeValue() {
+		return nodeValue;
 	}
-
-	public void setName(String name) {
-		this.value = name;
+	public void setNodeValue(String nodeValue) {
+		this.nodeValue = nodeValue;
 	}
-
 	public boolean isVariable() {
 		return isVariable;
 	}
-
 	public void setVariable(boolean isVariable) {
 		this.isVariable = isVariable;
 	}
@@ -71,7 +68,7 @@ public class PathNode implements Comparable<PathNode>,Serializable
 		else if(o.isVariable())
 			re=1;
 		else
-			re=this.getName().compareTo(o.getName());
+			re=this.getNodeValue().compareTo(o.getNodeValue());
 		
 		return re;
 	}

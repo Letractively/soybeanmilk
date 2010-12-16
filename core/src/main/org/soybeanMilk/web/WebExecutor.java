@@ -27,10 +27,11 @@ import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecutableNotFoundException;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.ObjectSource;
-import org.soybeanMilk.core.config.Configuration;
+import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
 import org.soybeanMilk.web.os.WebObjectSource;
+import org.soybeanMilk.web.restful.VariablePath;
 
 
 /**
@@ -43,9 +44,9 @@ public class WebExecutor extends DefaultExecutor
 	private static Log log=LogFactory.getLog(WebExecutor.class);
 	private static boolean _logDebugEnabled=log.isDebugEnabled();
 	
-	public WebExecutor(Configuration configuration)
+	public WebExecutor(WebConfiguration webConfiguration)
 	{
-		super(configuration);
+		super(webConfiguration);
 	}
 	
 	@Override
@@ -70,9 +71,13 @@ public class WebExecutor extends DefaultExecutor
 		HttpServletRequest request = objSource.getRequest();
 		String servletPath=request.getServletPath();
 		
+		Executable exe=findExecutable(servletPath, objSource);
+		if(exe == null)
+			throw new ExecutableNotFoundException(servletPath);
+		
 		try
 		{
-			Executable finalExe=execute(findExecutable(servletPath), objSource);
+			Executable finalExe=execute(exe, objSource);
 			
 			processTarget(finalExe, objSource);
 		}
@@ -80,6 +85,28 @@ public class WebExecutor extends DefaultExecutor
 		{
 			throw new ServletException(e);
 		}
+	}
+	
+	@Override
+	protected Executable findExecutable(String executableName, ObjectSource objSource)
+	{
+		WebConfiguration cfg=getWebConfiguration();
+		Executable exe=super.findExecutable(executableName, objSource);
+		if(exe == null)
+		{
+			VariablePath vp=cfg.getVariablePathMatched(executableName);
+			if(vp == null)
+				throw new ExecutableNotFoundException(executableName);
+			
+			//TODO 设置变量路径的变量值到对象源中
+		}
+		
+		return exe;
+	}
+	
+	protected WebConfiguration getWebConfiguration()
+	{
+		return (WebConfiguration)super.getConfiguration();
 	}
 	
 	/**

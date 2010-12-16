@@ -47,7 +47,11 @@ public class DefaultExecutor implements Executor
 	public Executable execute(String exeName, ObjectSource objSource)
 			throws ExecuteException, ExecutableNotFoundException
 	{
-		return execute(findExecutable(exeName), objSource);
+		Executable exe=findExecutable(exeName, objSource);
+		if(exe == null)
+			throw new ExecutableNotFoundException(exeName);
+		
+		return execute(exe, objSource);
 	}
 	
 	/**
@@ -104,17 +108,13 @@ public class DefaultExecutor implements Executor
 	
 	/**
 	 * 根据名称查找可执行对象
-	 * @param name
+	 * @param executableName
+	 * @param objSource
 	 * @return
-	 * @throws ExecutableNotFoundException
 	 */
-	protected Executable findExecutable(String name) throws ExecutableNotFoundException
+	protected Executable findExecutable(String executableName, ObjectSource objSource)
 	{
-		Executable exe = getConfiguration().getExecutable(name);
-		if(exe == null)
-			throw new ExecutableNotFoundException(name);
-		
-		return exe;
+		return getConfiguration().getExecutable(executableName);
 	}
 	
 	/**

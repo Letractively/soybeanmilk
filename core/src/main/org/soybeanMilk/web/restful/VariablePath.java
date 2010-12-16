@@ -12,7 +12,7 @@
  * limitations under the License. 
  */
 
-package org.soybeanMilk.web.config.restful;
+package org.soybeanMilk.web.restful;
 
 import java.io.Serializable;
 
@@ -28,28 +28,28 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 {
 	private static final long serialVersionUID = 4221252496072385107L;
 	
-	private String path;
+	private String variablePath;
 	
 	/**
 	 * 路径节点数组，以'/'拆分的
 	 */
 	private PathNode[] pathNodes;
 	
-	public VariablePath(String path)
+	public VariablePath(String variablePath)
 	{
-		this.path=path;
+		this.variablePath=variablePath;
 		
-		if(path==null || path.length()==0)
+		if(variablePath==null || variablePath.length()==0)
 			return;
 		
-		this.pathNodes=split(this.path);
+		this.pathNodes=split(this.variablePath);
 	}
 	
-	public String getPath() {
-		return path;
+	public String getVariablePath() {
+		return variablePath;
 	}
-	public void setPath(String path) {
-		this.path = path;
+	public void setVariablePath(String variablePath) {
+		this.variablePath = variablePath;
 	}
 	public PathNode[] getPathNodes() {
 		return pathNodes;
@@ -110,6 +110,12 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 				return re;
 			}
 		}
+	}
+	
+	@Override
+	public String toString()
+	{
+		return this.variablePath;
 	}
 	
 	/**

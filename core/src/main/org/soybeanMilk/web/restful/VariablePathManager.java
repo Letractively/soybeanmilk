@@ -12,11 +12,17 @@
  * limitations under the License. 
  */
 
-package org.soybeanMilk.web.config.restful;
+package org.soybeanMilk.web.restful;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+/**
+ * 
+ * @author earthAngry@gmail.com
+ * @date 2010-12-16
+ *
+ */
 public class VariablePathManager
 {
 	protected SortedSet<VariablePath> variableNameExecutables;
@@ -40,16 +46,17 @@ public class VariablePathManager
 	public void addVariablePath(VariablePath variablePath)
 	{
 		if(!this.variableNameExecutables.add(variablePath))
-			throw new IllegalArgumentException("duplicate variable path '"+variablePath.getPath()+"'");
+			throw new IllegalArgumentException("duplicate variable path '"+variablePath.getVariablePath()+"'");
 	}
 	
 	/**
-	 * 取得与输入路径匹配的变量路径
-	 * @param inputPath 输入路径，比如“a/b/c/d”
+	 * 取得与值路径匹配的变量路径
+	 * @param valuePath 值路径，比如“a/b/c/d”
 	 * @return
 	 */
-	public VariablePath getMatched(String inputPath)
+	public VariablePath getMatched(String valuePath)
 	{
+		//TODO 实现匹配查找
 		return null;
 	}
 }

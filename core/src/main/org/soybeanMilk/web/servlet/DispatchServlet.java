@@ -25,11 +25,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.core.ExecutableNotFoundException;
-import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.resolver.ResolverFactory;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.WebExecutor;
+import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.config.parser.WebConfigurationParser;
 import org.soybeanMilk.web.os.WebObjectSource;
 
@@ -195,15 +195,15 @@ public class DispatchServlet extends HttpServlet
 		DefaultResolverFactory rf=new DefaultResolverFactory();
 		rf.setExternalResolverFactory(getInitExternalResolverFactory());
 		
-		Configuration configuration=new Configuration(rf);
+		WebConfiguration webConfiguration=new WebConfiguration(rf);
 		
 		String configFileName=getInitParameter(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG);
 		
-		WebConfigurationParser parser=new WebConfigurationParser(configuration,getServletContext());
+		WebConfigurationParser parser=new WebConfigurationParser(webConfiguration,getServletContext());
 		
 		parser.parse(configFileName);
 		
-		return new WebExecutor(configuration);
+		return new WebExecutor(webConfiguration);
 	}
 	
 	/**

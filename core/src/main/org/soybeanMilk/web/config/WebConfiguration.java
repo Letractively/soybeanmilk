@@ -14,19 +14,15 @@
 
 package org.soybeanMilk.web.config;
 
-import java.util.Collection;
-
 import org.soybeanMilk.core.Executable;
-import org.soybeanMilk.core.ExecuteException;
-import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.resolver.ResolverFactory;
-import org.soybeanMilk.web.config.restful.VariablePath;
-import org.soybeanMilk.web.config.restful.VariablePathManager;
+import org.soybeanMilk.web.restful.VariablePath;
+import org.soybeanMilk.web.restful.VariablePathManager;
 
 /**
  * Web配置信息。<br>
- * 它提供web环境特有的功能支持，比如RESTful风格的{@linkplain Executable 可执行对象}查找
+ * 它提供web环境特有的功能支持，比如查找名称定义为RESTful风格的{@linkplain Executable 可执行对象}
  * @author earthAngry@gmail.com
  * @date 2010-12-16
  *
@@ -53,76 +49,44 @@ public class WebConfiguration extends Configuration
 	@Override
 	public void addExecutable(Executable exe)
 	{
-		checkNameNotNull(exe);
+		super.addExecutable(exe);
 		
-		if(!addVariableNameExecutable(exe))
-			super.addExecutable(exe);
+		addVariablePath(exe.getName());
 	}
 	
 	@Override
-	public void addExecutables(Collection<Executable> executables)
+	public Executable getExecutable(String executableName)
 	{
-		super.addExecutables(executables);
-	}
-	
-	@Override
-	public Collection<Executable> getExecutables()
-	{
-		return super.getExecutables();
-	}
-	
-	@Override
-	public Executable getExecutable(String name)
-	{
-		Executable re = super.getExecutable(name);
+		Executable re = super.getExecutable(executableName);
 		if(re == null)
-			re = (VariableNameExecutable)this.variablePathManager.getMatched(name);
+		{
+			VariablePath vp=getVariablePathMatched(executableName);
+			if(vp != null)
+				re=super.getExecutable(vp.getVariablePath());
+		}
 		
 		return re;
 	}
 	
-	protected boolean addVariableNameExecutable(Executable executable)
+	/**
+	 * 查找与给定可执行对象名称匹配的变量路径
+	 * @param executbaleName
+	 * @return
+	 */
+	public VariablePath getVariablePathMatched(String executbaleName)
 	{
-		VariableNameExecutable vne=new VariableNameExecutable(executable);
-		if(!vne.isVariablePath())
-			return false;
-		
-		this.variablePathManager.addVariablePath(vne);
-		
-		return true;
+		return variablePathManager==null ? null : variablePathManager.getMatched(executbaleName);
 	}
 	
-	protected static class VariableNameExecutable extends VariablePath implements Executable
+	protected boolean addVariablePath(String variablePath)
 	{
-		private static final long serialVersionUID = -6535341086644875191L;
+		VariablePath vp=new VariablePath(variablePath);
 		
-		private Executable executable;
+		if(!vp.isVariablePath())
+			return false;
 		
-		public VariableNameExecutable(Executable executable)
-		{
-			super(executable.getName());
-		}
+		this.variablePathManager.addVariablePath(vp);
 		
-		public Executable getExecutable() {
-			return executable;
-		}
-
-		@Override
-		public void execute(ObjectSource objectSource) throws ExecuteException
-		{
-			this.executable.execute(objectSource);
-		}
-
-		@Override
-		public String getName()
-		{
-			return this.executable.getName();
-		}
-
-		@Override
-		public String toString()
-		{
-			return this.executable.toString();
-		}
+		return true;
 	}
 }

@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.soybeanMilk.core.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.resolver.ResolverFactory;
 import org.soybeanMilk.web.WebConstants;
+import org.soybeanMilk.web.os.PathWebObjectSource;
 import org.soybeanMilk.web.os.WebObjectSource;
 import org.soybeanMilk.web.servlet.DispatchServlet;
 import org.soybeanMilk.web.servlet.WebObjectSourceFactory;
@@ -47,9 +48,9 @@ public class TestDispatchServlet
 			log.error("",e);
 		}
 		
-		Assert.assertNull(((DefaultResolverFactory)servlet.getWebExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory());
+		Assert.assertNull(((DefaultResolverFactory)servlet.getExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory());
 		Assert.assertEquals(WebConstants.DEFAULT_ENCODING, servlet.getEncoding());
-		Assert.assertEquals(WebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
+		Assert.assertEquals(PathWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
 	}
 	
 	@Test
@@ -66,9 +67,9 @@ public class TestDispatchServlet
 			log.error("",e);
 		}
 		
-		Assert.assertTrue( ((DefaultResolverFactory)servlet.getWebExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory() == myExternalResolverFactory );
+		Assert.assertTrue( ((DefaultResolverFactory)servlet.getExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory() == myExternalResolverFactory );
 		Assert.assertEquals(myEncoding, servlet.getEncoding());
-		Assert.assertTrue( servlet.getServletContext().getAttribute(myExecutorKey) == servlet.getWebExecutor() );
+		Assert.assertTrue( servlet.getServletContext().getAttribute(myExecutorKey) == servlet.getExecutor() );
 		Assert.assertEquals(MyWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
 	}
 	

@@ -83,10 +83,7 @@ public class Configuration
 	 */
 	public Collection<Executable> getExecutables()
 	{
-		if(this.executables == null)
-			return null;
-		
-		return this.executables.values();
+		return this.executables == null ? null : this.executables.values();
 	}
 	
 	/**

@@ -44,24 +44,19 @@ public class DefaultExecutor implements Executor
 	}
 	
 	@Override
-	public Executable execute(String exeName, ObjectSource objSource)
+	public Executable execute(String executableName, ObjectSource objSource)
 			throws ExecuteException, ExecutableNotFoundException
 	{
-		Executable exe=findExecutable(exeName, objSource);
+		Executable exe=findExecutable(executableName);
 		if(exe == null)
-			throw new ExecutableNotFoundException(exeName);
+			throw new ExecutableNotFoundException(executableName);
 		
 		return execute(exe, objSource);
 	}
 	
-	/**
-	 * 执行，并返回最终执行的那个可执行对象。如果正常执行，则返回参数给定的；如果出现异常，则返回作为异常处理器的那个。
-	 * @param exe
-	 * @param objSource
-	 * @return
-	 * @throws ExecuteException
-	 */
-	protected Executable execute(Executable exe, ObjectSource objSource) throws ExecuteException
+	@Override
+	public Executable execute(Executable executable, ObjectSource objSource)
+			throws ExecuteException
 	{
 		if(objSource instanceof ConvertableObjectSource)
 			((ConvertableObjectSource)objSource).setGenericConverter(getConfiguration().getGenericConverter());
@@ -72,7 +67,7 @@ public class DefaultExecutor implements Executor
 		Execution context=null;
 		if(itptInfo!=null && itptInfo.getExecutionKey()!=null)
 		{
-			context=new Execution(exe, objSource);
+			context=new Execution(executable, objSource);
 			objSource.set(itptInfo.getExecutionKey(), context);
 		}
 		
@@ -82,13 +77,13 @@ public class DefaultExecutor implements Executor
 		
 		try
 		{
-			exe.execute(objSource);
+			executable.execute(objSource);
 			
 			//after
 			if(itptInfo!=null && itptInfo.getAfterHandler()!=null)
 				executeInterceptor(itptInfo.getAfterHandler(), objSource);
 			
-			return exe;
+			return executable;
 		}
 		catch(ExecuteException e)
 		{
@@ -109,10 +104,9 @@ public class DefaultExecutor implements Executor
 	/**
 	 * 根据名称查找可执行对象
 	 * @param executableName
-	 * @param objSource
 	 * @return
 	 */
-	protected Executable findExecutable(String executableName, ObjectSource objSource)
+	protected Executable findExecutable(String executableName)
 	{
 		return getConfiguration().getExecutable(executableName);
 	}

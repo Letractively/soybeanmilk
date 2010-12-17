@@ -15,7 +15,6 @@
 package org.soybeanMilk.web.servlet;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -25,14 +24,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.core.ExecutableNotFoundException;
+import org.soybeanMilk.core.DefaultExecutor;
+import org.soybeanMilk.core.Executable;
+import org.soybeanMilk.core.ExecuteException;
+import org.soybeanMilk.core.Executor;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.resolver.ResolverFactory;
 import org.soybeanMilk.web.WebConstants;
-import org.soybeanMilk.web.WebExecutor;
 import org.soybeanMilk.web.config.parser.WebConfigurationParser;
+import org.soybeanMilk.web.exe.WebAction;
+import org.soybeanMilk.web.exe.WebAction.Target;
 import org.soybeanMilk.web.os.PathWebObjectSource;
 import org.soybeanMilk.web.os.WebObjectSource;
 import org.soybeanMilk.web.restful.PathNode;
@@ -52,33 +55,33 @@ public class DispatchServlet extends HttpServlet
 	private static Log log=LogFactory.getLog(DispatchServlet.class);
 	private static boolean _logDebugEnabled=log.isDebugEnabled();
 	
-	/**WEB执行器*/
-	protected WebExecutor webExecutor;
+	/**执行器*/
+	private Executor executor;
 	
 	/**WEB对象源工厂*/
-	protected WebObjectSourceFactory webObjectSourceFactory;
+	private WebObjectSourceFactory webObjectSourceFactory;
 	
 	/**编码*/
-	protected String encoding;
+	private String encoding;
 	
 	/**WEB执行器存储关键字*/
-	protected String appExecutorKey;
+	private String appExecutorKey;
 	
 	/**
 	 * 用于查找RESTful风格的可执行对象名
 	 */
-	private VariablePathMatcher varPathMatcher;
+	protected VariablePathMatcher variablePathMatcher;
 	
 	public DispatchServlet()
 	{
 		super();
 	}
 	
-	public WebExecutor getWebExecutor() {
-		return webExecutor;
+	public Executor getExecutor() {
+		return executor;
 	}
-	public void setWebExecutor(WebExecutor webExecutor) {
-		this.webExecutor = webExecutor;
+	public void setExecutor(Executor executor) {
+		this.executor = executor;
 	}
 	public WebObjectSourceFactory getWebObjectSourceFactory() {
 		return webObjectSourceFactory;
@@ -120,7 +123,7 @@ public class DispatchServlet extends HttpServlet
 		if(appExecutorKey != null)
 			getServletContext().removeAttribute(appExecutorKey);
 		
-		this.webExecutor = null;
+		this.executor = null;
 		super.destroy();
 	}
 	
@@ -136,7 +139,7 @@ public class DispatchServlet extends HttpServlet
 		this.encoding=ec;
 		
 		//执行器
-		this.webExecutor=getInitWebExecutor();
+		this.executor=getInitExecutor();
 		
 		//WEB对象源工厂
 		WebObjectSourceFactory wsf=getInitWebObjectSourceFactory();
@@ -156,7 +159,7 @@ public class DispatchServlet extends HttpServlet
 		//执行器存储关键字
 		this.appExecutorKey=getInitAppExecutorKey();
 		if(appExecutorKey != null)
-			getServletContext().setAttribute(appExecutorKey, webExecutor);
+			getServletContext().setAttribute(appExecutorKey, executor);
 	}
 	
 	/**
@@ -172,14 +175,135 @@ public class DispatchServlet extends HttpServlet
 		if(request.getCharacterEncoding() == null)
 			request.setCharacterEncoding(encoding);
 		
+		Configuration cfg=this.executor.getConfiguration();
+		WebObjectSource webObjSource=webObjectSourceFactory.create(request, response, getServletContext());
+		
+		String exeName=getRequestExecutableName(request, response);
+		Executable exe=cfg.getExecutable(exeName);
+		if(exe == null)
+		{
+			VariablePath vp=getVariablePathMatcher().getMatched(exeName);
+			if(vp != null)
+			{
+				preparePathValues(exeName, vp, webObjSource);
+				exe=cfg.getExecutable(vp.getVariablePath());
+			}
+		}
+		
+		if(exe == null)
+		{
+			handleExecutableNotFound(exeName, request, response);
+			return;
+		}
+		
 		try
 		{
-			webExecutor.execute(webObjectSourceFactory.create(request, response, getServletContext()));
+			exe=executor.execute(exe, webObjSource);
 		}
-		catch(ExecutableNotFoundException e)
+		catch(ExecuteException e)
 		{
-			response.sendError(HttpServletResponse.SC_NOT_FOUND, e.getExecutableName());
+			throw new ServletException(e);
 		}
+		
+		processTarget(exe, webObjSource);
+	}
+	
+	/**
+	 * 取得用于处理请求的可执行对象名
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	protected String getRequestExecutableName(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException
+	{
+		return request.getServletPath();
+	}
+	
+	/**
+	 * 没有找到能够处理请求的可执行对象
+	 * @param executableName
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	protected void handleExecutableNotFound(String executableName, HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException
+	{
+		response.sendError(HttpServletResponse.SC_NOT_FOUND, executableName);
+	}
+	
+	/**
+	 * 处理可执行对象的目标
+	 * @param executable
+	 * @param objSource
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	protected void processTarget(Executable executable, WebObjectSource objSource) throws ServletException, IOException
+	{
+		Target target=null;
+		if(executable instanceof WebAction)
+			target = ((WebAction)executable).getTarget();
+		
+		if(target == null)
+		{
+			if(_logDebugEnabled)
+				log.debug("Executable named '"+executable.getName()+"' not dispatched,because no Target defined");
+			
+			return;
+		}
+		
+		HttpServletRequest request = objSource.getRequest();
+		HttpServletResponse response=objSource.getResponse();
+		
+		if(Target.REDIRECT.equalsIgnoreCase(target.getType()))
+		{
+			//在语境内
+			if(target.getUrl().startsWith("/"))
+				response.sendRedirect(request.getContextPath()+target.getUrl());
+			else
+				response.sendRedirect(target.getUrl());
+			
+			if(_logDebugEnabled)
+				log.debug("redirect request to '"+target.getUrl()+"'");
+		}
+		else
+		{
+			request.getRequestDispatcher(target.getUrl()).forward(request, response);
+			
+			if(_logDebugEnabled)
+				log.debug("forward request to '"+target.getUrl()+"'");
+		}
+	}
+	
+	/**
+	 * 将变量路径的值保存到对象源中
+	 * @param valuePath 值路径
+	 * @param variablePath 变量路径，如果某个节点是变量，那么上面对应位置的元素就是它的值
+	 * @param objectSource
+	 */
+	protected void preparePathValues(String valuePath, VariablePath variablePath, ObjectSource objectSource)
+	{
+		String[] valuePathAry=valuePath.split(VariablePath.PATH_SEPRATOR);
+		
+		PathNode[] pathNodes=variablePath.getPathNodes();
+		if(valuePathAry.length != pathNodes.length)
+			throw new IllegalArgumentException("The value path '"+valuePath+"' does not math the variable path '"+variablePath.getVariablePath()+"'");
+		
+		for(int i=0;i<pathNodes.length;i++)
+		{
+			if(pathNodes[i].isVariable())
+				objectSource.set(PathWebObjectSource.SCOPE_PATH+WebConstants.ACCESSOR+pathNodes[i].getNodeValue(), valuePathAry[i]);
+		}
+	}
+	
+	protected VariablePathMatcher getVariablePathMatcher()
+	{
+		return this.variablePathMatcher;
 	}
 	
 	/**
@@ -199,9 +323,9 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 取得初始化{@link WebExecutor WEB执行器}对象
+	 * 取得初始化{@link Executor 执行器}对象
 	 */
-	protected WebExecutor getInitWebExecutor() throws ServletException
+	protected Executor getInitExecutor() throws ServletException
 	{
 		DefaultResolverFactory rf=new DefaultResolverFactory();
 		rf.setExternalResolverFactory(getInitExternalResolverFactory());
@@ -214,7 +338,7 @@ public class DispatchServlet extends HttpServlet
 		
 		parser.parse(configFileName);
 		
-		return new WebExecutor(webConfiguration);
+		return new DefaultExecutor(webConfiguration);
 	}
 	
 	/**
@@ -261,30 +385,5 @@ public class DispatchServlet extends HttpServlet
 		}
 		
 		return erf;
-	}
-	
-
-	/**
-	 * 将变量路径的值保存到对象源中
-	 * @param valuePath 值路径
-	 * @param variablePath 变量路径，如果某个节点是变量，那么上面对应位置的元素就是它的值
-	 * @param objectSource
-	 */
-	protected void savePathValues(String[] valuePath, VariablePath variablePath, ObjectSource objectSource)
-	{
-		PathNode[] pathNodes=variablePath.getPathNodes();
-		if(valuePath.length != pathNodes.length)
-			throw new IllegalArgumentException("The value path '"+Arrays.toString(valuePath)+"' does not math the variable path '"+variablePath.getVariablePath()+"'");
-		
-		for(int i=0;i<pathNodes.length;i++)
-		{
-			if(pathNodes[i].isVariable())
-				objectSource.set(PathWebObjectSource.SCOPE_PATH+WebConstants.ACCESSOR+pathNodes[i].getNodeValue(), valuePath[i]);
-		}
-	}
-	
-	protected VariablePathMatcher getVarPathMatcher()
-	{
-		return this.varPathMatcher;
 	}
 }

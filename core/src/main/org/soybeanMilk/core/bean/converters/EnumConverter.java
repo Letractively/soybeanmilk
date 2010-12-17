@@ -23,7 +23,7 @@ public class EnumConverter extends AbstractConverter
 	@Override
 	public Object convert(Object sourceObj, Class<?> targetClass)
 	{
-		//TODO
+		//TODO 实现枚举类型转换
 		return null;
 	}
 }

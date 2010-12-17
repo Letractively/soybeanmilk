@@ -15,6 +15,7 @@
 package org.soybeanMilk.web.servlet;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -25,13 +26,18 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.core.ExecutableNotFoundException;
+import org.soybeanMilk.core.ObjectSource;
+import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.resolver.ResolverFactory;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.WebExecutor;
-import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.config.parser.WebConfigurationParser;
+import org.soybeanMilk.web.os.PathWebObjectSource;
 import org.soybeanMilk.web.os.WebObjectSource;
+import org.soybeanMilk.web.restful.PathNode;
+import org.soybeanMilk.web.restful.VariablePath;
+import org.soybeanMilk.web.restful.VariablePathMatcher;
 
 
 /**
@@ -57,6 +63,11 @@ public class DispatchServlet extends HttpServlet
 	
 	/**WEB执行器存储关键字*/
 	protected String appExecutorKey;
+	
+	/**
+	 * 用于查找RESTful风格的可执行对象名
+	 */
+	private VariablePathMatcher varPathMatcher;
 	
 	public DispatchServlet()
 	{
@@ -136,7 +147,7 @@ public class DispatchServlet extends HttpServlet
 				@Override
 				public WebObjectSource create(HttpServletRequest request, HttpServletResponse response, ServletContext application)
 				{
-					return new WebObjectSource(request, response, application);
+					return new PathWebObjectSource(request, response, application);
 				}
 			};
 		}
@@ -195,7 +206,7 @@ public class DispatchServlet extends HttpServlet
 		DefaultResolverFactory rf=new DefaultResolverFactory();
 		rf.setExternalResolverFactory(getInitExternalResolverFactory());
 		
-		WebConfiguration webConfiguration=new WebConfiguration(rf);
+		Configuration webConfiguration=new Configuration(rf);
 		
 		String configFileName=getInitParameter(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG);
 		
@@ -250,5 +261,30 @@ public class DispatchServlet extends HttpServlet
 		}
 		
 		return erf;
+	}
+	
+
+	/**
+	 * 将变量路径的值保存到对象源中
+	 * @param valuePath 值路径
+	 * @param variablePath 变量路径，如果某个节点是变量，那么上面对应位置的元素就是它的值
+	 * @param objectSource
+	 */
+	protected void savePathValues(String[] valuePath, VariablePath variablePath, ObjectSource objectSource)
+	{
+		PathNode[] pathNodes=variablePath.getPathNodes();
+		if(valuePath.length != pathNodes.length)
+			throw new IllegalArgumentException("The value path '"+Arrays.toString(valuePath)+"' does not math the variable path '"+variablePath.getVariablePath()+"'");
+		
+		for(int i=0;i<pathNodes.length;i++)
+		{
+			if(pathNodes[i].isVariable())
+				objectSource.set(PathWebObjectSource.SCOPE_PATH+WebConstants.ACCESSOR+pathNodes[i].getNodeValue(), valuePath[i]);
+		}
+	}
+	
+	protected VariablePathMatcher getVarPathMatcher()
+	{
+		return this.varPathMatcher;
 	}
 }

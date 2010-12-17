@@ -29,15 +29,15 @@ public class PathNode implements Comparable<PathNode>,Serializable
 	private String nodeValue;
 	private boolean isVariable;
 	
-	public PathNode(String nodeValue)
+	public PathNode(String nodeString)
 	{
-		if(isVariableString(nodeValue))
+		if(isVariableString(nodeString))
 		{
 			this.isVariable=true;
-			this.nodeValue=nodeValue.substring(1, nodeValue.length()-1);
+			this.nodeValue=nodeString.substring(1, nodeString.length()-1);
 		}
 		else
-			this.nodeValue=nodeValue;
+			this.nodeValue=nodeString;
 	}
 	
 	public String getNodeValue() {
@@ -71,6 +71,22 @@ public class PathNode implements Comparable<PathNode>,Serializable
 			re=this.getNodeValue().compareTo(o.getNodeValue());
 		
 		return re;
+	}
+	
+	/**
+	 * 与字符串比较
+	 * @param s
+	 * @return
+	 */
+	public int compareToString(String s)
+	{
+		if(s == null)
+			return 1;
+		
+		if(this.isVariable())
+			return -1;
+		
+		return this.getNodeValue().compareTo(s);
 	}
 	
 	private boolean isVariableString(String s)

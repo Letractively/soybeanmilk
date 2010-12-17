@@ -28,6 +28,8 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 {
 	private static final long serialVersionUID = 4221252496072385107L;
 	
+	public static final String PATH_SEPRATOR="/"; 
+	
 	private String variablePath;
 	
 	/**
@@ -129,7 +131,7 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 		
 		String[] names=null;
 		if(variabalePath!=null && variabalePath.length()>0)
-			names=variabalePath.split("/");
+			names=variabalePath.split(PATH_SEPRATOR);
 		
 		boolean variable=false;
 		

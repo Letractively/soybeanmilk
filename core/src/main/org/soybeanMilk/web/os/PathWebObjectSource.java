@@ -1,0 +1,96 @@
+package org.soybeanMilk.web.os;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.soybeanMilk.core.ObjectSourceException;
+import org.soybeanMilk.core.bean.GenericConverter;
+
+/**
+ * 添加了"path"作用域支持的web对象源，使你可以使用“path.[subKey]”来获取和保存对象，不过它支持保存字符串对象。
+ * @author earthAngry@gmail.com
+ * @date 2010-12-17
+ *
+ */
+public class PathWebObjectSource extends WebObjectSource
+{
+	/**
+	 * 作用域-“path”
+	 */
+	public static final String SCOPE_PATH="path";
+	
+	private PathScope pathScope;
+	
+	public PathWebObjectSource(HttpServletRequest request,
+			HttpServletResponse response, ServletContext application,
+			GenericConverter genericConverter)
+	{
+		super(request, response, application, genericConverter);
+		this.pathScope=new PathScope();
+	}
+
+	public PathWebObjectSource(HttpServletRequest request,
+			HttpServletResponse response, ServletContext application)
+	{
+		super(request, response, application);
+		this.pathScope=new PathScope();
+	}
+	
+	@Override
+	protected Object getWithUnknownScope(String scope, String keyInScope,
+			Class<?> objectType)
+	{
+		if(SCOPE_PATH.equals(scope))
+			return getGenericConverter().convert(getPathScope().get(keyInScope), objectType);
+		else
+			return super.getWithUnknownScope(scope, keyInScope, objectType);
+	}
+
+	@Override
+	protected void setWithUnknownScope(String scope, String keyInScope,
+			Object obj)
+	{
+		if(SCOPE_PATH.equals(scope))
+		{
+			if(!(obj instanceof String))
+				throw new ObjectSourceException("you can only put string into '"+SCOPE_PATH+"'");
+			
+			getPathScope().put(keyInScope, (String)obj);
+		}
+		else
+			super.setWithUnknownScope(scope, keyInScope, obj);
+	}
+
+	protected PathScope getPathScope()
+	{
+		return this.pathScope;
+	}
+	
+	/**
+	 * 路径作用域
+	 * @author earthAngry@gmail.com
+	 * @date 2010-12-17
+	 *
+	 */
+	protected static class PathScope
+	{
+		private Map<String, String> path;
+		
+		public String get(String key)
+		{
+			return path == null ? null : path.get(key);
+		}
+		
+		public void put(String key, String value)
+		{
+			if(this.path == null)
+				this.path=new HashMap<String, String>();
+			
+			this.path.put(key, value);
+		}
+	}
+}

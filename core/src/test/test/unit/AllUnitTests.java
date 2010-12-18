@@ -21,4 +21,4 @@ TestDispatchServlet.class,
 TestWebGenericConverter.class,
 TestWebObjectSource.class
 })
-public class AllUnitTests {} 
+public class AllUnitTests{}

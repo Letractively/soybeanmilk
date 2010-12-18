@@ -14,7 +14,8 @@
 
 package org.soybeanMilk.web.restful;
 
-import java.util.Arrays;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * 变量路径匹配器
@@ -26,21 +27,25 @@ public class VariablePathMatcher
 {
 	private VariablePath[] variablePaths;
 	
-	public VariablePathMatcher(){}
-	
-	public VariablePathMatcher(VariablePath[] variablePaths)
+	public VariablePathMatcher(String[] variablePaths)
 	{
-		this.setVariablePaths(variablePaths);
+		if(variablePaths!=null && variablePaths.length>0)
+		{
+			SortedSet<VariablePath> vpSet=new TreeSet<VariablePath>();
+			for(String vpStr : variablePaths)
+			{
+				VariablePath vp=new VariablePath(vpStr);
+				if(vp.isVariablePath())
+					vpSet.add(vp);
+			}
+			
+			VariablePath[] vpAry=(VariablePath[])vpSet.toArray();
+			setVariablePaths(vpAry);
+		}
 	}
 	
 	public VariablePath[] getVariablePaths() {
 		return variablePaths;
-	}
-
-	public void setVariablePaths(VariablePath[] variablePaths)
-	{
-		this.variablePaths = variablePaths;
-		sort();
 	}
 	
 	/**
@@ -84,8 +89,8 @@ public class VariablePathMatcher
 		return null;
 	}
 	
-	protected void sort()
+	protected void setVariablePaths(VariablePath[] variablePaths)
 	{
-		Arrays.sort(this.variablePaths);
+		this.variablePaths = variablePaths;
 	}
 }

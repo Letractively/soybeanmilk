@@ -15,6 +15,7 @@
 package org.soybeanMilk.web.servlet;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -119,10 +120,11 @@ public class DispatchServlet extends HttpServlet
 	@Override
 	public void destroy()
 	{
-		if(appExecutorKey != null)
-			getServletContext().removeAttribute(appExecutorKey);
+		String aek=getAppExecutorKey();
+		if(aek != null)
+			getServletContext().removeAttribute(aek);
 		
-		this.executor = null;
+		setExecutor(null);
 		super.destroy();
 	}
 	
@@ -135,10 +137,26 @@ public class DispatchServlet extends HttpServlet
 		String ec=getInitEncoding();
 		if(ec==null || ec.length()==0)
 			ec=WebConstants.DEFAULT_ENCODING;
-		this.encoding=ec;
+		setEncoding(ec);
 		
 		//执行器
-		this.executor=getInitExecutor();
+		setExecutor(getInitExecutor());
+		if(isEnableVariablePath())
+		{
+			//初始化变量路径匹配器并且设为非空以便使用
+			Collection<Executable> executables=getExecutor().getConfiguration().getExecutables();
+			String[] exeNames=null;
+			if(executables!=null && !executables.isEmpty())
+			{
+				exeNames=new String[executables.size()];
+				int i=0;
+				for(Executable exe : executables)
+					exeNames[i++]=exe.getName();
+			}
+			
+			VariablePathMatcher vpm=new VariablePathMatcher(exeNames);
+			setVariablePathMatcher(vpm);
+		}
 		
 		//WEB对象源工厂
 		WebObjectSourceFactory wsf=getInitWebObjectSourceFactory();
@@ -149,18 +167,19 @@ public class DispatchServlet extends HttpServlet
 				@Override
 				public WebObjectSource create(HttpServletRequest request, HttpServletResponse response, ServletContext application)
 				{
-					return new PathWebObjectSource(request, response, application);
+					return createDefaultObjectSource(request, response, application);
 				}
 			};
 		}
-		this.webObjectSourceFactory=wsf;
+		setWebObjectSourceFactory(wsf);
 		
 		//执行器存储关键字
-		this.appExecutorKey=getInitAppExecutorKey();
-		if(this.appExecutorKey==null || this.appExecutorKey.length()==0)
-			this.appExecutorKey=null;
-		if(appExecutorKey!=null)
-			getServletContext().setAttribute(appExecutorKey, executor);
+		setAppExecutorKey(getInitAppExecutorKey());
+		String aek=getAppExecutorKey();
+		if(aek==null || aek.length()==0)
+			setAppExecutorKey(null);
+		if(aek != null)
+			getServletContext().setAttribute(aek, getExecutor());
 	}
 	
 	/**
@@ -174,16 +193,16 @@ public class DispatchServlet extends HttpServlet
 			throws ServletException, IOException
 	{
 		if(request.getCharacterEncoding() == null)
-			request.setCharacterEncoding(encoding);
+			request.setCharacterEncoding(getEncoding());
 		
-		Configuration cfg=this.executor.getConfiguration();
-		WebObjectSource webObjSource=webObjectSourceFactory.create(request, response, getServletContext());
+		Configuration cfg=getExecutor().getConfiguration();
+		WebObjectSource webObjSource=getWebObjectSourceFactory().create(request, response, getServletContext());
 		
 		String exeName=getRequestExecutableName(request, response);
 		Executable exe=cfg.getExecutable(exeName);
 		
 		//按照变量路径方式匹配
-		if(exe == null)
+		if(exe==null && isEnableVariablePath())
 		{
 			String[] valuePath=VariablePath.splitPath(exeName);
 			VariablePath vp=getVariablePathMatcher().getMatched(valuePath);
@@ -209,7 +228,7 @@ public class DispatchServlet extends HttpServlet
 		
 		try
 		{
-			exe=executor.execute(exe, webObjSource);
+			exe=getExecutor().execute(exe, webObjSource);
 		}
 		catch(ExecuteException e)
 		{
@@ -291,9 +310,34 @@ public class DispatchServlet extends HttpServlet
 		}
 	}
 	
-	protected VariablePathMatcher getVariablePathMatcher()
+	/**
+	 * 创建默认的WEB对象源，如果你没有自定义WEB对象源工厂，它将被用于创建对象源
+	 * @param request
+	 * @param response
+	 * @param application
+	 * @return
+	 */
+	protected WebObjectSource createDefaultObjectSource(HttpServletRequest request,
+			HttpServletResponse response, ServletContext application)
 	{
-		return this.variablePathMatcher;
+		return new PathWebObjectSource(request, response, application);
+	}
+	
+	protected VariablePathMatcher getVariablePathMatcher() {
+		return variablePathMatcher;
+	}
+	
+	protected void setVariablePathMatcher(VariablePathMatcher variablePathMatcher) {
+		this.variablePathMatcher = variablePathMatcher;
+	}
+	
+	/**
+	 * 是否开启变量路径功能
+	 * @return
+	 */
+	protected boolean isEnableVariablePath()
+	{
+		return true;
 	}
 	
 	/**

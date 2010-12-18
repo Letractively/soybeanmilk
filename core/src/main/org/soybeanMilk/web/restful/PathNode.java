@@ -74,19 +74,19 @@ public class PathNode implements Comparable<PathNode>,Serializable
 	}
 	
 	/**
-	 * 与字符串比较
+	 * 是否与给定的字符串匹配
 	 * @param s
 	 * @return
 	 */
-	public int compareToString(String s)
+	public boolean matchWith(String s)
 	{
 		if(s == null)
-			return 1;
+			return false;
 		
 		if(this.isVariable())
-			return -1;
+			return true;
 		
-		return this.getNodeValue().compareTo(s);
+		return this.getNodeValue().equals(s);
 	}
 	
 	private boolean isVariableString(String s)

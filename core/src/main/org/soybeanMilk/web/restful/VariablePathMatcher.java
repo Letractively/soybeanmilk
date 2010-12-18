@@ -14,8 +14,10 @@
 
 package org.soybeanMilk.web.restful;
 
+import java.util.Arrays;
+
 /**
- * 
+ * 变量路径匹配器
  * @author earthAngry@gmail.com
  * @date 2010-12-16
  *
@@ -28,15 +30,17 @@ public class VariablePathMatcher
 	
 	public VariablePathMatcher(VariablePath[] variablePaths)
 	{
-		this.variablePaths = variablePaths;
+		this.setVariablePaths(variablePaths);
 	}
 	
 	public VariablePath[] getVariablePaths() {
 		return variablePaths;
 	}
 
-	public void setVariablePaths(VariablePath[] variablePaths) {
+	public void setVariablePaths(VariablePath[] variablePaths)
+	{
 		this.variablePaths = variablePaths;
+		sort();
 	}
 	
 	/**
@@ -46,12 +50,7 @@ public class VariablePathMatcher
 	 */
 	public VariablePath getMatched(String valuePath)
 	{
-		if(valuePath == null)
-			return null;
-		
-		String[] valueNodes=valuePath.split(VariablePath.PATH_SEPRATOR);
-		
-		return getMatched(valueNodes);
+		return getMatched(VariablePath.splitPath(valuePath));
 	}
 	
 	/**
@@ -61,21 +60,32 @@ public class VariablePathMatcher
 	 */
 	public VariablePath getMatched(String[] valuePathNodes)
 	{
-		if(valuePathNodes==null || valuePathNodes.length==0
-				|| this.variablePaths==null || this.variablePaths.length==0)
+		if(this.variablePaths==null || this.variablePaths.length==0
+				|| valuePathNodes==null || valuePathNodes.length==0)
 			return null;
+		
+		int[] range=new int[]{0,this.variablePaths.length-1};
+		for(int i=0;i<valuePathNodes.length;i++)
+			range=getMatchRowRange(valuePathNodes[i], i, range);
 		
 		int idx=-1;
 		
-		//TODO
+		if(range!=null && range.length!=0
+				&& this.variablePaths[range[0]].getPathNodes().length==valuePathNodes.length)
+			idx=range[0];
 		
 		return idx == -1 ? null : this.variablePaths[idx];
 	}
 	
-	protected int[] getMatchRowRange(String v, int column, int[] rowRange)
+	protected int[] getMatchRowRange(String v, int column, int[] rowRangeIn)
 	{
 		//TODO 实现匹配查找
 		
 		return null;
+	}
+	
+	protected void sort()
+	{
+		Arrays.sort(this.variablePaths);
 	}
 }

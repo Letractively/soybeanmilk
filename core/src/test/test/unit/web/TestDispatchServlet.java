@@ -5,11 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Test;
 import org.soybeanMilk.core.resolver.DefaultResolverFactory;
@@ -24,8 +23,6 @@ import org.springframework.mock.web.MockServletContext;
 
 public class TestDispatchServlet
 {
-	private static Log log=LogFactory.getLog(TestDispatchServlet.class);
-	
 	private static ResolverFactory myExternalResolverFactory=new MyResolverFactory();
 	
 	private static String myExternalResolverKey="myExternalResolver";
@@ -35,63 +32,184 @@ public class TestDispatchServlet
 	private static String myWebObjectSourceFactoryClass="test.unit.web.TestDispatchServlet$MyWebObjectSourceFactory";
 	
 	@Test
-	public void defaultInitParameter()
+	public void initEncoding()
 	{
-		MockDispathServlet servlet=new MockDispathServlet(false);
-		
-		try
 		{
-			servlet.init();
-		}
-		catch(Exception e)
-		{
-			log.error("",e);
+			MockServletContext servletContext=new MockServletContext();
+			Map<String, String> servletInitParameters=new HashMap<String, String>();
+			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			
+			servletInitParameters.put(WebConstants.ServletInitParams.ENCODING, myEncoding);
+			
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
+			
+			Assert.assertEquals(myEncoding, servlet.getEncoding());
 		}
 		
-		Assert.assertNull(((DefaultResolverFactory)servlet.getExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory());
-		Assert.assertEquals(WebConstants.DEFAULT_ENCODING, servlet.getEncoding());
-		Assert.assertEquals(PathWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
+		{
+			MockServletContext servletContext=new MockServletContext();
+			Map<String, String> servletInitParameters=new HashMap<String, String>();
+			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			
+			servletInitParameters.put(WebConstants.ServletInitParams.ENCODING, "");
+			
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
+			
+			Assert.assertEquals(WebConstants.DEFAULT_ENCODING, servlet.getEncoding());
+		}
+		
+		{
+			MockServletContext servletContext=new MockServletContext();
+			Map<String, String> servletInitParameters=new HashMap<String, String>();
+			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
+			
+			Assert.assertEquals(WebConstants.DEFAULT_ENCODING, servlet.getEncoding());
+		}
 	}
 	
 	@Test
-	public void customizedInitParameter()
+	public void initAppExecutorKey()
 	{
-		MockDispathServlet servlet=new MockDispathServlet(true);
-		
-		try
 		{
-			servlet.init();
-		}
-		catch(Exception e)
-		{
-			log.error("",e);
+			MockServletContext servletContext=new MockServletContext();
+			Map<String, String> servletInitParameters=new HashMap<String, String>();
+			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			
+			servletInitParameters.put(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY, myExecutorKey);
+			
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
+			
+			Assert.assertEquals(myExecutorKey, servlet.getAppExecutorKey());
 		}
 		
-		Assert.assertTrue( ((DefaultResolverFactory)servlet.getExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory() == myExternalResolverFactory );
-		Assert.assertEquals(myEncoding, servlet.getEncoding());
-		Assert.assertTrue( servlet.getServletContext().getAttribute(myExecutorKey) == servlet.getExecutor() );
-		Assert.assertEquals(MyWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
+		{
+			MockServletContext servletContext=new MockServletContext();
+			Map<String, String> servletInitParameters=new HashMap<String, String>();
+			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			
+			servletInitParameters.put(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY, "");
+			
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
+			
+			Assert.assertNull(servlet.getAppExecutorKey());
+		}
+		
+		{
+			MockServletContext servletContext=new MockServletContext();
+			Map<String, String> servletInitParameters=new HashMap<String, String>();
+			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
+			
+			Assert.assertNull(servlet.getAppExecutorKey());
+		}
+	}
+	
+
+	@Test
+	public void initWebObjectSourceFactory()
+	{
+		{
+			MockServletContext servletContext=new MockServletContext();
+			Map<String, String> servletInitParameters=new HashMap<String, String>();
+			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			
+			servletInitParameters.put(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY_CLASS, myWebObjectSourceFactoryClass);
+			
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
+			
+			Assert.assertEquals(MyWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
+		}
+		
+		{
+			MockServletContext servletContext=new MockServletContext();
+			Map<String, String> servletInitParameters=new HashMap<String, String>();
+			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			
+			servletInitParameters.put(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY_CLASS, "");
+			
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
+			
+			Assert.assertEquals(PathWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
+		}
+		
+		{
+			MockServletContext servletContext=new MockServletContext();
+			Map<String, String> servletInitParameters=new HashMap<String, String>();
+			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
+			
+			Assert.assertEquals(PathWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
+		}
+	}
+	
+	@Test
+	public void initExternalResolverFactory()
+	{
+		{
+			MockServletContext servletContext=new MockServletContext();
+			Map<String, String> servletInitParameters=new HashMap<String, String>();
+			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			
+			servletContext.setAttribute(myExternalResolverKey, myExternalResolverFactory);
+			servletInitParameters.put(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY_KEY, myExternalResolverKey);
+			
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
+			
+			Assert.assertTrue( ((DefaultResolverFactory)servlet.getExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory() == myExternalResolverFactory );
+		}
+		
+		{
+			MockServletContext servletContext=new MockServletContext();
+			Map<String, String> servletInitParameters=new HashMap<String, String>();
+			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			
+			servletContext.setAttribute(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY_KEY, null);
+			
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
+			
+			Assert.assertNull(((DefaultResolverFactory)servlet.getExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory());
+		}
+		
+		{
+			MockServletContext servletContext=new MockServletContext();
+			Map<String, String> servletInitParameters=new HashMap<String, String>();
+			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
+			
+			Assert.assertNull(((DefaultResolverFactory)servlet.getExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory());
+		}
 	}
 	
 	public static class MockDispathServlet extends DispatchServlet
 	{
-		private Map<String, String> servletInitParameters=new HashMap<String, String>();
-		private MockServletContext servletContext=new MockServletContext();
-		public MockDispathServlet(boolean customized)
+		private static final long serialVersionUID = 1L;
+		
+		private MockServletContext servletContext;
+		private Map<String, String> servletInitParameters;
+		
+		public MockDispathServlet(MockServletContext servletContext, Map<String, String> servletInitParameters)
 		{
 			super();
 			
-			if(customized)
-			{
-				servletContext.setAttribute(myExternalResolverKey, myExternalResolverFactory);
-				
-				servletInitParameters.put(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY, myExecutorKey);
-				servletInitParameters.put(WebConstants.ServletInitParams.ENCODING, myEncoding);
-				servletInitParameters.put(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY_KEY, myExternalResolverKey);
-				servletInitParameters.put(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY_CLASS, myWebObjectSourceFactoryClass);
-			}
-			
-			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			this.servletContext=servletContext;
+			this.servletInitParameters=servletInitParameters;
 		}
 		
 		@Override
@@ -104,6 +222,18 @@ public class TestDispatchServlet
 		public ServletContext getServletContext()
 		{
 			return servletContext;
+		}
+	}
+	
+	protected void initServlet(HttpServlet servlet)
+	{
+		try
+		{
+			servlet.init();
+		}
+		catch(Exception e)
+		{
+			throw new RuntimeException(e);
 		}
 	}
 	

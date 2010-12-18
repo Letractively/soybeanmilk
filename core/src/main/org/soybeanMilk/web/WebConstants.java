@@ -63,6 +63,11 @@ public class WebConstants extends Constants
 		 * WEB执行器对象在应用中的存储关键字。如果指定，框架会将创建的WEB执行器存储到应用中；如果不指定，则不会存储
 		 */
 		public static final String APPLICATION_EXECUTOR_KEY="application-executor-key";
+		
+		/**
+		 * 是否开启RESTfule功能
+		 */
+		public static final String ENABLE_RESTFUL="enable-restful";
 	}
 	
 	/**

@@ -100,13 +100,15 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 				
 				for(int i=0;i<targetNodes.length;i++)
 				{
-					PathNode te=targetNodes[i];
 					PathNode le=this.pathNodes[i];
+					PathNode te=targetNodes[i];
 					
 					re=le.compareTo(te);
 					
 					if(re == 0)
 						continue;
+					else
+						break;
 				}
 				
 				return re;
@@ -129,10 +131,7 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 	{
 		PathNode re[]=null;
 		
-		String[] names=null;
-		if(variabalePath!=null && variabalePath.length()>0)
-			names=variabalePath.split(PATH_SEPRATOR);
-		
+		String[] names=splitPath(variabalePath);
 		boolean variable=false;
 		
 		if(names!=null && names.length>0)
@@ -152,5 +151,18 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 			re=null;
 		
 		return re;
+	}
+	
+	/**
+	 * 拆分路径字符串
+	 * @param path
+	 * @return
+	 */
+	public static String[] splitPath(String path)
+	{
+		if(path==null || path.length()==0)
+			return null;
+		
+		return path.split(PATH_SEPRATOR);
 	}
 }

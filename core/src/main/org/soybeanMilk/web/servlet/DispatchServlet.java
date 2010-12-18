@@ -28,7 +28,6 @@ import org.soybeanMilk.core.DefaultExecutor;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.Executor;
-import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.resolver.ResolverFactory;
@@ -70,7 +69,7 @@ public class DispatchServlet extends HttpServlet
 	/**
 	 * 用于查找RESTful风格的可执行对象名
 	 */
-	protected VariablePathMatcher variablePathMatcher;
+	private VariablePathMatcher variablePathMatcher;
 	
 	public DispatchServlet()
 	{
@@ -102,7 +101,7 @@ public class DispatchServlet extends HttpServlet
 	public void setAppExecutorKey(String appExecutorKey) {
 		this.appExecutorKey = appExecutorKey;
 	}
-	
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException
@@ -158,7 +157,9 @@ public class DispatchServlet extends HttpServlet
 		
 		//执行器存储关键字
 		this.appExecutorKey=getInitAppExecutorKey();
-		if(appExecutorKey != null)
+		if(this.appExecutorKey==null || this.appExecutorKey.length()==0)
+			this.appExecutorKey=null;
+		if(appExecutorKey!=null)
 			getServletContext().setAttribute(appExecutorKey, executor);
 	}
 	
@@ -180,13 +181,23 @@ public class DispatchServlet extends HttpServlet
 		
 		String exeName=getRequestExecutableName(request, response);
 		Executable exe=cfg.getExecutable(exeName);
+		
+		//按照变量路径方式匹配
 		if(exe == null)
 		{
-			VariablePath vp=getVariablePathMatcher().getMatched(exeName);
+			String[] valuePath=VariablePath.splitPath(exeName);
+			VariablePath vp=getVariablePathMatcher().getMatched(valuePath);
 			if(vp != null)
-			{
-				preparePathValues(exeName, vp, webObjSource);
 				exe=cfg.getExecutable(vp.getVariablePath());
+			
+			if(exe != null)
+			{
+				PathNode[] pathNodes=vp.getPathNodes();
+				for(int i=0;i<pathNodes.length;i++)
+				{
+					if(pathNodes[i].isVariable())
+						webObjSource.set(PathWebObjectSource.SCOPE_PATH+WebConstants.ACCESSOR+pathNodes[i].getNodeValue(), valuePath[i]);
+				}
 			}
 		}
 		
@@ -277,27 +288,6 @@ public class DispatchServlet extends HttpServlet
 			
 			if(_logDebugEnabled)
 				log.debug("forward request to '"+target.getUrl()+"'");
-		}
-	}
-	
-	/**
-	 * 将变量路径的值保存到对象源中
-	 * @param valuePath 值路径
-	 * @param variablePath 变量路径，如果某个节点是变量，那么上面对应位置的元素就是它的值
-	 * @param objectSource
-	 */
-	protected void preparePathValues(String valuePath, VariablePath variablePath, ObjectSource objectSource)
-	{
-		String[] valuePathAry=valuePath.split(VariablePath.PATH_SEPRATOR);
-		
-		PathNode[] pathNodes=variablePath.getPathNodes();
-		if(valuePathAry.length != pathNodes.length)
-			throw new IllegalArgumentException("The value path '"+valuePath+"' does not math the variable path '"+variablePath.getVariablePath()+"'");
-		
-		for(int i=0;i<pathNodes.length;i++)
-		{
-			if(pathNodes[i].isVariable())
-				objectSource.set(PathWebObjectSource.SCOPE_PATH+WebConstants.ACCESSOR+pathNodes[i].getNodeValue(), valuePathAry[i]);
 		}
 	}
 	

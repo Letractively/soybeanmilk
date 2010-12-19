@@ -57,9 +57,9 @@ public class DefaultResolverFactory implements ResolverFactory
 	@Override
 	public Object getResolver(Serializable resolverBeanId)
 	{
-		Object re= externalResolverFactory==null ? null : externalResolverFactory.getResolver(resolverBeanId);
+		Object re= getExternalResolverFactory()==null ? null : getExternalResolverFactory().getResolver(resolverBeanId);
 		if(re == null)
-			re= resolvers==null ? null : resolvers.get(resolverBeanId);
+			re= getResolvers()==null ? null : getResolvers().get(resolverBeanId);
 		
 		return re;
 	}
@@ -71,8 +71,13 @@ public class DefaultResolverFactory implements ResolverFactory
 	 */
 	public void addResolver(Serializable id, Object resolver)
 	{
+		Map<Serializable, Object> resolvers=getResolvers();
+		
 		if(resolvers == null)
+		{
 			resolvers = new HashMap<Serializable, Object>();
+			setResolvers(resolvers);
+		}
 		
 		if(resolvers.get(id) != null)
 			throw new IllegalArgumentException("duplicate resolver id '"+id+"'");

@@ -171,13 +171,13 @@ public class WebObjectSource extends ConvertableObjectSource
 	{
 		Object data = null;
 		if(objectType == HttpServletRequest.class)
-			data = request;
+			data = getRequest();
 		else if(objectType == HttpServletResponse.class)
-			data = response;
+			data = getResponse();
 		else if(objectType == ServletContext.class)
-			data = application;
+			data = getApplication();
 		else if(objectType == HttpSession.class)
-			data = request.getSession();
+			data = getRequest().getSession();
 		else
 		{
 			//WEB环境下只有字符串主键
@@ -196,34 +196,34 @@ public class WebObjectSource extends ConvertableObjectSource
 			if(scope == null)
 			{
 				if(WebConstants.Scope.PARAM.equals(subKey))
-					data=convertParamMap(request.getParameterMap(), null, objectType);
+					data=convertParamMap(getRequest().getParameterMap(), null, objectType);
 				else if(WebConstants.Scope.REQUEST.equals(subKey))
-					data=convertServletObject(request, objectType);
+					data=convertServletObject(getRequest(), objectType);
 				else if(WebConstants.Scope.SESSION.equals(subKey))
-					data=convertServletObject(request.getSession(), objectType);
+					data=convertServletObject(getRequest().getSession(), objectType);
 				else if(WebConstants.Scope.APPLICATION.equals(subKey))
-					data=convertServletObject(application, objectType);
+					data=convertServletObject(getApplication(), objectType);
 				else if(WebConstants.Scope.RESPONSE.equals(subKey))
-					data=convertServletObject(response, objectType);
+					data=convertServletObject(getResponse(), objectType);
 				else
 					data=getWithUnknownScope(scope, subKey, objectType);
 			}
 			else
 			{
 				if(WebConstants.Scope.PARAM.equals(scope))
-					data=convertParamMap(request.getParameterMap(), subKey, objectType);
+					data=convertParamMap(getRequest().getParameterMap(), subKey, objectType);
 				else if(WebConstants.Scope.REQUEST.equals(scope))
-					data=request.getAttribute(subKey);
+					data=getRequest().getAttribute(subKey);
 				else if(WebConstants.Scope.SESSION.equals(scope))
-					data=request.getSession().getAttribute(subKey);
+					data=getRequest().getSession().getAttribute(subKey);
 				else if(WebConstants.Scope.APPLICATION.equals(scope))
-					data=application.getAttribute(subKey);
+					data=getApplication().getAttribute(subKey);
 				else if(WebConstants.Scope.RESPONSE.equals(scope))
 				{
 					if(subKey != null)
 						throw new ObjectSourceException("key '"+key+"' is invalid, you can not get data from '"+WebConstants.Scope.RESPONSE+"' scope");
 					
-					data=convertServletObject(response, objectType);
+					data=convertServletObject(getResponse(), objectType);
 				}
 				else
 					data=getWithUnknownScope(scope, subKey, objectType);
@@ -256,11 +256,11 @@ public class WebObjectSource extends ConvertableObjectSource
 			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.PARAM+"'");
 		
 		else if(WebConstants.Scope.REQUEST.equals(scope))
-			request.setAttribute(subKey, obj);
+			getRequest().setAttribute(subKey, obj);
 		else if(WebConstants.Scope.SESSION.equals(scope))
-			request.getSession().setAttribute(subKey, obj);
+			getRequest().getSession().setAttribute(subKey, obj);
 		else if(WebConstants.Scope.APPLICATION.equals(scope))
-			application.setAttribute(subKey, obj);
+			getApplication().setAttribute(subKey, obj);
 		else if(WebConstants.Scope.RESPONSE.equals(scope))
 			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.RESPONSE+"'");
 		else
@@ -283,7 +283,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		if(scope != null)
 			throw new ObjectSourceException("scope '"+scope+"' in key '"+(scope+WebConstants.ACCESSOR+keyInScope)+"' is invalid, it must be one of '"+WebConstants.Scope.PARAM+"', '"+WebConstants.Scope.REQUEST+"', '"+WebConstants.Scope.SESSION+"', '"+WebConstants.Scope.APPLICATION+"', '"+WebConstants.Scope.RESPONSE+"'");
 		
-		return convertParamMap(request.getParameterMap(), keyInScope, objectType);
+		return convertParamMap(getRequest().getParameterMap(), keyInScope, objectType);
 	}
 	
 	/**
@@ -297,7 +297,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		if(scope != null)
 			throw new ObjectSourceException("scope '"+scope+"' in key '"+(scope+WebConstants.ACCESSOR+keyInScope)+"' is invalid, it must be one of '"+WebConstants.Scope.PARAM+"', '"+WebConstants.Scope.REQUEST+"', '"+WebConstants.Scope.SESSION+"', '"+WebConstants.Scope.APPLICATION+"', '"+WebConstants.Scope.RESPONSE+"'");
 		
-		request.setAttribute(keyInScope, obj);
+		getRequest().setAttribute(keyInScope, obj);
 	}
 	
 	/**

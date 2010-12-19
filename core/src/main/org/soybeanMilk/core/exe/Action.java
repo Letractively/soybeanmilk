@@ -87,10 +87,15 @@ public class Action extends AbstractExecutable
 	 */
 	public void addExecutable(Executable exe)
 	{
-		if(executables == null)
-			executables = new ArrayList<Executable>();
+		List<Executable> exes=getExecutables();
 		
-		executables.add(exe);
+		if(exes == null)
+		{
+			exes = new ArrayList<Executable>();
+			setExecutables(exes);
+		}
+		
+		exes.add(exe);
 		
 		if(_logDebugEnabled)
 			log.debug("add '"+exe+"' to '"+this+"'");

@@ -22,7 +22,10 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.core.AccessExecuteException;
+import org.soybeanMilk.core.ArgumentExecuteException;
 import org.soybeanMilk.core.ExecuteException;
+import org.soybeanMilk.core.InvocationExecuteException;
 import org.soybeanMilk.core.ObjectSource;
 
 /**
@@ -143,26 +146,30 @@ public class Invoke extends AbstractExecutable
 	}
 	
 	@Override
-	public void execute(ObjectSource dataStore) throws ExecuteException
+	public void execute(ObjectSource objectSource) throws ExecuteException
 	{
 		if(_logDebugEnabled)
 			log.debug("start  execute '"+this+"'");
 		
+		Method method=getMethod();
+		Object resolver=getResolver(objectSource);
+		
 		try
 		{
-			saveMethodResult(getResultKey(), executeMethod(dataStore), dataStore);
+			saveMethodResult(getResultKey(),
+					method.invoke(resolver, getMethodArguments(objectSource)), objectSource);
 		}
 		catch(InvocationTargetException e)
 		{
-			throw new ExecuteException(ExecuteException.ExceptionType.INVOCATION, e);
+			throw new InvocationExecuteException(e.getCause());
 		}
 		catch(IllegalArgumentException e)
 		{
-			throw new ExecuteException(ExecuteException.ExceptionType.ARGUMENT, e);
+			throw new ArgumentExecuteException(e);
 		}
 		catch(IllegalAccessException e)
 		{
-			throw new ExecuteException(ExecuteException.ExceptionType.ACCESS, e);
+			throw new AccessExecuteException(e);
 		}
 		
 		if(_logDebugEnabled)
@@ -195,24 +202,6 @@ public class Invoke extends AbstractExecutable
 	}
 	public void setResultKey(Serializable resultKey) {
 		this.resultKey = resultKey;
-	}
-
-	/**
-	 * 执行该调用的方法并返回结果
-	 * @param objectSource
-	 * @return
-	 * @throws IllegalAccessException
-	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
-	 */
-	protected Object executeMethod(ObjectSource objectSource) throws
-		IllegalAccessException,IllegalArgumentException,
-		InvocationTargetException
-	{
-		Method method=getMethod();
-		Object resolver=getResolver(objectSource);
-		
-		return method.invoke(resolver, getMethodArguments(objectSource));
 	}
 	
 	/**

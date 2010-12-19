@@ -61,7 +61,7 @@ public class DefaultExecutor implements Executor
 		if(objSource instanceof ConvertableObjectSource)
 			((ConvertableObjectSource)objSource).setGenericConverter(getConfiguration().getGenericConverter());
 		
-		InterceptorInfo itptInfo = configuration.getInterceptorInfo();
+		InterceptorInfo itptInfo = getConfiguration().getInterceptorInfo();
 		
 		//保存执行语境信息
 		Execution context=null;

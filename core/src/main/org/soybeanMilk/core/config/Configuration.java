@@ -37,16 +37,16 @@ public class Configuration
 	private static boolean _logDebugEnabled=log.isDebugEnabled();
 	
 	/**解决对象工厂*/
-	protected ResolverFactory resolverFactory;
+	private ResolverFactory resolverFactory;
 	
 	/**通用转换器，它负责将配置文件中定义的字符串参数值转换为实际的参数对象*/
-	protected GenericConverter genericConverter;
+	private GenericConverter genericConverter;
 	
 	/**拦截器信息*/
-	protected InterceptorInfo interceptorInfo;
+	private InterceptorInfo interceptorInfo;
 	
 	/**可执行对象集*/
-	protected Map<String, Executable> executables;
+	private Map<String, Executable> executablesMap;
 	
 	public Configuration()
 	{
@@ -83,7 +83,7 @@ public class Configuration
 	 */
 	public Collection<Executable> getExecutables()
 	{
-		return this.executables == null ? null : this.executables.values();
+		return getExecutablesMap() == null ? null : getExecutablesMap().values();
 	}
 	
 	/**
@@ -106,7 +106,7 @@ public class Configuration
 		if(executableName == null)
 			return null;
 		
-		return executables == null ? null : executables.get(executableName);
+		return getExecutablesMap() == null ? null : getExecutablesMap().get(executableName);
 	}
 	
 	/**
@@ -115,20 +115,32 @@ public class Configuration
 	 */
 	public void addExecutable(Executable executable)
 	{
-		if(executables == null)
-			executables=new HashMap<String,Executable>();
+		Map<String, Executable> exeMap=getExecutablesMap();
+		
+		if(exeMap == null)
+		{
+			exeMap=new HashMap<String,Executable>();
+			setExecutablesMap(exeMap);
+		}
 		
 		checkNameNotNull(executable);
 		
-		if(executables.get(executable.getName()) != null)
+		if(exeMap.get(executable.getName()) != null)
 			throw new IllegalArgumentException("duplicate Executable name '"+executable.getName()+"'");
 		
-		executables.put(executable.getName(), executable);
+		exeMap.put(executable.getName(), executable);
 		
 		if(_logDebugEnabled)
 			log.debug("add '"+executable+"' to '"+this+"'");
 	}
 	
+	public Map<String, Executable> getExecutablesMap() {
+		return executablesMap;
+	}
+	public void setExecutablesMap(Map<String, Executable> executablesMap) {
+		this.executablesMap = executablesMap;
+	}
+
 	/**
 	 * 校验名称，添加到此对象中的可执行对象的名称不能为null
 	 * @param exe

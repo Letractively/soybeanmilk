@@ -112,10 +112,10 @@ public class DefaultGenericConverter implements GenericConverter
 	@Override
 	public void addConverter(Class<?> sourceClass,Class<?> targetClass,Converter converter)
 	{
-		if(converters == null)
-			converters = new HashMap<String, Converter>();
+		if(getConverters() == null)
+			setConverters(new HashMap<String, Converter>());
 		
-		converters.put(generateConverterKey(sourceClass, targetClass), converter);
+		getConverters().put(generateConverterKey(sourceClass, targetClass), converter);
 		
 		if(_logDebugEnabled)
 			log.debug("add a support Converter '"+converter.getClass().getName()+"' for converting '"+sourceClass.getName()+"' to '"+targetClass.getName()+"'");
@@ -124,7 +124,7 @@ public class DefaultGenericConverter implements GenericConverter
 	@Override
 	public Converter getConverter(Class<?> sourceClass, Class<?> targetClass)
 	{
-		return converters == null ? null : converters.get(generateConverterKey(sourceClass, targetClass));
+		return getConverters() == null ? null : getConverters().get(generateConverterKey(sourceClass, targetClass));
 	}
 	
 	@Override
@@ -169,6 +169,13 @@ public class DefaultGenericConverter implements GenericConverter
 		return sourceClass.getName()+SEPRATOR+targetClass.getName();
 	}
 	
+	public Map<String, Converter> getConverters() {
+		return converters;
+	}
+	public void setConverters(Map<String, Converter> converters) {
+		this.converters = converters;
+	}
+
 	/**
 	 * 添加可以将字符串转换到原子类型的辅助转换器
 	 */

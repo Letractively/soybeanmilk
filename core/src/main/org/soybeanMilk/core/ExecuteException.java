@@ -15,59 +15,27 @@
 package org.soybeanMilk.core;
 
 /**
- * 执行异常
+ * 执行异常。
  * @author earthAngry@gmail.com
  * @date 2010-9-30
  */
 public class ExecuteException extends Exception
 {
 	private static final long serialVersionUID = 3370475438251845697L;
-	
-	private int exceptionType;
-	
-	/**
-	 * 创建执行异常对象
-	 * @param exceptionType 源异常类型
-	 * @param cause 源异常
-	 */
-	public ExecuteException(int exceptionType, Throwable cause)
-	{
-		super(cause);
-		this.exceptionType=exceptionType;
+
+	public ExecuteException() {
+		super();
 	}
 
-	public int getExceptionType() {
-		return exceptionType;
+	public ExecuteException(String message, Throwable cause) {
+		super(message, cause);
 	}
-	public void setExceptionType(int exceptionType) {
-		this.exceptionType = exceptionType;
+
+	public ExecuteException(String message) {
+		super(message);
 	}
-	
-	@Override
-	public String toString()
-	{
-		return "ExecuteException [exceptionType="
-				+ exceptionType + "]";
-	}
-	
-	/**
-	 * 导致执行异常的异常源类型
-	 * @author earthAngry@gmail.com
-	 * @date 2010-9-30
-	 */
-	public static class ExceptionType
-	{
-		/**
-		 * 执行异常类型-IllegalAccessException
-		 */
-		public static final int ACCESS=1;
-		/**
-		 * 执行异常类型-IllegalArgumentException
-		 */
-		public static final int ARGUMENT=2;
-		/**
-		 * 执行异常类型-InvocationTargetException
-		 */
-		public static final int INVOCATION=3;
+
+	public ExecuteException(Throwable cause) {
+		super(cause);
 	}
 }

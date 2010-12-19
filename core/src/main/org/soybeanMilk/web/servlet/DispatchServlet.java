@@ -38,9 +38,9 @@ import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
 import org.soybeanMilk.web.os.PathWebObjectSource;
 import org.soybeanMilk.web.os.WebObjectSource;
-import org.soybeanMilk.web.restful.PathNode;
-import org.soybeanMilk.web.restful.VariablePath;
-import org.soybeanMilk.web.restful.VariablePathMatcher;
+import org.soybeanMilk.web.vp.PathNode;
+import org.soybeanMilk.web.vp.VariablePath;
+import org.soybeanMilk.web.vp.VariablePathMatcher;
 
 
 /**

@@ -264,7 +264,7 @@ public class DispatchServlet extends HttpServlet
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	protected void processTarget(Executable executable, WebObjectSource objSource) throws ServletException, IOException
+	public void processTarget(Executable executable, WebObjectSource objSource) throws ServletException, IOException
 	{
 		Target target=null;
 		if(executable instanceof WebAction)
@@ -281,24 +281,68 @@ public class DispatchServlet extends HttpServlet
 		HttpServletRequest request = objSource.getRequest();
 		HttpServletResponse response=objSource.getResponse();
 		
+		String url=processVariableTargetUrl(target.getUrl(), objSource);
 		if(Target.REDIRECT.equalsIgnoreCase(target.getType()))
 		{
 			//在语境内
-			if(target.getUrl().startsWith("/"))
-				response.sendRedirect(request.getContextPath()+target.getUrl());
+			if(url.startsWith("/"))
+				response.sendRedirect(request.getContextPath()+url);
 			else
-				response.sendRedirect(target.getUrl());
+				response.sendRedirect(url);
 			
 			if(_logDebugEnabled)
-				log.debug("redirect request to '"+target.getUrl()+"'");
+				log.debug("redirect request to '"+url+"'");
 		}
 		else
 		{
-			request.getRequestDispatcher(target.getUrl()).forward(request, response);
+			request.getRequestDispatcher(url).forward(request, response);
 			
 			if(_logDebugEnabled)
-				log.debug("forward request to '"+target.getUrl()+"'");
+				log.debug("forward request to '"+url+"'");
 		}
+	}
+	
+	/**
+	 * 处理带有变量的目标URL
+	 * @param targetUrl 目标URL，它可能包含"{...}"格式的变量
+	 * @param objectSource
+	 * @return
+	 */
+	protected String processVariableTargetUrl(String targetUrl, WebObjectSource objectSource)
+	{
+		StringBuffer result=new StringBuffer();
+		
+		int i=0, len=targetUrl.length();
+		for(;i<len;i++)
+		{
+			char c=targetUrl.charAt(i);
+			
+			if(c == WebConstants.VARIABLE_QUOTE_LEFT)
+			{
+				int j=i+1;
+				int start=j;
+				for(;j<len && (c=targetUrl.charAt(j))!=WebConstants.VARIABLE_QUOTE_RIGHT;)
+					j++;
+				
+				String var=targetUrl.substring(start, j);
+				if(c == WebConstants.VARIABLE_QUOTE_RIGHT)
+				{
+					Object value=objectSource.get(var, null);
+					result.append(value==null ? "null" : value.toString());
+				}
+				else
+				{
+					result.append(WebConstants.VARIABLE_QUOTE_LEFT);
+					result.append(var);
+				}
+				
+				i=j;
+			}
+			else
+				result.append(c);
+		}
+		
+		return result.toString();
 	}
 	
 	/**

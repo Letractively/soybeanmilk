@@ -10,19 +10,26 @@
 			<invoke>
 				result=testResolver.edit(path.id);
 			</invoke>
+			
+			<target url="/modules_0/view/{path.id}" type="redirect" />
 		</action>
 		
 		<action name="/modules_0/view/{id}">
 			<invoke>
 				result=testResolver.view(path.id);
 			</invoke>
+			
+			<target url="/modules_0/view/{path.id}.jsp" />
 		</action>
 		
 		<action name="/modules_1/{userId}/{id}">
 			<invoke>
 				result=testResolver.edit(path.userId, path.id);
 			</invoke>
+			
+			<target url="/module{s_1/sdf.abc" />
 		</action>
+		
 	</executables>
 	
 </soybean-milk>

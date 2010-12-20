@@ -33,6 +33,8 @@ public class TestDispatchServlet
 	private static String mySoybeanMilkFile="test/unit/web/soybean-milk.config.xml";
 	private static String myWebObjectSourceFactoryClass="test.unit.web.TestDispatchServlet$MyWebObjectSourceFactory";
 	
+	private static String CONTEXT_PATH="/testContext";
+	
 	@Test
 	public void initEncoding()
 	{
@@ -214,6 +216,8 @@ public class TestDispatchServlet
 			MockHttpServletResponse response=new MockHttpServletResponse();
 			
 			request.setMethod("POST");
+			request.setContextPath(CONTEXT_PATH);
+			
 			request.setServletPath("/modules_0/edit/35");
 			try
 			{
@@ -225,6 +229,7 @@ public class TestDispatchServlet
 			}
 			
 			Assert.assertEquals("edit(35)", (String)request.getAttribute("result"));
+			Assert.assertEquals(CONTEXT_PATH+"/modules_0/view/35", response.getRedirectedUrl());
 		}
 		
 		{
@@ -232,6 +237,8 @@ public class TestDispatchServlet
 			MockHttpServletResponse response=new MockHttpServletResponse();
 			
 			request.setMethod("POST");
+			request.setContextPath(CONTEXT_PATH);
+			
 			request.setServletPath("/modules_0/view/35/");
 			try
 			{
@@ -243,6 +250,7 @@ public class TestDispatchServlet
 			}
 			
 			Assert.assertEquals("view(35)", (String)request.getAttribute("result"));
+			Assert.assertEquals("/modules_0/view/35.jsp", response.getForwardedUrl());
 		}
 		
 		{
@@ -250,6 +258,8 @@ public class TestDispatchServlet
 			MockHttpServletResponse response=new MockHttpServletResponse();
 			
 			request.setMethod("POST");
+			request.setContextPath(CONTEXT_PATH);
+			
 			request.setServletPath("/modules_1/jack/233/");
 			try
 			{
@@ -261,6 +271,7 @@ public class TestDispatchServlet
 			}
 			
 			Assert.assertEquals("edit(jack,233)", (String)request.getAttribute("result"));
+			Assert.assertEquals("/module{s_1/sdf.abc", response.getForwardedUrl());
 		}
 	}
 	

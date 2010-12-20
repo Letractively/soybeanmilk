@@ -29,6 +29,11 @@ public class WebConstants extends Constants
 	/**访问符*/
 	public static final char ACCESSOR='.'; 
 	
+	/**字符串变量左括弧*/
+	public static final char VARIABLE_QUOTE_LEFT='{';
+	/**字符串变量右括弧*/
+	public static final char VARIABLE_QUOTE_RIGHT='}';
+	
 	/**默认的编码*/
 	public static final String DEFAULT_ENCODING="UTF-8";
 	

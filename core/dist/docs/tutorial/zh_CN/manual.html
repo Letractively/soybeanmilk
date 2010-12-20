@@ -510,9 +510,15 @@ public void handleException(Execution execution)
 								<span class="tagValue">application.yourResultKey</span> <br/>
 								结果将以“<span class="var">yourResultKey</span>”关键字被保存到“<span class="var">application</span>”作用域中
 							</li>
+							<li>
+								<span class="tagValue">path.yourResultKey</span> <br/>
+								结果将以“<span class="var">yourResultKey</span>”关键字被保存到“<span class="var">path</span>”作用域中。
+								它实际上是为支持RESTful而定义的，你一般不会需要在这里使用它（参考<span class="glossary">动作</span>的<a href="#tag_action">name</a>属性说明）。
+							</li>
 						</ul>
 						实际上，这里的关键字格式是由<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>类决定的，
-						因为它们会被直接传递给它的<span class="var">set(...)</span>方法。
+						因为它们会被直接传递给它的<span class="var">set(...)</span>方法。<br>
+						上面列出的都是默认的<a href="../../api/org/soybeanMilk/web/os/PathWebObjectSource.html">WEB对象源</a>类所支持的关键字格式。
 					</li>
 				</ul>
 			</p>
@@ -637,9 +643,14 @@ public void handleException(Execution execution)
 								回应HttpServletResponse对象。如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">HttpServletResponse</span>”，
 								那么你需要自定义“<span class="var">javax.servlet.http.HttpServletResponse</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
+							<li>
+								<span class="tagValue">path.yourArgKey</span> <br/>
+								“<span class="var">path</span>”作用域中的“<span class="var">yourArgKey</span>”关键字对应的对象。框架会对此对象执行类型转换。
+							</li>
 						</ul>
 						实际上，这里的关键字格式是由<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>类决定的，
-						因为它们会被直接传递给它的<span class="var">get(...)</span>方法。
+						因为它们会被直接传递给它的<span class="var">get(...)</span>方法。<br>
+						上面列出的都是默认的<a href="../../api/org/soybeanMilk/web/os/PathWebObjectSource.html">WEB对象源</a>类所支持的关键字格式。
 					</li>
 					<li>
 						参数值 <br>
@@ -738,7 +749,15 @@ public void handleException(Execution execution)
 				<ul>
 					<li>
 						<span class="tagAttr">name</span>（<span class="required">必须</span>） <br />
-						定义<span class="glossary">动作</span>的名称。
+						定义<span class="glossary">动作</span>的名称，一般是你期望它所处理的servlet路径。<br />
+						你也可以将它定义变量元素（以“<span class="var">{</span>”开始并以“<span class="var">}</span>”结束），以使其支持RESTful，比如：
+<pre class="code-xml">
+&lt;action name="/user/{userId}/edit"&gt;
+	&lt;invoke&gt; userResolver.edit(path.userId) &lt;/invoke&gt;
+&lt;/action&gt;
+</pre>
+						将会处理诸如“<span class="var">/user/jack/edit</span>”、“<span class="var">/user/tom/edit</span>”之类的请求，
+						并且“<span class="var">jack</span>”和“<span class="var">tom</span>”会被框架以“<span class="var">path.userId</span>”关键字保存到<span class="glossary">WEB对象源</span>中。
 					</li>
 				</ul>
 			</p>
@@ -789,7 +808,15 @@ public void handleException(Execution execution)
 				<ul>
 					<li>
 						<span class="tagAttr">url</span>（<span class="required">必须</span>） <br />
-						目标URL，如果是应用内的URL，则必须以“<span class="var">/</span>”开头。
+						目标URL，如果是应用内的URL，则必须以“<span class="var">/</span>”开头。<br />
+						你也可以在这里使用对象源支持的关键字（以“<span class="var">{</span>”开始并以“<span class="var">}</span>”结束），以使其支持动态URL，比如：
+<pre class="code-xml">
+&lt;action name="/user/{userId}/edit"&gt;
+	&lt;invoke&gt; userResolver.edit(path.userId) &lt;/invoke&gt;
+	&lt;target url="/user/{path.userId}/view" type="redirect" /&gt;
+&lt;/action&gt;
+</pre>
+						对于请求“<span class="var">/user/jack/edit</span>”，框架将会重定向到“<span class="var">/user/jack/view</span>”。
 					</li>
 					<li>
 						<span class="tagAttr">type</span>（可选） <br />

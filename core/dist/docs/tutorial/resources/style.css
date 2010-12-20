@@ -104,4 +104,8 @@ p,li{
 .pageFooter{
 	margin-top:11px;
 }
-.
+
+.updateHistory{
+	font-size:small;
+	color:#333333;
+}

@@ -21,11 +21,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.GenericConverter;
 
 /**
- * 添加了"path"作用域支持的web对象源，使你可以使用“path.[subKey]”来获取和保存对象，不过它只支持保存字符串对象。
+ * 添加了"path"作用域支持的web对象源，使你可以使用“path.[subKey]”来获取和保存对象。
  * @author earthAngry@gmail.com
  * @date 2010-12-17
  *
@@ -69,12 +68,7 @@ public class PathWebObjectSource extends WebObjectSource
 			Object obj)
 	{
 		if(SCOPE_PATH.equals(scope))
-		{
-			if(!(obj instanceof String))
-				throw new ObjectSourceException("you can only put string into '"+SCOPE_PATH+"'");
-			
-			getPathScope().put(keyInScope, (String)obj);
-		}
+			getPathScope().put(keyInScope, obj);
 		else
 			super.setWithUnknownScope(scope, keyInScope, obj);
 	}
@@ -92,17 +86,17 @@ public class PathWebObjectSource extends WebObjectSource
 	 */
 	protected static class PathScope
 	{
-		private Map<String, String> path;
+		private Map<String, Object> path;
 		
-		public String get(String key)
+		public Object get(String key)
 		{
 			return path == null ? null : path.get(key);
 		}
 		
-		public void put(String key, String value)
+		public void put(String key, Object value)
 		{
 			if(this.path == null)
-				this.path=new HashMap<String, String>();
+				this.path=new HashMap<String, Object>();
 			
 			this.path.put(key, value);
 		}

@@ -539,9 +539,15 @@ public void handleException(Execution execution)
 								<span class="tagValue">application.yourResultKey</span> <br/>
 								The result will be saved in "<span class="var">application</span>" scope with keyword "<span class="var">yourResultKey</span>".
 							</li>
+							<li>
+								<span class="tagValue">path.yourResultKey</span> <br/>
+								The result will be saved in "<span class="var">path</span>" scope with keyword "<span class="var">yourResultKey</span>".
+								It is defined for RESTful support that you may rarely use it here (See <span class="glossary">Action</span> 's <a href="#tag_action">name</a> attribute).
+							</li>
 						</ul>
 						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
-						because they will be directly passed to its <span class="var">set(...)</span> method.
+						because they will be directly passed to its <span class="var">set(...)</span> method.<br>
+						All the keywords format listed above are supported by the default <a href="../../api/org/soybeanMilk/web/os/PathWebObjectSource.html">WebObjectSource</a> class.
 					</li>
 				</ul>
 			</p>
@@ -687,9 +693,15 @@ public void handleException(Execution execution)
 								who converting "<span class="var">javax.servlet.http.HttpServletResponse</span>" source to your destination type
 								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpServletResponse</span>.
 							</li>
+							<li>
+								<span class="tagValue">path.yourArgKey</span> <br/>
+								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">path</span> scope.
+								The framework will convert it.
+							</li>
 						</ul>
 						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
-						because they will be directly passed to its <span class="var">get(...)</span> method.
+						because they will be directly passed to its <span class="var">get(...)</span> method.<br>
+						All the keywords format listed above are supported by the default <a href="../../api/org/soybeanMilk/web/os/PathWebObjectSource.html">WebObjectSource</a> class.
 					</li>
 					<li>
 						Value <br>
@@ -802,7 +814,17 @@ public void handleException(Execution execution)
 				<ul>
 					<li>
 						<span class="tagAttr">name</span> (<span class="required">Required</span>) <br />
-						Set the name of this <span class="glossary">Action</span>.
+						Set the name of this <span class="glossary">Action</span>, often the servlet path you want it to process.<br />
+						You can also define variables in it, for RESTful support.
+						For example:
+<pre class="code-xml">
+&lt;action name="/user/{userId}/edit"&gt;
+	&lt;invoke&gt; userResolver.edit(path.userId) &lt;/invoke&gt;
+&lt;/action&gt;
+</pre>
+						It will be able to process requests such as "<span class="var">/user/jack/edit</span>" or "<span class="var">/user/tom/edit</span>",
+						and "<span class="var">jack</span>" and "<span class="var">tom</span>" will be put into <span class="glossary">WebObjectSource</span> with key "<span class="var">path.userId</span>" by the framework.
+					</li>
 					</li>
 				</ul>
 			</p>
@@ -855,7 +877,16 @@ public void handleException(Execution execution)
 					<li>
 						<span class="tagAttr">url</span> (<span class="required">Required</span>)<br />
 						The target URL.
-						It must be start with "<span class="var">/</span>" if it is an URL in your application.
+						It must be start with "<span class="var">/</span>" if it is an URL in your application.<br />
+						You can also use the keywords the <span class="glossary">WebObjectSource</span> supported here for dynamic URL (With "<span class="var">{</span>" prefix and "<span class="var">}</span>" suffix).
+						For example:
+<pre class="code-xml">
+&lt;action name="/user/{userId}/edit"&gt;
+	&lt;invoke&gt; userResolver.edit(path.userId) &lt;/invoke&gt;
+	&lt;target url="/user/{path.userId}/view" type="redirect" /&gt;
+&lt;/action&gt;
+</pre>
+						The framework will redirect to "<span class="var">/user/jack/view</span>" for request "<span class="var">/user/jack/edit</span>".
 					</li>
 					<li>
 						<span class="tagAttr">type</span> (Optional)<br />

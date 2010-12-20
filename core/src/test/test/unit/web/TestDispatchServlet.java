@@ -18,6 +18,8 @@ import org.soybeanMilk.web.os.PathWebObjectSource;
 import org.soybeanMilk.web.os.WebObjectSource;
 import org.soybeanMilk.web.servlet.DispatchServlet;
 import org.soybeanMilk.web.servlet.WebObjectSourceFactory;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 
 
@@ -197,6 +199,71 @@ public class TestDispatchServlet
 		}
 	}
 	
+	@Test
+	public void executeRestful()
+	{
+		MockServletContext servletContext=new MockServletContext();
+		Map<String, String> servletInitParameters=new HashMap<String, String>();
+		servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+		
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		{
+			MockHttpServletRequest request=new MockHttpServletRequest();
+			MockHttpServletResponse response=new MockHttpServletResponse();
+			
+			request.setMethod("POST");
+			request.setServletPath("/modules_0/edit/35");
+			try
+			{
+				servlet.service(request, response);
+			}
+			catch(Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+			
+			Assert.assertEquals("edit(35)", (String)request.getAttribute("result"));
+		}
+		
+		{
+			MockHttpServletRequest request=new MockHttpServletRequest();
+			MockHttpServletResponse response=new MockHttpServletResponse();
+			
+			request.setMethod("POST");
+			request.setServletPath("/modules_0/view/35/");
+			try
+			{
+				servlet.service(request, response);
+			}
+			catch(Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+			
+			Assert.assertEquals("view(35)", (String)request.getAttribute("result"));
+		}
+		
+		{
+			MockHttpServletRequest request=new MockHttpServletRequest();
+			MockHttpServletResponse response=new MockHttpServletResponse();
+			
+			request.setMethod("POST");
+			request.setServletPath("/modules_1/jack/233/");
+			try
+			{
+				servlet.service(request, response);
+			}
+			catch(Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+			
+			Assert.assertEquals("edit(jack,233)", (String)request.getAttribute("result"));
+		}
+	}
+	
 	public static class MockDispathServlet extends DispatchServlet
 	{
 		private static final long serialVersionUID = 1L;
@@ -262,5 +329,24 @@ public class TestDispatchServlet
 				HttpServletResponse response, ServletContext application)
 		{
 			super(request, response, application);
-		}}
+		}
+	}
+	
+	public static class TestResolver
+	{
+		public String view(int id)
+		{
+			return "view("+id+")";
+		}
+		
+		public String edit(int id)
+		{
+			return "edit("+id+")";
+		}
+		
+		public String edit(String user, int id)
+		{
+			return "edit("+user+","+id+")";
+		}
+	}
 }

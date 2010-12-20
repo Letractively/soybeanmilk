@@ -1,3 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <soybean-milk>
+	
+	<resolvers>
+		<resolver id="testResolver" class="test.unit.web.TestDispatchServlet$TestResolver" />
+	</resolvers>
+	
+	<executables>
+		<action name="/modules_0/edit/{id}">
+			<invoke>
+				result=testResolver.edit(path.id);
+			</invoke>
+		</action>
+		
+		<action name="/modules_0/view/{id}">
+			<invoke>
+				result=testResolver.view(path.id);
+			</invoke>
+		</action>
+		
+		<action name="/modules_1/{userId}/{id}">
+			<invoke>
+				result=testResolver.edit(path.userId, path.id);
+			</invoke>
+		</action>
+	</executables>
+	
 </soybean-milk>

@@ -14,8 +14,8 @@
 
 package org.soybeanMilk.web.vp;
 
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * 变量路径匹配器
@@ -27,70 +27,155 @@ public class VariablePathMatcher
 {
 	private VariablePath[] variablePaths;
 	
-	public VariablePathMatcher(String[] variablePaths)
+	public VariablePathMatcher(Collection<String> paths)
 	{
-		if(variablePaths!=null && variablePaths.length>0)
+		if(paths != null)
 		{
-			SortedSet<VariablePath> vpSet=new TreeSet<VariablePath>();
-			for(String vpStr : variablePaths)
-			{
-				VariablePath vp=new VariablePath(vpStr);
-				if(vp.isVariablePath())
-					vpSet.add(vp);
-			}
+			VariablePath[] variablePaths=new VariablePath[paths.size()];
+			int idx=0;
 			
-			VariablePath[] vpAry=(VariablePath[])vpSet.toArray();
-			setVariablePaths(vpAry);
+			for(String str : paths)
+				variablePaths[idx++]=new VariablePath(str);
+			
+			setVariablePaths(variablePaths);
 		}
 	}
 	
 	public VariablePath[] getVariablePaths() {
 		return variablePaths;
 	}
-	
-	/**
-	 * 取得与值路径匹配的变量路径
-	 * @param valuePath 值路径，比如“a/b/c/d”
-	 * @return
-	 */
-	public VariablePath getMatched(String valuePath)
-	{
-		return getMatched(VariablePath.splitPath(valuePath));
-	}
-	
-	/**
-	 * 取得与值路径节点数组匹配的变量路径
-	 * @param valuePathNodes 值路径数组
-	 * @return
-	 */
-	public VariablePath getMatched(String[] valuePathNodes)
-	{
-		if(this.variablePaths==null || this.variablePaths.length==0
-				|| valuePathNodes==null || valuePathNodes.length==0)
-			return null;
-		
-		int[] range=new int[]{0,this.variablePaths.length-1};
-		for(int i=0;i<valuePathNodes.length;i++)
-			range=getMatchRowRange(valuePathNodes[i], i, range);
-		
-		int idx=-1;
-		
-		if(range!=null && range.length!=0
-				&& this.variablePaths[range[0]].getPathNodes().length==valuePathNodes.length)
-			idx=range[0];
-		
-		return idx == -1 ? null : this.variablePaths[idx];
-	}
-	
-	protected int[] getMatchRowRange(String v, int column, int[] rowRangeIn)
-	{
-		//TODO 实现匹配查找
-		
-		return null;
-	}
-	
 	protected void setVariablePaths(VariablePath[] variablePaths)
 	{
 		this.variablePaths = variablePaths;
+		Arrays.sort(this.variablePaths);
+	}
+	
+	/**
+	 * 取得与给定字符串路径匹配的变量路径，如果没有则返回null。
+	 * @param path 字符串路径，比如“a/b/c/d”、“{aaa}/bbb/{ccc}”
+	 * @return 匹配结果。
+	 */
+	public VariablePath getMatched(String path)
+	{
+		VariablePath vp=new VariablePath(path);
+		return getMatched(vp);
+	}
+	
+	/**
+	 * 取得与给定变量路径匹配的变量路径，如果没有则返回null。
+	 * @param path 变量路径，比如“a/b/c/d”、“{aaa}/bbb/{ccc}”
+	 * @return 匹配结果。
+	 */
+	public VariablePath getMatched(VariablePath path)
+	{
+		VariablePath[] localPaths=getVariablePaths();
+		if(localPaths==null || localPaths.length==0
+				|| path==null)
+			return null;
+		
+		int len=path.getPathNodeLength();
+		int[] range=null;
+		if(len > 0)
+		{
+			range=new int[]{0,localPaths.length-1};
+			for(int i=0;i<len;i++)
+			{
+				if(range == null)
+					break;
+				else
+					range=getMatchRowRange(path, i, range[0], range[1]);
+			}
+		}
+		
+		return range == null ? null : localPaths[range[0]];
+	}
+	
+	/**
+	 * 在某一列上查找与路径节点匹配的行范围
+	 * @param v
+	 * @param column
+	 * @param rowRangeFrom 查找范围-行首
+	 * @param rowRangeTo 查找范围-行末
+	 * @return
+	 */
+	protected int[] getMatchRowRange(VariablePath v, int column, int rowRangeFrom, int rowRangeTo)
+	{
+		int[] re=new int[]{-1, -1};
+		
+		re[0]=findEdgeEqualRowIndex(v, column, rowRangeFrom, rowRangeTo, true);
+		if(re[0] != -1)
+			re[1]=findEdgeEqualRowIndex(v, column, re[0], rowRangeTo, false);
+		
+		//如果没有查到，并且此节点不是变量，则改为变量节点再匹配一次
+		if(re[0] == -1)
+		{
+			PathNode pn=v.getPathNode(column);
+			if(pn!=null && !pn.isVariable())
+			{
+				pn.setVariable(true);
+				
+				re[0]=findEdgeEqualRowIndex(v, column, rowRangeFrom, rowRangeTo, true);
+				if(re[0] != -1)
+					re[1]=findEdgeEqualRowIndex(v, column, re[0], rowRangeTo, false);
+				
+				pn.setVariable(false);
+			}
+		}
+		
+		return re[0]==-1 || re[1]==-1 ? null : re;
+	}
+	
+	/**
+	 * 在给定的行范围内，查找与给定变量路径<code>nodeIdx</code>位置的路径节点相等行号。
+	 * @param v 比较目标
+	 * @param nodeIdx 变量路径的节点位置
+	 * @param rowFrom 行范围-首行号
+	 * @param rowTo 行范围-末行号
+	 * @param first true 查找相等的第一个行号， false 查找相等的最后行号
+	 * @return 结果行号，如果查找不到，则返回-1。
+	 */
+	protected int findEdgeEqualRowIndex(VariablePath v, int nodeIdx, int rowFrom, int rowTo, boolean first)
+	{
+		int centerRow=rowFrom+(rowTo-rowFrom)/2;
+		PathNode[] currentRowNodes=getVariablePaths()[centerRow].getPathNodes();
+		int valueNodeLen=v.getPathNodeLength();
+		
+		if(rowFrom >= rowTo)
+		{
+			if(currentRowNodes.length!=valueNodeLen || currentRowNodes[nodeIdx].compareTo(v.getPathNode(nodeIdx))!=0)
+				return -1;
+			else
+				return rowFrom;
+		}
+		else
+		{
+			//首先路径节点的长度必须相等
+			if(currentRowNodes.length > valueNodeLen)
+				return findEdgeEqualRowIndex(v, nodeIdx, rowFrom, centerRow-1, first);
+			else if(currentRowNodes.length < valueNodeLen)
+				return findEdgeEqualRowIndex(v, nodeIdx, centerRow+1, rowTo, first);
+			else
+			{
+				int compare=currentRowNodes[nodeIdx].compareTo(v.getPathNode(nodeIdx));
+				
+				if(compare < 0)
+					return findEdgeEqualRowIndex(v, nodeIdx, centerRow+1, rowTo, first);
+				else if(compare > 0)
+					return findEdgeEqualRowIndex(v, nodeIdx, rowFrom, centerRow-1, first);
+				else
+				{
+					int moreCheckIdx=-1;
+					
+					//检查左边是否还有相等的
+					if(first)
+						moreCheckIdx=findEdgeEqualRowIndex(v, nodeIdx, rowFrom, centerRow-1, first);
+					//检查右边是否还有相等的
+					else
+						moreCheckIdx=findEdgeEqualRowIndex(v, nodeIdx, centerRow+1, rowTo, first);
+					
+					return moreCheckIdx == -1 ? centerRow : moreCheckIdx;
+				}
+			}
+		}
 	}
 }

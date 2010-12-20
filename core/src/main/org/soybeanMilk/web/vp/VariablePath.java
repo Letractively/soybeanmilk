@@ -37,6 +37,8 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 	 */
 	private PathNode[] pathNodes;
 	
+	private boolean isVariable;
+	
 	public VariablePath(String variablePath)
 	{
 		this.variablePath=variablePath;
@@ -59,16 +61,30 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 	public void setPathNodes(PathNode[] pathNodes) {
 		this.pathNodes = pathNodes;
 	}
-
+	
+	public PathNode getPathNode(int idx)
+	{
+		int len=getPathNodeLength();
+		return idx >= len ? null : this.pathNodes[idx];
+	}
+	
+	public int getPathNodeLength()
+	{
+		return this.pathNodes==null ? 0 : this.pathNodes.length;
+	}
+	
 	/**
 	 * 是否是变量路径
 	 * @return
 	 */
-	public boolean isVariablePath()
-	{
-		return this.pathNodes != null;
+	public boolean isVariable() {
+		return isVariable;
 	}
-	
+
+	protected void setVariable(boolean isVariable) {
+		this.isVariable = isVariable;
+	}
+
 	/**
 	 * 比较变量路径。<br>
 	 * 比较规则如下：
@@ -123,15 +139,23 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 	}
 	
 	/**
-	 * 拆分变量路径，如果它不是一个变量路径，此方法将返回null
-	 * @param variabalePath 变量路径，格式为“{variable_0}/bbb/{variable_1}/ddd”，其中"{}"表示该节点是变量
+	 * 拆分路径
+	 * @param path 路径，格式为“aaa/bbb/ccc”
 	 * @return 拆分结果数组
 	 */
-	private PathNode[] split(String variabalePath)
+	private PathNode[] split(String path)
 	{
 		PathNode re[]=null;
 		
-		String[] names=splitPath(variabalePath);
+		String[] names=null;
+		if(path!=null && path.length()>0)
+		{
+			//String类的BUG：以分隔符开头会多出来一个元素
+			if(path.startsWith(PATH_SEPRATOR))
+				path=path.substring(PATH_SEPRATOR.length());
+			
+			names=path.split(PATH_SEPRATOR);
+		}
 		boolean variable=false;
 		
 		if(names!=null && names.length>0)
@@ -147,22 +171,8 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 			}
 		}
 		
-		if(!variable)
-			re=null;
+		setVariable(variable);
 		
 		return re;
-	}
-	
-	/**
-	 * 拆分路径字符串
-	 * @param path
-	 * @return
-	 */
-	public static String[] splitPath(String path)
-	{
-		if(path==null || path.length()==0)
-			return null;
-		
-		return path.split(PATH_SEPRATOR);
 	}
 }

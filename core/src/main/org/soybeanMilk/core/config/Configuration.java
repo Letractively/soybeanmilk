@@ -87,6 +87,15 @@ public class Configuration
 	}
 	
 	/**
+	 * 获取它包含的所有可执行对象名集合
+	 * @return
+	 */
+	public Collection<String> getExecutableNames()
+	{
+		return getExecutablesMap()==null ? null : getExecutablesMap().keySet();
+	}
+	
+	/**
 	 * 添加集合中的所有可执行对象
 	 * @param executables
 	 */

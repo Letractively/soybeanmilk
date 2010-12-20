@@ -144,16 +144,7 @@ public class DispatchServlet extends HttpServlet
 		if(isEnableVariablePath())
 		{
 			//初始化变量路径匹配器并且设为非空以便使用
-			Collection<Executable> executables=getExecutor().getConfiguration().getExecutables();
-			String[] exeNames=null;
-			if(executables!=null && !executables.isEmpty())
-			{
-				exeNames=new String[executables.size()];
-				int i=0;
-				for(Executable exe : executables)
-					exeNames[i++]=exe.getName();
-			}
-			
+			Collection<String> exeNames=getExecutor().getConfiguration().getExecutableNames();
 			VariablePathMatcher vpm=new VariablePathMatcher(exeNames);
 			setVariablePathMatcher(vpm);
 		}
@@ -204,18 +195,18 @@ public class DispatchServlet extends HttpServlet
 		//按照变量路径方式匹配
 		if(exe==null && isEnableVariablePath())
 		{
-			String[] valuePath=VariablePath.splitPath(exeName);
-			VariablePath vp=getVariablePathMatcher().getMatched(valuePath);
-			if(vp != null)
-				exe=cfg.getExecutable(vp.getVariablePath());
+			VariablePath valuePath=new VariablePath(exeName);
+			VariablePath targetPath=getVariablePathMatcher().getMatched(valuePath);
+			if(targetPath != null)
+				exe=cfg.getExecutable(targetPath.getVariablePath());
 			
 			if(exe != null)
 			{
-				PathNode[] pathNodes=vp.getPathNodes();
+				PathNode[] pathNodes=targetPath.getPathNodes();
 				for(int i=0;i<pathNodes.length;i++)
 				{
 					if(pathNodes[i].isVariable())
-						webObjSource.set(PathWebObjectSource.SCOPE_PATH+WebConstants.ACCESSOR+pathNodes[i].getNodeValue(), valuePath[i]);
+						webObjSource.set(PathWebObjectSource.SCOPE_PATH+WebConstants.ACCESSOR+pathNodes[i].getNodeValue(), valuePath.getPathNode(i).getNodeValue());
 				}
 			}
 		}

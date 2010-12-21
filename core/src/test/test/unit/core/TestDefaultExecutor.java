@@ -169,10 +169,8 @@ public class TestDefaultExecutor
 			{
 				executor.execute("helloThrow", os);
 			}
-			catch(Exception e)
-			{
-				log.error("",e);
-			}
+			catch(Exception e){}
+			
 			Assert.assertNull(os.get("exception", null));
 		}
 	}

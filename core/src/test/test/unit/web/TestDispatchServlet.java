@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.soybeanMilk.core.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.resolver.ResolverFactory;
 import org.soybeanMilk.web.WebConstants;
-import org.soybeanMilk.web.os.PathWebObjectSource;
 import org.soybeanMilk.web.os.WebObjectSource;
 import org.soybeanMilk.web.servlet.DispatchServlet;
 import org.soybeanMilk.web.servlet.WebObjectSourceFactory;
@@ -144,7 +143,7 @@ public class TestDispatchServlet
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
 			
-			Assert.assertEquals(PathWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
+			Assert.assertEquals(WebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
 		}
 		
 		{
@@ -155,7 +154,7 @@ public class TestDispatchServlet
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
 			
-			Assert.assertEquals(PathWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
+			Assert.assertEquals(WebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
 		}
 	}
 	
@@ -218,7 +217,8 @@ public class TestDispatchServlet
 			request.setMethod("POST");
 			request.setContextPath(CONTEXT_PATH);
 			
-			request.setServletPath("/modules_0/edit/35");
+			request.setPathInfo("/modules_0/edit/35");
+			request.setServletPath("");
 			try
 			{
 				servlet.service(request, response);
@@ -239,7 +239,8 @@ public class TestDispatchServlet
 			request.setMethod("POST");
 			request.setContextPath(CONTEXT_PATH);
 			
-			request.setServletPath("/modules_0/view/35/");
+			request.setPathInfo("/modules_0/view/35/");
+			request.setServletPath("");
 			try
 			{
 				servlet.service(request, response);
@@ -260,7 +261,8 @@ public class TestDispatchServlet
 			request.setMethod("POST");
 			request.setContextPath(CONTEXT_PATH);
 			
-			request.setServletPath("/modules_1/jack/233/");
+			request.setPathInfo("/modules_1/jack/233/");
+			request.setServletPath("");
 			try
 			{
 				servlet.service(request, response);

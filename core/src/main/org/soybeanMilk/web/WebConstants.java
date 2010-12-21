@@ -83,23 +83,28 @@ public class WebConstants extends Constants
 		public static final String PARAM="param";
 		
 		/**
-		 * 请求，它是一个HttpServletRequest对象
+		 * 请求，它表示HttpServletRequest对象
 		 */
 		public static final String REQUEST="request";
 		
 		/**
-		 * 会话，它是一个HttpSession对象
+		 * 会话，它表示HttpSession对象
 		 */
 		public static final String SESSION="session";
 		
 		/**
-		 * 应用，它是一个ServletContext对象
+		 * 应用，它表示ServletContext对象
 		 */
 		public static final String APPLICATION="application";
 		
 		/**
-		 * 回应，它是一个HttpServletResponse对象
+		 * 回应，它表示HttpServletResponse对象
 		 */
 		public static final String RESPONSE="response";
+		
+		/**
+		 * 路径作用域，它是一个Map对象
+		 */
+		public static final String PATH="path";
 	}
 }

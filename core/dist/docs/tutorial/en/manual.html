@@ -542,12 +542,11 @@ public void handleException(Execution execution)
 							<li>
 								<span class="tagValue">path.yourResultKey</span> <br/>
 								The result will be saved in "<span class="var">path</span>" scope with keyword "<span class="var">yourResultKey</span>".
-								It is defined for RESTful support that you may rarely use it here (See <span class="glossary">Action</span> 's <a href="#tag_action">name</a> attribute).
+								It is defined for RESTful support that you may rarely put object into it directly (See <span class="glossary">Action</span> 's <a href="#tag_action">name</a> attribute).
 							</li>
 						</ul>
 						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
 						because they will be directly passed to its <span class="var">set(...)</span> method.<br>
-						All the keywords format listed above are supported by the default <a href="../../api/org/soybeanMilk/web/os/PathWebObjectSource.html">WebObjectSource</a> class.
 					</li>
 				</ul>
 			</p>
@@ -701,7 +700,6 @@ public void handleException(Execution execution)
 						</ul>
 						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
 						because they will be directly passed to its <span class="var">get(...)</span> method.<br>
-						All the keywords format listed above are supported by the default <a href="../../api/org/soybeanMilk/web/os/PathWebObjectSource.html">WebObjectSource</a> class.
 					</li>
 					<li>
 						Value <br>

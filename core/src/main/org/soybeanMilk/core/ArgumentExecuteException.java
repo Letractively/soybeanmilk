@@ -35,6 +35,6 @@ public class ArgumentExecuteException extends ExecuteException
 	 */
 	public IllegalArgumentException getCause()
 	{
-		return (IllegalArgumentException)getCause();
+		return (IllegalArgumentException)super.getCause();
 	}
 }

@@ -36,7 +36,6 @@ import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.config.parser.WebConfigurationParser;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
-import org.soybeanMilk.web.os.PathWebObjectSource;
 import org.soybeanMilk.web.os.WebObjectSource;
 import org.soybeanMilk.web.vp.PathNode;
 import org.soybeanMilk.web.vp.VariablePath;
@@ -54,6 +53,9 @@ public class DispatchServlet extends HttpServlet
 	
 	private static Log log=LogFactory.getLog(DispatchServlet.class);
 	private static boolean _logDebugEnabled=log.isDebugEnabled();
+	
+	protected static final String INCLUDE_PATH_INFO="javax.servlet.include.path_info";
+	protected static final String INCLUDE_SERVLET_PATH="javax.servlet.include.servlet_path";
 	
 	/**执行器*/
 	private Executor executor;
@@ -188,8 +190,10 @@ public class DispatchServlet extends HttpServlet
 		
 		Configuration cfg=getExecutor().getConfiguration();
 		WebObjectSource webObjSource=getWebObjectSourceFactory().create(request, response, getServletContext());
-		
 		String exeName=getRequestExecutableName(request, response);
+		if(_logDebugEnabled)
+			log.debug("processing request with name '"+exeName+"'");
+		
 		Executable exe=cfg.getExecutable(exeName);
 		
 		//按照变量路径方式匹配
@@ -206,7 +210,7 @@ public class DispatchServlet extends HttpServlet
 				for(int i=0;i<pathNodes.length;i++)
 				{
 					if(pathNodes[i].isVariable())
-						webObjSource.set(PathWebObjectSource.SCOPE_PATH+WebConstants.ACCESSOR+pathNodes[i].getNodeValue(), valuePath.getPathNode(i).getNodeValue());
+						webObjSource.set(WebConstants.Scope.PATH+WebConstants.ACCESSOR+pathNodes[i].getNodeValue(), valuePath.getPathNode(i).getNodeValue());
 				}
 			}
 		}
@@ -240,7 +244,23 @@ public class DispatchServlet extends HttpServlet
 	protected String getRequestExecutableName(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException
 	{
-		return request.getServletPath();
+		String pathInfo=request.getPathInfo();
+		String servletPath=request.getServletPath();
+		int period=servletPath.lastIndexOf(".");
+		
+		String result=null;
+		
+        if(period>=0 && period>servletPath.lastIndexOf("/"))
+        	result=servletPath;
+        else
+        {
+	        if(pathInfo != null)
+	        	result=servletPath+pathInfo;
+	        else
+	        	result=servletPath;
+        }
+        
+        return result;
 	}
 	
 	/**
@@ -355,7 +375,7 @@ public class DispatchServlet extends HttpServlet
 	protected WebObjectSource createDefaultObjectSource(HttpServletRequest request,
 			HttpServletResponse response, ServletContext application)
 	{
-		return new PathWebObjectSource(request, response, application);
+		return new WebObjectSource(request, response, application);
 	}
 	
 	protected VariablePathMatcher getVariablePathMatcher() {

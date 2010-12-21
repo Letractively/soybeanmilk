@@ -250,17 +250,17 @@ public class DispatchServlet extends HttpServlet
 		
 		String result=null;
 		
-        if(period>=0 && period>servletPath.lastIndexOf("/"))
-        	result=servletPath;
-        else
-        {
-	        if(pathInfo != null)
-	        	result=servletPath+pathInfo;
-	        else
-	        	result=servletPath;
-        }
-        
-        return result;
+		if(period>=0 && period>servletPath.lastIndexOf("/"))
+			result=servletPath;
+		else
+		{
+			if(pathInfo != null)
+				result=servletPath+pathInfo;
+			else
+				result=servletPath;
+		}
+		
+		return result;
 	}
 	
 	/**

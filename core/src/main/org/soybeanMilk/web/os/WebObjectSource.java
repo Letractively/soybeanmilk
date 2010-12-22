@@ -59,11 +59,6 @@ import org.soybeanMilk.web.WebConstants;
  *  		<span class="tagValue">application.yourKey</span> <br/>
  *  		结果将以“<span class="var">yourKey</span>”关键字被保存到“<span class="var">application</span>”作用域中
  *  	</li>
- *  	<li>
-			<span class="tagValue">path.yourKey</span> <br/>
-			结果将以“<span class="var">yourKey</span>”关键字被保存到“<span class="var">path</span>”作用域中。
-			它实际上是为支持RESTful而定义的，你一般不会需要直接将对象保存到这里。
-		</li>
  *   </ul>
  *  </li>
  *  <li>
@@ -92,7 +87,7 @@ import org.soybeanMilk.web.WebConstants;
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">request.yourKey</span> <br/>
- *  		请求属性中的“<span class="var">yourKey</span>”关键字对应的对象。它不会对此对象执行类型转换，目标类型应该与这个关键字对应的对象一致。
+ *  		请求属性中的“<span class="var">yourKey</span>”关键字对应的对象。如果目标类型与此对象不一致，框架将尝试执行类型转换。
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">session</span> <br/>
@@ -101,7 +96,7 @@ import org.soybeanMilk.web.WebConstants;
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">session.yourKey</span> <br/>
- *  		会话属性中的“<span class="var">yourKey</span>”关键字对应的对象。它不会对此对象执行类型转换。
+ *  		会话属性中的“<span class="var">yourKey</span>”关键字对应的对象。如果目标类型与此对象不一致，框架将尝试执行类型转换。
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">application</span> <br/>
@@ -110,17 +105,13 @@ import org.soybeanMilk.web.WebConstants;
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">application.yourKey</span> <br/>
- *  		应用属性中的“<span class="var">yourKey</span>”关键字对应的对象。它不会对此对象执行类型转换。
+ *  		应用属性中的“<span class="var">yourKey</span>”关键字对应的对象。如果目标类型与此对象不一致，框架将尝试执行类型转换。
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">response</span> <br/>
  *  		回应HttpServletResponse对象。如果目标类型不是“<span class="var">HttpServletResponse</span>”，
  *  		那么你需要为它的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletResponse</span>”到目标类型辅助{@linkplain Converter 转换器}。
  *  	</li>
- *  	<li>
-			<span class="tagValue">path.yourKey</span> <br/>
-			“<span class="var">path</span>”作用域中的“<span class="var">yourKey</span>”关键字对应的对象。框架会对此对象执行类型转换。
-		</li>
  *   </ul>
  *  </li>
  * </ul>
@@ -137,7 +128,6 @@ public class WebObjectSource extends ConvertableObjectSource
 	private HttpServletRequest request;
 	private HttpServletResponse response;
 	private ServletContext application;
-	private PathScope path;
 	
 	public WebObjectSource(HttpServletRequest request,
 			HttpServletResponse response, ServletContext application)
@@ -153,7 +143,6 @@ public class WebObjectSource extends ConvertableObjectSource
 		this.request = request;
 		this.response = response;
 		this.application = application;
-		this.path=new PathScope();
 		super.setGenericConverter(genericConverter);
 	}
 	
@@ -175,13 +164,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	public void setApplication(ServletContext application) {
 		this.application = application;
 	}
-	public PathScope getPath() {
-		return path;
-	}
-	public void setPath(PathScope path) {
-		this.path = path;
-	}
-
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	public Object get(Serializable key, Class<?> objectType)
@@ -230,11 +213,11 @@ public class WebObjectSource extends ConvertableObjectSource
 				if(WebConstants.Scope.PARAM.equals(scope))
 					data=convertParamMap(getRequest().getParameterMap(), subKey, objectType);
 				else if(WebConstants.Scope.REQUEST.equals(scope))
-					data=getRequest().getAttribute(subKey);
+					data=getGenericConverter().convert(getRequest().getAttribute(subKey), objectType);
 				else if(WebConstants.Scope.SESSION.equals(scope))
-					data=getRequest().getSession().getAttribute(subKey);
+					data=getGenericConverter().convert(getRequest().getSession().getAttribute(subKey), objectType);
 				else if(WebConstants.Scope.APPLICATION.equals(scope))
-					data=getApplication().getAttribute(subKey);
+					data=getGenericConverter().convert(getApplication().getAttribute(subKey), objectType);
 				else if(WebConstants.Scope.RESPONSE.equals(scope))
 				{
 					if(subKey != null)
@@ -242,8 +225,6 @@ public class WebObjectSource extends ConvertableObjectSource
 					
 					data=convertServletObject(getResponse(), objectType);
 				}
-				else if(WebConstants.Scope.PATH.equals(scope))
-					data=getGenericConverter().convert(getPath().get(subKey), objectType);
 				else
 					data=getWithUnknownScope(scope, subKey, objectType);
 			}
@@ -281,8 +262,6 @@ public class WebObjectSource extends ConvertableObjectSource
 			getApplication().setAttribute(subKey, obj);
 		else if(WebConstants.Scope.RESPONSE.equals(scope))
 			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.RESPONSE+"'");
-		else if(WebConstants.Scope.PATH.equals(scope))
-			getPath().put(subKey, obj);
 		else
 			setWithUnknownScope(scope, subKey, obj);
 		
@@ -393,29 +372,5 @@ public class WebObjectSource extends ConvertableObjectSource
 			throw new ObjectSourceException("no Converter defined for converting '"+sourceClass.getName()+"' to '"+targetType.getName()+"'");
 		
 		return converter.convert(obj, targetType);
-	}
-	
-	/**
-	 * 路径作用域
-	 * @author earthAngry@gmail.com
-	 * @date 2010-12-17
-	 *
-	 */
-	public static class PathScope
-	{
-		private Map<String, Object> path;
-		
-		public Object get(String key)
-		{
-			return path == null ? null : path.get(key);
-		}
-		
-		public void put(String key, Object value)
-		{
-			if(this.path == null)
-				this.path=new HashMap<String, Object>();
-			
-			this.path.put(key, value);
-		}
 	}
 }

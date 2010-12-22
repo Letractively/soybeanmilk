@@ -7,20 +7,20 @@
 	
 	<executables>
 		
-		<action name="/user/view/{userId}">
+		<action name="/user/view/{request.userId}">
 			<invoke>
-				result=testResolver.view(path.userId);
+				result=testResolver.view(request.userId);
 			</invoke>
 			
-			<target url="/jsp/user/{path.userId}/view.jsp" />
+			<target url="/jsp/user/{request.userId}/view.jsp" />
 		</action>
 		
-		<action name="/user/edit/{userId}">
+		<action name="/user/edit/{request.userId}">
 			<invoke>
-				result=testResolver.edit(path.userId);
+				result=testResolver.edit(request.userId);
 			</invoke>
 			
-			<target url="/user/view/{path.userId}" type="redirect" />
+			<target url="/user/view/{request.userId}" type="redirect" />
 		</action>
 		
 		<action name="/user/edit.do">
@@ -31,12 +31,12 @@
 			<target url="/user/view/{param.userId}" type="redirect" />
 		</action>
 		
-		<action name="/product/{userId}/edit/{id}">
+		<action name="/product/{request.userId}/edit/{request.id}">
 			<invoke>
-				result=testResolver.edit(path.userId, path.id);
+				result=testResolver.edit(request.userId, request.id);
 			</invoke>
 			
-			<target url="/jsp/product/{path.userId}/{path.id}/edit.jsp" />
+			<target url="/jsp/product/{request.userId}/{request.id}/edit.jsp" />
 		</action>
 		
 		<action name="/product/edit.do">

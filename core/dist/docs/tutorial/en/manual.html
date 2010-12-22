@@ -539,11 +539,6 @@ public void handleException(Execution execution)
 								<span class="tagValue">application.yourResultKey</span> <br/>
 								The result will be saved in "<span class="var">application</span>" scope with keyword "<span class="var">yourResultKey</span>".
 							</li>
-							<li>
-								<span class="tagValue">path.yourResultKey</span> <br/>
-								The result will be saved in "<span class="var">path</span>" scope with keyword "<span class="var">yourResultKey</span>".
-								It is defined for RESTful support that you may rarely put object into it directly (See <span class="glossary">Action</span> 's <a href="#tag_action">name</a> attribute).
-							</li>
 						</ul>
 						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
 						because they will be directly passed to its <span class="var">set(...)</span> method.<br>
@@ -656,7 +651,7 @@ public void handleException(Execution execution)
 							<li>
 								<span class="tagValue">request.yourArgKey</span> <br/>
 								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">request</span> scope.
-								The framework will not convert it, so the <span class="glossary">Invoke</span> method argument must be the same type with it.
+								The framework will try to convert it to the <span class="glossary">Invoke</span> method argument if they are not match.
 							</li>
 							<li>
 								<span class="tagValue">session</span> <br/>
@@ -669,7 +664,7 @@ public void handleException(Execution execution)
 							<li>
 								<span class="tagValue">session.yourArgKey</span> <br/>
 								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">session</span> scope.
-								The framework will not convert it.
+								The framework will try to convert it to the <span class="glossary">Invoke</span> method argument if they are not match.
 							</li>
 							<li>
 								<span class="tagValue">application</span> <br/>
@@ -682,7 +677,7 @@ public void handleException(Execution execution)
 							<li>
 								<span class="tagValue">application.yourArgKey</span> <br/>
 								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">application</span> scope.
-								The framework will not convert it.
+								The framework will try to convert it to the <span class="glossary">Invoke</span> method argument if they are not match.
 							</li>
 							<li>
 								<span class="tagValue">response</span> <br/>
@@ -691,11 +686,6 @@ public void handleException(Execution execution)
 								So, you must define your own <a href="#tag_converter">support converter</a>
 								who converting "<span class="var">javax.servlet.http.HttpServletResponse</span>" source to your destination type
 								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpServletResponse</span>.
-							</li>
-							<li>
-								<span class="tagValue">path.yourArgKey</span> <br/>
-								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">path</span> scope.
-								The framework will convert it.
 							</li>
 						</ul>
 						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
@@ -816,12 +806,12 @@ public void handleException(Execution execution)
 						You can also define variables in it, for RESTful support.
 						For example:
 <pre class="code-xml">
-&lt;action name="/user/{userId}/edit"&gt;
-	&lt;invoke&gt; userResolver.edit(path.userId) &lt;/invoke&gt;
+&lt;action name="/user/{request.userId}/edit"&gt;
+	&lt;invoke&gt; userResolver.edit(request.userId) &lt;/invoke&gt;
 &lt;/action&gt;
 </pre>
 						It will be able to process requests such as "<span class="var">/user/jack/edit</span>" or "<span class="var">/user/tom/edit</span>",
-						and "<span class="var">jack</span>" and "<span class="var">tom</span>" will be put into <span class="glossary">WebObjectSource</span> with key "<span class="var">path.userId</span>" by the framework.
+						and "<span class="var">jack</span>" and "<span class="var">tom</span>" will be put into <span class="glossary">WebObjectSource</span> with key "<span class="var">request.userId</span>" by the framework.
 					</li>
 					</li>
 				</ul>
@@ -879,9 +869,9 @@ public void handleException(Execution execution)
 						You can also use the keywords the <span class="glossary">WebObjectSource</span> supported here for dynamic URL (With "<span class="var">{</span>" prefix and "<span class="var">}</span>" suffix).
 						For example:
 <pre class="code-xml">
-&lt;action name="/user/{userId}/edit"&gt;
-	&lt;invoke&gt; userResolver.edit(path.userId) &lt;/invoke&gt;
-	&lt;target url="/user/{path.userId}/view" type="redirect" /&gt;
+&lt;action name="/user/{request.userId}/edit"&gt;
+	&lt;invoke&gt; userResolver.edit(request.userId) &lt;/invoke&gt;
+	&lt;target url="/user/{request.userId}/view" type="redirect" /&gt;
 &lt;/action&gt;
 </pre>
 						The framework will redirect to "<span class="var">/user/jack/view</span>" for request "<span class="var">/user/jack/edit</span>".

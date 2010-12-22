@@ -101,10 +101,5 @@ public class WebConstants extends Constants
 		 * 回应，它表示HttpServletResponse对象
 		 */
 		public static final String RESPONSE="response";
-		
-		/**
-		 * 路径作用域，它是一个Map对象
-		 */
-		public static final String PATH="path";
 	}
 }

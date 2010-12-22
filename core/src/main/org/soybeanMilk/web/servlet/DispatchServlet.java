@@ -222,7 +222,7 @@ public class DispatchServlet extends HttpServlet
 				for(int i=0;i<pathNodes.length;i++)
 				{
 					if(pathNodes[i].isVariable())
-						webObjSource.set(WebConstants.Scope.PATH+WebConstants.ACCESSOR+pathNodes[i].getNodeValue(), valuePath.getPathNode(i).getNodeValue());
+						webObjSource.set(pathNodes[i].getNodeValue(), valuePath.getPathNode(i).getNodeValue());
 				}
 			}
 		}

@@ -14,11 +14,13 @@
 
 package org.soybeanMilk.web.servlet;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -54,8 +56,18 @@ public class DispatchServlet extends HttpServlet
 	private static Log log=LogFactory.getLog(DispatchServlet.class);
 	private static boolean _logDebugEnabled=log.isDebugEnabled();
 	
-	protected static final String INCLUDE_PATH_INFO="javax.servlet.include.path_info";
-	protected static final String INCLUDE_SERVLET_PATH="javax.servlet.include.servlet_path";
+	/**
+	 * servlet规范"include"属性
+	 */
+	public static final String INCLUDE_REQUEST_URI_ATTRIBUTE = "javax.servlet.include.request_uri";
+	public static final String INCLUDE_PATH_INFO_ATTRIBUTE = "javax.servlet.include.path_info";
+	public static final String INCLUDE_SERVLET_PATH_ATTRIBUTE = "javax.servlet.include.servlet_path";
+	
+	/**
+	 * servlet规范"forward"属性
+	 */
+	public static final String FORWARD_PATH_INFO_ATTRIBUTE = "javax.servlet.forward.path_info";
+	public static final String FORWARD_SERVLET_PATH_ATTRIBUTE = "javax.servlet.forward.servlet_path";
 	
 	/**执行器*/
 	private Executor executor;
@@ -244,11 +256,24 @@ public class DispatchServlet extends HttpServlet
 	protected String getRequestExecutableName(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException
 	{
-		String pathInfo=request.getPathInfo();
-		String servletPath=request.getServletPath();
-		int period=servletPath.lastIndexOf(".");
-		
 		String result=null;
+		
+		String pathInfo=null;
+		String servletPath=null;
+		
+		//include请求
+		pathInfo=(String)request.getAttribute(INCLUDE_PATH_INFO_ATTRIBUTE);
+		servletPath=(String)request.getAttribute(INCLUDE_SERVLET_PATH_ATTRIBUTE);
+		if(pathInfo==null && servletPath==null)
+		{
+			pathInfo=request.getPathInfo();
+			servletPath=request.getServletPath();
+		}
+		
+		if(servletPath == null)
+			servletPath="";
+		
+		int period=servletPath.lastIndexOf(".");
 		
 		if(period>=0 && period>servletPath.lastIndexOf("/"))
 			result=servletPath;
@@ -274,6 +299,9 @@ public class DispatchServlet extends HttpServlet
 	protected void handleExecutableNotFound(String executableName, HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException
 	{
+		if(isIncludeRequest(request))
+			throw new FileNotFoundException(executableName);
+		
 		response.sendError(HttpServletResponse.SC_NOT_FOUND, executableName);
 	}
 	
@@ -311,14 +339,23 @@ public class DispatchServlet extends HttpServlet
 				response.sendRedirect(url);
 			
 			if(_logDebugEnabled)
-				log.debug("redirect request to '"+url+"'");
+				log.debug("redirect '"+url+"' for request");
 		}
 		else
 		{
-			request.getRequestDispatcher(url).forward(request, response);
-			
-			if(_logDebugEnabled)
-				log.debug("forward request to '"+url+"'");
+			if(isIncludeRequest(request))
+			{
+				request.getRequestDispatcher(url).include(request, response);
+				
+				if(_logDebugEnabled)
+					log.debug("include '"+url+"' for request");
+			}
+			else
+			{
+				request.getRequestDispatcher(url).forward(request, response);
+				if(_logDebugEnabled)
+					log.debug("forward '"+url+"' for request");
+			}
 		}
 	}
 	
@@ -347,8 +384,8 @@ public class DispatchServlet extends HttpServlet
 				String var=targetUrl.substring(start, j);
 				if(c == WebConstants.VARIABLE_QUOTE_RIGHT)
 				{
-					Object value=objectSource.get(var, null);
-					result.append(value==null ? "null" : value.toString());
+					String value=(String)objectSource.get(var, String.class);
+					result.append(value==null ? "null" : value);
 				}
 				else
 				{
@@ -393,6 +430,15 @@ public class DispatchServlet extends HttpServlet
 	protected boolean isEnableVariablePath()
 	{
 		return true;
+	}
+	
+	/**
+	 * 是否是"include"请求
+	 * @param request
+	 * @return
+	 */
+	protected static boolean isIncludeRequest(ServletRequest request) {
+		return (request.getAttribute(INCLUDE_REQUEST_URI_ATTRIBUTE) != null);
 	}
 	
 	/**

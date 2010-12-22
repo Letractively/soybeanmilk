@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.resolver.ResolverFactory;
@@ -34,14 +35,21 @@ public class TestDispatchServlet
 	
 	private static String CONTEXT_PATH="/testContext";
 	
+	private MockServletContext servletContext;
+	private Map<String, String> servletInitParameters;
+	
+	@Before
+	public void setUp()
+	{
+		servletContext=new MockServletContext();
+		servletInitParameters=new HashMap<String, String>();
+		servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+	}
+	
 	@Test
-	public void initEncoding()
+	public void initEncoding1()
 	{
 		{
-			MockServletContext servletContext=new MockServletContext();
-			Map<String, String> servletInitParameters=new HashMap<String, String>();
-			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
-			
 			servletInitParameters.put(WebConstants.ServletInitParams.ENCODING, myEncoding);
 			
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
@@ -49,12 +57,12 @@ public class TestDispatchServlet
 			
 			Assert.assertEquals(myEncoding, servlet.getEncoding());
 		}
-		
+	}
+	
+	@Test
+	public void initEncoding2()
+	{
 		{
-			MockServletContext servletContext=new MockServletContext();
-			Map<String, String> servletInitParameters=new HashMap<String, String>();
-			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
-			
 			servletInitParameters.put(WebConstants.ServletInitParams.ENCODING, "");
 			
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
@@ -62,12 +70,12 @@ public class TestDispatchServlet
 			
 			Assert.assertEquals(WebConstants.DEFAULT_ENCODING, servlet.getEncoding());
 		}
-		
+	}
+	
+	@Test
+	public void initEncoding3()
+	{
 		{
-			MockServletContext servletContext=new MockServletContext();
-			Map<String, String> servletInitParameters=new HashMap<String, String>();
-			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
-			
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
 			
@@ -76,13 +84,9 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initAppExecutorKey()
+	public void initAppExecutorKey1()
 	{
 		{
-			MockServletContext servletContext=new MockServletContext();
-			Map<String, String> servletInitParameters=new HashMap<String, String>();
-			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
-			
 			servletInitParameters.put(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY, myExecutorKey);
 			
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
@@ -90,12 +94,12 @@ public class TestDispatchServlet
 			
 			Assert.assertEquals(myExecutorKey, servlet.getAppExecutorKey());
 		}
-		
+	}
+	
+	@Test
+	public void initAppExecutorKey2()
+	{
 		{
-			MockServletContext servletContext=new MockServletContext();
-			Map<String, String> servletInitParameters=new HashMap<String, String>();
-			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
-			
 			servletInitParameters.put(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY, "");
 			
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
@@ -103,12 +107,12 @@ public class TestDispatchServlet
 			
 			Assert.assertNull(servlet.getAppExecutorKey());
 		}
-		
+	}
+	
+	@Test
+	public void initAppExecutorKey3()
+	{
 		{
-			MockServletContext servletContext=new MockServletContext();
-			Map<String, String> servletInitParameters=new HashMap<String, String>();
-			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
-			
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
 			
@@ -116,15 +120,10 @@ public class TestDispatchServlet
 		}
 	}
 	
-
 	@Test
-	public void initWebObjectSourceFactory()
+	public void initWebObjectSourceFactory1()
 	{
 		{
-			MockServletContext servletContext=new MockServletContext();
-			Map<String, String> servletInitParameters=new HashMap<String, String>();
-			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
-			
 			servletInitParameters.put(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY_CLASS, myWebObjectSourceFactoryClass);
 			
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
@@ -132,24 +131,13 @@ public class TestDispatchServlet
 			
 			Assert.assertEquals(MyWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
 		}
-		
+	}
+	
+	@Test
+	public void initWebObjectSourceFactory2()
+	{
 		{
-			MockServletContext servletContext=new MockServletContext();
-			Map<String, String> servletInitParameters=new HashMap<String, String>();
-			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
-			
 			servletInitParameters.put(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY_CLASS, "");
-			
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertEquals(WebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
-		}
-		
-		{
-			MockServletContext servletContext=new MockServletContext();
-			Map<String, String> servletInitParameters=new HashMap<String, String>();
-			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
 			
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
@@ -159,13 +147,20 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initExternalResolverFactory()
+	public void initWebObjectSourceFactory3()
 	{
 		{
-			MockServletContext servletContext=new MockServletContext();
-			Map<String, String> servletInitParameters=new HashMap<String, String>();
-			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
 			
+			Assert.assertEquals(WebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
+		}
+	}
+	
+	@Test
+	public void initExternalResolverFactory1()
+	{
+		{
 			servletContext.setAttribute(myExternalResolverKey, myExternalResolverFactory);
 			servletInitParameters.put(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY_KEY, myExternalResolverKey);
 			
@@ -174,24 +169,13 @@ public class TestDispatchServlet
 			
 			Assert.assertTrue( ((DefaultResolverFactory)servlet.getExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory() == myExternalResolverFactory );
 		}
-		
+	}
+	
+	@Test
+	public void initExternalResolverFactory2()
+	{
 		{
-			MockServletContext servletContext=new MockServletContext();
-			Map<String, String> servletInitParameters=new HashMap<String, String>();
-			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
-			
 			servletContext.setAttribute(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY_KEY, null);
-			
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertNull(((DefaultResolverFactory)servlet.getExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory());
-		}
-		
-		{
-			MockServletContext servletContext=new MockServletContext();
-			Map<String, String> servletInitParameters=new HashMap<String, String>();
-			servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
 			
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
@@ -201,12 +185,19 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void executeRestful()
+	public void initExternalResolverFactory3()
 	{
-		MockServletContext servletContext=new MockServletContext();
-		Map<String, String> servletInitParameters=new HashMap<String, String>();
-		servletInitParameters.put(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG, mySoybeanMilkFile);
-		
+		{
+			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+			initServlet(servlet);
+			
+			Assert.assertNull(((DefaultResolverFactory)servlet.getExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory());
+		}
+	}
+	
+	@Test
+	public void clientRequestExecute() throws Exception
+	{
 		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 		initServlet(servlet);
 		
@@ -217,19 +208,15 @@ public class TestDispatchServlet
 			request.setMethod("POST");
 			request.setContextPath(CONTEXT_PATH);
 			
-			request.setPathInfo("/modules_0/edit/35");
+			request.setPathInfo("/user/edit.do");
 			request.setServletPath("");
-			try
-			{
-				servlet.service(request, response);
-			}
-			catch(Exception e)
-			{
-				throw new RuntimeException(e);
-			}
+			
+			request.setParameter("userId", "35");
+			
+			servlet.service(request, response);
 			
 			Assert.assertEquals("edit(35)", (String)request.getAttribute("result"));
-			Assert.assertEquals(CONTEXT_PATH+"/modules_0/view/35", response.getRedirectedUrl());
+			Assert.assertEquals(CONTEXT_PATH+"/user/view/35", response.getRedirectedUrl());
 		}
 		
 		{
@@ -239,19 +226,29 @@ public class TestDispatchServlet
 			request.setMethod("POST");
 			request.setContextPath(CONTEXT_PATH);
 			
-			request.setPathInfo("/modules_0/view/35/");
+			request.setPathInfo("/user/edit/35");
 			request.setServletPath("");
-			try
-			{
-				servlet.service(request, response);
-			}
-			catch(Exception e)
-			{
-				throw new RuntimeException(e);
-			}
+			
+			servlet.service(request, response);
+			
+			Assert.assertEquals("edit(35)", (String)request.getAttribute("result"));
+			Assert.assertEquals(CONTEXT_PATH+"/user/view/35", response.getRedirectedUrl());
+		}
+		
+		{
+			MockHttpServletRequest request=new MockHttpServletRequest();
+			MockHttpServletResponse response=new MockHttpServletResponse();
+			
+			request.setMethod("POST");
+			request.setContextPath(CONTEXT_PATH);
+			
+			request.setPathInfo("/user/view/35");
+			request.setServletPath("");
+			
+			servlet.service(request, response);
 			
 			Assert.assertEquals("view(35)", (String)request.getAttribute("result"));
-			Assert.assertEquals("/modules_0/view/35.jsp", response.getForwardedUrl());
+			Assert.assertEquals("/jsp/user/35/view.jsp", response.getForwardedUrl());
 		}
 		
 		{
@@ -261,19 +258,66 @@ public class TestDispatchServlet
 			request.setMethod("POST");
 			request.setContextPath(CONTEXT_PATH);
 			
-			request.setPathInfo("/modules_1/jack/233/");
+			request.setPathInfo("/product/35/edit/233");
 			request.setServletPath("");
-			try
-			{
-				servlet.service(request, response);
-			}
-			catch(Exception e)
-			{
-				throw new RuntimeException(e);
-			}
 			
-			Assert.assertEquals("edit(jack,233)", (String)request.getAttribute("result"));
-			Assert.assertEquals("/module{s_1/sdf.abc", response.getForwardedUrl());
+			servlet.service(request, response);
+			
+			Assert.assertEquals("edit(35,233)", (String)request.getAttribute("result"));
+			Assert.assertEquals("/jsp/product/35/233/edit.jsp", response.getForwardedUrl());
+		}
+	}
+	
+	@Test
+	public void includeExecute() throws Exception
+	{
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		{
+			MockHttpServletRequest request=new MockHttpServletRequest();
+			MockHttpServletResponse response=new MockHttpServletResponse();
+			
+			request.setMethod("POST");
+			request.setContextPath(CONTEXT_PATH);
+			request.setAttribute(DispatchServlet.INCLUDE_PATH_INFO_ATTRIBUTE,"/product/35/edit/233");
+			
+			servlet.service(request, response);
+			
+			Assert.assertEquals("edit(35,233)", (String)request.getAttribute("result"));
+			//Assert.assertEquals("/jsp/product/35/233/edit.jsp", response.getIncludedUrl());
+		}
+		
+		{
+			MockHttpServletRequest request=new MockHttpServletRequest();
+			MockHttpServletResponse response=new MockHttpServletResponse();
+			
+			request.setMethod("POST");
+			request.setContextPath(CONTEXT_PATH);
+			request.setAttribute(DispatchServlet.INCLUDE_PATH_INFO_ATTRIBUTE,"/35/edit/233");
+			request.setAttribute(DispatchServlet.INCLUDE_SERVLET_PATH_ATTRIBUTE,"/product");
+			
+			servlet.service(request, response);
+			
+			Assert.assertEquals("edit(35,233)", (String)request.getAttribute("result"));
+			//Assert.assertEquals("/jsp/product/35/233/edit.jsp", response.getIncludedUrl());
+		}
+		
+		{
+			MockHttpServletRequest request=new MockHttpServletRequest();
+			MockHttpServletResponse response=new MockHttpServletResponse();
+			
+			request.setMethod("POST");
+			request.setContextPath(CONTEXT_PATH);
+			request.setAttribute(DispatchServlet.INCLUDE_SERVLET_PATH_ATTRIBUTE,"/product/edit.do");
+			
+			request.setParameter("userId", "35");
+			request.setParameter("id", "233");
+			
+			servlet.service(request, response);
+			
+			Assert.assertEquals("edit(35,233)", (String)request.getAttribute("result"));
+			//Assert.assertEquals("/jsp/product/35/233/edit.jsp", response.getIncludedUrl());
 		}
 	}
 	
@@ -347,19 +391,19 @@ public class TestDispatchServlet
 	
 	public static class TestResolver
 	{
-		public String view(int id)
+		public String view(int userId)
 		{
-			return "view("+id+")";
+			return "view("+userId+")";
 		}
 		
-		public String edit(int id)
+		public String edit(int userId)
 		{
-			return "edit("+id+")";
+			return "edit("+userId+")";
 		}
 		
-		public String edit(String user, int id)
+		public String edit(int userId, int productId)
 		{
-			return "edit("+user+","+id+")";
+			return "edit("+userId+","+productId+")";
 		}
 	}
 }

@@ -6,28 +6,45 @@
 	</resolvers>
 	
 	<executables>
-		<action name="/modules_0/edit/{id}">
+		
+		<action name="/user/view/{userId}">
 			<invoke>
-				result=testResolver.edit(path.id);
+				result=testResolver.view(path.userId);
 			</invoke>
 			
-			<target url="/modules_0/view/{path.id}" type="redirect" />
+			<target url="/jsp/user/{path.userId}/view.jsp" />
 		</action>
 		
-		<action name="/modules_0/view/{id}">
+		<action name="/user/edit/{userId}">
 			<invoke>
-				result=testResolver.view(path.id);
+				result=testResolver.edit(path.userId);
 			</invoke>
 			
-			<target url="/modules_0/view/{path.id}.jsp" />
+			<target url="/user/view/{path.userId}" type="redirect" />
 		</action>
 		
-		<action name="/modules_1/{userId}/{id}">
+		<action name="/user/edit.do">
+			<invoke>
+				result=testResolver.edit(param.userId);
+			</invoke>
+			
+			<target url="/user/view/{param.userId}" type="redirect" />
+		</action>
+		
+		<action name="/product/{userId}/edit/{id}">
 			<invoke>
 				result=testResolver.edit(path.userId, path.id);
 			</invoke>
 			
-			<target url="/module{s_1/sdf.abc" />
+			<target url="/jsp/product/{path.userId}/{path.id}/edit.jsp" />
+		</action>
+		
+		<action name="/product/edit.do">
+			<invoke>
+				result=testResolver.edit(param.userId, param.id);
+			</invoke>
+			
+			<target url="/jsp/product/{param.userId}/{param.id}/edit.jsp" />
 		</action>
 		
 	</executables>

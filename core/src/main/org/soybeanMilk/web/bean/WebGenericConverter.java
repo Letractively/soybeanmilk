@@ -117,8 +117,18 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		
 		if(c == null)
-			throw new ConvertException("no Converter defined for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
-		
+		{
+			//如果目标类型是字符串，则直接调用toString
+			if(String.class.equals(targetClass))
+			{
+				if(_logDebugEnabled)
+					log.debug("'toString()' method will be used for converting because the expected type is 'String' but not Converter found");
+				
+				return sourceObj.toString();
+			}
+			else
+				throw new ConvertException("no Converter defined for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
+		}
 		if(_logDebugEnabled)
 				log.debug("find Converter '"+c.getClass().getName()+"' for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
 		

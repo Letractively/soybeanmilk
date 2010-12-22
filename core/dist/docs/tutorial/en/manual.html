@@ -259,43 +259,21 @@
 				</ul>
 			</p>
 			<p>
-				The <span class="tagAttr">src</span> attribute value here is limited because the object saved in <span class="glossary">ObjectSource</span> at web environment is limited.<br/>
-				The following are all the <span class="tagAttr">src</span> values you can use:
-				<table border="1" cellspacing="1" cellpadding="5">
-					<tr>
-						<td align="center"><b>Value</b></td>
-						<td align="center"><b>Note</b></td>
-					</tr>
-					<tr>
-						<td><span class="tagValue">String</span></td>
-						<td>Shortname for java.lang.String class</td>
-					</tr>
-					<tr>
-						<td><span class="tagValue">String[]</span></td>
-						<td>Shortname for java.lang.String[] class</td>
-					</tr>
-					<tr>
-						<td><span class="tagValue">request</span></td>
-						<td>Shortname for javax.servlet.http.HttpServletRequest class</td>
-					</tr>
-					<tr>
-						<td><span class="tagValue">session</span></td>
-						<td>Shortname for javax.servlet.http.HttpSession class</td>
-					</tr>
-					<tr>
-						<td><span class="tagValue">application</span></td>
-						<td>Shortname for javax.servlet.ServletContext class</td>
-					</tr>
-					<tr>
-						<td><span class="tagValue">response</span></td>
-						<td>Shortname for javax.servlet.http.HttpServletResponse class</td>
-					</tr>
-				</table>
-			</p>
-			<p>
-				The framework also defines some shortname for <span class="tagAttr">target</span> attribute value,
+				The framework defines some shortname for <span class="tagAttr">src</span> and <span class="tagAttr">target</span> attribute value,
 				The rule is listing below:
 				<ul>
+					<li>
+						"<span class="tagValue">request</span>" means <span class="tagValue">javax.servlet.http.HttpServletRequest</span> class
+					</li>
+					<li>
+						"<span class="tagValue">session</span>" means <span class="tagValue">javax.servlet.http.HttpSession</span> class
+					</li>
+					<li>
+						"<span class="tagValue">application</span>" means <span class="tagValue">javax.servlet.ServletContext</span> class
+					</li>
+					<li>
+						"<span class="tagValue">response</span>" means <span class="tagValue">javax.servlet.http.HttpServletResponse</span> class
+					</li>
 					<li>
 						Primitive type, their wrapper type, and String, BigDecimal, BigInteger, java.util.Date type, also with their array type,
 						are the same with their Java syntax, and do not need its package prefix, such as :<br/>

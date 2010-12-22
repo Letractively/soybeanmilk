@@ -240,42 +240,20 @@
 				</ul>
 			</p>
 			<p>
-				由于在WEB环境下<span class="glossary">对象源</span>存储对象的类型也是有限的，因此这里<span class="tagAttr">src</span>属性的可用值也是有限的。<br>
-				下面是所有可用的<span class="tagAttr">src</span>属性值：
-				<table border="1" cellspacing="1" cellpadding="5">
-					<tr>
-						<td align="center"><b>属性值</b></td>
-						<td align="center"><b>说明</b></td>
-					</tr>
-					<tr>
-						<td><span class="tagValue">String</span></td>
-						<td>字符串类型简写</td>
-					</tr>
-					<tr>
-						<td><span class="tagValue">String[]</span></td>
-						<td>字符串数组类型简写</td>
-					</tr>
-					<tr>
-						<td><span class="tagValue">request</span></td>
-						<td>javax.servlet.http.HttpServletRequest类的简写</td>
-					</tr>
-					<tr>
-						<td><span class="tagValue">session</span></td>
-						<td>javax.servlet.http.HttpSession类的简写</td>
-					</tr>
-					<tr>
-						<td><span class="tagValue">application</span></td>
-						<td>javax.servlet.ServletContext类的简写</td>
-					</tr>
-					<tr>
-						<td><span class="tagValue">response</span></td>
-						<td>javax.servlet.http.HttpServletResponse类的简写</td>
-					</tr>
-				</table>
-			</p>
-			<p>
-				框架也为<span class="tagAttr">target</span>属性的一些常用值定义了简写，规则如下：
+				框架为<span class="tagAttr">src</span>和<span class="tagAttr">target</span>属性的一些常用值定义了简写，规则如下：
 				<ul>
+					<li>
+						“<span class="tagValue">request</span>”表示<span class="tagValue">javax.servlet.http.HttpServletRequest</span>类
+					</li>
+					<li>
+						“<span class="tagValue">session</span>”表示<span class="tagValue">javax.servlet.http.HttpSession</span>类
+					</li>
+					<li>
+						“<span class="tagValue">application</span>”表示<span class="tagValue">javax.servlet.ServletContext</span>类
+					</li>
+					<li>
+						“<span class="tagValue">response</span>”表示<span class="tagValue">javax.servlet.http.HttpServletResponse</span>类
+					</li>
 					<li>
 						基本类型、其包装类型，和String、BigDecimal、BigInteger、java.util.Date类型，以及它们的一维数组类型，
 						格式与Java语法一样，并且不需要包含包名，比如：<br/>

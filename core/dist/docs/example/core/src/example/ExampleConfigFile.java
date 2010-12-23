@@ -36,6 +36,12 @@ public class ExampleConfigFile
 		
 		printDiv();
 		executor.execute("testException", os);
+		
+		printDiv();
+		executor.execute("", os);
+		
+		printDiv();
+		executor.execute("testRefToEmptyNameAction", os);
 	}
 	
 	static void printDiv()

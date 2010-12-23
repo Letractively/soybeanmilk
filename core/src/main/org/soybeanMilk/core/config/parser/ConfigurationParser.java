@@ -45,6 +45,7 @@ import org.soybeanMilk.core.exe.Invoke.Arg;
 import org.soybeanMilk.core.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.resolver.FactoryResolverProvider;
 import org.soybeanMilk.core.resolver.ResolverFactory;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -329,9 +330,9 @@ public class ConfigurationParser
 			
 			for(Element e : children)
 			{
-				String id=getAttribute(e,TAG_RESOLVER_ATTR_ID);
+				String id=getAttributeIngoreEmpty(e,TAG_RESOLVER_ATTR_ID);
 				assertNotEmpty(id,"<"+TAG_RESOLVER+"> attribute ["+TAG_RESOLVER_ATTR_ID+"] must not be null");
-				String clazz=getAttribute(e,TAG_RESOLVER_ATTR_CLASS);
+				String clazz=getAttributeIngoreEmpty(e,TAG_RESOLVER_ATTR_CLASS);
 				assertNotEmpty(clazz,"<"+TAG_RESOLVER+"> of id '"+id+"' attribute ["+TAG_RESOLVER_ATTR_CLASS+"] must not be null");
 				
 				Object resolver=createClassInstance(clazz);
@@ -388,7 +389,7 @@ public class ConfigurationParser
 	{
 		Element cvtEl = getSingleElementByTagName(parent, TAG_GENERIC_CONVERTER);
 		
-		String clazz = cvtEl==null ? null : getAttribute(cvtEl, TAG_GENERIC_CONVERTER_ATTR_CLASS);
+		String clazz = cvtEl==null ? null : getAttributeIngoreEmpty(cvtEl, TAG_GENERIC_CONVERTER_ATTR_CLASS);
 		
 		GenericConverter genericConverter = configuration.getGenericConverter();
 		if(genericConverter == null)
@@ -417,9 +418,9 @@ public class ConfigurationParser
 		
 		for(Element e : children)
 		{
-			String src = getAttribute(e, TAG_CONVERTER_ATTR_SRC);
-			String target = getAttribute(e, TAG_CONVERTER_ATTR_TARGET);
-			String clazz = getAttribute(e, TAG_CONVERTER_ATTR_CLASS);
+			String src = getAttributeIngoreEmpty(e, TAG_CONVERTER_ATTR_SRC);
+			String target = getAttributeIngoreEmpty(e, TAG_CONVERTER_ATTR_TARGET);
+			String clazz = getAttributeIngoreEmpty(e, TAG_CONVERTER_ATTR_CLASS);
 			
 			assertNotEmpty(src, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_SRC+"] must not be empty");
 			assertNotEmpty(target, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_TARGET+"] must not be empty");
@@ -439,10 +440,10 @@ public class ConfigurationParser
 		if(el == null)
 			return;
 		
-		String before=getAttribute(el, TAG_INTERCEPROT_ATTR_BEFORE);
-		String after=getAttribute(el, TAG_INTERCEPROT_ATTR_AFTER);
-		String exception=getAttribute(el, TAG_INTERCEPROT_ATTR_EXCEPTION);
-		String executionKey=getAttribute(el, TAG_INTERCEPROT_ATTR_EXECUTION_KEY);
+		String before=getAttributeIngoreEmpty(el, TAG_INTERCEPROT_ATTR_BEFORE);
+		String after=getAttributeIngoreEmpty(el, TAG_INTERCEPROT_ATTR_AFTER);
+		String exception=getAttributeIngoreEmpty(el, TAG_INTERCEPROT_ATTR_EXCEPTION);
+		String executionKey=getAttributeIngoreEmpty(el, TAG_INTERCEPROT_ATTR_EXECUTION_KEY);
 		
 		if(before==null && after==null && exception==null && executionKey==null)
 			return;
@@ -480,8 +481,10 @@ public class ConfigurationParser
 	 */
 	protected void setActionProperties(Action action,Element element)
 	{
+		//动作和调用的名称可以为空字符串""，因为在servlet规范中会有空字符串名的serlvet路径
+		
 		String name=getAttribute(element,TAG_ACTION_ATTR_NAME);
-		assertNotEmpty(name, "<"+TAG_ACTION+"> attribute ["+TAG_ACTION_ATTR_NAME+"] must not be null");
+		assertNotNull(name, "<"+TAG_ACTION+"> attribute ["+TAG_ACTION_ATTR_NAME+"] must not be null");
 		
 		action.setName(customizeExecutableName(name));
 		
@@ -492,7 +495,7 @@ public class ConfigurationParser
 			if(TAG_REF.equals(tagName))
 			{
 				String refExecutableName=getAttribute(e,TAG_REF_ATTR_NAME);
-				assertNotEmpty(refExecutableName, "<"+TAG_REF+"> attribute ["+TAG_REF_ATTR_NAME+"] in <"+TAG_ACTION+"> named '"+action.getName()+"' must not be null");
+				assertNotNull(refExecutableName, "<"+TAG_REF+"> attribute ["+TAG_REF_ATTR_NAME+"] in <"+TAG_ACTION+"> named '"+action.getName()+"' must not be null");
 				
 				action.addExecutable(new ExecutableRefProxy(customizeExecutableName(refExecutableName)));
 			}
@@ -513,7 +516,7 @@ public class ConfigurationParser
 	 */
 	protected void setInvokeProperties(Invoke invoke, Element element)
 	{
-		String methodName=getAttribute(element, TAG_INVOKE_ATTR_METHOD);
+		String methodName=getAttributeIngoreEmpty(element, TAG_INVOKE_ATTR_METHOD);
 		
 		if(methodName == null)
 			setInvokePropertiesStatement(invoke, element);
@@ -533,7 +536,7 @@ public class ConfigurationParser
 		
 		String name=getAttribute(element,TAG_INVOKE_ATTR_NAME);
 		
-		invoke.setName(name);
+		invoke.setName(customizeExecutableName(name));
 		
 		new InvokeStatementParser(invoke, statement, configuration.getResolverFactory()).parse();
 	}
@@ -546,10 +549,10 @@ public class ConfigurationParser
 	protected void setInvokePropertiesXml(Invoke invoke,Element element)
 	{
 		String name=getAttribute(element,TAG_INVOKE_ATTR_NAME);
-		String methodName=getAttribute(element, TAG_INVOKE_ATTR_METHOD);
-		String resolverId=getAttribute(element,TAG_INVOKE_ATTR_RESOLVER_OBJECT);
-		String resolverClazz=getAttribute(element, TAG_INVOKE_ATTR_RESOLVER_CLASS);
-		String resultKey=getAttribute(element,TAG_INVOKE_ATTR_RESULT_KEY);
+		String methodName=getAttributeIngoreEmpty(element, TAG_INVOKE_ATTR_METHOD);
+		String resolverId=getAttributeIngoreEmpty(element,TAG_INVOKE_ATTR_RESOLVER_OBJECT);
+		String resolverClazz=getAttributeIngoreEmpty(element, TAG_INVOKE_ATTR_RESOLVER_CLASS);
+		String resultKey=getAttributeIngoreEmpty(element,TAG_INVOKE_ATTR_RESULT_KEY);
 		
 		if(methodName == null)
 			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_METHOD+"] must not be null");
@@ -975,19 +978,38 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 获取元素的属性值
+	 * 确保参数不为null
+	 * @param o
+	 * @param msg
+	 */
+	protected void assertNotNull(Object o,String msg)
+	{
+		if(o == null)
+			throw new ParseException(msg);
+	}
+	
+	/**
+	 * 获取元素的属性值，如果属性未定义或者值为空字符串，将返回null
 	 * @param element
 	 * @param attrName
 	 * @return
 	 */
-	protected String getAttribute(Element element,String attrName)
+	protected String getAttributeIngoreEmpty(Element element,String attrName)
 	{
-		//没定义的属性居然会返回""
 		String v=element.getAttribute(attrName);
-		if(v==null || v.length()==0)
-			return null;
-		
-		return v;
+		return v==null || v.length()==0 ? null : v;
+	}
+	
+	/**
+	 * 获取元素的属性值，空字符串也将被如实返回
+	 * @param element
+	 * @param attrName
+	 * @return
+	 */
+	protected String getAttribute(Element element, String attrName)
+	{
+		Attr attr=element.getAttributeNode(attrName);
+		return attr == null ? null : attr.getValue();
 	}
 	
 	/**
@@ -1003,7 +1025,7 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 自定义可执行对象的名称，所有可执行对象的名称都将使用该自定义规则
+	 * 自定义可执行对象的名称，所有可执行对象的名称定义和引用处都将使用该自定义规则
 	 * @param rawName
 	 * @return
 	 */

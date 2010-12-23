@@ -66,6 +66,14 @@
 			</invoke>
 		</action>
 		
+		<action name="">
+			<ref name="testJavaSyntax" />
+		</action>
+		
+		<action name="testRefToEmptyNameAction">
+			<ref name="" />
+		</action>
+		
 	</executables>
 	
 </soybean-milk>

@@ -21,8 +21,12 @@
 	<!--打jar包-->
 	<target name="jarFramework">
 		<delete file="${distDir}/${appName}.jar" />
-		<jar destfile="${distDir}/${appName}.jar" basedir="${classDir}"
-			includes="org/**/*.class, org/**/*.dtd, org/**/*.xml">
+		<jar destfile="${distDir}/${appName}.jar">
+			
+			<fileset dir="${classDir}"
+				includes="org/**/*.class, org/**/*.dtd, org/**/*.xml" />
+			
+			<fileset dir="src" includes="META-INF/*" />
 			
 			<manifest>
 				<attribute name="Author" value="earthAngry@gmail.com"/>

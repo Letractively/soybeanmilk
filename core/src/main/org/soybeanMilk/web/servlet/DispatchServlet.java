@@ -299,6 +299,7 @@ public class DispatchServlet extends HttpServlet
 	protected void handleExecutableNotFound(String executableName, HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException
 	{
+		//servlet规范规定这里要抛出FileNotFoundException异常
 		if(isIncludeRequest(request))
 			throw new FileNotFoundException(executableName);
 		

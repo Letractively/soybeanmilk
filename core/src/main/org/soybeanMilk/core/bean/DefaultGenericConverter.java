@@ -41,38 +41,22 @@ import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
  * 它默认支持的类型转换如下所示：<br>
  * <table border="1" cellspacing="1" cellpadding="3">
  *   <tr><td>源类型</td><td>目标类型</td></tr>
- *   <tr><td rowspan="14">String</td><td>boolean, Boolean</td></tr>
- *   <tr><td>byte, Byte</td></tr>
- *   <tr><td>char, Character</td></tr>
- *   <tr><td>double, Double</td></tr>
- *   <tr><td>float, Float</td></tr>
- *   <tr><td>int, Integer</td></tr>
- *   <tr><td>long, Long</td></tr>
- *   <tr><td>short, Short</td></tr>
- *   
- *   <tr><td>java.math.BigDecimal</td></tr>
- *   <tr><td>java.math.BigInteger</td></tr>
- *   <tr><td>java.util.Date</td></tr>
- *   <tr><td>java.sql.Date</td></tr>
- *   <tr><td>java.sql.Time</td></tr>
- *   <tr><td>java.sql.Timestamp</td></tr>
+ *   <tr>
+ *   	<td>String</td>
+ *   	<td>boolean, Boolean; byte, Byte; char, Character; double, Double; float, Float;<br>
+ *   		int, Integer; long, Long; short, Short;<br>
+ *   		java.math.BigDecimal; java.math.BigInteger; java.util.Date; java.sql.Date; java.sql.Time; java.sql.Timestamp
+ *   	</td>
+ *   </tr>
  *   
  *   
- *   <tr><td rowspan="14">String[]</td><td>boolean[], Boolean[]</td></tr>
- *   <tr><td>byte[], Byte[]</td></tr>
- *   <tr><td>char[], Character[]</td></tr>
- *   <tr><td>double[], Double[]</td></tr>
- *   <tr><td>float[], Float[]</td></tr>
- *   <tr><td>int[], Integer[]</td></tr>
- *   <tr><td>long[], Long[]</td></tr>
- *   <tr><td>short[], Short[]</td></tr>
- *   
- *   <tr><td>java.math.BigDecimal[]</td></tr>
- *   <tr><td>java.math.BigInteger[]</td></tr>
- *   <tr><td>java.util.Date[]</td></tr>
- *   <tr><td>java.sql.Date[]</td></tr>
- *   <tr><td>java.sql.Time[]</td></tr>
- *   <tr><td>java.sql.Timestamp[]</td></tr>
+ *   <tr>
+ *   	<td>String[]</td>
+ *   	<td>boolean[], Boolean[]; byte[], Byte[]; char[], Character[]; double[], Double[]; float[], Float[];<br>
+ *   		int[], Integer[]; long[], Long[]; short[], Short[];<br>
+ *   		java.math.BigDecimal[]; java.math.BigInteger[]; java.util.Date[]; java.sql.Date[]; java.sql.Time[];<br>
+ *   		java.sql.Timestamp[]
+ *   </td></tr>
  * </table>
  * <br>
  * 你也可以通过{@link #addConverter(Class, Class, Converter)}为它添加其他转换器，使其支持更多的类型转换。

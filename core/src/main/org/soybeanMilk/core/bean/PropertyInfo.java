@@ -37,7 +37,7 @@ public class PropertyInfo
 	private static Log log = LogFactory.getLog(WebGenericConverter.class);
 	
 	/**属性类型*/
-	private Class<?> propertyClass;
+	private Class<?> propertyType;
 	
 	/**此属性类型的属性信息集，以属性名作为关键字*/
 	private Map<String,PropertyInfo> subPropertyInfos;
@@ -48,25 +48,25 @@ public class PropertyInfo
 	/**此属性的写方法*/
 	private Method writeMethod;
 	
-	protected PropertyInfo(Class<?> clazz)
+	protected PropertyInfo(Class<?> propertyType)
 	{
-		this(clazz, null, null);
+		this(propertyType, null, null);
 	}
 	
-	public PropertyInfo(Class<?> propertyClass, Method readMethod, Method writeMethod)
+	public PropertyInfo(Class<?> propertyType, Method readMethod, Method writeMethod)
 	{
 		super();
-		this.propertyClass = propertyClass;
+		this.propertyType = propertyType;
 		this.readMethod = readMethod;
 		this.writeMethod = writeMethod;
 	}
 	
-	public Class<?> getPropertyClass() {
-		return propertyClass;
+	public Class<?> getPropertyType() {
+		return propertyType;
 	}
 
-	public void setPropertyClass(Class<?> propertyClass) {
-		this.propertyClass = propertyClass;
+	public void setPropertyType(Class<?> propertyType) {
+		this.propertyType = propertyType;
 	}
 
 	public Map<String, PropertyInfo> getSubPropertyInfos() {
@@ -100,7 +100,7 @@ public class PropertyInfo
 	 */
 	public boolean isArray()
 	{
-		return propertyClass.isArray();
+		return propertyType.isArray();
 	}
 	
 	/**
@@ -110,7 +110,7 @@ public class PropertyInfo
 	 */
 	public boolean isList()
 	{
-		return java.util.List.class.isAssignableFrom(propertyClass);
+		return java.util.List.class.isAssignableFrom(propertyType);
 	}
 	
 	/**
@@ -120,7 +120,7 @@ public class PropertyInfo
 	 */
 	public boolean isMap()
 	{
-		return java.util.Map.class.isAssignableFrom(propertyClass);
+		return java.util.Map.class.isAssignableFrom(propertyType);
 	}
 	
 	/**
@@ -130,7 +130,7 @@ public class PropertyInfo
 	 */
 	public boolean isSet()
 	{
-		return java.util.Set.class.isAssignableFrom(propertyClass);
+		return java.util.Set.class.isAssignableFrom(propertyType);
 	}
 	
 	/**
@@ -140,7 +140,7 @@ public class PropertyInfo
 	 */
 	public boolean isInterface()
 	{
-		return propertyClass.isInterface();
+		return propertyType.isInterface();
 	}
 	
 	/**
@@ -173,7 +173,7 @@ public class PropertyInfo
 	@Override
 	public String toString()
 	{
-		return "PropertyInfo [propertyClass=" + propertyClass + ", readMethod="
+		return "PropertyInfo [propertyClass=" + propertyType + ", readMethod="
 				+ readMethod + ", writeMethod=" + writeMethod + "]";
 	}
 	
@@ -183,9 +183,10 @@ public class PropertyInfo
 	private static ConcurrentHashMap<Class<?>,PropertyInfo> propertyInfoCache = new ConcurrentHashMap<Class<?>, PropertyInfo>();
 	
 	/**
-	 * 获取类的属性信息
+	 * 获取类的属性信息，一个仅包含<code>propertyType</code>属性（值为参数<code>beanClass</code>）的<code>PropertyInfo</code>对象将被返回，用作顶层对象。
 	 * @param beanClass
 	 * @return
+	 * @date 2010-12-28
 	 */
 	public static PropertyInfo getPropertyInfo(Class<?> beanClass)
 	{
@@ -221,13 +222,13 @@ public class PropertyInfo
 			log.debug(getSpace(depth)+"start  anatomized '"+beanClass.getName()+"' property information");
 		
 		PropertyInfo beanInfo=new PropertyInfo(beanClass);
-		localExists.put(beanInfo.getPropertyClass(), beanInfo);
+		localExists.put(beanInfo.getPropertyType(), beanInfo);
 		
 		PropertyDescriptor[] pds=null;
 		
 		try
 		{
-			pds=Introspector.getBeanInfo(beanInfo.getPropertyClass()).getPropertyDescriptors();
+			pds=Introspector.getBeanInfo(beanInfo.getPropertyType()).getPropertyDescriptors();
 		}
 		catch(IntrospectionException e)
 		{

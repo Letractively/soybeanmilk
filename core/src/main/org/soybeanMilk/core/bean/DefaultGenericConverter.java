@@ -61,7 +61,7 @@ import org.soybeanMilk.web.WebConstants;
  *   </td></tr>
  * </table>
  * <br>
- * 你也可以通过{@link #addConverter(Class, Class, Converter)}为它添加其他转换器，使其支持更多的类型转换。
+ * 你也可以通过{@link #addConverter(Class, Class, Converter)}为它添加更多辅助转换器，使其支持更多的类型转换。
  * @author earthAngry@gmail.com
  * @date 2010-10-6
  */

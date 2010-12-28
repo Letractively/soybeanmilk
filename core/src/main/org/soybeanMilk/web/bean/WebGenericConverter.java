@@ -184,12 +184,12 @@ public class WebGenericConverter extends DefaultGenericConverter
 		
 		PropertyInfo propertyInfo=beanInfo.getPropertyInfo(propertyExpression[index]);
 		if(propertyInfo == null)
-			throw new ConvertException("can not find property '"+propertyExpression[index]+"' in class '"+beanInfo.getPropertyClass().getName()+"'");
+			throw new ConvertException("can not find property '"+propertyExpression[index]+"' in class '"+beanInfo.getPropertyType().getName()+"'");
 		
 		//自上而下递归，到达末尾时初始化和写入
 		if(index == propertyExpression.length-1)
 		{
-			Object destValue=convertWithSupportConverter(srcValue, propertyInfo.getPropertyClass());
+			Object destValue=convertWithSupportConverter(srcValue, propertyInfo.getPropertyType());
 			try
 			{
 				propertyInfo.getWriteMethod().invoke(bean, new Object[]{destValue});
@@ -249,11 +249,11 @@ public class WebGenericConverter extends DefaultGenericConverter
 	{
 		try
 		{
-			return beanInfo.getPropertyClass().newInstance();
+			return beanInfo.getPropertyType().newInstance();
 		}
 		catch(Exception e)
 		{
-			throw new ConvertException("exception occur while creating instance for class '"+beanInfo.getPropertyClass()+"' ",e);
+			throw new ConvertException("exception occur while creating instance for class '"+beanInfo.getPropertyType()+"' ",e);
 		}
 	}
 }

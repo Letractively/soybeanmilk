@@ -25,13 +25,13 @@ public class TestPropertyInfo
 		
 		{
 			PropertyInfo pi=PropertyInfo.getPropertyInfo(java.util.Date.class);
-			Assert.assertNotNull(pi.getPropertyInfo("date").getReadMethod());
-			Assert.assertNotNull(pi.getPropertyInfo("hours").getReadMethod());
-			Assert.assertNotNull(pi.getPropertyInfo("minutes").getReadMethod());
-			Assert.assertNotNull(pi.getPropertyInfo("month").getReadMethod());
-			Assert.assertNotNull(pi.getPropertyInfo("seconds").getReadMethod());
-			Assert.assertNotNull(pi.getPropertyInfo("time").getReadMethod());
-			Assert.assertNotNull(pi.getPropertyInfo("year").getReadMethod());
+			Assert.assertNotNull(pi.getSubPropertyInfo("date").getReadMethod());
+			Assert.assertNotNull(pi.getSubPropertyInfo("hours").getReadMethod());
+			Assert.assertNotNull(pi.getSubPropertyInfo("minutes").getReadMethod());
+			Assert.assertNotNull(pi.getSubPropertyInfo("month").getReadMethod());
+			Assert.assertNotNull(pi.getSubPropertyInfo("seconds").getReadMethod());
+			Assert.assertNotNull(pi.getSubPropertyInfo("time").getReadMethod());
+			Assert.assertNotNull(pi.getSubPropertyInfo("year").getReadMethod());
 		}
 		
 		{
@@ -43,21 +43,21 @@ public class TestPropertyInfo
 		{
 			PropertyInfo pi=PropertyInfo.getPropertyInfo(MyBean.class);
 			Assert.assertNotNull(pi);
-			Assert.assertNotNull(pi.getPropertyInfo("integer").getWriteMethod());
+			Assert.assertNotNull(pi.getSubPropertyInfo("integer").getWriteMethod());
 			
-			PropertyInfo p0=pi.getPropertyInfo("myBean");
+			PropertyInfo p0=pi.getSubPropertyInfo("myBean");
 			Assert.assertNotNull(p0.getReadMethod());
-			Assert.assertNotNull(p0.getPropertyInfo("myBean").getReadMethod());
+			Assert.assertNotNull(p0.getSubPropertyInfo("myBean").getReadMethod());
 		}
 		
 		{
 			PropertyInfo pi=PropertyInfo.getPropertyInfo(MyBean2.class);
 			Assert.assertNotNull(pi);
-			Assert.assertNotNull(pi.getPropertyInfo("list").getReadMethod());
+			Assert.assertNotNull(pi.getSubPropertyInfo("list").getReadMethod());
 			
-			PropertyInfo p0=pi.getPropertyInfo("myBean");
+			PropertyInfo p0=pi.getSubPropertyInfo("myBean");
 			Assert.assertNotNull(p0.getReadMethod());
-			Assert.assertNotNull(p0.getPropertyInfo("myBean").getReadMethod());
+			Assert.assertNotNull(p0.getSubPropertyInfo("myBean").getReadMethod());
 		}
 	}
 	

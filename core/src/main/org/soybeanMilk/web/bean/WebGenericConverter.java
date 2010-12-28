@@ -129,7 +129,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			if(propertyExpression==null || propertyExpression.length==0)
 				propertyExpression=new String[]{k};
 			
-			if(beanInfo.getPropertyInfo(propertyExpression[0]) != null)
+			if(beanInfo.getSubPropertyInfo(propertyExpression[0]) != null)
 			{
 				//延迟初始化
 				if(bean == null)
@@ -182,7 +182,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		if(index >= propertyExpression.length)
 			return;
 		
-		PropertyInfo propertyInfo=beanInfo.getPropertyInfo(propertyExpression[index]);
+		PropertyInfo propertyInfo=beanInfo.getSubPropertyInfo(propertyExpression[index]);
 		if(propertyInfo == null)
 			throw new ConvertException("can not find property '"+propertyExpression[index]+"' in class '"+beanInfo.getPropertyType().getName()+"'");
 		

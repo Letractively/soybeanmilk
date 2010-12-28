@@ -144,12 +144,12 @@ public class PropertyInfo
 	}
 	
 	/**
-	 * 添加此类型的属性类信息
+	 * 添加子属性类信息
 	 * @param name
 	 * @param propertyInfo
 	 * @date 2010-12-28
 	 */
-	public void addPropertyBeanInfo(String name, PropertyInfo propertyInfo)
+	public void addSubPropertyInfo(String name, PropertyInfo propertyInfo)
 	{
 		if(subPropertyInfos == null)
 			subPropertyInfos=new HashMap<String, PropertyInfo>();
@@ -165,18 +165,17 @@ public class PropertyInfo
 	 * @param name 属性名
 	 * @return
 	 */
-	public PropertyInfo getPropertyInfo(String name)
+	public PropertyInfo getSubPropertyInfo(String name)
 	{
 		return subPropertyInfos == null ? null : subPropertyInfos.get(name);
 	}
 	
 	@Override
-	public String toString()
-	{
-		return "PropertyInfo [propertyClass=" + propertyType + ", readMethod="
+	public String toString() {
+		return "PropertyInfo [propertyType=" + propertyType + ", readMethod="
 				+ readMethod + ", writeMethod=" + writeMethod + "]";
 	}
-	
+
 	/**
 	 * 缓存
 	 */
@@ -261,7 +260,7 @@ public class PropertyInfo
 				PropertyInfo copied=new PropertyInfo(propertyClazz, rm, wm);
 				copied.setSubPropertyInfos(exist.getSubPropertyInfos());
 				
-				beanInfo.addPropertyBeanInfo(name, copied);
+				beanInfo.addSubPropertyInfo(name, copied);
 				
 				if(log.isDebugEnabled())
 					log.debug(getSpace(depth)+"add '"+name+"' named '"+copied+"'");

@@ -14,23 +14,15 @@
 
 package org.soybeanMilk.web.bean;
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.core.bean.ConvertException;
-import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
-import org.soybeanMilk.web.WebConstants;
+import org.soybeanMilk.core.bean.PropertyInfo;
 
 /**
  * WEB通用转换器，除了继承的转换支持，它还支持将{@link Map Map&lt;String,String&gt;}和{@link Map Map&lt;String,String[]&gt;}转换为JavaBean对象
@@ -41,12 +33,6 @@ public class WebGenericConverter extends DefaultGenericConverter
 {
 	private static Log log = LogFactory.getLog(WebGenericConverter.class);
 	
-	
-	private static final Object[] EMPTY_ARGS={};
-	
-	private static final String ACCESSOR_REGEX="\\"+WebConstants.ACCESSOR;
-	
-	private static ConcurrentHashMap<Class<?>,BeanInfo> beanInfoCache = new ConcurrentHashMap<Class<?>, BeanInfo>();;
 	
 	public WebGenericConverter()
 	{
@@ -64,86 +50,61 @@ public class WebGenericConverter extends DefaultGenericConverter
 			if(sourceObj instanceof Map)
 				return convertMap((Map<String, Object>)sourceObj, targetClass);
 			else
-				return safeConvert(sourceObj, targetClass);
+				return convertWithSupportConverter(sourceObj, targetClass);
 		}
 	}
 	
-	/**
-	 * 安全转换。<br>
-	 * 如果<code>sourceObj</code>是数组，而<code>targetClass</code>不是，
-	 * 并且没有<code>sourceObj</code>到<code>targetClass</code>的转换器，那么这个方法将尝试使用<code>sourceObj</code>的第一个元素（如果有的话）来转换；<br>
-	 * 如果<code>sourceObj</code>为<code>null</code>或者出现转换异常，它将返回目标类型的默认值（参考{@link #getDefaultValue(Class)}）
-	 * @param sourceObj
-	 * @param targetClass
-	 * @return
-	 */
-	protected Object safeConvert(Object sourceObj, Class<?> targetClass)
+	@Override
+	protected Object convertWithSupportConverter(Object sourceObj, Class<?> targetType) throws ConvertException
 	{
-		if(log.isDebugEnabled())
-			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"+(sourceObj == null ? null : sourceObj.getClass().getName())+"' to type '"+targetClass.getName()+"'");
-		
 		if(sourceObj == null)
 		{
-			Object dv = getDefaultValue(targetClass);
+			Object dv = getDefaultValue(targetType);
 			
 			if(log.isDebugEnabled())
-				log.debug("the source Object is null, so the default value '"+dv+"' of type '"+targetClass+"' will be used");
+				log.debug("the source object is null, so the default value '"+dv+"' of type '"+targetType+"' is used");
 			
 			return dv;
 		}
 		
-		Class<?> sourceClass=sourceObj.getClass();
-		if(toWrapperClass(targetClass).isAssignableFrom(sourceClass))
-			return sourceObj;
-		
-		Converter c = getConverter(sourceClass, targetClass);
-		
-		if(c == null)
+		try
+		{
+			return super.convertWithSupportConverter(sourceObj, targetType);
+		}
+		catch(ConvertException e)
 		{
 			//如果源对象是数组而目标类型不是，则使用数组的第一个元素转换
-			if(sourceClass.isArray() && !targetClass.isArray())
+			if(sourceObj.getClass().isArray() && !targetType.isArray())
 			{
 				if(log.isDebugEnabled())
 					log.debug("the source '"+getStringDesc(sourceObj)+"' is an array while the target Class is not, so it's first element will be used for converting");
 				
-				sourceClass=sourceClass.getComponentType();
 				sourceObj=Array.getLength(sourceObj) ==0 ? null : Array.get(sourceObj, 0);
-				
-				if(toWrapperClass(targetClass).isAssignableFrom(sourceClass))
-					return sourceObj;
-				
-				c = getConverter(sourceClass, targetClass);
 			}
-		}
-		
-		if(c == null)
-		{
-			//如果目标类型是字符串，则直接调用toString
-			if(String.class.equals(targetClass))
+			
+			try
 			{
-				if(log.isDebugEnabled())
-					log.debug("'toString()' method will be used for converting because the expected type is 'String' but not Converter found");
-				
-				return sourceObj.toString();
+				return super.convertWithSupportConverter(sourceObj, targetType);
 			}
-			else
-				throw new ConvertException("no Converter defined for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
-		}
-		if(log.isDebugEnabled())
-				log.debug("find Converter '"+c.getClass().getName()+"' for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
-		
-		try
-		{
-			return c.convert(sourceObj, targetClass);
-		}
-		catch(Exception e)
-		{
-			Object dv = getDefaultValue(targetClass);
-			
-			if(log.isDebugEnabled())
-				log.debug("default value '"+dv+"' is used while converting '"+sourceObj+"' to '"+targetClass.getName()+"' because the following exception :", e);
-			
-			return dv;
+			catch(ConvertException e1)
+			{
+				//转换失败后，如果目标类型是字符串，则直接调用toString
+				if(sourceObj!=null && String.class.equals(targetType))
+				{
+					if(log.isDebugEnabled())
+						log.debug("'toString()' method is used for converting because the expected type is 'String' but no Converter found");
+					
+					return sourceObj.toString();
+				}
+				
+				//否则，取默认值
+				Object dv = getDefaultValue(targetType);
+				
+				if(log.isDebugEnabled())
+					log.debug("default value '"+dv+"' is used while converting '"+sourceObj+"' to '"+targetType.getName()+"' because the following exception :", e);
+				
+				return dv;
+			}
 		}
 	}
 	
@@ -159,7 +120,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			return valueMap;
 		
 		Object bean = null;
-		BeanInfo beanInfo=getBeanInfo(targetClass);
+		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(targetClass);
 		
 		Set<String> keys=valueMap.keySet();
 		for(String k : keys)
@@ -168,7 +129,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			if(propertyExpression==null || propertyExpression.length==0)
 				propertyExpression=new String[]{k};
 			
-			if(beanInfo.getPropertyBeanInfo(propertyExpression[0]) != null)
+			if(beanInfo.getPropertyInfo(propertyExpression[0]) != null)
 			{
 				//延迟初始化
 				if(bean == null)
@@ -216,26 +177,26 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @param index 当前正在处理的属性层级数组的索引
 	 * @param srcValue 属性对应的值
 	 */
-	private void setPropertyValue(Object bean, BeanInfo beanInfo, String[] propertyExpression, int index, Object srcValue)
+	private void setPropertyValue(Object bean, PropertyInfo beanInfo, String[] propertyExpression, int index, Object srcValue)
 	{
 		if(index >= propertyExpression.length)
 			return;
 		
-		BeanInfo propertyInfo=beanInfo.getPropertyBeanInfo(propertyExpression[index]);
+		PropertyInfo propertyInfo=beanInfo.getPropertyInfo(propertyExpression[index]);
 		if(propertyInfo == null)
-			throw new ConvertException("can not find property '"+propertyExpression[index]+"' in class '"+beanInfo.getBeanClass().getName()+"'");
+			throw new ConvertException("can not find property '"+propertyExpression[index]+"' in class '"+beanInfo.getPropertyClass().getName()+"'");
 		
 		//自上而下递归，到达末尾时初始化和写入
 		if(index == propertyExpression.length-1)
 		{
-			Object destValue=safeConvert(srcValue, propertyInfo.getBeanClass());
+			Object destValue=convertWithSupportConverter(srcValue, propertyInfo.getPropertyClass());
 			try
 			{
-				propertyInfo.getBeanWriteMethod().invoke(bean, new Object[]{destValue});
+				propertyInfo.getWriteMethod().invoke(bean, new Object[]{destValue});
 			}
 			catch(Exception e)
 			{
-				throw new ConvertException("exception occur while calling write method '"+propertyInfo.getBeanWriteMethod()+"'",e);
+				throw new ConvertException("exception occur while calling write method '"+propertyInfo.getWriteMethod()+"'",e);
 			}
 		}
 		else
@@ -246,11 +207,11 @@ public class WebGenericConverter extends DefaultGenericConverter
 			//查看对象是否已经初始化
 			try
 			{
-				propertyInstance=propertyInfo.getBeanReadMethod().invoke(bean, EMPTY_ARGS);
+				propertyInstance=propertyInfo.getReadMethod().invoke(bean, EMPTY_ARGS);
 			}
 			catch(Exception e)
 			{
-				throw new ConvertException("exception occur while calling read method '"+propertyInfo.getBeanReadMethod().getName()+"'",e);
+				throw new ConvertException("exception occur while calling read method '"+propertyInfo.getReadMethod().getName()+"'",e);
 			}
 			
 			//初始化
@@ -268,269 +229,31 @@ public class WebGenericConverter extends DefaultGenericConverter
 			{
 				try
 				{
-					propertyInfo.getBeanWriteMethod().invoke(bean, new Object[]{propertyInstance});
+					propertyInfo.getWriteMethod().invoke(bean, new Object[]{propertyInstance});
 				}
 				catch(Exception e)
 				{
-					throw new ConvertException("exception occur while calling write method '"+propertyInfo.getBeanWriteMethod().getName()+"'",e);
+					throw new ConvertException("exception occur while calling write method '"+propertyInfo.getWriteMethod().getName()+"'",e);
 				}
 			}
 		}
 	}
 	
-	/**
-	 * 获取bean类的BeanInfo
-	 * @param beanClass
-	 * @return
-	 */
-	private BeanInfo getBeanInfo(Class<?> beanClass)
-	{
-		BeanInfo beanInfo=null;
-		
-		beanInfo=beanInfoCache.get(beanClass);
-		if(beanInfo == null)
-		{
-			beanInfo=anatomize(beanClass);
-			beanInfoCache.putIfAbsent(beanClass, beanInfo);
-		}
-		
-		return beanInfo;
-	}
-	
-	/**
-	 * 分解类
-	 * @param beanClass
-	 * @return
-	 */
-	private BeanInfo anatomize(Class<?> beanClass)
-	{
-		BeanInfo bf=new BeanInfo(beanClass);
-		
-		if(log.isDebugEnabled())
-			log.debug("");
-		
-		anatomizeRecursion(bf,0);
-		
-		if(log.isDebugEnabled())
-			log.debug("");
-		
-		return bf;
-	}
-	
-	/**
-	 * 递归分解
-	 * @param beanInfo
-	 * @param depth
-	 */
-	private void anatomizeRecursion(BeanInfo beanInfo,int depth)
-	{
-		if(log.isDebugEnabled())
-		{
-			StringBuffer sb=new StringBuffer();
-			for(int i=0;i<depth;i++)
-				sb.append("    ");
-			
-			log.debug(sb.toString()+beanInfo.toString());
-		}
-		
-		Class<?> beanClass=beanInfo.getBeanClass();
-		
-		Class<?> sourceClass = null;
-		if(beanClass.isArray())
-			sourceClass = String[].class;
-		else
-			sourceClass = String.class;
-		
-		//找到对应的转换器，则不再继续分解，并且数组必须有其对应的转换器
-		if(beanClass.isAssignableFrom(sourceClass) || getConverter(sourceClass, beanClass)!=null)
-			return;
-		else if(beanClass.isArray())
-			throw new ConvertException("no Converter defined for converting '"+sourceClass.getName()+"' to '"+beanClass.getName()+"'");
-		
-		PropertyDescriptor[] pds=null;
-		
-		try
-		{
-			pds=Introspector.getBeanInfo(beanClass).getPropertyDescriptors();
-		}
-		catch(IntrospectionException e)
-		{
-			throw new ConvertException(e);
-		}
-		
-		for(PropertyDescriptor pd : pds)
-		{
-			Method wm=pd.getWriteMethod();
-			Method rm=pd.getReadMethod();
-			
-			//非法
-			if(wm==null || rm==null
-					|| !Modifier.isPublic(wm.getModifiers())
-					|| !Modifier.isPublic(rm.getModifiers()))
-				continue;
-			
-			Class<?> propertyClass=pd.getPropertyType();
-			
-			BeanInfo bf=new BeanInfo(propertyClass, pd.getName(), beanInfo, pd.getReadMethod(), pd.getWriteMethod());
-			
-			anatomizeRecursion(bf,depth+1);
-		}
-	}
 	
 	/**
 	 * 创建Bean实例
 	 * @param beanInfo
 	 * @return
 	 */
-	private Object instance(BeanInfo beanInfo) throws ConvertException
+	private Object instance(PropertyInfo beanInfo) throws ConvertException
 	{
 		try
 		{
-			return beanInfo.getBeanClass().newInstance();
+			return beanInfo.getPropertyClass().newInstance();
 		}
 		catch(Exception e)
 		{
-			throw new ConvertException("exception occur while creating instance for class '"+beanInfo.getBeanClass()+"' ",e);
-		}
-	}
-	
-	/**
-	 * 取得对象的字符串描述
-	 * @param o
-	 * @return
-	 */
-	private static String getStringDesc(Object o)
-	{
-		if(o == null)
-			return "null";
-		else if(o.getClass().isArray())
-		{
-			StringBuffer cache = new StringBuffer();
-			cache.append('[');
-			
-			for(int i=0,len=Array.getLength(o); i < len; i++)
-			{
-				Object e = Array.get(o, i);
-				cache.append(getStringDesc(e));
-				
-				if(i < len-1)
-					cache.append(',');
-			}
-			
-			cache.append(']');
-			
-			return cache.toString();
-		}
-		else
-			return o.toString();
-	}
-	
-	/**
-	 * javaBean类信息
-	 * @author earthAngry@gmail.com
-	 * @date 2010-4-4
-	 */
-	private static class BeanInfo
-	{
-		private static char ACCESSOR = WebConstants.ACCESSOR;
-		
-		private Class<?> beanClass;
-		/**如果是某个类的属性类信息，则这是它的属性名，比如“age”*/
-		private String beanName;
-		/**如果是某个类的属性类信息，则这是它的属性层级名，比如“address.home”*/
-		private String beanFullName;
-		
-		/**属性类信息集，以属性名作为关键字*/
-		private Map<String,BeanInfo> propertyBeanInfos;
-		
-		/**如果是某个类的属性类信息，则这是它的读方法*/
-		private Method beanReadMethod;
-		/**如果是某个类的属性类信息，则这是它的写方法*/
-		private Method beanWriteMethod;
-		
-		/**
-		 * 创建指定类的类信息
-		 * @param beanClass
-		 */
-		public BeanInfo(Class<?> beanClass)
-		{
-			this(beanClass, null, null, null, null);
-		}
-		
-		/**
-		 * 创建指定类的类信息，并且它是某个类的属性类信息
-		 * @param beanClass
-		 * @param beanName
-		 * @param parent
-		 * @param beanReadMethod
-		 * @param beanWriteMethod
-		 */
-		public BeanInfo(Class<?> beanClass, String beanName, BeanInfo parent,
-				Method beanReadMethod, Method beanWriteMethod)
-		{
-			this.beanClass = beanClass;
-			this.beanName = beanName;
-			
-			if(parent != null)
-				parent.addPropertyBeanInfo(this);
-			
-			this.beanReadMethod=beanReadMethod;
-			this.beanWriteMethod=beanWriteMethod;
-		}
-		
-		public Class<?> getBeanClass() {
-			return beanClass;
-		}
-		public String getBeanName() {
-			return beanName;
-		}
-		public void setBeanFullName(String beanFullName) {
-			this.beanFullName = beanFullName;
-		}
-		public Method getBeanReadMethod() {
-			return beanReadMethod;
-		}
-		public Method getBeanWriteMethod() {
-			return beanWriteMethod;
-		}
-		
-		/**
-		 * 添加一个属性类信息
-		 * @param beanInfo
-		 */
-		public void addPropertyBeanInfo(BeanInfo beanInfo)
-		{
-			if(propertyBeanInfos == null)
-				propertyBeanInfos=new HashMap<String, BeanInfo>();
-			
-			if(beanInfo.getBeanName() == null)
-				throw new IllegalArgumentException(BeanInfo.class.getSimpleName()+".getName() must not be null.");
-			
-			propertyBeanInfos.put(beanInfo.getBeanName(), beanInfo);
-			
-			if(this.beanFullName != null)
-				beanInfo.setBeanFullName(this.beanFullName+ACCESSOR+beanInfo.getBeanName());
-			else
-				beanInfo.setBeanFullName(beanInfo.getBeanName());
-		}
-		
-		/**
-		 * 取得属性类信息
-		 * @param name 属性名
-		 * @return
-		 */
-		public BeanInfo getPropertyBeanInfo(String name)
-		{
-			return propertyBeanInfos == null ? null : propertyBeanInfos.get(name);
-		}
-		
-		@Override
-		public String toString()
-		{
-			return getClass().getSimpleName()+" [beanClass="
-					+ beanClass.getName() + ", fullName=" + beanFullName + ", name=" + beanName
-					+ ", readMethod=" + beanReadMethod
-					+ ", writeMethod=" + beanWriteMethod + "]";
+			throw new ConvertException("exception occur while creating instance for class '"+beanInfo.getPropertyClass()+"' ",e);
 		}
 	}
 }

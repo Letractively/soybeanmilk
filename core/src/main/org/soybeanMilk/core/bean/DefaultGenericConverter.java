@@ -14,6 +14,7 @@
 
 package org.soybeanMilk.core.bean;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.soybeanMilk.core.bean.converters.ShortConverter;
 import org.soybeanMilk.core.bean.converters.SqlDateConverter;
 import org.soybeanMilk.core.bean.converters.SqlTimeConverter;
 import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
+import org.soybeanMilk.web.WebConstants;
 
 /**
  * 通用转换器的默认实现。<br>
@@ -67,6 +69,9 @@ public class DefaultGenericConverter implements GenericConverter
 {
 	private static Log log = LogFactory.getLog(DefaultGenericConverter.class);
 	
+	protected static final Object[] EMPTY_ARGS={};
+	
+	protected static final String ACCESSOR_REGEX="\\"+WebConstants.ACCESSOR;
 	
 	protected static final String SEPRATOR="->";
 	
@@ -94,46 +99,25 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	@Override
-	public Object convert(Object sourceObj, Class<?> targetClass)
+	public Object convert(Object sourceObj, Class<?> targetType)
 	{
-		if(targetClass == null)
+		if(targetType == null)
 			return sourceObj;
-		
-		if(sourceObj == null)
-		{
-			if(targetClass.isPrimitive())
-				throw new ConvertException("can not convert null to primitive type");
-			else
-				return null;
-		}
-		
-		if(toWrapperClass(targetClass).isAssignableFrom(sourceObj.getClass()))
-			return sourceObj;
-		
-		Converter c = getConverter(sourceObj.getClass(), targetClass);
-		if(c == null)
-			throw new ConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
-		
-		try
-		{
-			return c.convert(sourceObj, targetClass);
-		}
-		catch(Exception e)
-		{
-			throw new ConvertException(e);
-		}
+		else
+			return convertWithSupportConverter(sourceObj, targetType);
 	}
 	
 	@Override
 	public Object getProperty(Object srcObj, String propertyExpression, Class<?> targetType)
 	{
+		//TODO 实现
 		return null;
 	}
 	
 	@Override
 	public void setProperty(Object srcObj, String propertyExpression, Object value)
 	{
-		
+		//TODO 实现
 	}
 	
 	@Override
@@ -152,6 +136,44 @@ public class DefaultGenericConverter implements GenericConverter
 	public Converter getConverter(Class<?> sourceClass, Class<?> targetClass)
 	{
 		return getConverters() == null ? null : getConverters().get(generateConverterKey(sourceClass, targetClass));
+	}
+	
+	/**
+	 * 使用辅助转换器转换类型
+	 * @param sourceObj 源对象
+	 * @param targetType 目标类型
+	 * @return
+	 * @throws ConvertException
+	 * @date 2010-12-28
+	 */
+	protected Object convertWithSupportConverter(Object sourceObj, Class<?> targetType) throws ConvertException
+	{
+		if(log.isDebugEnabled())
+			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"+(sourceObj == null ? null : sourceObj.getClass().getName())+"' to type '"+targetType.getName()+"'");
+		
+		if(sourceObj == null)
+		{
+			if(targetType.isPrimitive())
+				throw new ConvertException("can not convert null to primitive type");
+			else
+				return null;
+		}
+		
+		if(toWrapperClass(targetType).isAssignableFrom(sourceObj.getClass()))
+			return sourceObj;
+		
+		Converter c = getConverter(sourceObj.getClass(), targetType);
+		if(c == null)
+			throw new ConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetType.getName()+"'");
+		
+		try
+		{
+			return c.convert(sourceObj, targetType);
+		}
+		catch(Exception e)
+		{
+			throw new ConvertException(e);
+		}
 	}
 	
 	/**
@@ -268,5 +290,36 @@ public class DefaultGenericConverter implements GenericConverter
             return Character.class;
         else
             return type;
+	}
+	
+	/**
+	 * 取得对象的字符串描述
+	 * @param o
+	 * @return
+	 */
+	protected String getStringDesc(Object o)
+	{
+		if(o == null)
+			return "null";
+		else if(o.getClass().isArray())
+		{
+			StringBuffer cache = new StringBuffer();
+			cache.append('[');
+			
+			for(int i=0,len=Array.getLength(o); i < len; i++)
+			{
+				Object e = Array.get(o, i);
+				cache.append(getStringDesc(e));
+				
+				if(i < len-1)
+					cache.append(',');
+			}
+			
+			cache.append(']');
+			
+			return cache.toString();
+		}
+		else
+			return o.toString();
 	}
 }

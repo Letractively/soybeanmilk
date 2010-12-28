@@ -40,7 +40,7 @@ import org.soybeanMilk.web.WebConstants;
 public class WebGenericConverter extends DefaultGenericConverter
 {
 	private static Log log = LogFactory.getLog(WebGenericConverter.class);
-	private static boolean _logDebugEnabled=log.isDebugEnabled();
+	
 	
 	private static final Object[] EMPTY_ARGS={};
 	
@@ -79,14 +79,14 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 */
 	protected Object safeConvert(Object sourceObj, Class<?> targetClass)
 	{
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"+(sourceObj == null ? null : sourceObj.getClass().getName())+"' to type '"+targetClass.getName()+"'");
 		
 		if(sourceObj == null)
 		{
 			Object dv = getDefaultValue(targetClass);
 			
-			if(_logDebugEnabled)
+			if(log.isDebugEnabled())
 				log.debug("the source Object is null, so the default value '"+dv+"' of type '"+targetClass+"' will be used");
 			
 			return dv;
@@ -103,7 +103,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			//如果源对象是数组而目标类型不是，则使用数组的第一个元素转换
 			if(sourceClass.isArray() && !targetClass.isArray())
 			{
-				if(_logDebugEnabled)
+				if(log.isDebugEnabled())
 					log.debug("the source '"+getStringDesc(sourceObj)+"' is an array while the target Class is not, so it's first element will be used for converting");
 				
 				sourceClass=sourceClass.getComponentType();
@@ -121,7 +121,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			//如果目标类型是字符串，则直接调用toString
 			if(String.class.equals(targetClass))
 			{
-				if(_logDebugEnabled)
+				if(log.isDebugEnabled())
 					log.debug("'toString()' method will be used for converting because the expected type is 'String' but not Converter found");
 				
 				return sourceObj.toString();
@@ -129,7 +129,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			else
 				throw new ConvertException("no Converter defined for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
 		}
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 				log.debug("find Converter '"+c.getClass().getName()+"' for converting '"+sourceObj.getClass().getName()+"' to '"+targetClass.getName()+"'");
 		
 		try
@@ -140,7 +140,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			Object dv = getDefaultValue(targetClass);
 			
-			if(_logDebugEnabled)
+			if(log.isDebugEnabled())
 				log.debug("default value '"+dv+"' is used while converting '"+sourceObj+"' to '"+targetClass.getName()+"' because the following exception :", e);
 			
 			return dv;
@@ -306,12 +306,12 @@ public class WebGenericConverter extends DefaultGenericConverter
 	{
 		BeanInfo bf=new BeanInfo(beanClass);
 		
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("");
 		
 		anatomizeRecursion(bf,0);
 		
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("");
 		
 		return bf;
@@ -324,7 +324,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 */
 	private void anatomizeRecursion(BeanInfo beanInfo,int depth)
 	{
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 		{
 			StringBuffer sb=new StringBuffer();
 			for(int i=0;i<depth;i++)

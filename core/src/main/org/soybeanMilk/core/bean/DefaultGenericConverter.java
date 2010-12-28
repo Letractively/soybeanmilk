@@ -66,7 +66,7 @@ import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
 public class DefaultGenericConverter implements GenericConverter
 {
 	private static Log log = LogFactory.getLog(DefaultGenericConverter.class);
-	private static boolean _logDebugEnabled=log.isDebugEnabled();
+	
 	
 	protected static final String SEPRATOR="->";
 	
@@ -91,24 +91,6 @@ public class DefaultGenericConverter implements GenericConverter
 			addStringSourceConverters();
 			addStringArraySourceConverters();
 		}
-	}
-	
-	@Override
-	public void addConverter(Class<?> sourceClass,Class<?> targetClass,Converter converter)
-	{
-		if(getConverters() == null)
-			setConverters(new HashMap<String, Converter>());
-		
-		getConverters().put(generateConverterKey(sourceClass, targetClass), converter);
-		
-		if(_logDebugEnabled)
-			log.debug("add a support Converter '"+converter.getClass().getName()+"' for converting '"+sourceClass.getName()+"' to '"+targetClass.getName()+"'");
-	}
-	
-	@Override
-	public Converter getConverter(Class<?> sourceClass, Class<?> targetClass)
-	{
-		return getConverters() == null ? null : getConverters().get(generateConverterKey(sourceClass, targetClass));
 	}
 	
 	@Override
@@ -140,6 +122,36 @@ public class DefaultGenericConverter implements GenericConverter
 		{
 			throw new ConvertException(e);
 		}
+	}
+	
+	@Override
+	public Object getProperty(Object srcObj, String propertyExpression, Class<?> targetType)
+	{
+		return null;
+	}
+	
+	@Override
+	public void setProperty(Object srcObj, String propertyExpression, Object value)
+	{
+		
+	}
+	
+	@Override
+	public void addConverter(Class<?> sourceClass,Class<?> targetClass,Converter converter)
+	{
+		if(getConverters() == null)
+			setConverters(new HashMap<String, Converter>());
+		
+		getConverters().put(generateConverterKey(sourceClass, targetClass), converter);
+		
+		if(log.isDebugEnabled())
+			log.debug("add a support Converter '"+converter.getClass().getName()+"' for converting '"+sourceClass.getName()+"' to '"+targetClass.getName()+"'");
+	}
+	
+	@Override
+	public Converter getConverter(Class<?> sourceClass, Class<?> targetClass)
+	{
+		return getConverters() == null ? null : getConverters().get(generateConverterKey(sourceClass, targetClass));
 	}
 	
 	/**

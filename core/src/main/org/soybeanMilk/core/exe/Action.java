@@ -36,7 +36,7 @@ public class Action extends AbstractExecutable
 	private static final long serialVersionUID = -8438224010529190055L;
 	
 	private static Log log=LogFactory.getLog(Action.class);
-	private static boolean _logDebugEnabled=log.isDebugEnabled();
+	
 	
 	/**动作包含的可执行对象集*/
 	private List<Executable> executables;
@@ -58,7 +58,7 @@ public class Action extends AbstractExecutable
 	@Override
 	public void execute(ObjectSource dataStore) throws ExecuteException
 	{
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("start  execute '"+this+"'");
 		
 		List<Executable> executables = getExecutables();
@@ -69,7 +69,7 @@ public class Action extends AbstractExecutable
 				exe.execute(dataStore);
 		}
 		
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("finish execute '"+this+"'");
 	}
 
@@ -97,7 +97,7 @@ public class Action extends AbstractExecutable
 		
 		exes.add(exe);
 		
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("add '"+exe+"' to '"+this+"'");
 	}
 	

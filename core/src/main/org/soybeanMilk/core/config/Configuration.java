@@ -34,7 +34,7 @@ import org.soybeanMilk.core.resolver.ResolverFactory;
 public class Configuration
 {
 	private static Log log=LogFactory.getLog(Configuration.class);
-	private static boolean _logDebugEnabled=log.isDebugEnabled();
+	
 	
 	/**解决对象工厂*/
 	private ResolverFactory resolverFactory;
@@ -139,7 +139,7 @@ public class Configuration
 		
 		exeMap.put(executable.getName(), executable);
 		
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("add '"+executable+"' to '"+this+"'");
 	}
 	

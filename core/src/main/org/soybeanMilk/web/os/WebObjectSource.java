@@ -123,7 +123,7 @@ import org.soybeanMilk.web.WebConstants;
 public class WebObjectSource extends ConvertableObjectSource
 {
 	private static Log log = LogFactory.getLog(WebObjectSource.class);
-	private static boolean _logDebugEnabled=log.isDebugEnabled();
+	
 	
 	private HttpServletRequest request;
 	private HttpServletResponse response;
@@ -229,7 +229,7 @@ public class WebObjectSource extends ConvertableObjectSource
 					data=getWithUnknownScope(scope, subKey, objectType);
 			}
 			
-			if(_logDebugEnabled)
+			if(log.isDebugEnabled())
 				log.debug("get '"+data+"' from scope '"+scope+"' with key '"+subKey+"'");
 		}
 		
@@ -265,7 +265,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		else
 			setWithUnknownScope(scope, subKey, obj);
 		
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("save '"+obj+"' into '"+scope+"' with key '"+subKey+"'");
 	}
 	

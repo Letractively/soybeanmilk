@@ -40,7 +40,7 @@ public class Invoke extends AbstractExecutable
 	private static final long serialVersionUID = -6517860148774345653L;
 	
 	private static Log log=LogFactory.getLog(Invoke.class);
-	private static boolean _logDebugEnabled=log.isDebugEnabled();
+	
 	
 	/**解决对象提供者，方法被调用时的对象参数将由它提供*/
 	private transient ResolverProvider resolverProvider;
@@ -148,7 +148,7 @@ public class Invoke extends AbstractExecutable
 	@Override
 	public void execute(ObjectSource objectSource) throws ExecuteException
 	{
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("start  execute '"+this+"'");
 		
 		Method method=getMethod();
@@ -172,7 +172,7 @@ public class Invoke extends AbstractExecutable
 			throw new AccessExecuteException(e);
 		}
 		
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("finish execute '"+this+"'");
 	}
 
@@ -230,7 +230,7 @@ public class Invoke extends AbstractExecutable
 			}
 		}
 		
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("construct method arguments '"+Arrays.toString(values)+"'");
 		
 		return values;

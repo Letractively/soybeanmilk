@@ -41,7 +41,7 @@ import org.w3c.dom.Element;
 public class WebConfigurationParser extends ConfigurationParser
 {
 	private static Log log=LogFactory.getLog(WebConfigurationParser.class);
-	private static boolean _logDebugEnabled=log.isDebugEnabled();
+	
 	
 	public static final String TAG_TARGET="target";
 	public static final String TAG_TARGET_ATTR_URL="url";
@@ -98,7 +98,7 @@ public class WebConfigurationParser extends ConfigurationParser
 		Target targetInfo=createTargetInstance();
 		setTargetInfoProperties(targetInfo,element);
 		
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("parsed '"+targetInfo+"'");
 		
 		action.setTarget(targetInfo);

@@ -24,8 +24,8 @@ public interface Converter
 	/**
 	 * 将源对象转换为目标类型的对象
 	 * @param sourceObj 源对象
-	 * @param targetClass 目标类型
-	 * @return <code>targetClass</code>类型的对象
+	 * @param targetType 目标类型
+	 * @return <code>targetType</code>类型的对象
 	 */
-	Object convert(Object sourceObj, Class<?> targetClass);
+	Object convert(Object sourceObj, Class<?> targetType);
 }

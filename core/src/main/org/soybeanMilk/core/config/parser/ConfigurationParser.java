@@ -60,7 +60,7 @@ import org.w3c.dom.NodeList;
 public class ConfigurationParser
 {
 	private static Log log=LogFactory.getLog(ConfigurationParser.class);
-	private static boolean _logDebugEnabled=log.isDebugEnabled();
+	
 	
 	public static final String TAG_ROOT="soybean-milk";
 	
@@ -337,7 +337,7 @@ public class ConfigurationParser
 				
 				Object resolver=createClassInstance(clazz);
 				
-				if(_logDebugEnabled)
+				if(log.isDebugEnabled())
 					log.debug("parsed resolver instance of Class '"+resolver.getClass().getName()+"' with id '"+id+"'");
 				
 				drf.addResolver(id,resolver);
@@ -363,7 +363,7 @@ public class ConfigurationParser
 					
 					setExecutableProperties(executable,e);
 					
-					if(_logDebugEnabled)
+					if(log.isDebugEnabled())
 						log.debug("parsed '"+executable+"'");
 					
 					configuration.addExecutable(executable);
@@ -455,7 +455,7 @@ public class ConfigurationParser
 		ii.setExceptionHandler(new ExecutableRefProxy(exception));
 		ii.setExecutionKey(executionKey);
 		
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("parsed '"+ii+"'");
 		
 		getConfiguration().setInterceptorInfo(ii);
@@ -613,7 +613,7 @@ public class ConfigurationParser
 			a.setType(paramTypes[i]);
 			setArgProperties(a,e);
 			
-			if(_logDebugEnabled)
+			if(log.isDebugEnabled())
 				log.debug("parsed '"+a+"'");
 			
 			args[i]=a;
@@ -797,13 +797,13 @@ public class ConfigurationParser
 					
 					docs[i]=parseDocument(in);
 					
-					if(_logDebugEnabled)
+					if(log.isDebugEnabled())
 						log.debug("parsed Document object from '"+files[i].getAbsolutePath()+"'");
 				}
 			}
 			else
 			{
-				if(_logDebugEnabled)
+				if(log.isDebugEnabled())
 					log.debug("no xml file found in directory '"+fileName+"'");
 			}
 		}
@@ -841,7 +841,7 @@ public class ConfigurationParser
 		
 		Document doc=parseDocument(in);
 		
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("parsing Document object from '"+fileName+"'");
 		
 		return doc;

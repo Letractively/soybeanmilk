@@ -54,7 +54,7 @@ public class DispatchServlet extends HttpServlet
 	private static final long serialVersionUID = -1647302324862162094L;
 	
 	private static Log log=LogFactory.getLog(DispatchServlet.class);
-	private static boolean _logDebugEnabled=log.isDebugEnabled();
+	
 	
 	/**
 	 * servlet规范"include"属性
@@ -203,7 +203,7 @@ public class DispatchServlet extends HttpServlet
 		Configuration cfg=getExecutor().getConfiguration();
 		WebObjectSource webObjSource=getWebObjectSourceFactory().create(request, response, getServletContext());
 		String exeName=getRequestExecutableName(request, response);
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("processing request with name '"+exeName+"'");
 		
 		Executable exe=cfg.getExecutable(exeName);
@@ -321,7 +321,7 @@ public class DispatchServlet extends HttpServlet
 		
 		if(target == null)
 		{
-			if(_logDebugEnabled)
+			if(log.isDebugEnabled())
 				log.debug("Executable named '"+executable.getName()+"' not dispatched,because no Target defined");
 			
 			return;
@@ -339,7 +339,7 @@ public class DispatchServlet extends HttpServlet
 			else
 				response.sendRedirect(url);
 			
-			if(_logDebugEnabled)
+			if(log.isDebugEnabled())
 				log.debug("redirect '"+url+"' for request");
 		}
 		else
@@ -348,13 +348,13 @@ public class DispatchServlet extends HttpServlet
 			{
 				request.getRequestDispatcher(url).include(request, response);
 				
-				if(_logDebugEnabled)
+				if(log.isDebugEnabled())
 					log.debug("include '"+url+"' for request");
 			}
 			else
 			{
 				request.getRequestDispatcher(url).forward(request, response);
-				if(_logDebugEnabled)
+				if(log.isDebugEnabled())
 					log.debug("forward '"+url+"' for request");
 			}
 		}
@@ -516,7 +516,7 @@ public class DispatchServlet extends HttpServlet
 			if(erf == null)
 				throw new ServletException("can not find external ResolverFactory in application with key '"+erfKey+"'");
 			
-			if(_logDebugEnabled)
+			if(log.isDebugEnabled())
 				log.debug("find external resolver factory '"+erf.getClass().getName()+"' in 'application' scope");
 		}
 		

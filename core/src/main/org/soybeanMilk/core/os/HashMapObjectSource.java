@@ -31,7 +31,7 @@ import org.soybeanMilk.core.bean.GenericConverter;
 public class HashMapObjectSource extends ConvertableObjectSource
 {
 	private static Log log=LogFactory.getLog(HashMapObjectSource.class);
-	private static boolean _logDebugEnabled=log.isDebugEnabled();
+	
 	
 	private HashMap<Serializable,Object> source;
 	
@@ -65,7 +65,7 @@ public class HashMapObjectSource extends ConvertableObjectSource
 		else
 			re = cvt.convert(re, objectType);
 		
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("get '"+re+"' with key '"+key+"' from "+this);
 		
 		return re;
@@ -76,7 +76,7 @@ public class HashMapObjectSource extends ConvertableObjectSource
 	{
 		source.put(key, obj);
 		
-		if(_logDebugEnabled)
+		if(log.isDebugEnabled())
 			log.debug("save '"+obj+"' with key '"+key+"' into "+this);
 	}
 }

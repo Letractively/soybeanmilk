@@ -25,7 +25,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.web.bean.WebGenericConverter;
 
 /**
  * 类属性信息封装类
@@ -34,7 +33,7 @@ import org.soybeanMilk.web.bean.WebGenericConverter;
  */
 public class PropertyInfo
 {
-	private static Log log = LogFactory.getLog(WebGenericConverter.class);
+	private static Log log = LogFactory.getLog(PropertyInfo.class);
 	
 	/**属性类型*/
 	private Class<?> propertyType;
@@ -175,7 +174,7 @@ public class PropertyInfo
 		return "PropertyInfo [propertyType=" + propertyType + ", readMethod="
 				+ readMethod + ", writeMethod=" + writeMethod + "]";
 	}
-
+	
 	/**
 	 * 缓存
 	 */

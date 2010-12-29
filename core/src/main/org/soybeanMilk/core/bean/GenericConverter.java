@@ -38,7 +38,7 @@ public interface GenericConverter extends Converter
 	Converter getConverter(Class<?> sourceType,Class<?> targetType);
 	
 	/**
-	 * 设置对象的属性值，<code>value</code>将被转换为此属性的类型。
+	 * 设置对象的属性值，<code>value</code>将被转换为属性类型的对象。
 	 * @param srcObj 源对象
 	 * @param propertyExpression 属性表达式，可以多层嵌套，比如“propertyA.propertyB.propertyC”
 	 * @param value 要设置的属性值

@@ -59,6 +59,24 @@ public class TestPropertyInfo
 			Assert.assertNotNull(p0.getReadMethod());
 			Assert.assertNotNull(p0.getSubPropertyInfo("myBean").getReadMethod());
 		}
+		
+		{
+			PropertyInfo pi=PropertyInfo.getPropertyInfo(int[].class);
+			Assert.assertNotNull(pi);
+			Assert.assertNull( pi.getSubPropertyInfos() );
+		}
+		
+		{
+			PropertyInfo pi=PropertyInfo.getPropertyInfo(MyBean[].class);
+			Assert.assertNotNull(pi);
+			Assert.assertNull( pi.getSubPropertyInfos() );
+		}
+		
+		{
+			PropertyInfo pi=PropertyInfo.getPropertyInfo(MyBean2[].class);
+			Assert.assertNotNull(pi);
+			Assert.assertNull( pi.getSubPropertyInfos() );
+		}
 	}
 	
 	protected static class MyBean

@@ -15,7 +15,10 @@
 package org.soybeanMilk.core.bean;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import java.util.Map;
 
@@ -61,6 +64,7 @@ import org.soybeanMilk.web.WebConstants;
  *   </td></tr>
  * </table>
  * <br>
+ * 另外，如果目标类型为<code>String</code>，而你没有添加此对象到<code>String</code>类型的辅助转换器，那么它将返回此对象的<code>toString()</code>结果<br>
  * 你也可以通过{@link #addConverter(Class, Class, Converter)}为它添加更多辅助转换器，使其支持更多的类型转换。
  * @author earthAngry@gmail.com
  * @date 2010-10-6
@@ -98,13 +102,20 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 	}
 	
+	/**
+	 * 获取所有辅助转换器
+	 * @return
+	 * @date 2010-12-29
+	 */
+	public Collection<Converter> getSupportConverters()
+	{
+		return converters==null ? null : converters.values();
+	}
+	
 	@Override
 	public Object convert(Object sourceObj, Class<?> targetType)
 	{
-		if(targetType == null)
-			return sourceObj;
-		else
-			return convertWithSupportConverter(sourceObj, targetType);
+		return convertWithSupportConverter(sourceObj, targetType);
 	}
 	
 	@Override
@@ -121,21 +132,21 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	@Override
-	public void addConverter(Class<?> sourceClass,Class<?> targetClass,Converter converter)
+	public void addConverter(Class<?> sourceType,Class<?> targetType,Converter converter)
 	{
 		if(getConverters() == null)
 			setConverters(new HashMap<String, Converter>());
 		
-		getConverters().put(generateConverterKey(sourceClass, targetClass), converter);
+		getConverters().put(generateConverterKey(sourceType, targetType), converter);
 		
 		if(log.isDebugEnabled())
-			log.debug("add a support Converter '"+converter.getClass().getName()+"' for converting '"+sourceClass.getName()+"' to '"+targetClass.getName()+"'");
+			log.debug("add a support Converter '"+converter.getClass().getName()+"' for converting '"+sourceType.getName()+"' to '"+targetType.getName()+"'");
 	}
 	
 	@Override
-	public Converter getConverter(Class<?> sourceClass, Class<?> targetClass)
+	public Converter getConverter(Class<?> sourceType, Class<?> targetType)
 	{
-		return getConverters() == null ? null : getConverters().get(generateConverterKey(sourceClass, targetClass));
+		return getConverters() == null ? null : getConverters().get(generateConverterKey(sourceType, targetType));
 	}
 	
 	/**
@@ -149,7 +160,17 @@ public class DefaultGenericConverter implements GenericConverter
 	protected Object convertWithSupportConverter(Object sourceObj, Class<?> targetType) throws ConvertException
 	{
 		if(log.isDebugEnabled())
-			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"+(sourceObj == null ? null : sourceObj.getClass().getName())+"' to type '"+targetType.getName()+"'");
+			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"
+					+(sourceObj == null ? null : sourceObj.getClass().getName())+"' to type '"
+					+(targetType==null ? null : targetType.getName())+"'");
+		
+		if(targetType == null)
+		{
+			if(log.isDebugEnabled())
+				log.debug("the target type is null, so the source object will be returned directly");
+			
+			return sourceObj;
+		}
 		
 		if(sourceObj == null)
 		{
@@ -164,7 +185,12 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		Converter c = getConverter(sourceObj.getClass(), targetType);
 		if(c == null)
-			throw new ConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetType.getName()+"'");
+		{
+			if(targetType.equals(String.class))
+				return sourceObj.toString();
+			else
+				throw new ConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetType.getName()+"'");
+		}
 		
 		try
 		{
@@ -187,13 +213,50 @@ public class DefaultGenericConverter implements GenericConverter
 		return sourceClass.getName()+SEPRATOR+targetClass.getName();
 	}
 	
-	public Map<String, Converter> getConverters() {
-		return converters;
-	}
-	public void setConverters(Map<String, Converter> converters) {
-		this.converters = converters;
+	/**
+	 * 创建给定类型的实例。<br>
+	 * 如果此类是集合类接口<code>List</code>、<code>Map</code>、<code>Set</code>，它将创建默认实例，<code>arraySize</code>将被忽略；<br>
+	 * 否则，此类必须提供一个无参的构造方法，如果<code>arrayLength</code>不小于0，它将创建这个类型的数组实例，否则，仅创建此类的实例。
+	 * @param objectType 类型
+	 * @param arrayLength 要创建数组的长度
+	 * @return
+	 * @throws ConvertException
+	 * @date 2010-12-29
+	 */
+	@SuppressWarnings("unchecked")
+	protected Object instance(Class<?> objectType, int arrayLength) throws ConvertException
+	{
+		if(java.util.List.class.equals(objectType))
+			return new ArrayList();
+		else if(java.util.Map.class.equals(objectType))
+			return new HashMap();
+		else if(java.util.Set.class.equals(objectType))
+			return new HashSet();
+		else
+		{
+			try
+			{
+				if(arrayLength < 0)
+					return objectType.newInstance();
+				else
+					return Array.newInstance(objectType, arrayLength);
+			}
+			catch(Exception e)
+			{
+				throw new ConvertException("exception occur while creating instance for class '"+objectType+"' ",e);
+			}
+			
+		}
 	}
 
+	protected Map<String, Converter> getConverters() {
+		return converters;
+	}
+
+	protected void setConverters(Map<String, Converter> converters) {
+		this.converters = converters;
+	}
+	
 	/**
 	 * 添加可以将字符串转换到原子类型的辅助转换器
 	 */

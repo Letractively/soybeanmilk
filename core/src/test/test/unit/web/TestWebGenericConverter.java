@@ -25,16 +25,87 @@ public class TestWebGenericConverter
 	@Test
 	public void convertSafe()
 	{
+		//基本类型
 		{
-			Object dest=converter.convert(null, Object.class);
-			
+			Boolean dest=(Boolean)converter.convert(null, boolean.class);
+			Assert.assertFalse(dest);
+		}
+		{
+			Byte dest=(Byte)converter.convert(null, byte.class);
+			Assert.assertEquals(0, dest.byteValue());
+		}
+		{
+			Character dest=(Character)converter.convert(null, char.class);
+			Assert.assertEquals(0, dest.charValue());
+		}
+		{
+			Double dest=(Double)converter.convert(null, double.class);
+			Assert.assertEquals(0d, dest.doubleValue());
+		}
+		{
+			Float dest=(Float)converter.convert(null, float.class);
+			Assert.assertEquals(0f, dest.floatValue());
+		}
+		{
+			Integer dest=(Integer)converter.convert(null, int.class);
+			Assert.assertEquals(0, dest.intValue());
+		}
+		{
+			Long dest=(Long)converter.convert(null, long.class);
+			Assert.assertEquals(0l, dest.longValue());
+		}
+		{
+			Short dest=(Short)converter.convert(null, short.class);
+			Assert.assertEquals((short)0, dest.shortValue());
+		}
+		{
+			String dest=(String)converter.convert(null, String.class);
 			Assert.assertNull(dest);
 		}
 		
+		//数组
 		{
-			Integer dest=(Integer)converter.convert(null, int.class);
-			
-			Assert.assertEquals(0, dest.intValue());
+			String dest=(String)converter.convert(new int[]{12345}, String.class);
+			Assert.assertEquals("12345", dest);
+		}
+		{
+			int[] src=new int[]{12345,2342809};
+			String dest=(String)converter.convert(src, String.class);
+			Assert.assertEquals(src.toString(), dest);
+		}
+		{
+			String dest=(String)converter.convert(new boolean[]{false}, String.class);
+			Assert.assertEquals("false", dest);
+		}
+		{
+			boolean[] dest=(boolean[])converter.convert(new String[]{"false", "true"}, boolean[].class);
+			Assert.assertFalse(dest[0]);
+			Assert.assertTrue(dest[1]);
+		}
+		{
+			int[] dest=(int[])converter.convert(new String[]{"222", "3333"}, int[].class);
+			Assert.assertEquals(222,dest[0]);
+			Assert.assertEquals(3333, dest[1]);
+		}
+		{
+			int[] dest=(int[])converter.convert(new String[]{"222", "3333"}, int[].class);
+			Assert.assertEquals(222,dest[0]);
+			Assert.assertEquals(3333, dest[1]);
+		}
+		{
+			Integer[] src=new Integer[]{null};
+			String dest=(String)converter.convert(src, String.class);
+			Assert.assertNull(dest);
+		}
+		
+		//其他
+		{
+			Object dest=converter.convert(null, Object.class);
+			Assert.assertNull(dest);
+		}
+		{
+			String dest=(String)converter.convert(new Integer(12345), String.class);
+			Assert.assertEquals("12345", dest);
 		}
 	}
 	

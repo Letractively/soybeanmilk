@@ -132,58 +132,6 @@ public class WebGenericConverter extends DefaultGenericConverter
 			
 			return dv;
 		}
-		/*
-		if(sourceObj == null)
-		{
-			Object dv = getDefaultValue(targetType);
-			
-			if(log.isDebugEnabled())
-				log.debug("the source object is null, so the default value '"+dv+"' of type '"+targetType+"' is used");
-			
-			return dv;
-		}
-		
-		try
-		{
-			return super.convertWithSupportConverter(sourceObj, targetType);
-		}
-		catch(ConvertException e)
-		{
-			//如果源对象是数组并且长度为1，而标类型不是，则使用数组的第一个元素转换
-			if(sourceObj.getClass().isArray() && Array.getLength(sourceObj)==1 && !targetType.isArray())
-			{
-				if(log.isDebugEnabled())
-					log.debug("the source '"+getStringDesc(sourceObj)+"' is an array and the length is 1, while the target Class is not, so it's first element will be used for converting");
-				
-				sourceObj=Array.getLength(sourceObj) ==0 ? null : Array.get(sourceObj, 0);
-			}
-			
-			//转换失败后，如果目标类型是字符串，则直接调用toString
-			if(sourceObj!=null && String.class.equals(targetType))
-			{
-				if(log.isDebugEnabled())
-					log.debug("'toString()' method is used for converting because the expected type is 'String' but no Converter found");
-				
-				return sourceObj.toString();
-			}
-			else
-			{
-				try
-				{
-					return super.convertWithSupportConverter(sourceObj, targetType);
-				}
-				catch(ConvertException e1)
-				{
-					Object dv = getDefaultValue(targetType);
-					
-					if(log.isDebugEnabled())
-						log.debug("default value '"+dv+"' is used while converting '"+sourceObj+"' to '"+targetType.getName()+"' because the following exception :", e);
-					
-					return dv;
-				}
-			}
-		}
-		*/
 	}
 	
 	/**

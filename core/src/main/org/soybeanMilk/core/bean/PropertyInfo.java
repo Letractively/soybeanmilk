@@ -52,7 +52,7 @@ public class PropertyInfo
 		this(propertyType, null, null);
 	}
 	
-	public PropertyInfo(Class<?> propertyType, Method readMethod, Method writeMethod)
+	protected PropertyInfo(Class<?> propertyType, Method readMethod, Method writeMethod)
 	{
 		super();
 		this.propertyType = propertyType;

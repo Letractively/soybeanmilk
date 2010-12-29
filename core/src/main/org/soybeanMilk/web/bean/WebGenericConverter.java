@@ -44,15 +44,10 @@ public class WebGenericConverter extends DefaultGenericConverter
 	@SuppressWarnings("unchecked")
 	public Object convert(Object sourceObj, Class<?> targetType)
 	{
-		if(targetType == null)
-			return sourceObj;
+		if(sourceObj instanceof Map)
+			return convertMap((Map<String, Object>)sourceObj, targetType);
 		else
-		{
-			if(sourceObj instanceof Map)
-				return convertMap((Map<String, Object>)sourceObj, targetType);
-			else
-				return convertWithSupportConverter(sourceObj, targetType);
-		}
+			return convertWithSupportConverter(sourceObj, targetType);
 	}
 	
 	@Override

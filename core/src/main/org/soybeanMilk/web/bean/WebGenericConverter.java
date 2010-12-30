@@ -146,9 +146,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		Set<String> keys=valueMap.keySet();
 		for(String k : keys)
 		{
-			String[] propertyExpression=k.split(ACCESSOR_REGEX);
-			if(propertyExpression==null || propertyExpression.length==0)
-				propertyExpression=new String[]{k};
+			String[] propertyExpression=splitPropertyExpression(k);
 			
 			//剔除无关属性
 			if(beanInfo.getSubPropertyInfo(propertyExpression[0]) != null)
@@ -157,82 +155,13 @@ public class WebGenericConverter extends DefaultGenericConverter
 				if(bean == null)
 					bean = instance(beanInfo.getPropertyType(), -1);
 				
-				setPropertyValue(bean, beanInfo, propertyExpression, 0, valueMap.get(k));
+				setProperty(bean, beanInfo, propertyExpression, 0, valueMap.get(k));
 			}
 		}
 		
 		return bean;
 	}
 	
-	/**
-	 * 设置JavaBean某个属性的值
-	 * @param bean JavaBean对象
-	 * @param beanInfo 该对象的Bean信息
-	 * @param propertyExpression 属性层级数组，比如["address","home"]表示该Bean的address属性的home属性
-	 * @param index 当前正在处理的属性层级数组的索引
-	 * @param srcValue 属性对应的值
-	 */
-	private void setPropertyValue(Object bean, PropertyInfo beanInfo, String[] propertyExpression, int index, Object srcValue)
-	{
-		if(index >= propertyExpression.length)
-			return;
-		
-		PropertyInfo propertyInfo=beanInfo.getSubPropertyInfo(propertyExpression[index]);
-		if(propertyInfo == null)
-			throw new ConvertException("can not find property '"+propertyExpression[index]+"' in class '"+beanInfo.getPropertyType().getName()+"'");
-		
-		//自上而下递归，到达末尾时初始化和写入
-		if(index == propertyExpression.length-1)
-		{
-			Object destValue=convertWithSupportConverter(srcValue, propertyInfo.getPropertyType());
-			try
-			{
-				propertyInfo.getWriteMethod().invoke(bean, new Object[]{destValue});
-			}
-			catch(Exception e)
-			{
-				throw new ConvertException("exception occur while calling write method '"+propertyInfo.getWriteMethod()+"'",e);
-			}
-		}
-		else
-		{
-			Object propertyInstance=null;
-			boolean toWrite=false;
-			
-			//查看对象是否已经初始化
-			try
-			{
-				propertyInstance=propertyInfo.getReadMethod().invoke(bean, EMPTY_ARGS);
-			}
-			catch(Exception e)
-			{
-				throw new ConvertException("exception occur while calling read method '"+propertyInfo.getReadMethod().getName()+"'",e);
-			}
-			
-			//初始化
-			if(propertyInstance == null)
-			{
-				propertyInstance=instance(propertyInfo.getPropertyType(), -1);
-				toWrite=true;
-			}
-			
-			//先将对象构建完成，再写入
-			setPropertyValue(propertyInstance, propertyInfo, propertyExpression, index+1, srcValue);
-			
-			//如果之前已经写入了该对象，则不需要再写一次
-			if(toWrite)
-			{
-				try
-				{
-					propertyInfo.getWriteMethod().invoke(bean, new Object[]{propertyInstance});
-				}
-				catch(Exception e)
-				{
-					throw new ConvertException("exception occur while calling write method '"+propertyInfo.getWriteMethod().getName()+"'",e);
-				}
-			}
-		}
-	}
 	
 	/**
 	 * 取得类型的默认值

@@ -11,12 +11,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
-import org.soybeanMilk.core.bean.GenericConverter;
 
 
 public class TestDefaultGenericConverter
 {
-	private GenericConverter converter;
+	private DefaultGenericConverter converter;
 	
 	@Before
 	public void setUp()
@@ -428,5 +427,131 @@ public class TestDefaultGenericConverter
 		Object src = null;
 		
 		converter.convert(src, int.class);
+	}
+	
+	@Test
+	public void getProperty()
+	{
+		MyBean bean=new MyBean();
+		MyBean2 bean2=new MyBean2();
+		
+		bean.setId("111");
+		bean.setSize(7);
+		bean.setMyBean2(bean2);
+		
+		bean2.setId("222");
+		bean2.setSize(8);
+		bean2.setMyBean(bean);
+		
+		{
+			String id=(String)converter.getProperty(bean, "id", null);
+			Assert.assertEquals("111", id);
+		}
+		{
+			Integer id=(Integer)converter.getProperty(bean, "id", int.class);
+			Assert.assertEquals(111, id.intValue());
+		}
+		{
+			Integer size=(Integer)converter.getProperty(bean, "size", null);
+			Assert.assertEquals(7, size.intValue());
+		}
+		
+		{
+			String id=(String)converter.getProperty(bean, "myBean2.id", null);
+			Assert.assertEquals("222", id);
+		}
+		{
+			Integer id=(Integer)converter.getProperty(bean, "myBean2.id", int.class);
+			Assert.assertEquals(222, id.intValue());
+		}
+		{
+			Integer size=(Integer)converter.getProperty(bean, "myBean2.size", null);
+			Assert.assertEquals(8, size.intValue());
+		}
+		
+		{
+			Integer size=(Integer)converter.getProperty(bean, "myBean2.myBean.myBean2.size", null);
+			Assert.assertEquals(8, size.intValue());
+		}
+	}
+	
+	@Test(expected = ConvertException.class)
+	public void getPropertyThrow()
+	{
+		MyBean bean=new MyBean();
+		bean.setId("111");
+		bean.setSize(7);
+		
+		converter.getProperty(bean, "age.size", null);
+	}
+	
+	@Test
+	public void setProperty()
+	{
+		{
+			MyBean bean=new MyBean();
+			
+			converter.setProperty(bean, "id", 111);
+			converter.setProperty(bean, "size", "7");
+			converter.setProperty(bean, "myBean2.myBean", bean);
+			converter.setProperty(bean, "myBean2.id", "222");
+			converter.setProperty(bean, "myBean2.size", 8);
+			
+			Assert.assertEquals("111", bean.getId());
+			Assert.assertEquals(7, bean.getSize().intValue());
+			Assert.assertTrue( bean == bean.getMyBean2().getMyBean() );
+			Assert.assertEquals("222", bean.getMyBean2().getId());
+			Assert.assertEquals(8, bean.getMyBean2().getSize().intValue());
+		}
+	}
+	
+	public static class MyBean
+	{
+		private String id;
+		private Integer size;
+		private MyBean2 myBean2;
+		public String getId() {
+			return id;
+		}
+		public void setId(String id) {
+			this.id = id;
+		}
+		public Integer getSize() {
+			return size;
+		}
+		public void setSize(Integer size) {
+			this.size = size;
+		}
+		public MyBean2 getMyBean2() {
+			return myBean2;
+		}
+		public void setMyBean2(MyBean2 myBean2) {
+			this.myBean2 = myBean2;
+		}
+	}
+	public static class MyBean2
+	{
+		private String id;
+		private Integer size;
+		private MyBean myBean;
+		
+		public String getId() {
+			return id;
+		}
+		public void setId(String id) {
+			this.id = id;
+		}
+		public Integer getSize() {
+			return size;
+		}
+		public void setSize(Integer size) {
+			this.size = size;
+		}
+		public MyBean getMyBean() {
+			return myBean;
+		}
+		public void setMyBean(MyBean myBean) {
+			this.myBean = myBean;
+		}
 	}
 }

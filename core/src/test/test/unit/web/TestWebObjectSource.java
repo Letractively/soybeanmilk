@@ -21,7 +21,6 @@ import org.springframework.mock.web.MockServletContext;
 
 import test.unit.web.TestWebGenericConverter.JavaBean;
 
-
 public class TestWebObjectSource
 {
 	private MockHttpServletRequest request;
@@ -139,7 +138,6 @@ public class TestWebObjectSource
 				Assert.assertTrue( e.getMessage().startsWith(exceptionPrefix) );
 			}
 		}
-		
 		{
 			try
 			{
@@ -150,7 +148,6 @@ public class TestWebObjectSource
 				Assert.assertTrue( e.getMessage().startsWith(exceptionPrefix) );
 			}
 		}
-		
 		{
 			try
 			{
@@ -161,7 +158,6 @@ public class TestWebObjectSource
 				Assert.assertTrue( e.getMessage().startsWith(exceptionPrefix) );
 			}
 		}
-		
 		{
 			try
 			{
@@ -191,14 +187,55 @@ public class TestWebObjectSource
 	{
 		String value="12345";
 		
-		request.setParameter("value", value);
+		{
+			request.setParameter("value", value);
+			Assert.assertEquals(value, webObjectSource.get("param.value", String.class));
+		}
+		{
+			request.setParameter("my.set.value", value);
+			Assert.assertEquals(value, webObjectSource.get("param.my.set.value", String.class));
+		}
+		{
+			request.setParameter("id", new String[]{"1"});
+			request.setParameter("name", new String[]{"jack"});
+			request.setParameter("yourBean.id", new String[]{"2"});
+			request.setParameter("yourBean.name", new String[]{"tom"});
+			
+			MyBean dest=(MyBean)webObjectSource.get("param", MyBean.class);
+			
+			Assert.assertEquals(1, dest.getId().intValue());
+			Assert.assertEquals("jack", dest.getName());
+			Assert.assertEquals(2, dest.getYourBean().getId().intValue());
+			Assert.assertEquals("tom", dest.getYourBean().getName());
+		}
 		
-		//默认从param中取
-		Object dest0=webObjectSource.get("value", String.class);
-		Assert.assertEquals(value, dest0);
-		
-		Object dest1=webObjectSource.get("param.value", String.class);
-		Assert.assertEquals(value, dest1);
+		{
+			request.setParameter("my.myBean.id", new String[]{"1"});
+			request.setParameter("my.myBean.name", new String[]{"jack"});
+			request.setParameter("my.myBean.yourBean.id", new String[]{"2"});
+			request.setParameter("my.myBean.yourBean.name", new String[]{"tom"});
+			
+			MyBean dest=(MyBean)webObjectSource.get("my.myBean", MyBean.class);
+			
+			Assert.assertEquals(1, dest.getId().intValue());
+			Assert.assertEquals("jack", dest.getName());
+			Assert.assertEquals(2, dest.getYourBean().getId().intValue());
+			Assert.assertEquals("tom", dest.getYourBean().getName());
+		}
+
+		{
+			request.setParameter("my.myBean.id", new String[]{"1"});
+			request.setParameter("my.myBean.name", new String[]{"jack"});
+			request.setParameter("my.myBean.yourBean.id", new String[]{"2"});
+			request.setParameter("my.myBean.yourBean.name", new String[]{"tom"});
+			
+			MyBean dest=(MyBean)webObjectSource.get("param.my.myBean", MyBean.class);
+			
+			Assert.assertEquals(1, dest.getId().intValue());
+			Assert.assertEquals("jack", dest.getName());
+			Assert.assertEquals(2, dest.getYourBean().getId().intValue());
+			Assert.assertEquals("tom", dest.getYourBean().getName());
+		}
 	}
 	
 	@Test
@@ -207,28 +244,37 @@ public class TestWebObjectSource
 		String value="12345";
 		
 		{
-			//默认设置到request中
-			webObjectSource.set("value", value);
-			Assert.assertEquals(request.getAttribute("value"), value);
-			
-			Object dest=webObjectSource.get("request.value", String.class);
-			Assert.assertEquals(value, dest);
-		}
-		
-		{
 			webObjectSource.set("request.value", value);
 			Assert.assertEquals(request.getAttribute("value"), value);
 			
 			Object dest=webObjectSource.get("request.value", String.class);
 			Assert.assertEquals(value, dest);
 		}
-		
 		{
 			webObjectSource.set("request.my.value", value);
 			Assert.assertEquals(request.getAttribute("my.value"), value);
 			
 			Object dest=webObjectSource.get("request.my.value", String.class);
 			Assert.assertEquals(value, dest);
+		}
+		{
+			MyBean myBean=new MyBean();
+			
+			webObjectSource.set("request.myBean",myBean);
+			Assert.assertTrue( request.getAttribute("myBean")==myBean );
+			Assert.assertTrue( webObjectSource.get("request.myBean", null)==myBean );
+			
+			webObjectSource.set("request.myBean.id", 7);
+			Assert.assertEquals(7, myBean.getId().intValue());
+			Assert.assertEquals(7, webObjectSource.get("request.myBean.id", null));
+			
+			webObjectSource.set("request.myBean.name", "name");
+			Assert.assertEquals("name", myBean.getName());
+			Assert.assertEquals("name", webObjectSource.get("request.myBean.name", null));
+			
+			webObjectSource.set("request.myBean.yourBean.id", 8);
+			Assert.assertEquals(8, myBean.getYourBean().getId().intValue());
+			Assert.assertEquals(8, webObjectSource.get("request.myBean.yourBean.id", null));
 		}
 	}
 	
@@ -237,11 +283,39 @@ public class TestWebObjectSource
 	{
 		String value="12345";
 		
-		webObjectSource.set("session.value", value);
-		Assert.assertEquals(request.getSession().getAttribute("value"), value);
-		
-		Object dest=webObjectSource.get("session.value", String.class);
-		Assert.assertEquals(value, dest);
+		{
+			webObjectSource.set("session.value", value);
+			Assert.assertEquals(request.getSession().getAttribute("value"), value);
+			
+			Object dest=webObjectSource.get("session.value", String.class);
+			Assert.assertEquals(value, dest);
+		}
+		{
+			webObjectSource.set("session.my.value", value);
+			Assert.assertEquals(request.getSession().getAttribute("my.value"), value);
+			
+			Object dest=webObjectSource.get("session.my.value", String.class);
+			Assert.assertEquals(value, dest);
+		}
+		{
+			MyBean myBean=new MyBean();
+			
+			webObjectSource.set("session.myBean",myBean);
+			Assert.assertTrue( request.getSession().getAttribute("myBean")==myBean );
+			Assert.assertTrue( webObjectSource.get("session.myBean", null)==myBean );
+			
+			webObjectSource.set("session.myBean.id", 7);
+			Assert.assertEquals(7, myBean.getId().intValue());
+			Assert.assertEquals(7, webObjectSource.get("session.myBean.id", null));
+			
+			webObjectSource.set("session.myBean.name", "name");
+			Assert.assertEquals("name", myBean.getName());
+			Assert.assertEquals("name", webObjectSource.get("session.myBean.name", null));
+			
+			webObjectSource.set("session.myBean.yourBean.id", 8);
+			Assert.assertEquals(8, myBean.getYourBean().getId().intValue());
+			Assert.assertEquals(8, webObjectSource.get("session.myBean.yourBean.id", null));
+		}
 	}
 	
 	@Test
@@ -249,10 +323,125 @@ public class TestWebObjectSource
 	{
 		String value="12345";
 		
-		webObjectSource.set("application.value", value);
-		Assert.assertEquals(application.getAttribute("value"), value);
+		{
+			webObjectSource.set("application.value", value);
+			Assert.assertEquals(application.getAttribute("value"), value);
+			
+			Object dest=webObjectSource.get("application.value", String.class);
+			Assert.assertEquals(value, dest);
+		}
+		{
+			webObjectSource.set("application.my.value", value);
+			Assert.assertEquals(application.getAttribute("my.value"), value);
+			
+			Object dest=webObjectSource.get("application.my.value", String.class);
+			Assert.assertEquals(value, dest);
+		}
+		{
+			MyBean myBean=new MyBean();
+			
+			webObjectSource.set("application.myBean",myBean);
+			Assert.assertTrue( application.getAttribute("myBean")==myBean );
+			Assert.assertTrue( webObjectSource.get("application.myBean", null)==myBean );
+			
+			webObjectSource.set("application.myBean.id", 7);
+			Assert.assertEquals(7, myBean.getId().intValue());
+			Assert.assertEquals(7, webObjectSource.get("application.myBean.id", null));
+			
+			webObjectSource.set("application.myBean.name", "name");
+			Assert.assertEquals("name", myBean.getName());
+			Assert.assertEquals("name", webObjectSource.get("application.myBean.name", null));
+			
+			webObjectSource.set("application.myBean.yourBean.id", 8);
+			Assert.assertEquals(8, myBean.getYourBean().getId().intValue());
+			Assert.assertEquals(8, webObjectSource.get("application.myBean.yourBean.id", null));
+		}
+	}
+	
+	@Test
+	public void setAndGetFromUnknownScope()
+	{
+		String value="12345";
 		
-		Object dest=webObjectSource.get("application.value", String.class);
-		Assert.assertEquals(value, dest);
+		//默认应该设置到request中
+		{
+			webObjectSource.set("value", value);
+			Assert.assertEquals(value, request.getAttribute("value"));
+			
+			Object dest=webObjectSource.get("request.value", String.class);
+			Assert.assertEquals(value, dest);
+		}
+		{
+			webObjectSource.set("my.set.value", value);
+			Assert.assertEquals(value, request.getAttribute("my.set.value"));
+			
+			Object dest=webObjectSource.get("request.my.set.value", String.class);
+			Assert.assertEquals(value, dest);
+		}
+		
+		//默认应该从param取
+		{
+			request.setParameter("value", value);
+			
+			Object dest0=webObjectSource.get("value", String.class);
+			Assert.assertEquals(value, dest0);
+		}
+		{
+			request.setParameter("my.set.value", value);
+			
+			Assert.assertEquals(value, webObjectSource.get("my.set.value",String.class));
+		}
+	}
+	
+	public static class MyBean
+	{
+		private Integer id;
+		private String name;
+		private YourBean yourBean;
+		
+		public Integer getId() {
+			return id;
+		}
+		public void setId(Integer id) {
+			this.id = id;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public YourBean getYourBean() {
+			return yourBean;
+		}
+		public void setYourBean(YourBean yourBean) {
+			this.yourBean = yourBean;
+		}
+	}
+	
+	public static class YourBean
+	{
+		private Integer id;
+		private String name;
+		private MyBean myBean;
+		
+		public Integer getId() {
+			return id;
+		}
+		public void setId(Integer id) {
+			this.id = id;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public MyBean getMyBean() {
+			return myBean;
+		}
+		public void setMyBean(MyBean myBean) {
+			this.myBean = myBean;
+		}
 	}
 }

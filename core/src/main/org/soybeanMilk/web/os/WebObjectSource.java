@@ -35,8 +35,8 @@ import org.soybeanMilk.web.WebConstants;
 /**
  * 用于WEB应用的对象源，它的实例的生命周期与一次请求的生命周期相同。
  * <br>
- * 传递给它的关键字会被理解为由两个部分组成：[scope].[yourKey]，其中
- * “[scope]”表示作用域，“[yourKey]”则是真正的该作用域下的关键字。
+ * 传递给它的关键字会被理解为由两个部分组成：“[scope].[keyInScope]”，其中
+ * “[scope]”表示作用域，“[keyInScope]”则是真正的该作用域下的关键字。
  * <br>
  * 它目前所支持的关键字格式及其说明如下：
  * <ul>
@@ -44,20 +44,20 @@ import org.soybeanMilk.web.WebConstants;
  *   set
  *   <ul>
  *  	<li>
- *  		<span class="tagValue">yourKey</span> <br/>
- *  		结果将以“<span class="var">yourKey</span>”关键字被保存到“<span class="var">request</span>”作用域中
+ *  		<span class="tagValue">keyInScope</span> <br/>
+ *  		结果将以“<span class="var">keyInScope</span>”关键字被保存到“<span class="var">request</span>”作用域中
  *  	</li>
  *  	<li>
- *  		<span class="tagValue">request.yourKey</span> <br/>
+ *  		<span class="tagValue">request.keyInScope</span> <br/>
  *  		同上
  *  	</li>
  *  	<li>
- *  		<span class="tagValue">session.yourKey</span> <br/>
- *  		结果将以“<span class="var">yourKey</span>”关键字被保存到“<span class="var">session</span>”作用域中
+ *  		<span class="tagValue">session.keyInScope</span> <br/>
+ *  		结果将以“<span class="var">keyInScope</span>”关键字被保存到“<span class="var">session</span>”作用域中
  *  	</li>
  *  	<li>
- *  		<span class="tagValue">application.yourKey</span> <br/>
- *  		结果将以“<span class="var">yourKey</span>”关键字被保存到“<span class="var">application</span>”作用域中
+ *  		<span class="tagValue">application.keyInScope</span> <br/>
+ *  		结果将以“<span class="var">keyInScope</span>”关键字被保存到“<span class="var">application</span>”作用域中
  *  	</li>
  *   </ul>
  *  </li>
@@ -70,14 +70,14 @@ import org.soybeanMilk.web.WebConstants;
  *  		那么它不会做任何处理而直接返回整个参数映射表；如果是其他类型，它会首先将此映射表转换为这个类型的对象，然后返回此对象。
  *  	</li>
  *  	<li>
- *  		<span class="tagValue">yourKey</span> <br/>
- *  		请求参数映射表中以“<span class="var">yourKey</span>”开头的请求参数。
- *  		如果这个参数有明确的值，它将对这个值进行类型转换（需要的话），然后返回转换后的对象；否则，就根据“<span class="var">yourKey</span>”来对参数映射表进行过滤，
- *  		产生一个新的映射表（它的主键是原始关键字“<span class="var">yourKey.</span>”之后的部分，比如由“<span class="var">beanName.propertyName</span>”变为“<span class="var">propertyName</span>”），
+ *  		<span class="tagValue">keyInScope</span> <br/>
+ *  		请求参数映射表中以“<span class="var">keyInScope</span>”开头的请求参数。
+ *  		如果这个参数有明确的值，它将对这个值进行类型转换（需要的话），然后返回转换后的对象；否则，就根据“<span class="var">keyInScope</span>”来对参数映射表进行过滤，
+ *  		产生一个新的映射表（它的主键是原始关键字“<span class="var">keyInScope.</span>”之后的部分，比如由“<span class="var">beanName.propertyName</span>”变为“<span class="var">propertyName</span>”），
  *  		然后，与上面提到的一样，根据目标类型直接返回这个新映射表或者返回转换后的对象。
  *  	</li>
  *  	<li>
- *  		<span class="tagValue">param.yourKey</span> <br/>
+ *  		<span class="tagValue">param.keyInScope</span> <br/>
  *  		同上。
  *  	</li>
  *  	<li>
@@ -86,8 +86,8 @@ import org.soybeanMilk.web.WebConstants;
  *  		那么你需要为它的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletRequest</span>”到目标类型的辅助{@linkplain Converter 转换器}。
  *  	</li>
  *  	<li>
- *  		<span class="tagValue">request.yourKey</span> <br/>
- *  		请求属性中的“<span class="var">yourKey</span>”关键字对应的对象。如果目标类型与此对象不一致，框架将尝试执行类型转换。
+ *  		<span class="tagValue">request.keyInScope</span> <br/>
+ *  		请求属性中的“<span class="var">keyInScope</span>”关键字对应的对象。如果目标类型与此对象不一致，框架将尝试执行类型转换。
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">session</span> <br/>
@@ -95,8 +95,8 @@ import org.soybeanMilk.web.WebConstants;
  *  		那么你需要为它的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpSession</span>”到目标类型的辅助{@linkplain Converter 转换器}。
  *  	</li>
  *  	<li>
- *  		<span class="tagValue">session.yourKey</span> <br/>
- *  		会话属性中的“<span class="var">yourKey</span>”关键字对应的对象。如果目标类型与此对象不一致，框架将尝试执行类型转换。
+ *  		<span class="tagValue">session.keyInScope</span> <br/>
+ *  		会话属性中的“<span class="var">keyInScope</span>”关键字对应的对象。如果目标类型与此对象不一致，框架将尝试执行类型转换。
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">application</span> <br/>
@@ -104,8 +104,8 @@ import org.soybeanMilk.web.WebConstants;
  *  		那么你需要为它的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.ServletContext</span>”到目标类型的辅助{@linkplain Converter 转换器}。
  *  	</li>
  *  	<li>
- *  		<span class="tagValue">application.yourKey</span> <br/>
- *  		应用属性中的“<span class="var">yourKey</span>”关键字对应的对象。如果目标类型与此对象不一致，框架将尝试执行类型转换。
+ *  		<span class="tagValue">application.keyInScope</span> <br/>
+ *  		应用属性中的“<span class="var">keyInScope</span>”关键字对应的对象。如果目标类型与此对象不一致，框架将尝试执行类型转换。
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">response</span> <br/>
@@ -116,6 +116,9 @@ import org.soybeanMilk.web.WebConstants;
  *  </li>
  * </ul>
  * <br>
+ * 另外，如果“request”、“session”、“application”作用域的“[keyInScope]”包含访问符“.”，比如“request.yourBean.property”，
+ * 它会认为你是想要取得或设置“request”作用域内“yourBean”对象的“property”属性，并按此处理（如果“yourBean”对象存在的话）。
+ * <br>
  * 实际上，你在配置文件中定义的&lt;arg&gt;关键字的格式就是由它决定的。
  * @author earthAngry@gmail.com
  * @date 2010-7-19
@@ -124,6 +127,7 @@ public class WebObjectSource extends ConvertableObjectSource
 {
 	private static Log log = LogFactory.getLog(WebObjectSource.class);
 	
+	private static final char ACCESSOR=WebConstants.ACCESSOR;
 	
 	private HttpServletRequest request;
 	private HttpServletResponse response;
@@ -211,16 +215,13 @@ public class WebObjectSource extends ConvertableObjectSource
 				if(WebConstants.Scope.PARAM.equals(scope))
 					data=getFromMap(getRequest().getParameterMap(), keyInScope, objectType);
 				else if(WebConstants.Scope.REQUEST.equals(scope))
-					data=getWithKeyExpression(getRequest(), keyInScope, objectType);
+					data=getAttributeByKeyExpression(getRequest(), keyInScope, objectType);
 				else if(WebConstants.Scope.SESSION.equals(scope))
-					data=getWithKeyExpression(getRequest().getSession(), keyInScope, objectType);
+					data=getAttributeByKeyExpression(getRequest().getSession(), keyInScope, objectType);
 				else if(WebConstants.Scope.APPLICATION.equals(scope))
-					data=getWithKeyExpression(getApplication(), keyInScope, objectType);
+					data=getAttributeByKeyExpression(getApplication(), keyInScope, objectType);
 				else if(WebConstants.Scope.RESPONSE.equals(scope))
-				{
-					if(keyInScope != null)
-						throw new ObjectSourceException("key '"+key+"' is invalid, you can not get data from '"+WebConstants.Scope.RESPONSE+"' scope");
-				}
+					throw new ObjectSourceException("key '"+key+"' is invalid, you can not get data from '"+WebConstants.Scope.RESPONSE+"' scope");
 				else
 					data=getWithUnknownScope(scope, keyInScope, objectType);
 			}
@@ -249,11 +250,11 @@ public class WebObjectSource extends ConvertableObjectSource
 		if(WebConstants.Scope.PARAM.equals(scope))
 			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.PARAM+"'");
 		else if(WebConstants.Scope.REQUEST.equals(scope))
-			setWithKeyExpression(getRequest(), keyInScope, obj);
+			setAttributeByKeyExpression(getRequest(), keyInScope, obj);
 		else if(WebConstants.Scope.SESSION.equals(scope))
-			setWithKeyExpression(getRequest().getSession(), keyInScope, obj);
+			setAttributeByKeyExpression(getRequest().getSession(), keyInScope, obj);
 		else if(WebConstants.Scope.APPLICATION.equals(scope))
-			setWithKeyExpression(getApplication(), keyInScope, obj);
+			setAttributeByKeyExpression(getApplication(), keyInScope, obj);
 		else if(WebConstants.Scope.RESPONSE.equals(scope))
 			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.RESPONSE+"'");
 		else
@@ -264,43 +265,45 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	/**
-	 * 从默认无法识别的作用域取得对象（作用域为null或者未知）
-	 * @param scope 作用域
-	 * @param keyInScope 该作用域下的关键字，它不会为null
+	 * 从无法识别的作用域取得对象
+	 * @param scope 作用域，可能为<code>null</code>
+	 * @param keyInScope 该作用域下的关键字
 	 * @param objectType
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	protected Object getWithUnknownScope(String scope, String keyInScope, Class<?> objectType)
 	{
+		//作用域无法识别，则认为它是param作用域的关键字的一部分
 		if(scope != null)
-			throw new ObjectSourceException("scope '"+scope+"' in key '"+(scope+WebConstants.ACCESSOR+keyInScope)+"' is invalid, it must be one of '"+WebConstants.Scope.PARAM+"', '"+WebConstants.Scope.REQUEST+"', '"+WebConstants.Scope.SESSION+"', '"+WebConstants.Scope.APPLICATION+"', '"+WebConstants.Scope.RESPONSE+"'");
+			keyInScope=scope+ACCESSOR+keyInScope;
 		
 		return getFromMap(getRequest().getParameterMap(), keyInScope, objectType);
 	}
 	
 	/**
-	 * 将对象存储到默认无法识别的作用域中（作用域为null或者未知）
-	 * @param scope 作用域
-	 * @param keyInScope 该作用域下的关键字，它不会为null
+	 * 将对象存储到无法识别的作用域中
+	 * @param scope 作用域，可能为<code>null</code>
+	 * @param keyInScope 该作用域下的关键字
 	 * @param obj
 	 */
 	protected void setWithUnknownScope(String scope, String keyInScope, Object obj)
 	{
+		//作用域无法识别，则认为它是request作用域的关键字的一部分
 		if(scope != null)
-			throw new ObjectSourceException("scope '"+scope+"' in key '"+(scope+WebConstants.ACCESSOR+keyInScope)+"' is invalid, it must be one of '"+WebConstants.Scope.PARAM+"', '"+WebConstants.Scope.REQUEST+"', '"+WebConstants.Scope.SESSION+"', '"+WebConstants.Scope.APPLICATION+"', '"+WebConstants.Scope.RESPONSE+"'");
+			keyInScope=scope+ACCESSOR+keyInScope;
 		
-		setWithKeyExpression(getRequest(), keyInScope, obj);
+		setAttributeByKeyExpression(getRequest(), keyInScope, obj);
 	}
 	
 	/**
-	 * 设置属性值到servlet对象
+	 * 将对象保存到servlet对象作用域内，它支持设置作用域内对象的属性。
 	 * @param servletObj
 	 * @param keyExpression
 	 * @param obj
 	 * @date 2010-12-30
 	 */
-	protected void setWithKeyExpression(Object servletObj, String keyExpression, Object obj)
+	protected void setAttributeByKeyExpression(Object servletObj, String keyExpression, Object obj)
 	{
 		String[] objKeyWithProperty=splitByFirstDot(keyExpression);
 		
@@ -318,14 +321,14 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	/**
-	 * 从servlet对象取得属性值。
+	 * 从servlet对象作用域内取得对象，它支持取得作用域内对象的属性。
 	 * @param servletObj
 	 * @param keyExpression
 	 * @param objectType
 	 * @return
 	 * @date 2010-12-30
 	 */
-	protected Object getWithKeyExpression(Object servletObj, String keyExpression, Class<?> objectType)
+	protected Object getAttributeByKeyExpression(Object servletObj, String keyExpression, Class<?> objectType)
 	{
 		Object data=getServletObjAttribute(servletObj, keyExpression);
 		if(data != null)
@@ -345,7 +348,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	/**
-	 * 设置属性值到servlet对象
+	 * 将对象保存到servlet对象作用域内，它支持设置作用域内对象的属性。
 	 * @param servletObj
 	 * @param key
 	 * @param value
@@ -364,7 +367,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	/**
-	 * 从servlet对象取得属性值
+	 * 从servlet对象作用域内取得对象
 	 * @param servletObj
 	 * @param key
 	 * @param value
@@ -408,7 +411,7 @@ public class WebObjectSource extends ConvertableObjectSource
 			return genericConverter.convert(explicit, targetType);
 		else
 		{
-			String keyPrefix = keyFilter+WebConstants.ACCESSOR;
+			String keyPrefix = keyFilter+ACCESSOR;
 			
 			Map<String,Object> filtered = new HashMap<String, Object>();
 			Set<String> keys=rawValueMap.keySet();
@@ -466,7 +469,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	private String[] splitByFirstDot(String str)
 	{
 		String[] re=new String[2];
-		int idx=str.indexOf(WebConstants.ACCESSOR);
+		int idx=str.indexOf(ACCESSOR);
 		
 		if(idx<=0 || idx==str.length()-1)
 			re[1]=str;

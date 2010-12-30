@@ -222,6 +222,14 @@ public class TestWebObjectSource
 			Object dest=webObjectSource.get("request.value", String.class);
 			Assert.assertEquals(value, dest);
 		}
+		
+		{
+			webObjectSource.set("request.my.value", value);
+			Assert.assertEquals(request.getAttribute("my.value"), value);
+			
+			Object dest=webObjectSource.get("request.my.value", String.class);
+			Assert.assertEquals(value, dest);
+		}
 	}
 	
 	@Test

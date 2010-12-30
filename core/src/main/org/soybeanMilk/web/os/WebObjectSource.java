@@ -183,54 +183,50 @@ public class WebObjectSource extends ConvertableObjectSource
 			//WEB环境下只有字符串主键
 			String strKey = (String)key;
 			
-			if(strKey==null || strKey.length()==0)
-				throw new ObjectSourceException("[key] must not be empty.");
+			if(strKey==null)
+				throw new ObjectSourceException("[key] must not be null.");
 			
-			int accessorIdx=strKey.indexOf(WebConstants.ACCESSOR);
-			if(accessorIdx==0 || accessorIdx >= strKey.length()-1)
-				throw new ObjectSourceException("invalid key '"+strKey+"'");
+			String[] scopeSplit=splitByFirstDot(strKey);
 			
-			String scope = accessorIdx > 0 ? strKey.substring(0, accessorIdx) : null;
-			String subKey = accessorIdx > 0 ? strKey.substring(accessorIdx+1) : strKey;
+			String scope = scopeSplit[0];
+			String keyInScope = scopeSplit[1];
 			
 			if(scope == null)
 			{
-				if(WebConstants.Scope.PARAM.equals(subKey))
-					data=convertParamMap(getRequest().getParameterMap(), null, objectType);
-				else if(WebConstants.Scope.REQUEST.equals(subKey))
+				if(WebConstants.Scope.PARAM.equals(keyInScope))
+					data=getFromMap(getRequest().getParameterMap(), null, objectType);
+				else if(WebConstants.Scope.REQUEST.equals(keyInScope))
 					data=convertServletObject(getRequest(), objectType);
-				else if(WebConstants.Scope.SESSION.equals(subKey))
+				else if(WebConstants.Scope.SESSION.equals(keyInScope))
 					data=convertServletObject(getRequest().getSession(), objectType);
-				else if(WebConstants.Scope.APPLICATION.equals(subKey))
+				else if(WebConstants.Scope.APPLICATION.equals(keyInScope))
 					data=convertServletObject(getApplication(), objectType);
-				else if(WebConstants.Scope.RESPONSE.equals(subKey))
+				else if(WebConstants.Scope.RESPONSE.equals(keyInScope))
 					data=convertServletObject(getResponse(), objectType);
 				else
-					data=getWithUnknownScope(scope, subKey, objectType);
+					data=getWithUnknownScope(scope, keyInScope, objectType);
 			}
 			else
 			{
 				if(WebConstants.Scope.PARAM.equals(scope))
-					data=convertParamMap(getRequest().getParameterMap(), subKey, objectType);
+					data=getFromMap(getRequest().getParameterMap(), keyInScope, objectType);
 				else if(WebConstants.Scope.REQUEST.equals(scope))
-					data=getGenericConverter().convert(getRequest().getAttribute(subKey), objectType);
+					data=getWithKeyExpression(getRequest(), keyInScope, objectType);
 				else if(WebConstants.Scope.SESSION.equals(scope))
-					data=getGenericConverter().convert(getRequest().getSession().getAttribute(subKey), objectType);
+					data=getWithKeyExpression(getRequest().getSession(), keyInScope, objectType);
 				else if(WebConstants.Scope.APPLICATION.equals(scope))
-					data=getGenericConverter().convert(getApplication().getAttribute(subKey), objectType);
+					data=getWithKeyExpression(getApplication(), keyInScope, objectType);
 				else if(WebConstants.Scope.RESPONSE.equals(scope))
 				{
-					if(subKey != null)
+					if(keyInScope != null)
 						throw new ObjectSourceException("key '"+key+"' is invalid, you can not get data from '"+WebConstants.Scope.RESPONSE+"' scope");
-					
-					data=convertServletObject(getResponse(), objectType);
 				}
 				else
-					data=getWithUnknownScope(scope, subKey, objectType);
+					data=getWithUnknownScope(scope, keyInScope, objectType);
 			}
 			
 			if(log.isDebugEnabled())
-				log.debug("get '"+data+"' from scope '"+scope+"' with key '"+subKey+"'");
+				log.debug("get '"+data+"' from scope '"+scope+"' with key '"+keyInScope+"'");
 		}
 		
 		return data;
@@ -242,31 +238,29 @@ public class WebObjectSource extends ConvertableObjectSource
 		String strKey = (String)key;
 		
 		//主键不能为空
-		if(strKey==null || strKey.length()==0)
-			throw new ObjectSourceException("[key] must not be empty.");
+		if(strKey == null)
+			throw new IllegalArgumentException("[key] must not be null");
 		
-		int accessorIdx=strKey.indexOf(WebConstants.ACCESSOR);
-		if(accessorIdx==0 || accessorIdx >= strKey.length()-1)
-			throw new ObjectSourceException("invalid key '"+strKey+"'");
+		String[] scopeSplit=splitByFirstDot(strKey);
 		
-		String scope = accessorIdx > 0 ? strKey.substring(0, accessorIdx) : null;
-		String subKey = accessorIdx > 0 ? strKey.substring(accessorIdx+1) : strKey;
+		String scope = scopeSplit[0];
+		String keyInScope = scopeSplit[1];
 		
 		if(WebConstants.Scope.PARAM.equals(scope))
 			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.PARAM+"'");
 		else if(WebConstants.Scope.REQUEST.equals(scope))
-			getRequest().setAttribute(subKey, obj);
+			setWithKeyExpression(getRequest(), keyInScope, obj);
 		else if(WebConstants.Scope.SESSION.equals(scope))
-			getRequest().getSession().setAttribute(subKey, obj);
+			setWithKeyExpression(getRequest().getSession(), keyInScope, obj);
 		else if(WebConstants.Scope.APPLICATION.equals(scope))
-			getApplication().setAttribute(subKey, obj);
+			setWithKeyExpression(getApplication(), keyInScope, obj);
 		else if(WebConstants.Scope.RESPONSE.equals(scope))
 			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.RESPONSE+"'");
 		else
-			setWithUnknownScope(scope, subKey, obj);
+			setWithUnknownScope(scope, keyInScope, obj);
 		
 		if(log.isDebugEnabled())
-			log.debug("save '"+obj+"' into '"+scope+"' with key '"+subKey+"'");
+			log.debug("save '"+obj+"' into '"+scope+"' with key '"+keyInScope+"'");
 	}
 	
 	/**
@@ -282,7 +276,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		if(scope != null)
 			throw new ObjectSourceException("scope '"+scope+"' in key '"+(scope+WebConstants.ACCESSOR+keyInScope)+"' is invalid, it must be one of '"+WebConstants.Scope.PARAM+"', '"+WebConstants.Scope.REQUEST+"', '"+WebConstants.Scope.SESSION+"', '"+WebConstants.Scope.APPLICATION+"', '"+WebConstants.Scope.RESPONSE+"'");
 		
-		return convertParamMap(getRequest().getParameterMap(), keyInScope, objectType);
+		return getFromMap(getRequest().getParameterMap(), keyInScope, objectType);
 	}
 	
 	/**
@@ -296,31 +290,120 @@ public class WebObjectSource extends ConvertableObjectSource
 		if(scope != null)
 			throw new ObjectSourceException("scope '"+scope+"' in key '"+(scope+WebConstants.ACCESSOR+keyInScope)+"' is invalid, it must be one of '"+WebConstants.Scope.PARAM+"', '"+WebConstants.Scope.REQUEST+"', '"+WebConstants.Scope.SESSION+"', '"+WebConstants.Scope.APPLICATION+"', '"+WebConstants.Scope.RESPONSE+"'");
 		
-		getRequest().setAttribute(keyInScope, obj);
+		setWithKeyExpression(getRequest(), keyInScope, obj);
 	}
 	
 	/**
-	 * 将请求参数映射表转换为目标对象。<br>
+	 * 设置属性值到servlet对象
+	 * @param servletObj
+	 * @param keyExpression
+	 * @param obj
+	 * @date 2010-12-30
+	 */
+	protected void setWithKeyExpression(Object servletObj, String keyExpression, Object obj)
+	{
+		String[] objKeyWithProperty=splitByFirstDot(keyExpression);
+		
+		//只有包含了'.'字符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式，下面两个都是相同的逻辑
+		if(objKeyWithProperty[0] != null)
+		{
+			Object data=getServletObjAttribute(servletObj, objKeyWithProperty[0]);
+			if(data != null)
+				getGenericConverter().setProperty(data, objKeyWithProperty[1], obj);
+			else
+				setServletObjAttribute(servletObj, keyExpression, obj);
+		}
+		else
+			setServletObjAttribute(servletObj, keyExpression, obj);
+	}
+	
+	/**
+	 * 从servlet对象取得属性值。
+	 * @param servletObj
+	 * @param keyExpression
+	 * @param objectType
+	 * @return
+	 * @date 2010-12-30
+	 */
+	protected Object getWithKeyExpression(Object servletObj, String keyExpression, Class<?> objectType)
+	{
+		Object data=getServletObjAttribute(servletObj, keyExpression);
+		if(data != null)
+			data=getGenericConverter().convert(data, objectType);
+		else
+		{
+			String[] objKeyWithProperty=splitByFirstDot(keyExpression);
+			if(objKeyWithProperty[0]!=null && objKeyWithProperty[1]!=null)
+			{
+				data=getServletObjAttribute(servletObj, objKeyWithProperty[0]);
+				if(data != null)
+					data=getGenericConverter().getProperty(data, objKeyWithProperty[1], objectType);
+			}
+		}
+		
+		return data;
+	}
+	
+	/**
+	 * 设置属性值到servlet对象
+	 * @param servletObj
+	 * @param key
+	 * @param value
+	 * @date 2010-12-30
+	 */
+	protected void setServletObjAttribute(Object servletObj, String key, Object value)
+	{
+		if(servletObj instanceof HttpServletRequest)
+			((HttpServletRequest)servletObj).setAttribute(key, value);
+		else if(servletObj instanceof HttpSession)
+			((HttpSession)servletObj).setAttribute(key, value);
+		else if(servletObj instanceof ServletContext)
+			((ServletContext)servletObj).setAttribute(key, value);
+		else
+			throw new IllegalArgumentException("unknown servlet object '"+servletObj+"'");
+	}
+	
+	/**
+	 * 从servlet对象取得属性值
+	 * @param servletObj
+	 * @param key
+	 * @param value
+	 * @date 2010-12-30
+	 */
+	protected Object getServletObjAttribute(Object servletObj, String key)
+	{
+		if(servletObj instanceof HttpServletRequest)
+			return ((HttpServletRequest)servletObj).getAttribute(key);
+		else if(servletObj instanceof HttpSession)
+			return ((HttpSession)servletObj).getAttribute(key);
+		else if(servletObj instanceof ServletContext)
+			return ((ServletContext)servletObj).getAttribute(key);
+		else
+			throw new IllegalArgumentException("unknown servlet object '"+servletObj+"'");
+	}
+	
+	/**
+	 * 将从映射表取得对象。<br>
 	 * 如果<code>keyFilter</code>是一个明确的关键字（映射表中有该关键字的值），它将直接根据该关键字的值来转换；<br>
 	 * 如果<code>keyFilter</code>是<code>null</code>，那么它将使用原始的请求参数映射表来进行转换；<br>
 	 * 否则，它会根据<code>keyFilter</code>来对参数映射表进行过滤，产生一个新的映射表（它的关键字将会被替换为原始关键字的“<code>[keyFilter]</code>.”之后的部分，比如由“<code>beanName.propertyName</code>”变为“<code>propertyName</code>”），
 	 * 然后使用它进行转换。
 	 * 
-	 * @param rawRequestParams 原始的请求参数映射表，直接由<code>request.getParameterMap()</code>取得
+	 * @param rawValueMap 原始映射表
 	 * @param keyFilter 主键筛选器，只有以此筛选器开头的Map关键字才会被转换，如果为null，则表明不做筛选
 	 * @param targetType 目标类型
 	 * 
 	 * @return
 	 */
-	protected Object convertParamMap(Map<String,String[]> rawRequestParams, String keyFilter, Class<?> targetType)
+	protected Object getFromMap(Map<String,Object> rawValueMap, String keyFilter, Class<?> targetType)
 	{
 		GenericConverter genericConverter=getGenericConverter();
 		
 		if(keyFilter == null)
-			return genericConverter.convert(rawRequestParams, targetType);
+			return genericConverter.convert(rawValueMap, targetType);
 		
 		//明确的KEY，直接根据值转换
-		Object explicit = rawRequestParams.get(keyFilter);
+		Object explicit = rawValueMap.get(keyFilter);
 		if(explicit != null)
 			return genericConverter.convert(explicit, targetType);
 		else
@@ -328,11 +411,11 @@ public class WebObjectSource extends ConvertableObjectSource
 			String keyPrefix = keyFilter+WebConstants.ACCESSOR;
 			
 			Map<String,Object> filtered = new HashMap<String, Object>();
-			Set<String> keys=rawRequestParams.keySet();
+			Set<String> keys=rawValueMap.keySet();
 			for(String k : keys)
 			{
 				if(k.startsWith(keyPrefix))
-					filtered.put(k.substring(keyPrefix.length()), rawRequestParams.get(k));
+					filtered.put(k.substring(keyPrefix.length()), rawValueMap.get(k));
 			}
 			
 			return genericConverter.convert(filtered, targetType);
@@ -372,5 +455,27 @@ public class WebObjectSource extends ConvertableObjectSource
 			throw new ObjectSourceException("no Converter defined for converting '"+sourceClass.getName()+"' to '"+targetType.getName()+"'");
 		
 		return converter.convert(obj, targetType);
+	}
+	
+	/**
+	 * 将字符串从第一个'.'位置拆分为两部分，如果不包含'.'，则第一个元素为<code>null</code>，第二个元素为原字符串。
+	 * @param str
+	 * @return
+	 * @date 2010-12-30
+	 */
+	private String[] splitByFirstDot(String str)
+	{
+		String[] re=new String[2];
+		int idx=str.indexOf(WebConstants.ACCESSOR);
+		
+		if(idx<=0 || idx==str.length()-1)
+			re[1]=str;
+		else
+		{
+			re[0]=str.substring(0,idx);
+			re[1]=str.substring(idx+1);
+		}
+		
+		return re;
 	}
 }

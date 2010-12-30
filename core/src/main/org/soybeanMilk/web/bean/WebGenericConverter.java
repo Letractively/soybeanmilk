@@ -168,7 +168,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @param type
 	 * @return
 	 */
-	public static Object getDefaultValue(Class<?> type)
+	protected Object getDefaultValue(Class<?> type)
 	{
 		if(boolean.class == type)
 			return false;

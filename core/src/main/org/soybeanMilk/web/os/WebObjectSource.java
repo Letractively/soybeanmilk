@@ -466,7 +466,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * @return
 	 * @date 2010-12-30
 	 */
-	private String[] splitByFirstDot(String str)
+	protected String[] splitByFirstDot(String str)
 	{
 		String[] re=new String[2];
 		int idx=str.indexOf(ACCESSOR);

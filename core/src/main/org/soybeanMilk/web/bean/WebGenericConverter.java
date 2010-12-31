@@ -296,7 +296,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 取得JavaBean某个参数化属性的参数实际类型
+	 * 取得JavaBean某个参数化属性的实际参数类型
 	 * @param beanInfo
 	 * @param property
 	 * @return

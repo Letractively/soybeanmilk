@@ -35,7 +35,7 @@ public abstract class ConvertableObjectSource implements ObjectSource
 	}
 	
 	/**
-	 * 设置通用转换器，执行器使用这个方法来为对象源设置通用转换器
+	 * 设置通用转换器
 	 * @param genericConverter
 	 */
 	public void setGenericConverter(GenericConverter genericConverter) {

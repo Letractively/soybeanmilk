@@ -21,9 +21,7 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -864,7 +862,7 @@ public class ConfigurationParser
 	 */
 	protected Class<?> converterClassAttrToClass(String name)
 	{
-		Class<?> re=ShortNameToClass.get(name);
+		Class<?> re=ClassShortName.get(name);
 		if(re == null)
 			re=toClass(name);
 		
@@ -1178,89 +1176,6 @@ public class ConfigurationParser
 		public String toString()
 		{
 			return "Executable [name=" + refName + "]";
-		}
-	}
-	
-	protected static class ShortNameToClass
-	{
-		private static Map<String, Class<?>> nameMaps=new HashMap<String, Class<?>>();
-		static
-		{
-			nameMaps.put("boolean", boolean.class);
-			nameMaps.put("boolean[]", boolean[].class);
-			nameMaps.put("Boolean", Boolean.class);
-			nameMaps.put("Boolean[]", Boolean[].class);
-			
-			nameMaps.put("byte", byte.class);
-			nameMaps.put("byte[]", byte[].class);
-			nameMaps.put("Byte", Byte.class);
-			nameMaps.put("Byte[]", Byte[].class);
-			
-			nameMaps.put("char", char.class);
-			nameMaps.put("char[]", char[].class);
-			nameMaps.put("Character", Character.class);
-			nameMaps.put("Character[]", Character[].class);
-			
-			nameMaps.put("double", double.class);
-			nameMaps.put("double[]", double[].class);
-			nameMaps.put("Double", Double.class);
-			nameMaps.put("Double[]", Double[].class);
-			
-			nameMaps.put("float", float.class);
-			nameMaps.put("float[]", float[].class);
-			nameMaps.put("Float", Float.class);
-			nameMaps.put("Float[]", Float[].class);
-			
-			nameMaps.put("int", int.class);
-			nameMaps.put("int[]", int[].class);
-			nameMaps.put("Integer", Integer.class);
-			nameMaps.put("Integer[]", Integer[].class);
-			
-			nameMaps.put("long", long.class);
-			nameMaps.put("long[]", long[].class);
-			nameMaps.put("Long", Long.class);
-			nameMaps.put("Long[]", Long[].class);
-			
-			nameMaps.put("short", short.class);
-			nameMaps.put("short[]", short[].class);
-			nameMaps.put("Short", Short.class);
-			nameMaps.put("Short[]", Short[].class);
-			
-			nameMaps.put("BigDecimal", java.math.BigDecimal.class);
-			nameMaps.put("BigDecimal[]", java.math.BigDecimal[].class);
-			
-			nameMaps.put("BigInteger", java.math.BigInteger.class);
-			nameMaps.put("BigInteger[]", java.math.BigInteger[].class);
-			
-			nameMaps.put("Date", java.util.Date.class);
-			nameMaps.put("Date[]", java.util.Date[].class);
-			
-			nameMaps.put("java.sql.Date", java.sql.Date.class);
-			nameMaps.put("java.sql.Date[]", java.sql.Date[].class);
-			
-			nameMaps.put("java.sql.Time", java.sql.Time.class);
-			nameMaps.put("java.sql.Time[]", java.sql.Time[].class);
-			
-			nameMaps.put("java.sql.Timestamp", java.sql.Timestamp.class);
-			nameMaps.put("java.sql.Timestamp[]", java.sql.Timestamp[].class);
-			
-			nameMaps.put("String", String.class);
-			nameMaps.put("String[]", String[].class);
-			nameMaps.put("java.lang.String", String.class);
-			nameMaps.put("java.lang.String[]", String[].class);
-		}
-		
-		/**
-		 * 由简称获取类型
-		 * @param shortName
-		 * @return
-		 */
-		public static Class<?> get(String shortName)
-		{
-			if(shortName==null || shortName.length()==0)
-				return null;
-			
-			return nameMaps.get(shortName);
 		}
 	}
 }

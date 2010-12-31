@@ -3,6 +3,7 @@ package test.unit;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import test.unit.core.TestClassShortName;
 import test.unit.core.TestDefaultExecutor;
 import test.unit.core.TestDefaultGenericConverter;
 import test.unit.core.TestHashMapObjectSource;
@@ -17,6 +18,7 @@ import test.unit.web.TestWebObjectSource;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+TestClassShortName.class,
 TestDefaultExecutor.class,
 TestDefaultGenericConverter.class,
 TestHashMapObjectSource.class,

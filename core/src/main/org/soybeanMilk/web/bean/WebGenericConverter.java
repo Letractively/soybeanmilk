@@ -15,6 +15,10 @@
 package org.soybeanMilk.web.bean;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -121,7 +125,8 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		catch(Exception e)
 		{
-			Object dv = getDefaultValue(targetType);
+			Object dv = getDefaultValueWhenException(sourceObj, targetType, c, e);
+			
 			if(log.isDebugEnabled())
 				log.debug("default value '"+dv+"' is used while converting '"+sourceObj+"' to '"+targetType.getName()+"' because the following exception :", e);
 			
@@ -131,19 +136,26 @@ public class WebGenericConverter extends DefaultGenericConverter
 	
 	/**
 	 * 将映射表转换成<code>targetType</code>类型的对象
-	 * @param valueMap 值映射表，它也可能包含与<code>targetType</code>类属性无关的关键字
+	 * @param originalValueMap 值映射表，它也可能包含与<code>targetType</code>类属性无关的关键字
 	 * @param targetType
 	 * @return
 	 */
-	protected Object convertMap(Map<String, Object> valueMap, Class<?> targetType)
+	protected Object convertMap(Map<String, Object> originalValueMap, Class<?> targetType)
 	{
-		if(valueMap==null || targetType.isAssignableFrom(valueMap.getClass()))
-			return valueMap;
+		if(targetType == null)
+			return originalValueMap;
+		if(originalValueMap==null || targetType.isAssignableFrom(originalValueMap.getClass()))
+			return originalValueMap;
+		
+		if(targetType.isArray())
+			return convertMapToJavaBeanArray(originalValueMap, targetType.getComponentType());
 		
 		Object bean = null;
 		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(targetType);
 		
-		Set<String> keys=valueMap.keySet();
+		//TODO 添加属性为数组、List、Set的转换支持
+		
+		Set<String> keys=originalValueMap.keySet();
 		for(String k : keys)
 		{
 			String[] propertyExpression=splitPropertyExpression(k);
@@ -155,20 +167,164 @@ public class WebGenericConverter extends DefaultGenericConverter
 				if(bean == null)
 					bean = instance(beanInfo.getPropertyType(), -1);
 				
-				setProperty(bean, beanInfo, propertyExpression, 0, valueMap.get(k));
+				setProperty(bean, beanInfo, propertyExpression, 0, originalValueMap.get(k));
 			}
 		}
 		
 		return bean;
 	}
 	
+	/**
+	 * 由映射表转换为泛型<code>java.util.Set</code>。
+	 * @param valueMap
+	 * @param setClass
+	 * @return
+	 * @date 2010-12-31
+	 */
+	@SuppressWarnings("unchecked")
+	protected Set<?> convertMapToJavaBeanSet(Map<String, Object> valueMap, Class<?> setClass)
+	{
+		Set re=null;
+		
+		//TODO 取得明确类型
+		Class<?> elementClass=null;
+		
+		Object[] ary=convertMapToJavaBeanArray(valueMap, elementClass);
+		if(ary != null)
+		{
+			re=(Set)instance(setClass, -1);
+			for(Object o : ary)
+				re.add(o);
+		}
+		
+		return re;
+	}
+	
+	/**
+	 * 由映射表转换为泛型<code>java.util.List</code>。
+	 * @param valueMap
+	 * @param listClass
+	 * @return
+	 * @date 2010-12-31
+	 */
+	@SuppressWarnings("unchecked")
+	protected List<?> convertMapToJavaBeanList(Map<String, Object> valueMap, Class<?> listClass)
+	{
+		List re=null;
+		
+		//TODO 取得明确类型
+		Class<?> elementClass=null;
+		
+		Object[] ary=convertMapToJavaBeanArray(valueMap, elementClass);
+		if(ary != null)
+		{
+			re=(List)instance(listClass, -1);
+			for(Object o : ary)
+				re.add(o);
+		}
+		
+		return re;
+	}
+	
+	/**
+	 * 由映射表转换为JavaBean数组，<code>valueMap</code>中值为<code>null</code>和关键字不是<code>javaBeanClass</code>类属性的元素将被忽略，
+	 * 其他元素必须是数组并且长度一致。<br>
+	 * 此方法不支持嵌套数组和集合（即<code>javaBeanClass</code>不能包含数组和集合类属性）。
+	 * @param valueMap
+	 * @param javaBeanClass
+	 * @return 元素为<code>javaBeanClass</code>类型且长度为<code>valueMap</code>值元素长度的数组
+	 * @date 2010-12-31
+	 */
+	protected Object[] convertMapToJavaBeanArray(Map<String, Object> valueMap, Class<?> javaBeanClass)
+	{
+		if(valueMap==null || valueMap.size()==0)
+			return null;
+		
+		Object[] re=null;
+		int len=-1;
+		
+		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(javaBeanClass);
+		
+		Set<String> keys=valueMap.keySet();
+		for(String key : keys)
+		{
+			Object value=valueMap.get(key);
+			if(value == null)
+				continue;
+			
+			if(!value.getClass().isArray())
+				throw new ConvertException("the element in the source map must be an array");
+			
+			int l=Array.getLength(value);
+			if(len == -1)
+				len=l;
+			else
+				if(l != len)
+					throw new ConvertException("the element array in the source map must be the same length");
+			
+			String[] propertyExp=splitPropertyExpression(key);
+			if(beanInfo.getSubPropertyInfo(propertyExp[0]) != null)
+			{
+				//延迟初始化
+				if(re == null)
+				{
+					re=(Object[])instance(javaBeanClass, len);
+					for(int i=0;i<len;i++)
+						re[i]=instance(javaBeanClass, -1);
+				}
+				
+				for(int i=0;i<len;i++)
+					setProperty(re[i], beanInfo, propertyExp, 0, Array.get(value, i));
+			}
+		}
+		
+		return re;
+	}
+	
+	/**
+	 * 当出现转换异常时，使用此方法返回的值作为转换结果。
+	 * @param sourceObj
+	 * @param targetType
+	 * @param converter
+	 * @param e
+	 * @return
+	 * @date 2010-12-31
+	 */
+	protected Object getDefaultValueWhenException(Object sourceObj, Class<?> targetType, Converter converter, Exception e)
+	{
+		return getDefaultValue(targetType);
+	}
+	
+	/**
+	 * 取得JavaBean某个参数化属性的参数实际类型
+	 * @param beanInfo
+	 * @param property
+	 * @return
+	 * @date 2010-12-31
+	 */
+	protected Class<?> getPropertyFirstParamType(PropertyInfo beanInfo, String property)
+	{
+		PropertyInfo pi=beanInfo.getSubPropertyInfo(property);
+		if(pi == null)
+			throw new ConvertException("no property '"+property+"' found in class '"+beanInfo.getClass()+"'");
+		
+		Type type=pi.getWriteMethod().getGenericParameterTypes()[0];
+		if(!(type instanceof ParameterizedType))
+			throw new ConvertException("'"+type+"' is not parameterized type");
+		
+		Type pa=((ParameterizedType)type).getActualTypeArguments()[0];
+		if(!(pa instanceof Class<?>))
+			throw new ConvertException("invalide parameterized type '"+pa+"'");
+		
+		return (Class<?>)pa;
+	}
 	
 	/**
 	 * 取得类型的默认值
 	 * @param type
 	 * @return
 	 */
-	protected Object getDefaultValue(Class<?> type)
+	public static Object getDefaultValue(Class<?> type)
 	{
 		if(boolean.class == type)
 			return false;

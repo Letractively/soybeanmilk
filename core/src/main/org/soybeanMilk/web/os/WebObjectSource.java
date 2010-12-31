@@ -83,7 +83,7 @@ import org.soybeanMilk.web.WebConstants;
  *  	<li>
  *  		<span class="tagValue">request</span> <br/>
  *  		请求HttpServletRequest对象。框架本身并没有提供它的转换器，如果目标类型不是“<span class="var">HttpServletRequest</span>”，
- *  		那么你需要为它的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletRequest</span>”到目标类型的辅助{@linkplain Converter 转换器}。
+ *  		那么你需要为此类的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletRequest</span>”到目标类型的辅助{@linkplain Converter 转换器}。
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">request.keyInScope</span> <br/>
@@ -92,7 +92,7 @@ import org.soybeanMilk.web.WebConstants;
  *  	<li>
  *  		<span class="tagValue">session</span> <br/>
  *  		会话HttpSession对象。框架本身并没有提供它的转换器，如果目标类型不是“<span class="var">HttpSession</span>”，
- *  		那么你需要为它的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpSession</span>”到目标类型的辅助{@linkplain Converter 转换器}。
+ *  		那么你需要为此类的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpSession</span>”到目标类型的辅助{@linkplain Converter 转换器}。
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">session.keyInScope</span> <br/>
@@ -101,7 +101,7 @@ import org.soybeanMilk.web.WebConstants;
  *  	<li>
  *  		<span class="tagValue">application</span> <br/>
  *  		应用ServletContext对象。如果目标类型不是“<span class="var">ServletContext</span>”，
- *  		那么你需要为它的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.ServletContext</span>”到目标类型的辅助{@linkplain Converter 转换器}。
+ *  		那么你需要为此类的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.ServletContext</span>”到目标类型的辅助{@linkplain Converter 转换器}。
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">application.keyInScope</span> <br/>
@@ -110,16 +110,16 @@ import org.soybeanMilk.web.WebConstants;
  *  	<li>
  *  		<span class="tagValue">response</span> <br/>
  *  		回应HttpServletResponse对象。如果目标类型不是“<span class="var">HttpServletResponse</span>”，
- *  		那么你需要为它的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletResponse</span>”到目标类型辅助{@linkplain Converter 转换器}。
+ *  		那么你需要为此类的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletResponse</span>”到目标类型辅助{@linkplain Converter 转换器}。
  *  	</li>
  *   </ul>
  *  </li>
  * </ul>
  * <br>
- * 另外，如果“request”、“session”、“application”作用域的“[keyInScope]”包含访问符“.”，比如“request.yourBean.property”，
+ * 另外，如果“request”、“session”、“application”作用域的“[keyInScope]”中包含访问符“.”，比如“request.yourBean.property”，
  * 它会认为你是想要取得或设置“request”作用域内“yourBean”对象的“property”属性，并按此处理（如果“yourBean”对象存在的话）。
  * <br>
- * 实际上，你在配置文件中定义的&lt;arg&gt;关键字的格式就是由它决定的。
+ * 实际上，你在配置文件中定义的&lt;arg&gt;关键字的格式就是由这个类决定的。
  * @author earthAngry@gmail.com
  * @date 2010-7-19
  */
@@ -274,7 +274,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	@SuppressWarnings("unchecked")
 	protected Object getWithUnknownScope(String scope, String keyInScope, Class<?> objectType)
 	{
-		//作用域无法识别，则认为它是param作用域的关键字的一部分
+		//作用域无法识别，则认为它是param作用域里关键字的一部分
 		if(scope != null)
 			keyInScope=scope+ACCESSOR+keyInScope;
 		
@@ -289,7 +289,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	 */
 	protected void setWithUnknownScope(String scope, String keyInScope, Object obj)
 	{
-		//作用域无法识别，则认为它是request作用域的关键字的一部分
+		//作用域无法识别，则认为它是request作用域里关键字的一部分
 		if(scope != null)
 			keyInScope=scope+ACCESSOR+keyInScope;
 		
@@ -299,7 +299,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	/**
 	 * 将对象保存到servlet对象作用域内，它支持设置作用域内对象的属性。
 	 * @param servletObj
-	 * @param keyExpression
+	 * @param keyExpression 关键字表达式，比如“yourBean”、“yourBean.property”
 	 * @param obj
 	 * @date 2010-12-30
 	 */
@@ -307,7 +307,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	{
 		String[] objKeyWithProperty=splitByFirstDot(keyExpression);
 		
-		//只有包含了'.'字符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式，下面两个都是相同的逻辑
+		//只有包含了'.'字符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式
 		if(objKeyWithProperty[0] != null)
 		{
 			Object data=getServletObjAttribute(servletObj, objKeyWithProperty[0]);
@@ -323,28 +323,26 @@ public class WebObjectSource extends ConvertableObjectSource
 	/**
 	 * 从servlet对象作用域内取得对象，它支持取得作用域内对象的属性。
 	 * @param servletObj
-	 * @param keyExpression
+	 * @param keyExpression 关键字表达式，比如“yourBean”、“yourBean.property”
 	 * @param objectType
 	 * @return
 	 * @date 2010-12-30
 	 */
 	protected Object getAttributeByKeyExpression(Object servletObj, String keyExpression, Class<?> objectType)
 	{
-		Object data=getServletObjAttribute(servletObj, keyExpression);
-		if(data != null)
-			data=getGenericConverter().convert(data, objectType);
-		else
-		{
-			String[] objKeyWithProperty=splitByFirstDot(keyExpression);
-			if(objKeyWithProperty[0]!=null && objKeyWithProperty[1]!=null)
-			{
-				data=getServletObjAttribute(servletObj, objKeyWithProperty[0]);
-				if(data != null)
-					data=getGenericConverter().getProperty(data, objKeyWithProperty[1], objectType);
-			}
-		}
+		String[] objKeyWithProperty=splitByFirstDot(keyExpression);
 		
-		return data;
+		//只有包含了'.'字符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式
+		if(objKeyWithProperty[0] != null)
+		{
+			Object data=getServletObjAttribute(servletObj, objKeyWithProperty[0]);
+			if(data != null)
+				return getGenericConverter().getProperty(data, objKeyWithProperty[1], objectType);
+			else
+				return getGenericConverter().convert(getServletObjAttribute(servletObj, keyExpression), objectType);
+		}
+		else
+			return getGenericConverter().convert(getServletObjAttribute(servletObj, keyExpression), objectType);
 	}
 	
 	/**
@@ -392,21 +390,21 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * 否则，它会根据<code>keyFilter</code>来对参数映射表进行过滤，产生一个新的映射表（它的关键字将会被替换为原始关键字的“<code>[keyFilter]</code>.”之后的部分，比如由“<code>beanName.propertyName</code>”变为“<code>propertyName</code>”），
 	 * 然后使用它进行转换。
 	 * 
-	 * @param rawValueMap 原始映射表
+	 * @param originalValueMap 原始映射表
 	 * @param keyFilter 主键筛选器，只有以此筛选器开头的Map关键字才会被转换，如果为null，则表明不做筛选
 	 * @param targetType 目标类型
 	 * 
 	 * @return
 	 */
-	protected Object getFromMap(Map<String,Object> rawValueMap, String keyFilter, Class<?> targetType)
+	protected Object getFromMap(Map<String,Object> originalValueMap, String keyFilter, Class<?> targetType)
 	{
 		GenericConverter genericConverter=getGenericConverter();
 		
 		if(keyFilter == null)
-			return genericConverter.convert(rawValueMap, targetType);
+			return genericConverter.convert(originalValueMap, targetType);
 		
 		//明确的KEY，直接根据值转换
-		Object explicit = rawValueMap.get(keyFilter);
+		Object explicit = originalValueMap.get(keyFilter);
 		if(explicit != null)
 			return genericConverter.convert(explicit, targetType);
 		else
@@ -414,11 +412,11 @@ public class WebObjectSource extends ConvertableObjectSource
 			String keyPrefix = keyFilter+ACCESSOR;
 			
 			Map<String,Object> filtered = new HashMap<String, Object>();
-			Set<String> keys=rawValueMap.keySet();
+			Set<String> keys=originalValueMap.keySet();
 			for(String k : keys)
 			{
 				if(k.startsWith(keyPrefix))
-					filtered.put(k.substring(keyPrefix.length()), rawValueMap.get(k));
+					filtered.put(k.substring(keyPrefix.length()), originalValueMap.get(k));
 			}
 			
 			return genericConverter.convert(filtered, targetType);

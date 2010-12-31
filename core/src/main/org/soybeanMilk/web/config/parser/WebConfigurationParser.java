@@ -157,7 +157,7 @@ public class WebConfigurationParser extends ConfigurationParser
 	{
 		return new WebGenericConverter();
 	}
-
+	
 	@Override
 	protected Action createActionIntance()
 	{

@@ -1,14 +1,17 @@
 package test.unit.web;
 
+import java.lang.reflect.ParameterizedType;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.soybeanMilk.core.bean.PropertyInfo;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 
 
@@ -126,7 +129,7 @@ public class TestWebGenericConverter
 	 * 内置Map转换
 	 */
 	@Test
-	public void convertMapNest() throws Exception
+	public void convertMapToOther() throws Exception
 	{
 		//源为空
 		{
@@ -165,11 +168,24 @@ public class TestWebGenericConverter
 		}
 	}
 	
+	@Test
+	public void convertMapToCollectionProperty2() throws Exception
+	{
+		PropertyInfo pi=PropertyInfo.getPropertyInfo(JavaBean.class);
+		
+		ParameterizedType pt = (ParameterizedType)(pi.getSubPropertyInfo("list").getWriteMethod().getGenericParameterTypes()[0]);  
+		
+		System.out.println(pt.getActualTypeArguments().length);  
+		System.out.println(((Class<?>)pt.getActualTypeArguments()[0]).getName());  
+	}
+	
 	public static class JavaBean
 	{
 		private String name;
 		private Integer age;
 		private Date birth;
+		
+		private List<Bean2> list;
 		
 		public String getName() {
 			return name;
@@ -188,6 +204,31 @@ public class TestWebGenericConverter
 		}
 		public void setBirth(Date birth) {
 			this.birth = birth;
+		}
+		public List<Bean2> getList() {
+			return list;
+		}
+		public void setList(List<Bean2> list) {
+			this.list = list;
+		}
+	}
+	
+	public static class Bean2
+	{
+		private int id;
+		private String name;
+		
+		public int getId() {
+			return id;
+		}
+		public void setId(int id) {
+			this.id = id;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
 		}
 	}
 }

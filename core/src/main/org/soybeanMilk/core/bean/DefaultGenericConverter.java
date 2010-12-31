@@ -329,8 +329,8 @@ public class DefaultGenericConverter implements GenericConverter
 	
 	/**
 	 * 创建给定类型的实例。<br>
-	 * 如果此类是集合类接口<code>List</code>、<code>Map</code>、<code>Set</code>，它将创建默认实例，<code>arraySize</code>将被忽略；<br>
-	 * 否则，此类必须提供一个无参的构造方法，如果<code>arrayLength</code>不小于0，它将创建这个类型的数组实例，否则，仅创建此类的实例。
+	 * 如果此类是集合类接口<code>List</code>、<code>Set</code>，它将创建默认实例，<code>arraySize</code>将被忽略；<br>
+	 * 否则，此类必须提供一个无参的构造方法，如果<code>arrayLength</code>不小于0，它将创建此类的数组实例，否则，仅创建此类的实例。
 	 * @param objectType 类型
 	 * @param arrayLength 要创建数组的长度
 	 * @return
@@ -342,8 +342,6 @@ public class DefaultGenericConverter implements GenericConverter
 	{
 		if(java.util.List.class.equals(objectType))
 			return new ArrayList();
-		else if(java.util.Map.class.equals(objectType))
-			return new HashMap();
 		else if(java.util.Set.class.equals(objectType))
 			return new HashSet();
 		else
@@ -359,7 +357,6 @@ public class DefaultGenericConverter implements GenericConverter
 			{
 				throw new ConvertException("exception occur while creating instance for class '"+objectType+"' ",e);
 			}
-			
 		}
 	}
 

@@ -38,7 +38,7 @@ public class PropertyInfo
 	
 	/**属性类型*/
 	private Class<?> type;
-	/**泛型类型*/
+	/**属性的泛型类型*/
 	private Type genericType;
 	
 	/**此属性类型的属性信息集，以属性名作为关键字*/

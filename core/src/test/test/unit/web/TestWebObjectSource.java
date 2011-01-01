@@ -178,9 +178,11 @@ public class TestWebObjectSource
 		String value="12345";
 		request.setParameter("value", value);
 		
+		Map src=request.getParameterMap();
 		Map dest=(Map)webObjectSource.get("param", Map.class);
 		
-		Assert.assertEquals(request.getParameterMap().get("value"), dest.get("value"));
+		Assert.assertEquals(src.get(value), dest.get(value));
+		Assert.assertEquals(src, dest);
 	}
 	
 	@Test

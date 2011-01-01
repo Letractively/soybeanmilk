@@ -321,34 +321,6 @@ public class TestDispatchServlet
 		}
 	}
 	
-	public static class MockDispathServlet extends DispatchServlet
-	{
-		private static final long serialVersionUID = 1L;
-		
-		private MockServletContext servletContext;
-		private Map<String, String> servletInitParameters;
-		
-		public MockDispathServlet(MockServletContext servletContext, Map<String, String> servletInitParameters)
-		{
-			super();
-			
-			this.servletContext=servletContext;
-			this.servletInitParameters=servletInitParameters;
-		}
-		
-		@Override
-		public String getInitParameter(String name)
-		{
-			return servletInitParameters.get(name);
-		}
-
-		@Override
-		public ServletContext getServletContext()
-		{
-			return servletContext;
-		}
-	}
-	
 	protected void initServlet(HttpServlet servlet)
 	{
 		try

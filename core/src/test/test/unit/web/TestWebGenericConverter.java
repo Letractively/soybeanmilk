@@ -1,16 +1,26 @@
 package test.unit.web;
 
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+import java.util.TreeSet;
+import java.util.Vector;
 
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.web.bean.WebGenericConverter;
+
 
 
 public class TestWebGenericConverter
@@ -114,7 +124,7 @@ public class TestWebGenericConverter
 	 * 目标类型为父类型
 	 */
 	@Test
-	public void convertMapToSuperMap()
+	public void convertMapToMap()
 	{
 		HashMap<String,Integer> src=new HashMap<String, Integer>();
 		
@@ -123,11 +133,8 @@ public class TestWebGenericConverter
 		Assert.assertTrue(src == dest);
 	}
 	
-	/**
-	 * 内置Map转换
-	 */
 	@Test
-	public void convertMapToOther() throws Exception
+	public void convertMapToClassType() throws Exception
 	{
 		//源为空
 		{
@@ -164,9 +171,245 @@ public class TestWebGenericConverter
 			Assert.assertEquals(new Integer(age), dest.getAge());
 			Assert.assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse(birth), dest.getBirth());
 		}
+		
+		{
+			Map<String,Object> src=new HashMap<String, Object>();
+			
+			String[] name=new String[]{"jack"};
+			String[] age=new String[]{"15"};
+			String[] birth=new String[]{"1900-10-21"};
+			
+			src.put("name", name);
+			src.put("age", age);
+			src.put("birth", birth);
+			
+			JavaBean dest=(JavaBean)converter.convert(src, JavaBean.class);
+			
+			Assert.assertEquals(name[0], dest.getName());
+			Assert.assertEquals(new Integer(age[0]), dest.getAge());
+			Assert.assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse(birth[0]), dest.getBirth());
+		}
 	}
 	
-	public static class JavaBean
+	@SuppressWarnings("unchecked")
+	@Test
+	public void convertMapToNormalCollection() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] names=new String[]{"aa", "bb", "cc"};
+		String[] ages=new String[]{"11", "22", "33"};
+		String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
+		
+		src.put("name", names);
+		src.put("age", ages);
+		src.put("birth", births);
+		
+		//非泛型类，不知道元素类型，所以是null
+		{
+			List<JavaBean> dest=(List<JavaBean>)converter.convert(src, List.class);
+			Assert.assertNull(dest);
+		}
+		{
+			Set<JavaBean> dest=(Set<JavaBean>)converter.convert(src, Set.class);
+			Assert.assertNull(dest);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void convertMapToUnSupportedGenericCollection()
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] names=new String[]{"aa", "bb", "cc"};
+		String[] ages=new String[]{"11", "22", "33"};
+		String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
+		
+		src.put("name", names);
+		src.put("age", ages);
+		src.put("birth", births);
+		
+		{
+			Type type=new MockParameterizedType(Map.class, new Type[]{String.class, JavaBean.class});
+			try
+			{
+				Map<Integer, JavaBean> dest=(Map<Integer, JavaBean>)converter.convert(src, type);
+				dest.size();
+			}
+			catch(Exception e)
+			{
+				Assert.assertEquals("'"+type+"' is not valid, only 1 and only Class type of its actual type argument is supported", e.getMessage());
+			}
+		}
+		
+		{
+			Type rawType=new MockParameterizedType(null, null);
+			Type type=new MockParameterizedType(rawType, new Type[]{JavaBean.class});
+			try
+			{
+				List<JavaBean> dest=(List<JavaBean>)converter.convert(src, type);
+				dest.size();
+			}
+			catch(Exception e)
+			{
+				Assert.assertEquals("'"+type+"' is not valid, only Class type of its raw type is supported", e.getMessage());
+			}
+		}
+	}
+	
+	@Test
+	public void convertMapToGenericList() throws Exception
+	{
+		//使用List接口
+		{
+			convertMapToGenericList(List.class);
+		}
+		
+		//使用List子类
+		{
+			convertMapToGenericList(ArrayList.class);
+		}
+		{
+			convertMapToGenericList(LinkedList.class);
+		}
+		{
+			convertMapToGenericList(Vector.class);
+		}
+		{
+			convertMapToGenericList(Stack.class);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	protected void convertMapToGenericList(Class<? extends List> listClass) throws Exception
+	{
+		//使用List接口
+		{
+			Map<String,Object> src=new HashMap<String, Object>();
+			
+			String[] names=new String[]{"aa", "bb", "cc"};
+			String[] ages=new String[]{"11", "22", "33"};
+			String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
+			
+			src.put("name", names);
+			src.put("age", ages);
+			src.put("birth", births);
+			
+			List<JavaBean> dest=(List<JavaBean>)converter.convert(src, new MockParameterizedType(listClass, new Type[]{JavaBean.class}));
+			
+			Assert.assertTrue( dest.size() == names.length);
+			
+			//默认创建ArrayList
+			if(listClass.equals(List.class))
+				Assert.assertEquals(ArrayList.class, dest.getClass());
+			else
+				Assert.assertEquals(listClass, dest.getClass());
+			
+			for(int i=0;i<dest.size();i++)
+			{
+				JavaBean jb=dest.get(i);
+				
+				Assert.assertEquals(names[i], jb.getName());
+				Assert.assertEquals(ages[i], jb.getAge().toString());
+				Assert.assertEquals(births[i], new SimpleDateFormat("yyyy-MM-dd").format(jb.getBirth()));
+			}
+		}
+	}
+
+	@Test
+	public void convertMapToGenericSet() throws Exception
+	{
+		//使用Set接口
+		{
+			convertMapToGenericSet(Set.class);
+		}
+		
+		//使用Set子类
+		{
+			convertMapToGenericSet(HashSet.class);
+		}
+		{
+			convertMapToGenericSet(TreeSet.class);
+		}
+		{
+			convertMapToGenericSet(LinkedHashSet.class);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void convertMapToGenericSet(Class<? extends Set> setClass) throws Exception
+	{
+		{
+			Map<String,Object> src=new HashMap<String, Object>();
+			
+			String[] names=new String[]{"aa", "bb", "cc"};
+			String[] ages=new String[]{"11", "22", "33"};
+			String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
+			
+			src.put("name", names);
+			src.put("age", ages);
+			src.put("birth", births);
+			
+			Set<JavaBean> dest=(Set<JavaBean>)converter.convert(src, new MockParameterizedType(setClass, new Type[]{JavaBean.class}));
+			
+			Assert.assertTrue( dest.size() == names.length);
+			
+			//默认创建ArrayList
+			if(setClass.equals(Set.class))
+				Assert.assertEquals(HashSet.class, dest.getClass());
+			else
+				Assert.assertEquals(setClass, dest.getClass());
+			
+			for(JavaBean jb : dest)
+			{
+				String name=jb.getName();
+				
+				int idx=-1;
+				if(name.equals(names[0]))
+					idx=0;
+				else if(name.equals(names[1]))
+					idx=1;
+				else if(name.equals(names[2]))
+					idx=2;
+				
+				Assert.assertEquals(ages[idx], jb.getAge().toString());
+				Assert.assertEquals(births[idx], new SimpleDateFormat("yyyy-MM-dd").format(jb.getBirth()));
+			}
+		}
+	}
+	
+	@Test
+	public void convertMapToArray()
+	{
+		//复杂类型
+		{
+			Map<String,Object> src=new HashMap<String, Object>();
+			
+			String[] names=new String[]{"aa", "bb", "cc"};
+			String[] ages=new String[]{"11", "22", "33"};
+			String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
+			
+			src.put("name", names);
+			src.put("age", ages);
+			src.put("birth", births);
+			
+			JavaBean[] dest=(JavaBean[])converter.convert(src, JavaBean[].class);
+			
+			Assert.assertTrue( dest.length == names.length);
+			
+			for(int i=0;i<dest.length;i++)
+			{
+				JavaBean jb=dest[i];
+				
+				Assert.assertEquals(names[i], jb.getName());
+				Assert.assertEquals(ages[i], jb.getAge().toString());
+				Assert.assertEquals(births[i], new SimpleDateFormat("yyyy-MM-dd").format(jb.getBirth()));
+			}
+		}
+	}
+	
+	public static class JavaBean implements Comparable<JavaBean>
 	{
 		private String name;
 		private Integer age;
@@ -197,6 +440,15 @@ public class TestWebGenericConverter
 		}
 		public void setList(List<Bean2> list) {
 			this.list = list;
+		}
+		
+		@Override
+		public int compareTo(JavaBean o)
+		{
+			if(o == null)
+				return 1;
+			
+			return this.name.compareTo(o.getName());
 		}
 	}
 	

@@ -161,9 +161,9 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			Class<?> targetClass=SbmUtils.narrowToClassType(targetType);
 			
-			if(SbmUtils.isAncestorClass(Map.class, targetClass))
+			if(SbmUtils.isInstanceOf(originalValueMap, targetClass))
 				result=originalValueMap;
-			if(targetClass.isArray())
+			else if(targetClass.isArray())
 				result=convertMapToArray(originalValueMap, targetClass.getComponentType());
 			else
 			{
@@ -209,7 +209,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		Object[] ary=convertMapToArray(valueMap, setGeneric[1]);
 		if(ary != null)
 		{
-			re=(Set)instance(Set.class, -1);
+			re=(Set)instance(setGeneric[0], -1);
 			for(Object o : ary)
 				re.add(o);
 		}

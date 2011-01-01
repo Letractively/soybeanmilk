@@ -19,7 +19,7 @@ package org.soybeanMilk.core.bean.converters;
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */
-public class SqlDateConverter extends AbstractConverter
+public class SqlDateConverter extends ClassTypeConverter
 {
 	private static String[] PATTERNS=new String[]{"yyyy-MM-dd"};
 	
@@ -34,8 +34,8 @@ public class SqlDateConverter extends AbstractConverter
 	}
 	
 	@Override
-	public Object convert(Object sourceObj, Class<?> targetClass)
+	protected Object convertToClass(Object sourceObj, Class<?> targetType)
 	{
-		return c.convert(targetClass, sourceObj);
+		return c.convert(targetType, sourceObj);
 	}
 }

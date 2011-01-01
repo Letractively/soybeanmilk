@@ -18,19 +18,19 @@ package org.soybeanMilk.core.bean.converters;
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */
-public class BigDecimalConverter extends AbstractConverter
+public class BigDecimalConverter extends ClassTypeConverter
 {
 	private org.apache.commons.beanutils.converters.BigDecimalConverter c;
 	
 	public BigDecimalConverter()
 	{
 		super();
-		
 		c=new org.apache.commons.beanutils.converters.BigDecimalConverter();
 	}
 	
-	public Object convert(Object sourceObj, Class<?> targetClass)
+	@Override
+	protected Object convertToClass(Object sourceObj, Class<?> targetType)
 	{
-		return c.convert(targetClass, sourceObj);
+		return c.convert(targetType, sourceObj);
 	}
 }

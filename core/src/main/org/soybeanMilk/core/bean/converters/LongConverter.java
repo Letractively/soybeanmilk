@@ -18,7 +18,7 @@ package org.soybeanMilk.core.bean.converters;
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */
-public class LongConverter extends AbstractConverter
+public class LongConverter extends ClassTypeConverter
 {
 	private org.apache.commons.beanutils.converters.LongConverter c;
 	
@@ -30,8 +30,8 @@ public class LongConverter extends AbstractConverter
 	}
 
 	@Override
-	public Object convert(Object sourceObj, Class<?> targetClass)
+	protected Object convertToClass(Object sourceObj, Class<?> targetType)
 	{
-		return c.convert(targetClass, sourceObj);
+		return c.convert(targetType, sourceObj);
 	}
 }

@@ -15,7 +15,6 @@
 package org.soybeanMilk.web.bean;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -24,6 +23,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
@@ -46,21 +46,21 @@ public class WebGenericConverter extends DefaultGenericConverter
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object convert(Object sourceObj, Class<?> targetType)
+	public Object convert(Object sourceObj, Type targetType)
 	{
-		if(sourceObj instanceof Map)
+		if(SbmUtils.isInstanceOf(sourceObj, Map.class))
 			return convertMap((Map<String, Object>)sourceObj, targetType);
 		else
-			return convertWithSupportConverter(sourceObj, targetType);
+			return convertWithSupportConverter(sourceObj, SbmUtils.narrowToClassType(targetType));
 	}
 	
 	@Override
-	protected Object convertWithSupportConverter(Object sourceObj, Class<?> targetType) throws ConvertException
+	protected Object convertWithSupportConverter(Object sourceObj, Type targetType) throws ConvertException
 	{
 		if(log.isDebugEnabled())
 			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"
 					+(sourceObj == null ? null : sourceObj.getClass().getName())+"' to type '"
-					+(targetType==null ? null : targetType.getName())+"'");
+					+(targetType==null ? null : targetType)+"'");
 		
 		if(targetType == null)
 		{
@@ -79,13 +79,13 @@ public class WebGenericConverter extends DefaultGenericConverter
 			return dv;
 		}
 		
-		if(toWrapperClass(targetType).isAssignableFrom(sourceObj.getClass()))
+		if(SbmUtils.isInstanceOf(sourceObj, targetType))
 			return sourceObj;
 		
 		Converter c = getConverter(sourceObj.getClass(), targetType);
 		
 		//如果源对象是数组并且长度为1，而标类型不是，则使用数组的第一个元素转换
-		if(c==null && sourceObj.getClass().isArray() && Array.getLength(sourceObj)==1 && !targetType.isArray())
+		if(c==null && sourceObj.getClass().isArray() && Array.getLength(sourceObj)==1 && !SbmUtils.isArray(targetType))
 		{
 			if(log.isDebugEnabled())
 				log.debug("the source '"+getStringDesc(sourceObj)+"' is an array an array and the length is 1, while the target Class is not, so it's first element will be used for converting");
@@ -101,7 +101,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 				return dv;
 			}
 			
-			if(toWrapperClass(targetType).isAssignableFrom(sourceObj.getClass()))
+			if(SbmUtils.isInstanceOf(sourceObj, targetType))
 				return sourceObj;
 			
 			c = getConverter(sourceObj.getClass(), targetType);
@@ -117,7 +117,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		
 		if(c == null)
-			throw new ConvertException("no Converter defined for converting '"+sourceObj.getClass().getName()+"' to '"+targetType.getName()+"'");
+			throw new ConvertException("no Converter defined for converting '"+sourceObj.getClass().getName()+"' to '"+targetType+"'");
 		
 		try
 		{
@@ -128,7 +128,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			Object dv = getDefaultValueWhenException(sourceObj, targetType, c, e);
 			
 			if(log.isDebugEnabled())
-				log.debug("default value '"+dv+"' is used while converting '"+sourceObj+"' to '"+targetType.getName()+"' because the following exception :", e);
+				log.debug("default value '"+dv+"' is used while converting '"+sourceObj+"' to '"+targetType+"' because the following exception :", e);
 			
 			return dv;
 		}
@@ -140,38 +140,53 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @param targetType
 	 * @return
 	 */
-	protected Object convertMap(Map<String, Object> originalValueMap, Class<?> targetType)
+	protected Object convertMap(Map<String, Object> originalValueMap, Type targetType)
 	{
-		if(targetType == null)
-			return originalValueMap;
-		if(originalValueMap==null || targetType.isAssignableFrom(originalValueMap.getClass()))
+		if(originalValueMap==null || targetType == null)
 			return originalValueMap;
 		
-		if(targetType.isArray())
-			return convertMapToJavaBeanArray(originalValueMap, targetType.getComponentType());
+		Object result = null;
 		
-		Object bean = null;
-		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(targetType);
-		
-		//TODO 添加属性为数组、List、Set的转换支持
-		
-		Set<String> keys=originalValueMap.keySet();
-		for(String k : keys)
+		if(SbmUtils.isInstanceOf(targetType, ParameterizedType.class))
 		{
-			String[] propertyExpression=splitPropertyExpression(k);
+			//TODO 处理参数化类型
+			throw new ConvertException("converting 'Map<String, Object>' to '"+targetType+"' is not supported");
+		}
+		else if(SbmUtils.isInstanceOf(targetType, Class.class))
+		{
+			Class<?> targetClass=SbmUtils.narrowToClassType(targetType);
 			
-			//剔除无关属性
-			if(beanInfo.getSubPropertyInfo(propertyExpression[0]) != null)
+			if(SbmUtils.isAncestorClass(Map.class, targetClass))
+				result=originalValueMap;
+			if(targetClass.isArray())
+				result=convertMapToJavaBeanArray(originalValueMap, targetClass.getComponentType());
+			else
 			{
-				//延迟初始化
-				if(bean == null)
-					bean = instance(beanInfo.getPropertyType(), -1);
+				PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(targetClass);
 				
-				setProperty(bean, beanInfo, propertyExpression, 0, originalValueMap.get(k));
+				//TODO 添加属性为数组、List、Set的转换支持
+				
+				Set<String> keys=originalValueMap.keySet();
+				for(String k : keys)
+				{
+					String[] propertyExpression=splitPropertyExpression(k);
+					
+					//剔除无关属性
+					if(beanInfo.getSubPropertyInfo(propertyExpression[0]) != null)
+					{
+						//延迟初始化
+						if(result == null)
+							result = instance(beanInfo.getPropertyType(), -1);
+						
+						setProperty(result, beanInfo, propertyExpression, 0, originalValueMap.get(k));
+					}
+				}
 			}
 		}
+		else
+			throw new ConvertException("converting 'Map<String, Object>' to '"+targetType+"' is not supported");
 		
-		return bean;
+		return result;
 	}
 	
 	/**
@@ -290,7 +305,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @return
 	 * @date 2010-12-31
 	 */
-	protected Object getDefaultValueWhenException(Object sourceObj, Class<?> targetType, Converter converter, Exception e)
+	protected Object getDefaultValueWhenException(Object sourceObj, Type targetType, Converter converter, Exception e)
 	{
 		return getDefaultValue(targetType);
 	}
@@ -324,23 +339,23 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @param type
 	 * @return
 	 */
-	public static Object getDefaultValue(Class<?> type)
+	public static Object getDefaultValue(Type type)
 	{
-		if(boolean.class == type)
+		if(boolean.class.equals(type))
 			return false;
-		else if(byte.class == type)
+		else if(byte.class.equals(type))
 			return (byte)0;
-		else if(char.class == type)
+		else if(char.class.equals(type))
 			return (char)0;
-		else if(double.class == type)
+		else if(double.class.equals(type))
 			return (double)0;
-		else if(float.class == type)
+		else if(float.class.equals(type))
 			return (float)0;
-		else if(int.class == type)
+		else if(int.class.equals(type))
 			return 0;
-		else if(long.class == type)
+		else if(long.class.equals(type))
 			return (long)0;
-		else if(short.class == type)
+		else if(short.class.equals(type))
 			return (short)0;
 		else
 			return null;

@@ -15,6 +15,7 @@
 package org.soybeanMilk.core.os;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.bean.GenericConverter;
@@ -41,10 +42,10 @@ public abstract class ConvertableObjectSource implements ObjectSource
 	public void setGenericConverter(GenericConverter genericConverter) {
 		this.genericConverter = genericConverter;
 	}
-
+	
 	@Override
-	public abstract Object get(Serializable key, Class<?> objectType);
-
+	public abstract Object get(Serializable key, Type type);
+	
 	@Override
 	public abstract void set(Serializable key, Object obj);
 }

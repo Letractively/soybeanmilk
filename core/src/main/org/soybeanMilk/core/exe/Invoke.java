@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
@@ -316,7 +317,7 @@ public class Invoke extends AbstractExecutable
 		/**从对象源中取得参数值的关键字*/
 		private Serializable key;
 		/**参数类型*/
-		private Class<?> type;
+		private Type type;
 		/**参数值*/
 		private Object value;
 		
@@ -347,7 +348,7 @@ public class Invoke extends AbstractExecutable
 		 * @param key 从{@linkplain ObjectSource 对象源}中取得参数值的关键字
 		 * @param type 参数值类型
 		 */
-		public Arg(Serializable key, Class<?> type)
+		public Arg(Serializable key, Type type)
 		{
 			super();
 			this.key = key;
@@ -360,10 +361,10 @@ public class Invoke extends AbstractExecutable
 		public void setKey(Serializable key) {
 			this.key = key;
 		}
-		public Class<?> getType() {
+		public Type getType() {
 			return type;
 		}
-		public void setType(Class<?> type) {
+		public void setType(Type type) {
 			this.type = type;
 		}
 		public Object getValue() {

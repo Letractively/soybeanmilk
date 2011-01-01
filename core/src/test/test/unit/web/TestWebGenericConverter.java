@@ -1,6 +1,5 @@
 package test.unit.web;
 
-import java.lang.reflect.ParameterizedType;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,7 +10,6 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.soybeanMilk.core.bean.PropertyInfo;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 
 
@@ -166,17 +164,6 @@ public class TestWebGenericConverter
 			Assert.assertEquals(new Integer(age), dest.getAge());
 			Assert.assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse(birth), dest.getBirth());
 		}
-	}
-	
-	@Test
-	public void convertMapToCollectionProperty2() throws Exception
-	{
-		PropertyInfo pi=PropertyInfo.getPropertyInfo(JavaBean.class);
-		
-		ParameterizedType pt = (ParameterizedType)(pi.getSubPropertyInfo("list").getWriteMethod().getGenericParameterTypes()[0]);  
-		
-		System.out.println(pt.getActualTypeArguments().length);  
-		System.out.println(((Class<?>)pt.getActualTypeArguments()[0]).getName());  
 	}
 	
 	public static class JavaBean

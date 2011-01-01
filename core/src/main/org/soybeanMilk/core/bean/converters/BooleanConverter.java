@@ -18,20 +18,19 @@ package org.soybeanMilk.core.bean.converters;
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */
-public class BooleanConverter extends AbstractConverter
+public class BooleanConverter extends ClassTypeConverter
 {
 	private org.apache.commons.beanutils.converters.BooleanConverter c;
 	
 	public BooleanConverter()
 	{
 		super();
-		
 		c=new org.apache.commons.beanutils.converters.BooleanConverter();
 	}
 	
 	@Override
-	public Object convert(Object sourceObj, Class<?> targetClass)
+	protected Object convertToClass(Object sourceObj, Class<?> targetType)
 	{
-		return c.convert(targetClass, sourceObj);
+		return c.convert(targetType, sourceObj);
 	}
 }

@@ -18,20 +18,19 @@ package org.soybeanMilk.core.bean.converters;
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */
-public class FloatConverter extends AbstractConverter
+public class FloatConverter extends ClassTypeConverter
 {
 	private org.apache.commons.beanutils.converters.FloatConverter c;
 	
 	public FloatConverter()
 	{
 		super();
-		
 		c=new org.apache.commons.beanutils.converters.FloatConverter();
 	}
 
 	@Override
-	public Object convert(Object sourceObj, Class<?> targetClass)
+	protected Object convertToClass(Object sourceObj, Class<?> targetType)
 	{
-		return c.convert(targetClass, sourceObj);
+		return c.convert(targetType, sourceObj);
 	}
 }

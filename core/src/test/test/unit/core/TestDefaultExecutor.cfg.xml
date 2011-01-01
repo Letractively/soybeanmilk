@@ -38,6 +38,12 @@
 			</invoke>
 		</action>
 		
+		<action name="helloParameterized">
+			<invoke>
+				resolver.helloParameterized(list);
+			</invoke>
+		</action>
+		
 	</executables>
 	
 </soybean-milk>

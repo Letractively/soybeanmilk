@@ -19,6 +19,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -223,7 +224,7 @@ public class ConfigurationParser
 		
 		parseAll();
 		return getConfiguration();
-	} 
+	}
 	
 	/**
 	 * 解析，如果你没有预设配置对象，这个方法将自动创建
@@ -592,7 +593,7 @@ public class ConfigurationParser
 	 */
 	protected void parseArgs(Element parent,Invoke invoke)
 	{
-		Class<?>[] paramTypes=invoke.getMethod().getParameterTypes();
+		Type[] paramTypes=invoke.getMethod().getGenericParameterTypes();
 		//如果调用对应的方法没有参数，则没有必要再解析
 		if(paramTypes==null || paramTypes.length==0)
 			return;

@@ -15,6 +15,7 @@
 package org.soybeanMilk.web.os;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +27,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
@@ -171,7 +173,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object get(Serializable key, Class<?> objectType)
+	public Object get(Serializable key, Type objectType)
 	{
 		Object data = null;
 		if(objectType == HttpServletRequest.class)
@@ -272,7 +274,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	protected Object getWithUnknownScope(String scope, String keyInScope, Class<?> objectType)
+	protected Object getWithUnknownScope(String scope, String keyInScope, Type objectType)
 	{
 		//作用域无法识别，则认为它是param作用域里关键字的一部分
 		if(scope != null)
@@ -328,16 +330,18 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * @return
 	 * @date 2010-12-30
 	 */
-	protected Object getAttributeByKeyExpression(Object servletObj, String keyExpression, Class<?> objectType)
+	protected Object getAttributeByKeyExpression(Object servletObj, String keyExpression, Type objectType)
 	{
 		String[] objKeyWithProperty=splitByFirstDot(keyExpression);
+		
+		Class<?> objectClass=SbmUtils.narrowToClassType(objectType);
 		
 		//只有包含了'.'字符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式
 		if(objKeyWithProperty[0] != null)
 		{
 			Object data=getServletObjAttribute(servletObj, objKeyWithProperty[0]);
 			if(data != null)
-				return getGenericConverter().getProperty(data, objKeyWithProperty[1], objectType);
+				return getGenericConverter().getProperty(data, objKeyWithProperty[1], objectClass);
 			else
 				return getGenericConverter().convert(getServletObjAttribute(servletObj, keyExpression), objectType);
 		}
@@ -396,7 +400,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * 
 	 * @return
 	 */
-	protected Object getFromMap(Map<String,Object> originalValueMap, String keyFilter, Class<?> targetType)
+	protected Object getFromMap(Map<String,Object> originalValueMap, String keyFilter, Type targetType)
 	{
 		GenericConverter genericConverter=getGenericConverter();
 		
@@ -429,10 +433,12 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * @param targetType
 	 * @return
 	 */
-	protected Object convertServletObject(Object obj, Class<?> targetType)
+	protected Object convertServletObject(Object obj, Type targetType)
 	{
-		if(targetType == null || targetType.isAssignableFrom(obj.getClass()))
+		if(targetType == null || SbmUtils.isInstanceOf(obj, targetType))
 			return obj;
+		
+		Class<?> targetClass=SbmUtils.narrowToClassType(targetType);
 		
 		GenericConverter genericConverter=getGenericConverter();
 		
@@ -450,10 +456,10 @@ public class WebObjectSource extends ConvertableObjectSource
 		else
 			throw new ObjectSourceException("unknown servlet object '"+obj.getClass().getName()+"'");
 		
-		converter=genericConverter.getConverter(sourceClass, targetType);
+		converter=genericConverter.getConverter(sourceClass, targetClass);
 		
 		if(converter == null)
-			throw new ObjectSourceException("no Converter defined for converting '"+sourceClass.getName()+"' to '"+targetType.getName()+"'");
+			throw new ObjectSourceException("no Converter defined for converting '"+sourceClass.getName()+"' to '"+targetClass.getName()+"'");
 		
 		return converter.convert(obj, targetType);
 	}

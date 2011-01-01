@@ -18,20 +18,19 @@ package org.soybeanMilk.core.bean.converters;
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */
-public class IntegerConverter extends AbstractConverter
+public class IntegerConverter extends ClassTypeConverter
 {
 	private org.apache.commons.beanutils.converters.IntegerConverter c;
 	
 	public IntegerConverter()
 	{
 		super();
-		
 		c=new org.apache.commons.beanutils.converters.IntegerConverter();
 	}
 
 	@Override
-	public Object convert(Object sourceObj, Class<?> targetClass)
+	protected Object convertToClass(Object sourceObj, Class<?> targetType)
 	{
-		return c.convert(targetClass, sourceObj);
+		return c.convert(targetType, sourceObj);
 	}
 }

@@ -18,10 +18,10 @@ package org.soybeanMilk.core.bean.converters;
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */
-public class EnumConverter extends AbstractConverter
+public class EnumConverter extends ClassTypeConverter
 {
 	@Override
-	public Object convert(Object sourceObj, Class<?> targetClass)
+	protected Object convertToClass(Object sourceObj, Class<?> targetType)
 	{
 		//TODO 实现枚举类型转换
 		return null;

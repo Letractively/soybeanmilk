@@ -1,5 +1,6 @@
 package test.unit.web;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -92,7 +93,7 @@ public class TestWebObjectSource
 		Converter converter=new Converter()
 		{
 			@Override
-			public Object convert(Object sourceObj, Class<?> targetClass) 
+			public Object convert(Object sourceObj, Type targetClass) 
 			{
 				return staticJavaBean;
 			}

@@ -15,6 +15,7 @@
 package org.soybeanMilk.core.bean;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.bean.converters.ArrayConverter;
 import org.soybeanMilk.core.bean.converters.BigDecimalConverter;
 import org.soybeanMilk.core.bean.converters.BigIntegerConverter;
@@ -65,7 +67,7 @@ import org.soybeanMilk.web.WebConstants;
  * </table>
  * <br>
  * 另外，如果目标类型为<code>String</code>，而你没有添加此对象到<code>String</code>类型的辅助转换器，那么它将返回此对象的<code>toString()</code>结果<br>
- * 你也可以通过{@link #addConverter(Class, Class, Converter)}为它添加更多辅助转换器，使其支持更多的类型转换。
+ * 你也可以通过{@link #addConverter(Type, Type, Converter)}为它添加更多辅助转换器，使其支持更多的类型转换。
  * @author earthAngry@gmail.com
  * @date 2010-10-6
  */
@@ -113,13 +115,13 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	@Override
-	public Object convert(Object sourceObj, Class<?> targetType)
+	public Object convert(Object sourceObj, Type targetType)
 	{
 		return convertWithSupportConverter(sourceObj, targetType);
 	}
 	
 	@Override
-	public Object getProperty(Object srcObj, String propertyExpression, Class<?> targetType)
+	public Object getProperty(Object srcObj, String propertyExpression, Type targetType)
 	{
 		if(srcObj == null)
 			throw new IllegalArgumentException("[srcObj] must not be null");
@@ -141,7 +143,7 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	@Override
-	public void addConverter(Class<?> sourceType,Class<?> targetType,Converter converter)
+	public void addConverter(Type sourceType,Type targetType,Converter converter)
 	{
 		if(getConverters() == null)
 			setConverters(new HashMap<String, Converter>());
@@ -149,11 +151,11 @@ public class DefaultGenericConverter implements GenericConverter
 		getConverters().put(generateConverterKey(sourceType, targetType), converter);
 		
 		if(log.isDebugEnabled())
-			log.debug("add a support Converter '"+converter.getClass().getName()+"' for converting '"+sourceType.getName()+"' to '"+targetType.getName()+"'");
+			log.debug("add a support Converter '"+converter.getClass().getName()+"' for converting '"+sourceType+"' to '"+targetType+"'");
 	}
 	
 	@Override
-	public Converter getConverter(Class<?> sourceType, Class<?> targetType)
+	public Converter getConverter(Type sourceType, Type targetType)
 	{
 		return getConverters() == null ? null : getConverters().get(generateConverterKey(sourceType, targetType));
 	}
@@ -166,12 +168,12 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @throws ConvertException
 	 * @date 2010-12-28
 	 */
-	protected Object convertWithSupportConverter(Object sourceObj, Class<?> targetType) throws ConvertException
+	protected Object convertWithSupportConverter(Object sourceObj, Type targetType) throws ConvertException
 	{
 		if(log.isDebugEnabled())
 			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"
 					+(sourceObj == null ? null : sourceObj.getClass().getName())+"' to type '"
-					+(targetType==null ? null : targetType.getName())+"'");
+					+(targetType==null ? null : targetType)+"'");
 		
 		if(targetType == null)
 		{
@@ -183,13 +185,13 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		if(sourceObj == null)
 		{
-			if(targetType.isPrimitive())
+			if(SbmUtils.isPrimitive(targetType))
 				throw new ConvertException("can not convert null to primitive type");
 			else
 				return null;
 		}
 		
-		if(toWrapperClass(targetType).isAssignableFrom(sourceObj.getClass()))
+		if(SbmUtils.isInstanceOf(sourceObj, targetType))
 			return sourceObj;
 		
 		Converter c = getConverter(sourceObj.getClass(), targetType);
@@ -198,7 +200,7 @@ public class DefaultGenericConverter implements GenericConverter
 			if(targetType.equals(String.class))
 				return sourceObj.toString();
 			else
-				throw new ConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetType.getName()+"'");
+				throw new ConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetType+"'");
 		}
 		
 		try
@@ -289,7 +291,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2010-12-30
 	 */
-	protected Object getProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpression, Class<?> targetType)
+	protected Object getProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpression, Type targetType)
 	{
 		Object property=bean;
 		PropertyInfo propertyInfo=beanInfo;
@@ -322,9 +324,9 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @param targetClass
 	 * @return
 	 */
-	protected String generateConverterKey(Class<?> sourceClass,Class<?> targetClass)
+	protected String generateConverterKey(Type sourceType, Type targetType)
 	{
-		return sourceClass.getName()+SEPRATOR+targetClass.getName();
+		return sourceType.toString()+SEPRATOR+targetType.toString();
 	}
 	
 	/**
@@ -465,36 +467,6 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 		else
 			return o.toString();
-	}
-	
-	/**
-	 * 返回基本类型的包装类型，如果不是基本类型，它将直接被返回
-	 * @param type
-	 * @return
-	 */
-	public static Class<?> toWrapperClass(Class<?> type)
-	{
-		if (type == null || !type.isPrimitive())
-            return type;
-		
-		if (type == Integer.TYPE)
-        	return Integer.class;
-        else if (type == Double.TYPE)
-            return Double.class;
-        else if (type == Long.TYPE)
-            return Long.class;
-        else if (type == Boolean.TYPE)
-            return Boolean.class;
-        else if (type == Float.TYPE)
-            return Float.class;
-        else if (type == Short.TYPE)
-            return Short.class;
-        else if (type == Byte.TYPE)
-            return Byte.class;
-        else if (type == Character.TYPE)
-            return Character.class;
-        else
-            return type;
 	}
 	
 	/**

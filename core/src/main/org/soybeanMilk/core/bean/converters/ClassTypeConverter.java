@@ -14,10 +14,31 @@
 
 package org.soybeanMilk.core.bean.converters;
 
+import java.lang.reflect.Type;
+
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.bean.Converter;
 
 /**
+ * 目标类型是<code>Class</code>的转换器
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */
-public abstract class AbstractConverter implements Converter{}
+public abstract class ClassTypeConverter implements Converter
+{
+	@Override
+	public Object convert(Object sourceObj, Type targetType)
+	{
+		if(targetType == null)
+			return sourceObj;
+		return convertToClass(sourceObj, SbmUtils.narrowToClassType(targetType));
+	}
+	
+	/**
+	 * 将源对象转换为目标类型的对象
+	 * @param sourceObj
+	 * @param targetType
+	 * @return
+	 */
+	protected abstract Object convertToClass(Object sourceObj, Class<?> targetType);
+}

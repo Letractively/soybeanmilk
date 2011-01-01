@@ -15,10 +15,11 @@
 package org.soybeanMilk.core.config.parser;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.soybeanMilk.core.bean.DefaultGenericConverter;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
 import org.soybeanMilk.core.resolver.FactoryResolverProvider;
@@ -198,7 +199,7 @@ public class InvokeStatementParser
 		
 		if(!argStrList.isEmpty())
 		{
-			Class<?>[] argTypes=method.getParameterTypes();
+			Type[] argTypes=method.getGenericParameterTypes();
 			Arg[] args=new Arg[argTypes.length];
 			
 			for(int i=0;i<argTypes.length;i++)
@@ -376,7 +377,7 @@ public class InvokeStatementParser
 		if(arg.getType() == null)
 			throw new ParseException("the [type] property of this Arg must not be null");
 		
-		Class<?> wrapClass=DefaultGenericConverter.toWrapperClass(arg.getType());
+		Type wrapType=SbmUtils.toWrapperType(arg.getType());
 		
 		String key=null;
 		Object value=null;
@@ -384,17 +385,17 @@ public class InvokeStatementParser
 		//首字符为数字，则认为是数值
 		if(stmt.length()>0 && isNumberChar(stmt.charAt(0)))
 		{
-			if(Byte.class.equals(wrapClass))
+			if(Byte.class.equals(wrapType))
 				value=new Byte(stmt);
-			else if(Double.class.equals(wrapClass))
+			else if(Double.class.equals(wrapType))
 				value=new Double(stmt);
-			else if(Float.class.equals(wrapClass))
+			else if(Float.class.equals(wrapType))
 				value=new Float(stmt);
-			else if(Integer.class.equals(wrapClass))
+			else if(Integer.class.equals(wrapType))
 				value=new Integer(stmt);
-			else if(Long.class.equals(wrapClass))
+			else if(Long.class.equals(wrapType))
 				value=new Long(stmt);
-			else if(Short.class.equals(wrapClass))
+			else if(Short.class.equals(wrapType))
 				value=new Short(stmt);
 			else
 				throw new ParseException("can not create Number instance of class '"+arg.getType()+"' with value \""+stmt+"\"");
@@ -409,7 +410,7 @@ public class InvokeStatementParser
 		}
 		else if("null".equals(stmt))
 		{
-			if(arg.getType().isPrimitive())
+			if(SbmUtils.isPrimitive(arg.getType()))
 				throw new ParseException("can not set null to primitive type");
 			
 			value=null;

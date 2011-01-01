@@ -14,6 +14,8 @@
 
 package org.soybeanMilk.core.bean;
 
+import java.lang.reflect.Type;
+
 /**
  * 转换器，它可以将某个类型的对象转换为另一个类型的对象，比如将字符串转换成整型
  * @author earthAngry@gmail.com
@@ -24,8 +26,8 @@ public interface Converter
 	/**
 	 * 将源对象转换为目标类型的对象
 	 * @param sourceObj 源对象
-	 * @param targetType 目标类型
+	 * @param targetType 目标类型，可能为<code>null</code>
 	 * @return <code>targetType</code>类型的对象
 	 */
-	Object convert(Object sourceObj, Class<?> targetType);
+	Object convert(Object sourceObj, Type targetType);
 }

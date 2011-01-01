@@ -15,10 +15,12 @@
 package org.soybeanMilk.core.os;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.GenericConverter;
 
@@ -47,23 +49,22 @@ public class HashMapObjectSource extends ConvertableObjectSource
 	}
 
 	@Override
-	public Object get(Serializable key, Class<?> objectType)
-			throws ObjectSourceException
+	public Object get(Serializable key, Type type) throws ObjectSourceException
 	{
 		Object re = source.get(key);
-		if(objectType == null)
+		if(type == null)
 			return re;
 		
 		GenericConverter cvt = getGenericConverter();
 		if(cvt == null)
 		{
-			if(re==null && objectType.isPrimitive())
+			if(re==null && SbmUtils.isPrimitive(type))
 				throw new ObjectSourceException("the result object is null, but primitive type needed");
 			else
 				return re;
 		}
 		else
-			re = cvt.convert(re, objectType);
+			re = cvt.convert(re, type);
 		
 		if(log.isDebugEnabled())
 			log.debug("get '"+re+"' with key '"+key+"' from "+this);

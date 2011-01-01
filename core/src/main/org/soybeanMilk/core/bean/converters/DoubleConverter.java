@@ -18,7 +18,7 @@ package org.soybeanMilk.core.bean.converters;
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */
-public class DoubleConverter extends AbstractConverter
+public class DoubleConverter extends ClassTypeConverter
 {
 	private org.apache.commons.beanutils.converters.DoubleConverter c;
 	
@@ -30,8 +30,8 @@ public class DoubleConverter extends AbstractConverter
 	}
 
 	@Override
-	public Object convert(Object sourceObj, Class<?> targetClass)
+	protected Object convertToClass(Object sourceObj, Class<?> targetType)
 	{
-		return c.convert(targetClass, sourceObj);
+		return c.convert(targetType, sourceObj);
 	}
 }

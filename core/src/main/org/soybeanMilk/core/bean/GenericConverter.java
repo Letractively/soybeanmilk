@@ -14,6 +14,8 @@
 
 package org.soybeanMilk.core.bean;
 
+import java.lang.reflect.Type;
+
 /**
  * 通用转换器，通过添加辅助转换器，它可以将任何类型的对象转换到目标类型对象。
  * @author earthAngry@gmail.com
@@ -27,7 +29,7 @@ public interface GenericConverter extends Converter
 	 * @param targetType 目标类型
 	 * @param converter 辅助转换器对象
 	 */
-	void addConverter(Class<?> sourceType,Class<?> targetType,Converter converter);
+	void addConverter(Type sourceType,Type targetType,Converter converter);
 	
 	/**
 	 * 取得能够将源类型转换到目标类型的辅助{@linkplain Converter 转换器}
@@ -35,7 +37,7 @@ public interface GenericConverter extends Converter
 	 * @param targetType 目标类型
 	 * @return 转换器对象
 	 */
-	Converter getConverter(Class<?> sourceType,Class<?> targetType);
+	Converter getConverter(Type sourceType,Type targetType);
 	
 	/**
 	 * 设置对象的属性值，<code>value</code>将被转换为属性类型的对象。
@@ -54,5 +56,5 @@ public interface GenericConverter extends Converter
 	 * @return <code>targetType</code>类型的对象
 	 * @date 2010-12-28
 	 */
-	Object getProperty(Object srcObj, String propertyExpression, Class<?> targetType);
+	Object getProperty(Object srcObj, String propertyExpression, Type targetType);
 }

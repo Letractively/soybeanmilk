@@ -1,5 +1,8 @@
 package test.unit.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.Assert;
 
 import org.apache.commons.logging.Log;
@@ -175,6 +178,28 @@ public class TestDefaultExecutor
 		}
 	}
 	
+	@Test
+	public void execute() throws Exception
+	{
+		//参数化类型，默认不支持
+		{
+			HashMapObjectSource os=new HashMapObjectSource();
+			os.set("list", new ArrayList<String>());
+			
+			Exception e=null;
+			try
+			{
+				executor.execute("helloParameterized", os);
+			}
+			catch(Exception e1)
+			{
+				e=e1;
+			}
+			
+			Assert.assertTrue( e.getMessage().startsWith("can not find Converter for converting '") );
+		}
+	}
+	
 	public static class ResolverForTest
 	{
 		public String before(Execution execution)
@@ -198,5 +223,7 @@ public class TestDefaultExecutor
 		{
 			throw new UnsupportedOperationException();
 		}
+		
+		public void helloParameterized(List<String> list){}
 	}
 }

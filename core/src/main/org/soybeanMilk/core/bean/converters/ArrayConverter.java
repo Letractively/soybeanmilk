@@ -25,7 +25,7 @@ import org.soybeanMilk.core.bean.Converter;
  * @date 2010-10-3
  *
  */
-public class ArrayConverter extends AbstractConverter
+public class ArrayConverter extends ClassTypeConverter
 {
 	private Converter elementConverter;
 	
@@ -36,19 +36,19 @@ public class ArrayConverter extends AbstractConverter
 	}
 	
 	@Override
-	public Object convert(Object sourceObj, Class<?> targetClass)
+	protected Object convertToClass(Object sourceObj, Class<?> targetType)
 	{
-		if(!targetClass.isArray())
-			throw new ConvertException("[targetClass] must be an array");
+		if(!targetType.isArray())
+			throw new IllegalArgumentException("the parameter '"+targetType+"' must be an array Class");
 		
 		if(sourceObj == null)
 			return null;
 		
 		if(!sourceObj.getClass().isArray())
-			throw new ConvertException("[sourceObj] must be an array");
+			throw new ConvertException("the parameter '"+sourceObj+"' must be an array");
 		
 		int len=Array.getLength(sourceObj);
-		Class<?> componentClass=targetClass.getComponentType();
+		Class<?> componentClass=targetType.getComponentType();
 		
 		Object targetObj=Array.newInstance(componentClass, len);
 		

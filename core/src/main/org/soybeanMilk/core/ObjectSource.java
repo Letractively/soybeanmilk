@@ -15,6 +15,7 @@
 package org.soybeanMilk.core;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 
 /**
  * 对象源，用于获取和存储对象
@@ -26,10 +27,10 @@ public interface ObjectSource
 	/**
 	 * 取得对象
 	 * @param key 对象关键字
-	 * @param objectType 要取得对象的类型，如果为<code>null</code>，则表明调用者不关心对象类型
+	 * @param type 期望的对象类型，可能为<code>null</code>
 	 * @return
 	 */
-	Object get(Serializable key, Class<?> objectType);
+	Object get(Serializable key, Type type);
 	
 	/**
 	 * 保存对象

@@ -51,7 +51,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		if(SbmUtils.isInstanceOf(sourceObj, Map.class))
 			return convertMap((Map<String, Object>)sourceObj, targetType);
 		else
-			return convertWithSupportConverter(sourceObj, SbmUtils.narrowToClassType(targetType));
+			return convertWithSupportConverter(sourceObj, targetType);
 	}
 	
 	@Override
@@ -149,8 +149,13 @@ public class WebGenericConverter extends DefaultGenericConverter
 		
 		if(SbmUtils.isInstanceOf(targetType, ParameterizedType.class))
 		{
-			//TODO 处理参数化类型
-			throw new ConvertException("converting 'Map<String, Object>' to '"+targetType+"' is not supported");
+			Class<?>[] genericClass=getSupportGenericType((ParameterizedType)targetType);
+			if(SbmUtils.isAncestorClass(List.class, genericClass[0]))
+				result=convertMapToList(originalValueMap, genericClass);
+			else if(SbmUtils.isAncestorClass(Set.class, genericClass[0]))
+				result=convertMapToSet(originalValueMap, genericClass);
+			else
+				throw new ConvertException("converting 'Map<String, Object>' to parameterized type '"+targetType+"' is not supported");
 		}
 		else if(SbmUtils.isInstanceOf(targetType, Class.class))
 		{
@@ -159,7 +164,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			if(SbmUtils.isAncestorClass(Map.class, targetClass))
 				result=originalValueMap;
 			if(targetClass.isArray())
-				result=convertMapToJavaBeanArray(originalValueMap, targetClass.getComponentType());
+				result=convertMapToArray(originalValueMap, targetClass.getComponentType());
 			else
 			{
 				PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(targetClass);
@@ -176,7 +181,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 					{
 						//延迟初始化
 						if(result == null)
-							result = instance(beanInfo.getPropertyType(), -1);
+							result = instance(beanInfo.getType(), -1);
 						
 						setProperty(result, beanInfo, propertyExpression, 0, originalValueMap.get(k));
 					}
@@ -190,24 +195,21 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 由映射表转换为泛型<code>java.util.Set</code>。
+	 * 由映射表转换为<code>java.util.Set</code>。
 	 * @param valueMap
-	 * @param setClass
+	 * @param setGeneric
 	 * @return
 	 * @date 2010-12-31
 	 */
 	@SuppressWarnings("unchecked")
-	protected Set<?> convertMapToJavaBeanSet(Map<String, Object> valueMap, Class<?> setClass)
+	protected Set<?> convertMapToSet(Map<String, Object> valueMap, Class<?>[] setGeneric)
 	{
 		Set re=null;
 		
-		//TODO 取得明确类型
-		Class<?> elementClass=null;
-		
-		Object[] ary=convertMapToJavaBeanArray(valueMap, elementClass);
+		Object[] ary=convertMapToArray(valueMap, setGeneric[1]);
 		if(ary != null)
 		{
-			re=(Set)instance(setClass, -1);
+			re=(Set)instance(Set.class, -1);
 			for(Object o : ary)
 				re.add(o);
 		}
@@ -216,24 +218,21 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 由映射表转换为泛型<code>java.util.List</code>。
+	 * 由映射表转换为<code>java.util.List</code>。
 	 * @param valueMap
-	 * @param listClass
+	 * @param listGeneric
 	 * @return
 	 * @date 2010-12-31
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<?> convertMapToJavaBeanList(Map<String, Object> valueMap, Class<?> listClass)
+	protected List<?> convertMapToList(Map<String, Object> valueMap, Class<?>[] listGeneric)
 	{
 		List re=null;
 		
-		//TODO 取得明确类型
-		Class<?> elementClass=null;
-		
-		Object[] ary=convertMapToJavaBeanArray(valueMap, elementClass);
+		Object[] ary=convertMapToArray(valueMap, listGeneric[1]);
 		if(ary != null)
 		{
-			re=(List)instance(listClass, -1);
+			re=(List)instance(listGeneric[0], -1);
 			for(Object o : ary)
 				re.add(o);
 		}
@@ -242,15 +241,15 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 由映射表转换为JavaBean数组，<code>valueMap</code>中值为<code>null</code>和关键字不是<code>javaBeanClass</code>类属性的元素将被忽略，
+	 * 由映射表转换为数组，<code>valueMap</code>中值为<code>null</code>和关键字不是<code>elementClass</code>类属性的元素将被忽略，
 	 * 其他元素必须是数组并且长度一致。<br>
-	 * 此方法不支持嵌套数组和集合（即<code>javaBeanClass</code>不能包含数组和集合类属性）。
+	 * 此方法不支持嵌套数组和集合（即<code>elementClass</code>不能包含数组和集合类属性）。
 	 * @param valueMap
-	 * @param javaBeanClass
+	 * @param elementClass
 	 * @return 元素为<code>javaBeanClass</code>类型且长度为<code>valueMap</code>值元素长度的数组
 	 * @date 2010-12-31
 	 */
-	protected Object[] convertMapToJavaBeanArray(Map<String, Object> valueMap, Class<?> javaBeanClass)
+	protected Object[] convertMapToArray(Map<String, Object> valueMap, Class<?> elementClass)
 	{
 		if(valueMap==null || valueMap.size()==0)
 			return null;
@@ -258,7 +257,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		Object[] re=null;
 		int len=-1;
 		
-		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(javaBeanClass);
+		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(elementClass);
 		
 		Set<String> keys=valueMap.keySet();
 		for(String key : keys)
@@ -283,9 +282,9 @@ public class WebGenericConverter extends DefaultGenericConverter
 				//延迟初始化
 				if(re == null)
 				{
-					re=(Object[])instance(javaBeanClass, len);
+					re=(Object[])instance(elementClass, len);
 					for(int i=0;i<len;i++)
-						re[i]=instance(javaBeanClass, -1);
+						re[i]=instance(elementClass, -1);
 				}
 				
 				for(int i=0;i<len;i++)
@@ -311,27 +310,25 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 取得JavaBean某个参数化属性的实际参数类型
-	 * @param beanInfo
-	 * @param property
+	 * 取得参数化类型的原始类型和参数类型
+	 * @param type
 	 * @return
-	 * @date 2010-12-31
 	 */
-	protected Class<?> getPropertyFirstParamType(PropertyInfo beanInfo, String property)
+	protected Class<?>[] getSupportGenericType(ParameterizedType type)
 	{
-		PropertyInfo pi=beanInfo.getSubPropertyInfo(property);
-		if(pi == null)
-			throw new ConvertException("no property '"+property+"' found in class '"+beanInfo.getClass()+"'");
+		Type[] ats=type.getActualTypeArguments();
+		if(ats==null || ats.length!=1 || !SbmUtils.isClassType(ats[0]))
+			throw new ConvertException("'"+type+"' is not valid, only 1 and only Class type of its actual type argument is supported");
 		
-		Type type=pi.getWriteMethod().getGenericParameterTypes()[0];
-		if(!(type instanceof ParameterizedType))
-			throw new ConvertException("'"+type+"' is not parameterized type");
+		Type rt=type.getRawType();
+		if(!SbmUtils.isClassType(rt))
+			throw new ConvertException("'"+type+"' is not valid, only Class type of its raw type is supported");
 		
-		Type pa=((ParameterizedType)type).getActualTypeArguments()[0];
-		if(!(pa instanceof Class<?>))
-			throw new ConvertException("invalide parameterized type '"+pa+"'");
+		Class<?>[] re=new Class<?>[2];
+		re[0]=SbmUtils.narrowToClassType(rt);
+		re[1]=SbmUtils.narrowToClassType(ats[0]);
 		
-		return (Class<?>)pa;
+		return re;
 	}
 	
 	/**

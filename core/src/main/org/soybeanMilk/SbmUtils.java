@@ -65,12 +65,10 @@ public class SbmUtils
 	{
 		if(obj==null || type==null)
 			return false;
-		else if(obj instanceof Type)
-			return type.getClass().isInstance(obj);
 		else if(isClassType(type))
 			return narrowToClassType(type).isInstance(obj);
 		else
-			return false;
+			return type.getClass().isInstance(obj);
 	}
 	
 	/**

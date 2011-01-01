@@ -19,6 +19,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,7 +37,9 @@ public class PropertyInfo
 	private static Log log = LogFactory.getLog(PropertyInfo.class);
 	
 	/**属性类型*/
-	private Class<?> propertyType;
+	private Class<?> type;
+	/**泛型类型*/
+	private Type genericType;
 	
 	/**此属性类型的属性信息集，以属性名作为关键字*/
 	private Map<String,PropertyInfo> subPropertyInfos;
@@ -52,20 +55,33 @@ public class PropertyInfo
 		this(propertyType, null, null);
 	}
 	
-	protected PropertyInfo(Class<?> propertyType, Method readMethod, Method writeMethod)
+	protected PropertyInfo(Class<?> type, Method readMethod, Method writeMethod)
 	{
 		super();
-		this.propertyType = propertyType;
+		this.type = type;
 		this.readMethod = readMethod;
 		this.writeMethod = writeMethod;
+		
+		if(writeMethod != null)
+			this.genericType=writeMethod.getGenericParameterTypes()[0];
+		else
+			this.genericType=type;
 	}
 	
-	public Class<?> getPropertyType() {
-		return propertyType;
+	public Class<?> getType() {
+		return type;
 	}
 
-	public void setPropertyType(Class<?> propertyType) {
-		this.propertyType = propertyType;
+	public void setType(Class<?> type) {
+		this.type = type;
+	}
+
+	public Type getGenericType() {
+		return genericType;
+	}
+
+	public void setGenericType(Type genericType) {
+		this.genericType = genericType;
 	}
 
 	public Map<String, PropertyInfo> getSubPropertyInfos() {
@@ -99,7 +115,7 @@ public class PropertyInfo
 	 */
 	public boolean isArray()
 	{
-		return propertyType.isArray();
+		return type.isArray();
 	}
 	
 	/**
@@ -109,7 +125,7 @@ public class PropertyInfo
 	 */
 	public boolean isList()
 	{
-		return java.util.List.class.isAssignableFrom(propertyType);
+		return java.util.List.class.isAssignableFrom(type);
 	}
 	
 	/**
@@ -119,7 +135,7 @@ public class PropertyInfo
 	 */
 	public boolean isMap()
 	{
-		return java.util.Map.class.isAssignableFrom(propertyType);
+		return java.util.Map.class.isAssignableFrom(type);
 	}
 	
 	/**
@@ -129,7 +145,7 @@ public class PropertyInfo
 	 */
 	public boolean isSet()
 	{
-		return java.util.Set.class.isAssignableFrom(propertyType);
+		return java.util.Set.class.isAssignableFrom(type);
 	}
 	
 	/**
@@ -139,7 +155,7 @@ public class PropertyInfo
 	 */
 	public boolean isInterface()
 	{
-		return propertyType.isInterface();
+		return type.isInterface();
 	}
 	
 	/**
@@ -171,7 +187,7 @@ public class PropertyInfo
 	
 	@Override
 	public String toString() {
-		return "PropertyInfo [propertyType=" + propertyType + ", readMethod="
+		return "PropertyInfo [propertyType=" + type + ", readMethod="
 				+ readMethod + ", writeMethod=" + writeMethod + "]";
 	}
 	
@@ -220,13 +236,15 @@ public class PropertyInfo
 			log.debug(getSpace(depth)+"start  anatomized '"+beanClass.getName()+"' property information");
 		
 		PropertyInfo beanInfo=new PropertyInfo(beanClass);
-		localExists.put(beanInfo.getPropertyType(), beanInfo);
+		beanInfo.setGenericType(beanClass);
+		
+		localExists.put(beanInfo.getType(), beanInfo);
 		
 		PropertyDescriptor[] pds=null;
 		
 		try
 		{
-			pds=Introspector.getBeanInfo(beanInfo.getPropertyType()).getPropertyDescriptors();
+			pds=Introspector.getBeanInfo(beanInfo.getType()).getPropertyDescriptors();
 		}
 		catch(IntrospectionException e)
 		{

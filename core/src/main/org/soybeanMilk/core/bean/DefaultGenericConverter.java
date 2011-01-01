@@ -226,12 +226,12 @@ public class DefaultGenericConverter implements GenericConverter
 	{
 		PropertyInfo propertyInfo=beanInfo.getSubPropertyInfo(propertyExpression[index]);
 		if(propertyInfo == null)
-			throw new ConvertException("can not find property '"+propertyExpression[index]+"' in class '"+beanInfo.getPropertyType().getName()+"'");
+			throw new ConvertException("can not find property '"+propertyExpression[index]+"' in class '"+beanInfo.getType().getName()+"'");
 		
 		//自上而下递归，到达末尾时初始化和写入
 		if(index == propertyExpression.length-1)
 		{
-			Object destValue=convertWithSupportConverter(value, propertyInfo.getPropertyType());
+			Object destValue=convertWithSupportConverter(value, propertyInfo.getType());
 			try
 			{
 				propertyInfo.getWriteMethod().invoke(bean, new Object[]{destValue});
@@ -259,7 +259,7 @@ public class DefaultGenericConverter implements GenericConverter
 			//初始化
 			if(propertyInstance == null)
 			{
-				propertyInstance=instance(propertyInfo.getPropertyType(), -1);
+				propertyInstance=instance(propertyInfo.getType(), -1);
 				toWrite=true;
 			}
 			
@@ -301,7 +301,7 @@ public class DefaultGenericConverter implements GenericConverter
 			propertyInfo = propertyInfo.getSubPropertyInfo(propertyExpression[i]);
 			
 			if(propertyInfo == null)
-				throw new ConvertException("can not find property '"+propertyExpression[i]+"' in class '"+beanInfo.getPropertyType().getName()+"'");
+				throw new ConvertException("can not find property '"+propertyExpression[i]+"' in class '"+beanInfo.getType().getName()+"'");
 			if(property == null)
 				throw new ConvertException("can not get property '"+propertyExpression[i]+"' from null object");
 			

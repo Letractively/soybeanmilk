@@ -85,7 +85,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		Converter c = getConverter(sourceObj.getClass(), targetType);
 		
 		//如果源对象是数组并且长度为1，而标类型不是，则使用数组的第一个元素转换
-		if(c==null && sourceObj.getClass().isArray() && Array.getLength(sourceObj)==1 && !SoybeanMilkUtils.isArray(targetType))
+		if(c==null && sourceObj.getClass().isArray() && Array.getLength(sourceObj)==1 && !SoybeanMilkUtils.isClassTypeArray(targetType))
 		{
 			if(log.isDebugEnabled())
 				log.debug("the source '"+getStringDesc(sourceObj)+"' is an array an array and the length is 1, while the target Class is not, so it's first element will be used for converting");
@@ -125,7 +125,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		catch(Exception e)
 		{
-			Object dv = getDefaultValueWhenException(sourceObj, targetType, c, e);
+			Object dv = getDefaultValue(targetType);
 			
 			if(log.isDebugEnabled())
 				log.debug("default value '"+dv+"' is used while converting '"+sourceObj+"' to '"+targetType+"' because the following exception :", e);
@@ -136,103 +136,143 @@ public class WebGenericConverter extends DefaultGenericConverter
 	
 	/**
 	 * 将映射表转换成<code>targetType</code>类型的对象
-	 * @param originalValueMap 值映射表，它也可能包含与<code>targetType</code>类属性无关的关键字
+	 * @param valueMap 值映射表，它也可能包含与<code>targetType</code>类属性无关的关键字
 	 * @param targetType
 	 * @return
 	 */
-	protected Object convertMap(Map<String, Object> originalValueMap, Type targetType)
+	protected Object convertMap(Map<String, Object> valueMap, Type targetType)
 	{
-		if(originalValueMap==null || targetType == null)
-			return originalValueMap;
+		if(log.isDebugEnabled())
+			log.debug("start converting 'Map<String, Object>' object to '"+targetType+"'");
+		
+		if(valueMap==null || targetType == null)
+			return valueMap;
 		
 		Object result = null;
 		
-		//目标类型为ParameterizedType
-		if(SoybeanMilkUtils.isInstanceOf(targetType, ParameterizedType.class))
+		Class<?>[] supportedClass=getActualClassTypeInfo(targetType);
+		
+		if(supportedClass==null || supportedClass.length==0)
+			throw new ConvertException("converting 'Map<String,Object>' to '"+targetType+"' is not supported");
+		else if(SoybeanMilkUtils.isAncestorClass(List.class, supportedClass[0]))
 		{
-			if(log.isDebugEnabled())
-				log.debug("start converting 'Map<String, Object>'  to parameterized type '"+targetType+"'");
+			if(supportedClass.length != 2)
+				throw new ConvertException("only generic List converting is supported");
 			
-			Class<?>[] genericClass=getSupportGenericType((ParameterizedType)targetType);
-			if(SoybeanMilkUtils.isAncestorClass(List.class, genericClass[0]))
-				result=convertMapToGenericList(originalValueMap, genericClass);
-			else if(SoybeanMilkUtils.isAncestorClass(Set.class, genericClass[0]))
-				result=convertMapToGenericSet(originalValueMap, genericClass);
-			else
-				throw new ConvertException("converting 'Map<String, Object>' to parameterized type '"+targetType+"' is not supported");
+			result=convertMapToGenericList(valueMap, supportedClass);
 		}
-		//目标类型为Class
-		else if(SoybeanMilkUtils.isInstanceOf(targetType, Class.class))
+		else if(SoybeanMilkUtils.isAncestorClass(Set.class, supportedClass[0]))
 		{
-			if(log.isDebugEnabled())
-				log.debug("start converting 'Map<String, Object>'  to Class type '"+targetType+"'");
+			if(supportedClass.length != 2)
+				throw new ConvertException("only generic Set converting is supported");
 			
-			Class<?> targetClass=SoybeanMilkUtils.narrowToClassType(targetType);
+			result=convertMapToGenericSet(valueMap, supportedClass);
+		}
+		else if(SoybeanMilkUtils.isAncestorClass(Map.class, supportedClass[0]))
+			result=valueMap;
+		else if(SoybeanMilkUtils.isArray(supportedClass[0]))
+			result=convertMapToArray(valueMap, supportedClass[0].getComponentType());
+		else
+		{
+			PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(supportedClass[0]);
 			
-			if(SoybeanMilkUtils.isInstanceOf(originalValueMap, targetClass))
-				result=originalValueMap;
-			else if(targetClass.isArray())
-				result=convertMapToJavaBeanArray(originalValueMap, targetClass.getComponentType());
+			if(!beanInfo.hasSubPropertyInfo())
+			{
+				result=getDefaultValue(targetType);
+				
+				if(log.isDebugEnabled())
+					log.debug("'"+supportedClass[0]+"' has no javaBean property, default value '"+result+"' will be used");
+			}
 			else
 			{
-				PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(targetClass);
+				//TODO 集合属性或数组属性转换实现
 				
-				if(!beanInfo.hasSubPropertyInfo())
+				//预存储beanInfo的集合属性，比如带有集合属性的表达式：
+				//	"my.listChild_1.id"
+				//	"my.listChild_1.name"
+				//	"my.listChild_2.id"
+				//	"my.listChild_2.name"
+				//将被以如下形式存储在这里：
+				//	my.listChild_1
+				//		id		Object
+				//		name	Object
+				//	my.listChild_2
+				//		id		Object
+				//		name	Object
+				Map<String, Map<String, Object>> collectionProperties=new HashMap<String, Map<String,Object>>();
+				
+				Set<String> keys=valueMap.keySet();
+				for(String propExp : keys)
 				{
-					result=getDefaultValue(targetType);
+					String[] propExpAry=splitPropertyExpression(propExp);
 					
-					if(log.isDebugEnabled())
-						log.debug("'"+targetClass+"' has no javaBean property, default value '"+result+"' will be used");
-				}
-				else
-				{
-					//TODO 集合属性或数组属性转换实现
-					
-					//预存储beanInfo的集合属性，比如带有集合属性的表达式：
-					//	"my.listChild_1.id"
-					//	"my.listChild_1.name"
-					//	"my.listChild_2.id"
-					//	"my.listChild_2.name"
-					//将被以如下形式存储在这里：
-					//	my.listChild_1
-					//		id		Object
-					//		name	Object
-					//	my.listChild_2
-					//		id		Object
-					//		name	Object
-					Map<String, Map<String, Object>> collectionProperties=new HashMap<String, Map<String,Object>>();
-					
-					Set<String> keys=originalValueMap.keySet();
-					for(String propExp : keys)
+					//剔除无关属性
+					if(beanInfo.getSubPropertyInfo(propExpAry[0]) != null)
 					{
-						String[] propExpAry=splitPropertyExpression(propExp);
+						//延迟初始化
+						if(result == null)
+							result = instance(beanInfo.getType(), -1);
 						
-						//剔除无关属性
-						if(beanInfo.getSubPropertyInfo(propExpAry[0]) != null)
-						{
-							//延迟初始化
-							if(result == null)
-								result = instance(beanInfo.getType(), -1);
-							
-							setProperty(result, beanInfo, propExpAry, 0, originalValueMap.get(propExp));
-						}
+						setProperty(result, beanInfo, propExpAry, 0, valueMap.get(propExp));
 					}
+				}
+				
+				//设置集合类型属性的值
+				if(collectionProperties!=null && collectionProperties.size()>0)
+				{
+					Set<String> props=collectionProperties.keySet();
 					
-					//设置非Class类型属性的值
-					if(collectionProperties!=null && collectionProperties.size()>0)
+					for(String propExp : props)
 					{
-						Set<String> props=collectionProperties.keySet();
-						
-						for(String propExp : props)
-							setProperty(result, propExp, collectionProperties.get(propExp));
+						Object propValue=convertMap(collectionProperties.get(propExp), targetType);
+						setProperty(result, propExp, propValue);
 					}
 				}
 			}
 		}
-		else
-			throw new ConvertException("converting 'Map<String, Object>' to '"+targetType+"' is not supported");
 		
 		return result;
+	}
+	
+	/**
+	 * 获取类型实际的{@linkplain java.lang.Class Class}类型。
+	 * 如果<code>type</code>是{@linkplain java.lang.Class Class}类型，则结果是包含仅包含它一个元素的数组；
+	 * 如果是{@linkplain java.lang.reflect.ParameterizedType ParameterizedType}类型，
+	 * 则返回数组的第一个元素是它的原始类型，而后续的元素则是参数类型；
+	 * 如果是不支持的类型，则返回<code>null</code>。
+	 * @param type
+	 * @return
+	 * @date 2011-1-3
+	 */
+	protected Class<?>[] getActualClassTypeInfo(Type type)
+	{
+		Class<?>[] re=null;
+		
+		if(SoybeanMilkUtils.isInstanceOf(type, ParameterizedType.class))
+		{
+			ParameterizedType paramType=(ParameterizedType)type;
+			Type[] ats=paramType.getActualTypeArguments();
+			
+			if(!SoybeanMilkUtils.isClassType(paramType.getRawType()))
+				throw new ConvertException("'"+type+"' is not valid, only Class type of its raw is supported");
+			
+			re=new Class<?>[1+ats.length];
+			re[0]=SoybeanMilkUtils.narrowToClassType(paramType.getRawType());
+			
+			for(int i=0;i<ats.length;i++)
+			{
+				if(!SoybeanMilkUtils.isClassType(ats[i]))
+					throw new ConvertException("'"+type+"' is not valid, only Class type of its actual types is supported");
+				
+				re[i+1]=SoybeanMilkUtils.narrowToClassType(ats[i]);
+			}
+		}
+		else if(SoybeanMilkUtils.isInstanceOf(type, Class.class))
+			re=new Class<?>[]{ SoybeanMilkUtils.narrowToClassType(type) };
+		else
+			;
+		
+		return re;
 	}
 	
 	/**
@@ -247,7 +287,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	{
 		Set re=null;
 		
-		Object[] ary=convertMapToJavaBeanArray(valueMap, setGeneric[1]);
+		Object[] ary=convertMapToArray(valueMap, setGeneric[1]);
 		if(ary != null)
 		{
 			re=(Set)instance(setGeneric[0], -1);
@@ -270,7 +310,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	{
 		List re=null;
 		
-		Object[] ary=convertMapToJavaBeanArray(valueMap, listGeneric[1]);
+		Object[] ary=convertMapToArray(valueMap, listGeneric[1]);
 		if(ary != null)
 		{
 			re=(List)instance(listGeneric[0], -1);
@@ -290,7 +330,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @return 元素为<code>javaBeanClass</code>类型且长度为<code>valueMap</code>值元素长度的数组
 	 * @date 2010-12-31
 	 */
-	protected Object[] convertMapToJavaBeanArray(Map<String, Object> valueMap, Class<?> elementClass)
+	protected Object[] convertMapToArray(Map<String, Object> valueMap, Class<?> elementClass)
 	{
 		if(valueMap==null || valueMap.size()==0)
 			return null;
@@ -337,47 +377,11 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 当出现转换异常时，使用此方法返回的值作为转换结果。
-	 * @param sourceObj
-	 * @param targetType
-	 * @param converter
-	 * @param e
-	 * @return
-	 * @date 2010-12-31
-	 */
-	protected Object getDefaultValueWhenException(Object sourceObj, Type targetType, Converter converter, Exception e)
-	{
-		return getDefaultValue(targetType);
-	}
-	
-	/**
-	 * 取得参数化类型的原始类型和参数类型
-	 * @param type
-	 * @return
-	 */
-	protected Class<?>[] getSupportGenericType(ParameterizedType type)
-	{
-		Type[] ats=type.getActualTypeArguments();
-		if(ats==null || ats.length!=1 || !SoybeanMilkUtils.isClassType(ats[0]))
-			throw new ConvertException("'"+type+"' is not valid, only 1 and only Class type of its actual type argument is supported");
-		
-		Type rt=type.getRawType();
-		if(!SoybeanMilkUtils.isClassType(rt))
-			throw new ConvertException("'"+type+"' is not valid, only Class type of its raw type is supported");
-		
-		Class<?>[] re=new Class<?>[2];
-		re[0]=SoybeanMilkUtils.narrowToClassType(rt);
-		re[1]=SoybeanMilkUtils.narrowToClassType(ats[0]);
-		
-		return re;
-	}
-	
-	/**
 	 * 取得类型的默认值
 	 * @param type
 	 * @return
 	 */
-	public static Object getDefaultValue(Type type)
+	protected Object getDefaultValue(Type type)
 	{
 		if(boolean.class.equals(type))
 			return false;

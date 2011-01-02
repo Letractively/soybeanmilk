@@ -213,12 +213,24 @@ public class TestWebGenericConverter
 		
 		//非泛型类，不知道元素类型，所以是null
 		{
-			List<JavaBean> dest=(List<JavaBean>)converter.convert(src, List.class);
-			Assert.assertNull(dest);
+			try
+			{
+				List<JavaBean> dest=(List<JavaBean>)converter.convert(src, List.class);
+			}
+			catch(Exception e)
+			{
+				Assert.assertEquals("only generic List converting is supported", e.getMessage());
+			}
 		}
 		{
-			Set<JavaBean> dest=(Set<JavaBean>)converter.convert(src, Set.class);
-			Assert.assertNull(dest);
+			try
+			{
+				Set<JavaBean> dest=(Set<JavaBean>)converter.convert(src, Set.class);
+			}
+			catch(Exception e)
+			{
+				Assert.assertEquals("only generic Set converting is supported", e.getMessage());
+			}
 		}
 	}
 	
@@ -238,20 +250,14 @@ public class TestWebGenericConverter
 		
 		{
 			Type type=new MockParameterizedType(Map.class, new Type[]{String.class, JavaBean.class});
-			try
-			{
-				Map<Integer, JavaBean> dest=(Map<Integer, JavaBean>)converter.convert(src, type);
-				dest.size();
-			}
-			catch(Exception e)
-			{
-				Assert.assertEquals("'"+type+"' is not valid, only 1 and only Class type of its actual type argument is supported", e.getMessage());
-			}
+			
+			Map<String, Object> dest=(Map<String, Object>)converter.convert(src, type);
+			
+			Assert.assertTrue( dest == src );
 		}
 		
 		{
-			Type rawType=new MockParameterizedType(null, null);
-			Type type=new MockParameterizedType(rawType, new Type[]{JavaBean.class});
+			Type type=new MockParameterizedType(new MockParameterizedType(null, null), new Type[]{JavaBean.class});
 			try
 			{
 				List<JavaBean> dest=(List<JavaBean>)converter.convert(src, type);
@@ -259,7 +265,7 @@ public class TestWebGenericConverter
 			}
 			catch(Exception e)
 			{
-				Assert.assertEquals("'"+type+"' is not valid, only Class type of its raw type is supported", e.getMessage());
+				Assert.assertEquals("'"+type+"' is not valid, only Class type of its raw is supported", e.getMessage());
 			}
 		}
 	}

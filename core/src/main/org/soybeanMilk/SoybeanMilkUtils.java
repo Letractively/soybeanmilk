@@ -14,7 +14,6 @@
 
 package org.soybeanMilk;
 
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 
 /**
@@ -33,6 +32,17 @@ public class SoybeanMilkUtils
 	public static boolean isClassType(Type type)
 	{
 		return (type instanceof Class<?>);
+	}
+	
+	/**
+	 * 是否是数组类型
+	 * @param type
+	 * @return
+	 * @date 2011-1-3
+	 */
+	public static boolean isArray(Class<?> type)
+	{
+		return type.isArray();
 	}
 	
 	/**
@@ -87,19 +97,17 @@ public class SoybeanMilkUtils
 	}
 	
 	/**
-	 * 是否是数组类型
+	 * 是否是{@linkplain java.lang.Class Class}类型对象的数组类型
 	 * @param type
 	 * @return
 	 * @date 2010-12-31
 	 */
-	public static boolean isArray(Type type)
+	public static boolean isClassTypeArray(Type type)
 	{
 		if(type == null)
 			return false;
 		else if(isClassType(type))
 			return narrowToClassType(type).isArray();
-		else if(type instanceof GenericArrayType)
-			return true;
 		else
 			return false;
 	}

@@ -249,14 +249,6 @@ public class TestWebGenericConverter
 		src.put("birth", births);
 		
 		{
-			Type type=new MockParameterizedType(Map.class, new Type[]{String.class, JavaBean.class});
-			
-			Map<String, Object> dest=(Map<String, Object>)converter.convert(src, type);
-			
-			Assert.assertTrue( dest == src );
-		}
-		
-		{
 			Type type=new MockParameterizedType(new MockParameterizedType(null, null), new Type[]{JavaBean.class});
 			try
 			{

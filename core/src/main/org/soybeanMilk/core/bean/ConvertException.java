@@ -15,8 +15,9 @@
 package org.soybeanMilk.core.bean;
 
 /**
+ * 转换异常。
  * @author earthAngry@gmail.com
- *
+ * @date 2010-10-6
  */
 public class ConvertException extends RuntimeException
 {

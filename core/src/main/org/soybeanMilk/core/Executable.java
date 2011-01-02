@@ -17,14 +17,14 @@ package org.soybeanMilk.core;
 import java.io.Serializable;
 
 /**
- * 可执行对象
+ * 可执行对象。
  * @author earthAngry@gmail.com
  * @date 2010-9-30
  */
 public interface Executable extends Serializable
 {
 	/**
-	 * 取得名称，该名称应该可以唯一标识这个可执行对象
+	 * 获取此可执行对象的名称
 	 * @return
 	 */
 	String getName();

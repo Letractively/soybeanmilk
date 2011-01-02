@@ -15,6 +15,7 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
+ * {@linkplain java.math.BigInteger BigInteger}类型转换器。
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */

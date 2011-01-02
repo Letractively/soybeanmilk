@@ -15,8 +15,9 @@
 package org.soybeanMilk.core.config.parser;
 
 /**
+ * 解析异常。
  * @author earthAngry@gmail.com
- *
+ * @date 2010-10-1
  */
 public class ParseException extends RuntimeException
 {

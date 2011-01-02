@@ -20,13 +20,13 @@ import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.SbmUtils;
+import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.GenericConverter;
 
 
 /**
- * 基于哈希表的一个简单对象源实现
+ * 基于哈希表的一个简单对象源实现。
  * @author earthAngry@gmail.com
  * @date 2010-10-1
  */
@@ -58,7 +58,7 @@ public class HashMapObjectSource extends ConvertableObjectSource
 		GenericConverter cvt = getGenericConverter();
 		if(cvt == null)
 		{
-			if(re==null && SbmUtils.isPrimitive(type))
+			if(re==null && SoybeanMilkUtils.isPrimitive(type))
 				throw new ObjectSourceException("the result object is null, but primitive type needed");
 			else
 				return re;

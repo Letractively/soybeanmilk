@@ -17,10 +17,9 @@ package org.soybeanMilk.core;
 import org.soybeanMilk.core.config.Configuration;
 
 /**
- * 执行器，它可以通过名称来执行{@linkplain Executable 可执行对象}
+ * 执行器，它可以通过名称来执行{@linkplain Executable 可执行对象}。
  * @author earthAngry@gmail.com
  * @date 2010-9-30
- *
  */
 public interface Executor
 {

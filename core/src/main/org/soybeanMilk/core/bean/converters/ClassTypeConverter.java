@@ -16,11 +16,11 @@ package org.soybeanMilk.core.bean.converters;
 
 import java.lang.reflect.Type;
 
-import org.soybeanMilk.SbmUtils;
+import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.bean.Converter;
 
 /**
- * 目标类型是<code>Class</code>的转换器
+ * 目标类型是{@linkplain java.lang.Class Class}的转换器。
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */
@@ -31,7 +31,7 @@ public abstract class ClassTypeConverter implements Converter
 	{
 		if(targetType == null)
 			return sourceObj;
-		return convertToClass(sourceObj, SbmUtils.narrowToClassType(targetType));
+		return convertToClass(sourceObj, SoybeanMilkUtils.narrowToClassType(targetType));
 	}
 	
 	/**

@@ -30,11 +30,12 @@ import org.soybeanMilk.core.InvocationExecuteException;
 import org.soybeanMilk.core.ObjectSource;
 
 /**
- * 调用，它包含执行方法（{@linkplain Method}对象）、方法{@linkplain Arg 参数信息}、{@linkplain ResolverProvider 解决对象提供者}
- * @see Arg
- * @see ResolverProvider
+ * 调用，它包含执行方法（{@linkplain Method}对象）、方法的{@linkplain Arg 参数信息}、{@linkplain ResolverProvider 解决对象提供者}
  * @author earthAngry@gmail.com
  * @date 2010-9-30
+ * 
+ * @see Arg
+ * @see ResolverProvider
  */
 public class Invoke extends AbstractExecutable
 {

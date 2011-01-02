@@ -18,10 +18,9 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- * 变量路径匹配器
+ * 变量路径匹配器。
  * @author earthAngry@gmail.com
  * @date 2010-12-16
- *
  */
 public class VariablePathMatcher
 {

@@ -28,7 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * 类属性信息封装类
+ * {@linkplain java.lang.Class Class}类型的属性信息封装类
  * @author earthAngry@gmail.com
  * @date 2010-4-4
  */

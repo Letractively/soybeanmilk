@@ -19,7 +19,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.soybeanMilk.SbmUtils;
+import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
 import org.soybeanMilk.core.resolver.FactoryResolverProvider;
@@ -377,7 +377,7 @@ public class InvokeStatementParser
 		if(arg.getType() == null)
 			throw new ParseException("the [type] property of this Arg must not be null");
 		
-		Type wrapType=SbmUtils.toWrapperType(arg.getType());
+		Type wrapType=SoybeanMilkUtils.toWrapperType(arg.getType());
 		
 		String key=null;
 		Object value=null;
@@ -410,7 +410,7 @@ public class InvokeStatementParser
 		}
 		else if("null".equals(stmt))
 		{
-			if(SbmUtils.isPrimitive(arg.getType()))
+			if(SoybeanMilkUtils.isPrimitive(arg.getType()))
 				throw new ParseException("can not set null to primitive type");
 			
 			value=null;

@@ -103,13 +103,13 @@ public class TestWebGenericConverter
 			Assert.assertEquals(222,dest[0]);
 			Assert.assertEquals(3333, dest[1]);
 		}
+		
+		//其他
 		{
 			Integer[] src=new Integer[]{null};
 			String dest=(String)converter.convert(src, String.class);
 			Assert.assertNull(dest);
 		}
-		
-		//其他
 		{
 			Object dest=converter.convert(null, Object.class);
 			Assert.assertNull(dest);
@@ -117,6 +117,12 @@ public class TestWebGenericConverter
 		{
 			String dest=(String)converter.convert(new Integer(12345), String.class);
 			Assert.assertEquals("12345", dest);
+		}
+		{
+			Integer src=new Integer(12345);
+			
+			Integer dest=(Integer)converter.convert(src, null);
+			Assert.assertTrue( src==dest );
 		}
 	}
 	
@@ -415,7 +421,7 @@ public class TestWebGenericConverter
 		private Integer age;
 		private Date birth;
 		
-		private List<Bean2> list;
+		private List<JavaBean2> list;
 		
 		public String getName() {
 			return name;
@@ -435,10 +441,10 @@ public class TestWebGenericConverter
 		public void setBirth(Date birth) {
 			this.birth = birth;
 		}
-		public List<Bean2> getList() {
+		public List<JavaBean2> getList() {
 			return list;
 		}
-		public void setList(List<Bean2> list) {
+		public void setList(List<JavaBean2> list) {
 			this.list = list;
 		}
 		
@@ -448,11 +454,23 @@ public class TestWebGenericConverter
 			if(o == null)
 				return 1;
 			
-			return this.name.compareTo(o.getName());
+			int re=this.name.compareTo(o.getName());
+			if(re == 0)
+				re=this.age.compareTo(o.getAge());
+			if(re == 0)
+				re=this.birth.compareTo(o.getBirth());
+			
+			return re;
+		}
+		
+		@Override
+		public String toString() {
+			return "JavaBean [name=" + name + ", age=" + age + ", birth="
+					+ birth + "]";
 		}
 	}
 	
-	public static class Bean2
+	public static class JavaBean2 implements Comparable<JavaBean2>
 	{
 		private int id;
 		private String name;
@@ -468,6 +486,24 @@ public class TestWebGenericConverter
 		}
 		public void setName(String name) {
 			this.name = name;
+		}
+		
+		@Override
+		public int compareTo(JavaBean2 o)
+		{
+			if(o == null)
+				return 1;
+			
+			int re= this.id == o.id ? 0 : (this.id>o.id ? 1 : -1);
+			if(re == 0)
+				re=this.name.compareTo(o.name);
+			
+			return re;
+		}
+		
+		@Override
+		public String toString() {
+			return "JavaBean2 [id=" + id + ", name=" + name + "]";
 		}
 	}
 }

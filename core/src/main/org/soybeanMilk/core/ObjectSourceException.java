@@ -15,7 +15,7 @@
 package org.soybeanMilk.core;
 
 /**
- * 对象源异常
+ * 对象源异常。
  * @author earthAngry@gmail.com
  * @date 2010-9-30
  */

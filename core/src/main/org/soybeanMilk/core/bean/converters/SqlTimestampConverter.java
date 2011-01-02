@@ -15,7 +15,7 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
- * SQL时间戳转换器，它可以将“yyyy-MM-dd HH:mm:ss”或“yyyy-MM-dd HH:mm:ss.SSS”格式的字符串转换为java.sql.Timestamp类型的对象。
+ * {@linkplain java.sql.Timestamp}类型转换器，它可以将“yyyy-MM-dd HH:mm:ss”或“yyyy-MM-dd HH:mm:ss.SSS”格式的字符串转换为{@linkplain java.sql.Timestamp}类型的对象。
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */

@@ -27,7 +27,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.SbmUtils;
+import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
@@ -334,7 +334,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	{
 		String[] objKeyWithProperty=splitByFirstDot(keyExpression);
 		
-		Class<?> objectClass=SbmUtils.narrowToClassType(objectType);
+		Class<?> objectClass=SoybeanMilkUtils.narrowToClassType(objectType);
 		
 		//只有包含了'.'字符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式
 		if(objKeyWithProperty[0] != null)
@@ -435,10 +435,10 @@ public class WebObjectSource extends ConvertableObjectSource
 	 */
 	protected Object convertServletObject(Object obj, Type targetType)
 	{
-		if(targetType == null || SbmUtils.isInstanceOf(obj, targetType))
+		if(targetType == null || SoybeanMilkUtils.isInstanceOf(obj, targetType))
 			return obj;
 		
-		Class<?> targetClass=SbmUtils.narrowToClassType(targetType);
+		Class<?> targetClass=SoybeanMilkUtils.narrowToClassType(targetType);
 		
 		GenericConverter genericConverter=getGenericConverter();
 		

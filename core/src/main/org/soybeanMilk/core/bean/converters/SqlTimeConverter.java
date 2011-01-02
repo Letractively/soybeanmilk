@@ -15,7 +15,7 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
- * SQL时间转换器，它可以将“HH:mm:ss”或“HH:mm:ss.SSS”格式的字符串转换为java.sql.Time类型的对象。
+ * {@linkplain java.sql.Time}类型转换器，它可以将“HH:mm:ss”或“HH:mm:ss.SSS”格式的字符串转换为{@linkplain java.sql.Time}类型的对象。
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */

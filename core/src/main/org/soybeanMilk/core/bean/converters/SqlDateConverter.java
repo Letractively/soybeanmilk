@@ -15,7 +15,7 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
- * SQL日期转换器，它可以将“yyyy-MM-dd”格式的字符串转换为java.sql.Date类型的对象。
+ * {@linkplain java.sql.Date}类型转换器，它可以将“yyyy-MM-dd”格式的字符串转换为{@linkplain java.sql.Date}类型的对象。
  * @author earthAngry@gmail.com
  * @date 2010-10-3
  */

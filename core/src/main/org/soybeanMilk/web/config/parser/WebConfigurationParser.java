@@ -34,7 +34,7 @@ import org.soybeanMilk.web.exe.WebAction.Target;
 import org.w3c.dom.Element;
 
 /**
- * WEB解析器，它可以解析类路径资源文件和应用“/WEB-INF”下的配置文件
+ * WEB解析器，它可以解析类路径资源文件和应用“/WEB-INF”下的配置文件。
  * @author earthAngry@gmail.com
  *
  */

@@ -23,7 +23,6 @@ import org.soybeanMilk.core.bean.Converter;
  * 数组转换器，它支持将一个类型的数组转换为另一个类型的数组
  * @author earthAngry@gmail.com
  * @date 2010-10-3
- *
  */
 public class ArrayConverter extends ClassTypeConverter
 {

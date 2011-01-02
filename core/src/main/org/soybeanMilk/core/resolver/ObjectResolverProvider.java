@@ -17,10 +17,9 @@ package org.soybeanMilk.core.resolver;
 import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
 
 /**
- * 解决对象提供者，它直接持有解决对象
+ * 解决对象提供者，它直接持有解决对象。
  * @author earthAngry@gmail.com
  * @date 2010-10-19
- *
  */
 public class ObjectResolverProvider implements ResolverProvider
 {

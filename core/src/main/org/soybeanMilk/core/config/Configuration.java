@@ -29,7 +29,6 @@ import org.soybeanMilk.core.resolver.ResolverFactory;
  * 以及{@linkplain Executable 可执行对象}集
  * @author earthAngry@gmail.com
  * @date 2010-10-1
- *
  */
 public class Configuration
 {

@@ -24,7 +24,6 @@ import java.util.Map;
  * 类名简写工具类，它可以由简写获取类型
  * @author earthAngry@gmail.com
  * @date 2010-12-31
- *
  */
 public class ClassShortName
 {

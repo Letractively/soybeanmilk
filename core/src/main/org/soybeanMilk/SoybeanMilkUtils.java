@@ -18,17 +18,17 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 
 /**
- * 框架内部常用类
+ * 框架内部常用类。
  * @author earthAngry@gmail.com
  * @date 2010-12-31
- *
  */
-public class SbmUtils
+public class SoybeanMilkUtils
 {
 	/**
 	 * 是否是<code>Class</code>类型
 	 * @param type
 	 * @return
+	 * @date 2010-12-31
 	 */
 	public static boolean isClassType(Type type)
 	{
@@ -39,6 +39,7 @@ public class SbmUtils
 	 * 将类型收缩为<code>Class</code>
 	 * @param type
 	 * @return
+	 * @date 2010-12-31
 	 */
 	public static Class<?> narrowToClassType(Type type)
 	{
@@ -49,6 +50,7 @@ public class SbmUtils
 	 * 是否为基本类型
 	 * @param type
 	 * @return
+	 * @date 2010-12-31
 	 */
 	public static boolean isPrimitive(Type type)
 	{
@@ -60,6 +62,7 @@ public class SbmUtils
 	 * @param obj
 	 * @param type
 	 * @return
+	 * @date 2010-12-31
 	 */
 	public static boolean isInstanceOf(Object obj, Type type)
 	{
@@ -76,6 +79,7 @@ public class SbmUtils
 	 * @param ancestor
 	 * @param descendant
 	 * @return
+	 * @date 2010-12-31
 	 */
 	public static boolean isAncestorClass(Class<?> ancestor, Class<?> descendant)
 	{
@@ -86,6 +90,7 @@ public class SbmUtils
 	 * 是否是数组类型
 	 * @param type
 	 * @return
+	 * @date 2010-12-31
 	 */
 	public static boolean isArray(Type type)
 	{
@@ -103,6 +108,7 @@ public class SbmUtils
 	 * 返回基本类型的包装类型，如果不是基本类型，它将直接被返回
 	 * @param type
 	 * @return
+	 * @date 2010-12-31
 	 */
 	public static Type toWrapperType(Type type)
 	{

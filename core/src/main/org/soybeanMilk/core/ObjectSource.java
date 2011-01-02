@@ -18,7 +18,7 @@ import java.io.Serializable;
 import java.lang.reflect.Type;
 
 /**
- * 对象源，用于获取和存储对象
+ * 对象源，用于获取和存储对象。
  * @author earthAngry@gmail.com
  * @date 2010-9-30
  */

@@ -22,7 +22,6 @@ import java.io.Serializable;
  * 比如“{id}/edit”就是一个变量路径。
  * @author earthAngry@gmail.com
  * @date 2010-12-16
- *
  */
 public class VariablePath implements Comparable<VariablePath>,Serializable
 {

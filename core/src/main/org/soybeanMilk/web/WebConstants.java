@@ -17,7 +17,7 @@ package org.soybeanMilk.web;
 import org.soybeanMilk.core.Constants;
 
 /**
- * WEB常量类
+ * WEB常量类。
  * @author earthAngry@gmail.com
  * @date 2010-10-6
  */

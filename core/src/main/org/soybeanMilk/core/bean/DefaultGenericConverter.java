@@ -25,7 +25,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.SbmUtils;
+import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.bean.converters.ArrayConverter;
 import org.soybeanMilk.core.bean.converters.BigDecimalConverter;
 import org.soybeanMilk.core.bean.converters.BigIntegerConverter;
@@ -185,13 +185,13 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		if(sourceObj == null)
 		{
-			if(SbmUtils.isPrimitive(targetType))
+			if(SoybeanMilkUtils.isPrimitive(targetType))
 				throw new ConvertException("can not convert null to primitive type");
 			else
 				return null;
 		}
 		
-		if(SbmUtils.isInstanceOf(sourceObj, targetType))
+		if(SoybeanMilkUtils.isInstanceOf(sourceObj, targetType))
 			return sourceObj;
 		
 		Converter c = getConverter(sourceObj.getClass(), targetType);
@@ -475,7 +475,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2010-12-30
 	 */
-	public static String[] splitPropertyExpression(String propertyExpression)
+	protected String[] splitPropertyExpression(String propertyExpression)
 	{
 		String[] propertyArray=propertyExpression.split(ACCESSOR_REGEX);
 		if(propertyArray==null || propertyArray.length==0)

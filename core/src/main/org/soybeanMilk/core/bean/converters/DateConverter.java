@@ -15,7 +15,7 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
- * 日期转换器，它可以将如下格式的字符串转换为java.util.Date对象：
+ * {@linkplain java.util.Date Date}类型转换器，它可以将如下格式的字符串转换为{@linkplain java.util.Date Date}对象：
  * <ul>
  *   <li>yyyy</li>
  *   <li>yyyy-MM</li>

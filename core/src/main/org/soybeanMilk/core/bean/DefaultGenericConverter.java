@@ -128,6 +128,9 @@ public class DefaultGenericConverter implements GenericConverter
 		if(propertyExpression==null || propertyExpression.length()==0)
 			throw new IllegalArgumentException("[propertyExpression] must not be empty");
 		
+		if(log.isDebugEnabled())
+			log.debug("start getting '"+srcObj+"' property '"+propertyExpression+"'");
+		
 		return getProperty(srcObj, PropertyInfo.getPropertyInfo(srcObj.getClass()), splitPropertyExpression(propertyExpression), targetType);
 	}
 	
@@ -138,6 +141,9 @@ public class DefaultGenericConverter implements GenericConverter
 			throw new IllegalArgumentException("[srcObj] must not be null");
 		if(propertyExpression==null || propertyExpression.length()==0)
 			throw new IllegalArgumentException("[propertyExpression] must not be empty");
+		
+		if(log.isDebugEnabled())
+			log.debug("start setting '"+srcObj+"' property '"+propertyExpression+"' to value '"+value+"'");
 		
 		setProperty(srcObj, PropertyInfo.getPropertyInfo(srcObj.getClass()), splitPropertyExpression(propertyExpression), 0, value);
 	}

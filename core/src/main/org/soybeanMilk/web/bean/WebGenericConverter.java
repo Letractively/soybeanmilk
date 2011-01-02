@@ -17,6 +17,7 @@ package org.soybeanMilk.web.bean;
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -146,43 +147,84 @@ public class WebGenericConverter extends DefaultGenericConverter
 		
 		Object result = null;
 		
+		//目标类型为ParameterizedType
 		if(SoybeanMilkUtils.isInstanceOf(targetType, ParameterizedType.class))
 		{
+			if(log.isDebugEnabled())
+				log.debug("start converting 'Map<String, Object>'  to parameterized type '"+targetType+"'");
+			
 			Class<?>[] genericClass=getSupportGenericType((ParameterizedType)targetType);
 			if(SoybeanMilkUtils.isAncestorClass(List.class, genericClass[0]))
-				result=convertMapToList(originalValueMap, genericClass);
+				result=convertMapToGenericList(originalValueMap, genericClass);
 			else if(SoybeanMilkUtils.isAncestorClass(Set.class, genericClass[0]))
-				result=convertMapToSet(originalValueMap, genericClass);
+				result=convertMapToGenericSet(originalValueMap, genericClass);
 			else
 				throw new ConvertException("converting 'Map<String, Object>' to parameterized type '"+targetType+"' is not supported");
 		}
+		//目标类型为Class
 		else if(SoybeanMilkUtils.isInstanceOf(targetType, Class.class))
 		{
+			if(log.isDebugEnabled())
+				log.debug("start converting 'Map<String, Object>'  to Class type '"+targetType+"'");
+			
 			Class<?> targetClass=SoybeanMilkUtils.narrowToClassType(targetType);
 			
 			if(SoybeanMilkUtils.isInstanceOf(originalValueMap, targetClass))
 				result=originalValueMap;
 			else if(targetClass.isArray())
-				result=convertMapToArray(originalValueMap, targetClass.getComponentType());
+				result=convertMapToJavaBeanArray(originalValueMap, targetClass.getComponentType());
 			else
 			{
 				PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(targetClass);
 				
-				//TODO 添加属性为数组、List、Set的转换支持
-				
-				Set<String> keys=originalValueMap.keySet();
-				for(String propExp : keys)
+				if(!beanInfo.hasSubPropertyInfo())
 				{
-					String[] propExpAry=splitPropertyExpression(propExp);
+					result=getDefaultValue(targetType);
 					
-					//剔除无关属性
-					if(beanInfo.getSubPropertyInfo(propExpAry[0]) != null)
+					if(log.isDebugEnabled())
+						log.debug("'"+targetClass+"' has no javaBean property, default value '"+result+"' will be used");
+				}
+				else
+				{
+					//TODO 集合属性或数组属性转换实现
+					
+					//预存储beanInfo的集合属性，比如带有集合属性的表达式：
+					//	"my.listChild_1.id"
+					//	"my.listChild_1.name"
+					//	"my.listChild_2.id"
+					//	"my.listChild_2.name"
+					//将被以如下形式存储在这里：
+					//	my.listChild_1
+					//		id		Object
+					//		name	Object
+					//	my.listChild_2
+					//		id		Object
+					//		name	Object
+					Map<String, Map<String, Object>> collectionProperties=new HashMap<String, Map<String,Object>>();
+					
+					Set<String> keys=originalValueMap.keySet();
+					for(String propExp : keys)
 					{
-						//延迟初始化
-						if(result == null)
-							result = instance(beanInfo.getType(), -1);
+						String[] propExpAry=splitPropertyExpression(propExp);
 						
-						setProperty(result, beanInfo, propExpAry, 0, originalValueMap.get(propExp));
+						//剔除无关属性
+						if(beanInfo.getSubPropertyInfo(propExpAry[0]) != null)
+						{
+							//延迟初始化
+							if(result == null)
+								result = instance(beanInfo.getType(), -1);
+							
+							setProperty(result, beanInfo, propExpAry, 0, originalValueMap.get(propExp));
+						}
+					}
+					
+					//设置非Class类型属性的值
+					if(collectionProperties!=null && collectionProperties.size()>0)
+					{
+						Set<String> props=collectionProperties.keySet();
+						
+						for(String propExp : props)
+							setProperty(result, propExp, collectionProperties.get(propExp));
 					}
 				}
 			}
@@ -201,11 +243,11 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @date 2010-12-31
 	 */
 	@SuppressWarnings("unchecked")
-	protected Set<?> convertMapToSet(Map<String, Object> valueMap, Class<?>[] setGeneric)
+	protected Set<?> convertMapToGenericSet(Map<String, Object> valueMap, Class<?>[] setGeneric)
 	{
 		Set re=null;
 		
-		Object[] ary=convertMapToArray(valueMap, setGeneric[1]);
+		Object[] ary=convertMapToJavaBeanArray(valueMap, setGeneric[1]);
 		if(ary != null)
 		{
 			re=(Set)instance(setGeneric[0], -1);
@@ -224,11 +266,11 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @date 2010-12-31
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<?> convertMapToList(Map<String, Object> valueMap, Class<?>[] listGeneric)
+	protected List<?> convertMapToGenericList(Map<String, Object> valueMap, Class<?>[] listGeneric)
 	{
 		List re=null;
 		
-		Object[] ary=convertMapToArray(valueMap, listGeneric[1]);
+		Object[] ary=convertMapToJavaBeanArray(valueMap, listGeneric[1]);
 		if(ary != null)
 		{
 			re=(List)instance(listGeneric[0], -1);
@@ -248,7 +290,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @return 元素为<code>javaBeanClass</code>类型且长度为<code>valueMap</code>值元素长度的数组
 	 * @date 2010-12-31
 	 */
-	protected Object[] convertMapToArray(Map<String, Object> valueMap, Class<?> elementClass)
+	protected Object[] convertMapToJavaBeanArray(Map<String, Object> valueMap, Class<?> elementClass)
 	{
 		if(valueMap==null || valueMap.size()==0)
 			return null;

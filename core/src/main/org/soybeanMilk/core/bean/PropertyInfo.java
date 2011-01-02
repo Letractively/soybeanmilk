@@ -107,56 +107,6 @@ public class PropertyInfo
 	public void setWriteMethod(Method writeMethod) {
 		this.writeMethod = writeMethod;
 	}
-
-	/**
-	 * 是否是数组
-	 * @return
-	 * @date 2010-12-28
-	 */
-	public boolean isArray()
-	{
-		return type.isArray();
-	}
-	
-	/**
-	 * 是否是<code>java.util.List</code>或其子类
-	 * @return
-	 * @date 2010-12-28
-	 */
-	public boolean isList()
-	{
-		return java.util.List.class.isAssignableFrom(type);
-	}
-	
-	/**
-	 * 是否是<code>java.util.Map</code>或其子类
-	 * @return
-	 * @date 2010-12-28
-	 */
-	public boolean isMap()
-	{
-		return java.util.Map.class.isAssignableFrom(type);
-	}
-	
-	/**
-	 * 是否是<code>java.util.Set</code>或其子类
-	 * @return
-	 * @date 2010-12-28
-	 */
-	public boolean isSet()
-	{
-		return java.util.Set.class.isAssignableFrom(type);
-	}
-	
-	/**
-	 * 是否是Java接口
-	 * @return
-	 * @date 2010-12-28
-	 */
-	public boolean isInterface()
-	{
-		return type.isInterface();
-	}
 	
 	/**
 	 * 添加子属性类信息
@@ -183,6 +133,16 @@ public class PropertyInfo
 	public PropertyInfo getSubPropertyInfo(String name)
 	{
 		return subPropertyInfos == null ? null : subPropertyInfos.get(name);
+	}
+	
+	/**
+	 * 是否有子属性信息
+	 * @return
+	 * @date 2011-1-2
+	 */
+	public boolean hasSubPropertyInfo()
+	{
+		return this.subPropertyInfos!=null && !this.subPropertyInfos.isEmpty();
 	}
 	
 	@Override

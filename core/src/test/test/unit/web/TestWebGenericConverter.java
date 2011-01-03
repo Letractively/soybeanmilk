@@ -216,6 +216,7 @@ public class TestWebGenericConverter
 			try
 			{
 				List<JavaBean> dest=(List<JavaBean>)converter.convert(src, List.class);
+				dest.size();
 			}
 			catch(Exception e)
 			{
@@ -226,6 +227,7 @@ public class TestWebGenericConverter
 			try
 			{
 				Set<JavaBean> dest=(Set<JavaBean>)converter.convert(src, Set.class);
+				dest.size();
 			}
 			catch(Exception e)
 			{
@@ -257,7 +259,7 @@ public class TestWebGenericConverter
 			}
 			catch(Exception e)
 			{
-				Assert.assertEquals("'"+type+"' is not valid, only Class type of its raw is supported", e.getMessage());
+				Assert.assertEquals("'"+type+"' is not valid, only Class type of its raw type is supported", e.getMessage());
 			}
 		}
 	}

@@ -237,7 +237,7 @@ public class DefaultGenericConverter implements GenericConverter
 		//自上而下递归，到达末尾时初始化和写入
 		if(index == propertyExpression.length-1)
 		{
-			Object destValue=convertWithSupportConverter(value, propertyInfo.getType());
+			Object destValue=convert(value, propertyInfo.getType());
 			try
 			{
 				propertyInfo.getWriteMethod().invoke(bean, new Object[]{destValue});
@@ -321,7 +321,7 @@ public class DefaultGenericConverter implements GenericConverter
 			}
 		}
 		
-		return convertWithSupportConverter(property, targetType);
+		return convert(property, targetType);
 	}
 	
 	/**
@@ -337,7 +337,7 @@ public class DefaultGenericConverter implements GenericConverter
 	
 	/**
 	 * 创建给定类型的实例。<br>
-	 * 如果此类是集合类接口<code>List</code>、<code>Set</code>，它将创建默认实例，<code>arraySize</code>将被忽略；<br>
+	 * 如果此类是集合类接口<code>List</code>、<code>Set</code>、<code>Map</code>，它将创建默认实例，<code>arraySize</code>将被忽略；<br>
 	 * 否则，此类必须提供一个无参的构造方法，如果<code>arrayLength</code>不小于0，它将创建此类的数组实例，否则，仅创建此类的实例。
 	 * @param objectType 类型
 	 * @param arrayLength 要创建数组的长度
@@ -352,6 +352,8 @@ public class DefaultGenericConverter implements GenericConverter
 			return new ArrayList();
 		else if(java.util.Set.class.equals(objectType))
 			return new HashSet();
+		else if(java.util.Map.class.equals(objectType))
+			return new HashMap();
 		else
 		{
 			try

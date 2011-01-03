@@ -15,8 +15,10 @@
 package org.soybeanMilk.web.bean;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,39 +152,46 @@ public class WebGenericConverter extends DefaultGenericConverter
 		
 		Object result = null;
 		
-		Class<?>[] supportedClass=getActualClassTypeInfo(targetType);
+		Class<?>[] actualTypes=getActualClassTypeInfo(targetType);
 		
-		if(supportedClass==null || supportedClass.length==0)
+		if(actualTypes==null || actualTypes.length==0)
 			throw new ConvertException("converting 'Map<String,Object>' to '"+targetType+"' is not supported");
-		else if(SoybeanMilkUtils.isAncestorClass(List.class, supportedClass[0]))
+		else if(isArrayOrCollection(actualTypes[0]))
 		{
-			if(supportedClass.length != 2)
-				throw new ConvertException("only generic List converting is supported");
-			
-			result=convertMapToGenericList(valueMap, supportedClass);
-		}
-		else if(SoybeanMilkUtils.isAncestorClass(Set.class, supportedClass[0]))
-		{
-			if(supportedClass.length != 2)
+			//List
+			if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))
+			{
+				if(actualTypes.length != 2)
+					throw new ConvertException("only generic List converting is supported");
+				
+				result=convertMapToJavaBeanList(valueMap, actualTypes);
+			}
+			//Set
+			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualTypes[0]))
+			{
+				if(actualTypes.length != 2)
+					throw new ConvertException("only generic Set converting is supported");
+				
+				result=convertMapToJavaBeanSet(valueMap, actualTypes);
+			}
+			//Map
+			else if(SoybeanMilkUtils.isAncestorClass(Map.class, actualTypes[0]))
+			{
+				result=valueMap;
+			}
+			//数组
+			else if(SoybeanMilkUtils.isArray(actualTypes[0]))
+				result=convertMapToJavaBeanArray(valueMap, actualTypes[0].getComponentType());
+			else
 				throw new ConvertException("only generic Set converting is supported");
-			
-			result=convertMapToGenericSet(valueMap, supportedClass);
 		}
-		else if(SoybeanMilkUtils.isAncestorClass(Map.class, supportedClass[0]))
-			result=valueMap;
-		else if(SoybeanMilkUtils.isArray(supportedClass[0]))
-			result=convertMapToArray(valueMap, supportedClass[0].getComponentType());
+		//JavaBean
 		else
 		{
-			PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(supportedClass[0]);
+			PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(actualTypes[0]);
 			
 			if(!beanInfo.hasSubPropertyInfo())
-			{
-				result=getDefaultValue(targetType);
-				
-				if(log.isDebugEnabled())
-					log.debug("'"+supportedClass[0]+"' has no javaBean property, default value '"+result+"' will be used");
-			}
+				throw new ConvertException("the target javaBean Class '"+actualTypes[0]+"' is not valid, it has no javaBean property");
 			else
 			{
 				//TODO 集合属性或数组属性转换实现
@@ -218,7 +227,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 				}
 				
 				//设置集合类型属性的值
-				if(collectionProperties!=null && collectionProperties.size()>0)
+				if(collectionProperties!=null && !collectionProperties.isEmpty())
 				{
 					Set<String> props=collectionProperties.keySet();
 					
@@ -232,6 +241,12 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		
 		return result;
+	}
+	
+	protected Type splitCollectionProperty(PropertyInfo beanInfo, String[] propertyExpression, String[] splits)
+	{
+		//TODO
+		return null;
 	}
 	
 	/**
@@ -248,13 +263,15 @@ public class WebGenericConverter extends DefaultGenericConverter
 	{
 		Class<?>[] re=null;
 		
-		if(SoybeanMilkUtils.isInstanceOf(type, ParameterizedType.class))
+		if(SoybeanMilkUtils.isInstanceOf(type, Class.class))
+			re=new Class<?>[]{ SoybeanMilkUtils.narrowToClassType(type) };
+		else if(SoybeanMilkUtils.isInstanceOf(type, ParameterizedType.class))
 		{
 			ParameterizedType paramType=(ParameterizedType)type;
 			Type[] ats=paramType.getActualTypeArguments();
 			
 			if(!SoybeanMilkUtils.isClassType(paramType.getRawType()))
-				throw new ConvertException("'"+type+"' is not valid, only Class type of its raw is supported");
+				throw new ConvertException("'"+type+"' is not valid, only Class type of its raw type is supported");
 			
 			re=new Class<?>[1+ats.length];
 			re[0]=SoybeanMilkUtils.narrowToClassType(paramType.getRawType());
@@ -267,27 +284,25 @@ public class WebGenericConverter extends DefaultGenericConverter
 				re[i+1]=SoybeanMilkUtils.narrowToClassType(ats[i]);
 			}
 		}
-		else if(SoybeanMilkUtils.isInstanceOf(type, Class.class))
-			re=new Class<?>[]{ SoybeanMilkUtils.narrowToClassType(type) };
-		else
+		else if(SoybeanMilkUtils.isInstanceOf(type, GenericArrayType.class))
 			;
 		
 		return re;
 	}
 	
 	/**
-	 * 由映射表转换为泛型<code>java.util.Set</code>。
+	 * 由映射表转换为JavaBean <code>java.util.Set</code>。
 	 * @param valueMap
 	 * @param setGeneric
 	 * @return
 	 * @date 2010-12-31
 	 */
 	@SuppressWarnings("unchecked")
-	protected Set<?> convertMapToGenericSet(Map<String, Object> valueMap, Class<?>[] setGeneric)
+	protected Set<?> convertMapToJavaBeanSet(Map<String, Object> valueMap, Class<?>[] setGeneric)
 	{
 		Set re=null;
 		
-		Object[] ary=convertMapToArray(valueMap, setGeneric[1]);
+		Object[] ary=convertMapToJavaBeanArray(valueMap, setGeneric[1]);
 		if(ary != null)
 		{
 			re=(Set)instance(setGeneric[0], -1);
@@ -299,18 +314,18 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 由映射表转换为泛型<code>java.util.List</code>。
+	 * 由映射表转换为JavaBean <code>java.util.List</code>。
 	 * @param valueMap
 	 * @param listGeneric
 	 * @return
 	 * @date 2010-12-31
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<?> convertMapToGenericList(Map<String, Object> valueMap, Class<?>[] listGeneric)
+	protected List<?> convertMapToJavaBeanList(Map<String, Object> valueMap, Class<?>[] listGeneric)
 	{
 		List re=null;
 		
-		Object[] ary=convertMapToArray(valueMap, listGeneric[1]);
+		Object[] ary=convertMapToJavaBeanArray(valueMap, listGeneric[1]);
 		if(ary != null)
 		{
 			re=(List)instance(listGeneric[0], -1);
@@ -322,15 +337,15 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 由映射表转换为数组，<code>valueMap</code>中值为<code>null</code>和关键字不是<code>elementClass</code>类属性的元素将被忽略，
+	 * 由映射表转换为JavaBean数组，<code>valueMap</code>中值为<code>null</code>和关键字不是<code>javaBeanClass</code>类属性的元素将被忽略，
 	 * 其他元素必须是数组并且长度一致。<br>
 	 * 此方法不支持嵌套数组和集合（即<code>elementClass</code>不能包含数组和集合类属性）。
 	 * @param valueMap
-	 * @param elementClass
+	 * @param javaBeanClass
 	 * @return 元素为<code>javaBeanClass</code>类型且长度为<code>valueMap</code>值元素长度的数组
 	 * @date 2010-12-31
 	 */
-	protected Object[] convertMapToArray(Map<String, Object> valueMap, Class<?> elementClass)
+	protected Object[] convertMapToJavaBeanArray(Map<String, Object> valueMap, Class<?> javaBeanClass)
 	{
 		if(valueMap==null || valueMap.size()==0)
 			return null;
@@ -338,7 +353,9 @@ public class WebGenericConverter extends DefaultGenericConverter
 		Object[] re=null;
 		int len=-1;
 		
-		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(elementClass);
+		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(javaBeanClass);
+		if(!beanInfo.hasSubPropertyInfo())
+			throw new ConvertException("the target javaBean Class '"+javaBeanClass+"' is not valid, it has no javaBean property");
 		
 		Set<String> keys=valueMap.keySet();
 		for(String key : keys)
@@ -348,7 +365,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 				continue;
 			
 			if(!value.getClass().isArray())
-				throw new ConvertException("the element in the source map must be an array");
+				throw new ConvertException("the element in the source map must be array");
 			
 			int l=Array.getLength(value);
 			if(len == -1)
@@ -363,9 +380,9 @@ public class WebGenericConverter extends DefaultGenericConverter
 				//延迟初始化
 				if(re == null)
 				{
-					re=(Object[])instance(elementClass, len);
+					re=(Object[])instance(javaBeanClass, len);
 					for(int i=0;i<len;i++)
-						re[i]=instance(elementClass, -1);
+						re[i]=instance(javaBeanClass, -1);
 				}
 				
 				for(int i=0;i<len;i++)
@@ -374,6 +391,22 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		
 		return re;
+	}
+	
+	/**
+	 * 是否是数组或者集合类
+	 * @param clazz
+	 * @return
+	 * @date 2011-1-3
+	 */
+	protected boolean isArrayOrCollection(Class<?> clazz)
+	{
+		if(clazz.isArray())
+			return true;
+		else if(SoybeanMilkUtils.isAncestorClass(Collection.class, clazz))
+			return true;
+		else
+			return false;
 	}
 	
 	/**

@@ -43,7 +43,7 @@ public abstract class ConvertableObjectSource implements ObjectSource
 	}
 	
 	@Override
-	public abstract Object get(Serializable key, Type type);
+	public abstract Object get(Serializable key, Type expectType);
 	
 	@Override
 	public abstract void set(Serializable key, Object obj);

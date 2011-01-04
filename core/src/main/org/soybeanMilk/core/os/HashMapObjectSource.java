@@ -49,22 +49,22 @@ public class HashMapObjectSource extends ConvertableObjectSource
 	}
 
 	@Override
-	public Object get(Serializable key, Type type) throws ObjectSourceException
+	public Object get(Serializable key, Type expectType) throws ObjectSourceException
 	{
 		Object re = source.get(key);
-		if(type == null)
+		if(expectType == null)
 			return re;
 		
 		GenericConverter cvt = getGenericConverter();
 		if(cvt == null)
 		{
-			if(re==null && SoybeanMilkUtils.isPrimitive(type))
+			if(re==null && SoybeanMilkUtils.isPrimitive(expectType))
 				throw new ObjectSourceException("the result object is null, but primitive type needed");
 			else
 				return re;
 		}
 		else
-			re = cvt.convert(re, type);
+			re = cvt.convert(re, expectType);
 		
 		if(log.isDebugEnabled())
 			log.debug("get '"+re+"' with key '"+key+"' from "+this);

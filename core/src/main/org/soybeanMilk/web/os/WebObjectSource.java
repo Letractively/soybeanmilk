@@ -173,16 +173,16 @@ public class WebObjectSource extends ConvertableObjectSource
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object get(Serializable key, Type objectType)
+	public Object get(Serializable key, Type expectType)
 	{
 		Object data = null;
-		if(objectType == HttpServletRequest.class)
+		if(expectType == HttpServletRequest.class)
 			data = getRequest();
-		else if(objectType == HttpServletResponse.class)
+		else if(expectType == HttpServletResponse.class)
 			data = getResponse();
-		else if(objectType == ServletContext.class)
+		else if(expectType == ServletContext.class)
 			data = getApplication();
-		else if(objectType == HttpSession.class)
+		else if(expectType == HttpSession.class)
 			data = getRequest().getSession();
 		else
 		{
@@ -200,32 +200,32 @@ public class WebObjectSource extends ConvertableObjectSource
 			if(scope == null)
 			{
 				if(WebConstants.Scope.PARAM.equals(keyInScope))
-					data=getFromMap(getRequest().getParameterMap(), null, objectType);
+					data=getFromMap(getRequest().getParameterMap(), null, expectType);
 				else if(WebConstants.Scope.REQUEST.equals(keyInScope))
-					data=convertServletObject(getRequest(), objectType);
+					data=convertServletObject(getRequest(), expectType);
 				else if(WebConstants.Scope.SESSION.equals(keyInScope))
-					data=convertServletObject(getRequest().getSession(), objectType);
+					data=convertServletObject(getRequest().getSession(), expectType);
 				else if(WebConstants.Scope.APPLICATION.equals(keyInScope))
-					data=convertServletObject(getApplication(), objectType);
+					data=convertServletObject(getApplication(), expectType);
 				else if(WebConstants.Scope.RESPONSE.equals(keyInScope))
-					data=convertServletObject(getResponse(), objectType);
+					data=convertServletObject(getResponse(), expectType);
 				else
-					data=getWithUnknownScope(scope, keyInScope, objectType);
+					data=getWithUnknownScope(scope, keyInScope, expectType);
 			}
 			else
 			{
 				if(WebConstants.Scope.PARAM.equals(scope))
-					data=getFromMap(getRequest().getParameterMap(), keyInScope, objectType);
+					data=getFromMap(getRequest().getParameterMap(), keyInScope, expectType);
 				else if(WebConstants.Scope.REQUEST.equals(scope))
-					data=getAttributeByKeyExpression(getRequest(), keyInScope, objectType);
+					data=getAttributeByKeyExpression(getRequest(), keyInScope, expectType);
 				else if(WebConstants.Scope.SESSION.equals(scope))
-					data=getAttributeByKeyExpression(getRequest().getSession(), keyInScope, objectType);
+					data=getAttributeByKeyExpression(getRequest().getSession(), keyInScope, expectType);
 				else if(WebConstants.Scope.APPLICATION.equals(scope))
-					data=getAttributeByKeyExpression(getApplication(), keyInScope, objectType);
+					data=getAttributeByKeyExpression(getApplication(), keyInScope, expectType);
 				else if(WebConstants.Scope.RESPONSE.equals(scope))
 					throw new ObjectSourceException("key '"+key+"' is invalid, you can not get data from '"+WebConstants.Scope.RESPONSE+"' scope");
 				else
-					data=getWithUnknownScope(scope, keyInScope, objectType);
+					data=getWithUnknownScope(scope, keyInScope, expectType);
 			}
 			
 			if(log.isDebugEnabled())

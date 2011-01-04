@@ -27,10 +27,10 @@ public interface ObjectSource
 	/**
 	 * 取得对象
 	 * @param key 对象关键字
-	 * @param type 期望的对象类型，可能为<code>null</code>
+	 * @param expectType 期望的对象类型，可能为<code>null</code>
 	 * @return
 	 */
-	Object get(Serializable key, Type type);
+	Object get(Serializable key, Type expectType);
 	
 	/**
 	 * 保存对象

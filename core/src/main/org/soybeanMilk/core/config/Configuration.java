@@ -38,7 +38,7 @@ public class Configuration
 	/**解决对象工厂*/
 	private ResolverFactory resolverFactory;
 	
-	/**通用转换器，它负责将配置文件中定义的字符串参数值转换为实际的参数对象*/
+	/**通用转换器*/
 	private GenericConverter genericConverter;
 	
 	/**拦截器信息*/

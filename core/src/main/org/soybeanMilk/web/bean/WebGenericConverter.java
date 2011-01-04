@@ -15,7 +15,6 @@
 package org.soybeanMilk.web.bean;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -74,7 +73,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		
 		if(sourceObj == null)
 		{
-			Object dv = getDefaultValue(targetType);
+			Object dv = getDefaultValue(sourceObj, targetType);
 			if(log.isDebugEnabled())
 				log.debug("the source object is null, so the default value '"+dv+"' of type '"+targetType+"' will be used");
 			
@@ -90,13 +89,13 @@ public class WebGenericConverter extends DefaultGenericConverter
 		if(c==null && sourceObj.getClass().isArray() && Array.getLength(sourceObj)==1 && !SoybeanMilkUtils.isClassTypeArray(targetType))
 		{
 			if(log.isDebugEnabled())
-				log.debug("the source '"+getStringDesc(sourceObj)+"' is an array an array and the length is 1, while the target Class is not, so it's first element will be used for converting");
+				log.debug("the source '"+getStringDesc(sourceObj)+"' is an array and the length is 1, while the target Class is not, so it's first element will be used for converting");
 			
 			sourceObj=Array.getLength(sourceObj) ==0 ? null : Array.get(sourceObj, 0);
 			
 			if(sourceObj == null)
 			{
-				Object dv = getDefaultValue(targetType);
+				Object dv = getDefaultValue(sourceObj, targetType);
 				if(log.isDebugEnabled())
 					log.debug("the source object is null, so the default value '"+dv+"' of type '"+targetType+"' will be used");
 				
@@ -127,7 +126,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		catch(Exception e)
 		{
-			Object dv = getDefaultValue(targetType);
+			Object dv = getDefaultValue(sourceObj, targetType);
 			
 			if(log.isDebugEnabled())
 				log.debug("default value '"+dv+"' is used while converting '"+sourceObj+"' to '"+targetType+"' because the following exception :", e);
@@ -162,7 +161,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))
 			{
 				if(actualTypes.length != 2)
-					throw new ConvertException("only generic List converting is supported");
+					throw new ConvertException("'"+targetType+"' is invalid, only generic List converting is supported");
 				
 				result=convertMapToJavaBeanList(valueMap, actualTypes);
 			}
@@ -170,7 +169,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualTypes[0]))
 			{
 				if(actualTypes.length != 2)
-					throw new ConvertException("only generic Set converting is supported");
+					throw new ConvertException("'"+targetType+"' is invalid, only generic Set converting is supported");
 				
 				result=convertMapToJavaBeanSet(valueMap, actualTypes);
 			}
@@ -183,7 +182,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			else if(SoybeanMilkUtils.isArray(actualTypes[0]))
 				result=convertMapToJavaBeanArray(valueMap, actualTypes[0].getComponentType());
 			else
-				throw new ConvertException("only generic Set converting is supported");
+				throw new ConvertException("converting to '"+targetType+"' is not supported");
 		}
 		//JavaBean
 		else
@@ -194,21 +193,9 @@ public class WebGenericConverter extends DefaultGenericConverter
 				throw new ConvertException("the target javaBean Class '"+actualTypes[0]+"' is not valid, it has no javaBean property");
 			else
 			{
-				//TODO 集合属性或数组属性转换实现
-				
-				//预存储beanInfo的集合属性，比如带有集合属性的表达式：
-				//	"my.listChild_1.id"
-				//	"my.listChild_1.name"
-				//	"my.listChild_2.id"
-				//	"my.listChild_2.name"
-				//将被以如下形式存储在这里：
-				//	my.listChild_1
-				//		id		Object
-				//		name	Object
-				//	my.listChild_2
-				//		id		Object
-				//		name	Object
+				//预存储的集合类属性映射表
 				Map<String, Map<String, Object>> collectionProperties=new HashMap<String, Map<String,Object>>();
+				String[] collectionPropSplits=new String[2];
 				
 				Set<String> keys=valueMap.keySet();
 				for(String propExp : keys)
@@ -222,7 +209,21 @@ public class WebGenericConverter extends DefaultGenericConverter
 						if(result == null)
 							result = instance(beanInfo.getType(), -1);
 						
-						setProperty(result, beanInfo, propExpAry, 0, valueMap.get(propExp));
+						splitCollectionProperty(beanInfo, propExpAry, collectionPropSplits);
+						
+						if(collectionPropSplits[0] == null)
+							setProperty(result, beanInfo, propExpAry, 0, valueMap.get(propExp));
+						else
+						{
+							Map<String, Object> clsnValueMap=collectionProperties.get(collectionPropSplits[0]);
+							if(clsnValueMap == null)
+							{
+								clsnValueMap=new HashMap<String, Object>();
+								collectionProperties.put(collectionPropSplits[0], clsnValueMap);
+							}
+							
+							clsnValueMap.put(collectionPropSplits[1], valueMap.get(propExp));
+						}
 					}
 				}
 				
@@ -232,10 +233,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 					Set<String> props=collectionProperties.keySet();
 					
 					for(String propExp : props)
-					{
-						Object propValue=convertMap(collectionProperties.get(propExp), targetType);
-						setProperty(result, propExp, propValue);
-					}
+						setProperty(result, propExp, collectionProperties.get(propExp));
 				}
 			}
 		}
@@ -243,10 +241,42 @@ public class WebGenericConverter extends DefaultGenericConverter
 		return result;
 	}
 	
-	protected Type splitCollectionProperty(PropertyInfo beanInfo, String[] propertyExpression, String[] splits)
+	/**
+	 * 拆分javaBean的集合类属性表达式。<br>
+	 * 如果表达式没有包含集合类属性或者末尾节点是集合类，则<code>splits</code>将被清空；
+	 * 否则，<code>splits[0]</code>是原表达式中到集合类属性为止的子属性，<code>splits[1]</code>则是之后的部分。
+	 * @param beanInfo
+	 * @param propExpressionArray
+	 * @param splits
+	 * @return 集合类属性的类型
+	 * @date 2011-1-4
+	 */
+	protected void splitCollectionProperty(PropertyInfo beanInfo, String[] propExpressionArray, String[] splits)
 	{
-		//TODO
-		return null;
+		int i=0;
+		PropertyInfo tmpPropInfo=null;
+		for(;i<propExpressionArray.length;i++)
+		{
+			tmpPropInfo=beanInfo.getSubPropertyInfo(propExpressionArray[i]);
+			if(tmpPropInfo == null)
+				throw new ConvertException("can not find property '"+propExpressionArray[i]+"' in class '"+beanInfo.getType().getName()+"'");
+			else
+				beanInfo=tmpPropInfo;
+			
+			if(isArrayOrCollection(beanInfo.getType()))
+				break;
+		}
+		
+		if(i < propExpressionArray.length-1)
+		{
+			splits[0]=assemblePropertyExpression(propExpressionArray, 0, i+1);
+			splits[1]=assemblePropertyExpression(propExpressionArray, i+1, propExpressionArray.length);
+		}
+		else
+		{
+			splits[0]=null;
+			splits[1]=null;
+		}
 	}
 	
 	/**
@@ -254,7 +284,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * 如果<code>type</code>是{@linkplain java.lang.Class Class}类型，则结果是包含仅包含它一个元素的数组；
 	 * 如果是{@linkplain java.lang.reflect.ParameterizedType ParameterizedType}类型，
 	 * 则返回数组的第一个元素是它的原始类型，而后续的元素则是参数类型；
-	 * 如果是不支持的类型，则返回<code>null</code>。
+	 * 如果是无法识别的类型，则返回<code>null</code>。
 	 * @param type
 	 * @return
 	 * @date 2011-1-3
@@ -271,7 +301,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			Type[] ats=paramType.getActualTypeArguments();
 			
 			if(!SoybeanMilkUtils.isClassType(paramType.getRawType()))
-				throw new ConvertException("'"+type+"' is not valid, only Class type of its raw type is supported");
+				throw new ConvertException("'"+type+"' is not valid, its raw type must be Class type");
 			
 			re=new Class<?>[1+ats.length];
 			re[0]=SoybeanMilkUtils.narrowToClassType(paramType.getRawType());
@@ -279,12 +309,12 @@ public class WebGenericConverter extends DefaultGenericConverter
 			for(int i=0;i<ats.length;i++)
 			{
 				if(!SoybeanMilkUtils.isClassType(ats[i]))
-					throw new ConvertException("'"+type+"' is not valid, only Class type of its actual types is supported");
+					throw new ConvertException("'"+type+"' is not valid, its actual type must be Class type");
 				
 				re[i+1]=SoybeanMilkUtils.narrowToClassType(ats[i]);
 			}
 		}
-		else if(SoybeanMilkUtils.isInstanceOf(type, GenericArrayType.class))
+		else
 			;
 		
 		return re;
@@ -405,32 +435,36 @@ public class WebGenericConverter extends DefaultGenericConverter
 			return true;
 		else if(SoybeanMilkUtils.isAncestorClass(Collection.class, clazz))
 			return true;
+		else if(SoybeanMilkUtils.isAncestorClass(Map.class, clazz))
+			return true;
 		else
 			return false;
 	}
 	
 	/**
-	 * 取得类型的默认值
-	 * @param type
+	 * 获取转换默认值。当转换不能正常执行时（比如源对象为<code>null</code>而目标类型为基本类型，或者源对象无法转换到目标类型），此方法的结果将被用做转换结果。
+	 * @param srcObject
+	 * @param targetType
 	 * @return
+	 * @date 2011-1-4
 	 */
-	protected Object getDefaultValue(Type type)
+	protected Object getDefaultValue(Object srcObject, Type targetType)
 	{
-		if(boolean.class.equals(type))
+		if(boolean.class.equals(targetType))
 			return false;
-		else if(byte.class.equals(type))
+		else if(byte.class.equals(targetType))
 			return (byte)0;
-		else if(char.class.equals(type))
+		else if(char.class.equals(targetType))
 			return (char)0;
-		else if(double.class.equals(type))
+		else if(double.class.equals(targetType))
 			return (double)0;
-		else if(float.class.equals(type))
+		else if(float.class.equals(targetType))
 			return (float)0;
-		else if(int.class.equals(type))
+		else if(int.class.equals(targetType))
 			return 0;
-		else if(long.class.equals(type))
+		else if(long.class.equals(targetType))
 			return (long)0;
-		else if(short.class.equals(type))
+		else if(short.class.equals(targetType))
 			return (short)0;
 		else
 			return null;

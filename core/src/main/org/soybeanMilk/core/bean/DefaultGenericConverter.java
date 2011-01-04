@@ -224,20 +224,20 @@ public class DefaultGenericConverter implements GenericConverter
 	 * 目前不支持中间属性是数组或集合类。
 	 * @param bean JavaBean对象
 	 * @param beanInfo 此对象的属性信息
-	 * @param propertyExpression 属性层级数组，比如["address","home"]表示此对象的address属性的home属性
+	 * @param propertyExpressionArray 属性层级数组，比如["address","home"]表示此对象的address属性的home属性
 	 * @param index 当前正在处理的属性层级数组的索引
 	 * @param value 属性对应的值
 	 */
-	protected void setProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpression, int index, Object value)
+	protected void setProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpressionArray, int index, Object value)
 	{
-		PropertyInfo propertyInfo=beanInfo.getSubPropertyInfo(propertyExpression[index]);
+		PropertyInfo propertyInfo=beanInfo.getSubPropertyInfo(propertyExpressionArray[index]);
 		if(propertyInfo == null)
-			throw new ConvertException("can not find property '"+propertyExpression[index]+"' in class '"+beanInfo.getType().getName()+"'");
+			throw new ConvertException("can not find property '"+propertyExpressionArray[index]+"' in class '"+beanInfo.getType().getName()+"'");
 		
 		//自上而下递归，到达末尾时初始化和写入
-		if(index == propertyExpression.length-1)
+		if(index == propertyExpressionArray.length-1)
 		{
-			Object destValue=convert(value, propertyInfo.getType());
+			Object destValue=convert(value, propertyInfo.getGenericType());
 			try
 			{
 				propertyInfo.getWriteMethod().invoke(bean, new Object[]{destValue});
@@ -270,7 +270,7 @@ public class DefaultGenericConverter implements GenericConverter
 			}
 			
 			//先将对象构建完成，再写入
-			setProperty(propertyInstance, propertyInfo, propertyExpression, index+1, value);
+			setProperty(propertyInstance, propertyInfo, propertyExpressionArray, index+1, value);
 			
 			//如果之前已经写入了该对象，则不需要再写一次
 			if(toWrite)
@@ -299,29 +299,29 @@ public class DefaultGenericConverter implements GenericConverter
 	 */
 	protected Object getProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpression, Type targetType)
 	{
-		Object property=bean;
-		PropertyInfo propertyInfo=beanInfo;
-		
+		PropertyInfo tmpPropInfo=null;
 		for(int i=0;i<propertyExpression.length;i++)
 		{
-			propertyInfo = propertyInfo.getSubPropertyInfo(propertyExpression[i]);
-			
-			if(propertyInfo == null)
-				throw new ConvertException("can not find property '"+propertyExpression[i]+"' in class '"+beanInfo.getType().getName()+"'");
-			if(property == null)
+			if(bean == null)
 				throw new ConvertException("can not get property '"+propertyExpression[i]+"' from null object");
+			
+			tmpPropInfo = beanInfo.getSubPropertyInfo(propertyExpression[i]);
+			if(tmpPropInfo == null)
+				throw new ConvertException("can not find property '"+propertyExpression[i]+"' in class '"+beanInfo.getType().getName()+"'");
+			else
+				beanInfo=tmpPropInfo;
 			
 			try
 			{
-				property=propertyInfo.getReadMethod().invoke(property, EMPTY_ARGS);
+				bean=beanInfo.getReadMethod().invoke(bean, EMPTY_ARGS);
 			}
 			catch(Exception e)
 			{
-				throw new ConvertException("exception occur while calling read method '"+propertyInfo.getReadMethod().getName()+"'",e);
+				throw new ConvertException("exception occur while calling read method '"+tmpPropInfo.getReadMethod().getName()+"'",e);
 			}
 		}
 		
-		return convert(property, targetType);
+		return convert(bean, targetType);
 	}
 	
 	/**
@@ -490,5 +490,28 @@ public class DefaultGenericConverter implements GenericConverter
 			propertyArray=new String[]{propertyExpression};
 		
 		return propertyArray;
+	}
+	
+	/**
+	 * 组装属性表达式数组为字符串
+	 * @param propExpressionAry
+	 * @param from
+	 * @param end
+	 * @return
+	 * @date 2011-1-4
+	 */
+	protected String assemblePropertyExpression(String[] propExpressionAry, int from, int end)
+	{
+		StringBuffer re=new StringBuffer();
+		
+		for(int i=from;i<end;i++)
+		{
+			re.append(propExpressionAry[i]);
+			
+			if(i<end-1)
+				re.append(WebConstants.ACCESSOR);
+		}
+		
+		return re.toString();
 	}
 }

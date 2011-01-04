@@ -147,8 +147,9 @@ public class PropertyInfo
 	
 	@Override
 	public String toString() {
-		return "PropertyInfo [propertyType=" + type + ", readMethod="
-				+ readMethod + ", writeMethod=" + writeMethod + "]";
+		return "PropertyInfo [type=" + type + ", genericType=" + genericType
+				+ ", readMethod=" + readMethod + ", writeMethod=" + writeMethod
+				+ "]";
 	}
 	
 	/**

@@ -15,7 +15,6 @@
 package org.soybeanMilk.web.bean;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
@@ -151,7 +150,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		
 		Object result = null;
 		
-		Class<?>[] actualTypes=getActualClassTypeInfo(targetType);
+		Class<?>[] actualTypes=SoybeanMilkUtils.getActualClassTypeInfo(targetType);
 		
 		if(actualTypes==null || actualTypes.length==0)
 			throw new ConvertException("converting 'Map<String,Object>' to '"+targetType+"' is not supported");
@@ -277,47 +276,6 @@ public class WebGenericConverter extends DefaultGenericConverter
 			splits[0]=null;
 			splits[1]=null;
 		}
-	}
-	
-	/**
-	 * 获取类型实际的{@linkplain java.lang.Class Class}类型。
-	 * 如果<code>type</code>是{@linkplain java.lang.Class Class}类型，则结果是包含仅包含它一个元素的数组；
-	 * 如果是{@linkplain java.lang.reflect.ParameterizedType ParameterizedType}类型，
-	 * 则返回数组的第一个元素是它的原始类型，而后续的元素则是参数类型；
-	 * 如果是无法识别的类型，则返回<code>null</code>。
-	 * @param type
-	 * @return
-	 * @date 2011-1-3
-	 */
-	protected Class<?>[] getActualClassTypeInfo(Type type)
-	{
-		Class<?>[] re=null;
-		
-		if(SoybeanMilkUtils.isInstanceOf(type, Class.class))
-			re=new Class<?>[]{ SoybeanMilkUtils.narrowToClassType(type) };
-		else if(SoybeanMilkUtils.isInstanceOf(type, ParameterizedType.class))
-		{
-			ParameterizedType paramType=(ParameterizedType)type;
-			Type[] ats=paramType.getActualTypeArguments();
-			
-			if(!SoybeanMilkUtils.isClassType(paramType.getRawType()))
-				throw new ConvertException("'"+type+"' is not valid, its raw type must be Class type");
-			
-			re=new Class<?>[1+ats.length];
-			re[0]=SoybeanMilkUtils.narrowToClassType(paramType.getRawType());
-			
-			for(int i=0;i<ats.length;i++)
-			{
-				if(!SoybeanMilkUtils.isClassType(ats[i]))
-					throw new ConvertException("'"+type+"' is not valid, its actual type must be Class type");
-				
-				re[i+1]=SoybeanMilkUtils.narrowToClassType(ats[i]);
-			}
-		}
-		else
-			;
-		
-		return re;
 	}
 	
 	/**

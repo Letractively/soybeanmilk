@@ -20,13 +20,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
-import org.soybeanMilk.core.bean.converters.ArrayConverter;
 import org.soybeanMilk.core.bean.converters.BigDecimalConverter;
 import org.soybeanMilk.core.bean.converters.BigIntegerConverter;
 import org.soybeanMilk.core.bean.converters.BooleanConverter;
@@ -50,7 +51,8 @@ import org.soybeanMilk.web.WebConstants;
  *   <tr><td>源类型</td><td>目标类型</td></tr>
  *   <tr>
  *   	<td>String</td>
- *   	<td>boolean, Boolean; byte, Byte; char, Character; double, Double; float, Float;<br>
+ *   	<td>
+ *   		boolean, Boolean; byte, Byte; char, Character; double, Double; float, Float;<br>
  *   		int, Integer; long, Long; short, Short;<br>
  *   		java.math.BigDecimal; java.math.BigInteger; java.util.Date; java.sql.Date; java.sql.Time; java.sql.Timestamp
  *   	</td>
@@ -59,14 +61,13 @@ import org.soybeanMilk.web.WebConstants;
  *   
  *   <tr>
  *   	<td>String[]</td>
- *   	<td>boolean[], Boolean[]; byte[], Byte[]; char[], Character[]; double[], Double[]; float[], Float[];<br>
- *   		int[], Integer[]; long[], Long[]; short[], Short[];<br>
- *   		java.math.BigDecimal[]; java.math.BigInteger[]; java.util.Date[]; java.sql.Date[]; java.sql.Time[];<br>
- *   		java.sql.Timestamp[]
+ *   	<td>
+ *   		上述各类型的数组、java.util.List、java.util.Set。<br>
+ *   		比如“int[]”、“boolean[]”、“Short[]”、List&lt;Integer&gt;、List&lt;Date&gt;、Set&lt;Integer&gt;、Set&lt;Date&gt; <br>
  *   </td></tr>
  * </table>
  * <br>
- * 另外，如果目标类型为<code>String</code>，而你没有添加此对象到<code>String</code>类型的辅助转换器，那么它将返回此对象的<code>toString()</code>结果<br>
+ * 另外，如果目标类型为<code>String</code>，而你没有添加对象到<code>String</code>类型的辅助转换器，那么它将返回此对象的<code>toString()</code>结果<br>
  * 你也可以通过{@link #addConverter(Type, Type, Converter)}为它添加更多辅助转换器，使其支持更多的类型转换。
  * @author earthAngry@gmail.com
  * @date 2010-10-6
@@ -100,7 +101,6 @@ public class DefaultGenericConverter implements GenericConverter
 		if(initDefaultSupportConverter)
 		{
 			addStringSourceConverters();
-			addStringArraySourceConverters();
 		}
 	}
 	
@@ -121,7 +121,7 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	@Override
-	public Object getProperty(Object srcObj, String propertyExpression, Type targetType)
+	public Object getProperty(Object srcObj, String propertyExpression, Type expectType)
 	{
 		if(srcObj == null)
 			throw new IllegalArgumentException("[srcObj] must not be null");
@@ -131,7 +131,7 @@ public class DefaultGenericConverter implements GenericConverter
 		if(log.isDebugEnabled())
 			log.debug("start getting '"+srcObj+"' property '"+propertyExpression+"'");
 		
-		return getProperty(srcObj, PropertyInfo.getPropertyInfo(srcObj.getClass()), splitPropertyExpression(propertyExpression), targetType);
+		return getProperty(srcObj, PropertyInfo.getPropertyInfo(srcObj.getClass()), splitPropertyExpression(propertyExpression), expectType);
 	}
 	
 	@Override
@@ -171,23 +171,17 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @param sourceObj 源对象
 	 * @param targetType 目标类型，为<code>null</code>则表示不需转换
 	 * @return
-	 * @throws ConvertException
 	 * @date 2010-12-28
 	 */
-	protected Object convertWithSupportConverter(Object sourceObj, Type targetType) throws ConvertException
+	protected Object convertWithSupportConverter(Object sourceObj, Type targetType)
 	{
 		if(log.isDebugEnabled())
 			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"
 					+(sourceObj == null ? null : sourceObj.getClass().getName())+"' to type '"
-					+(targetType==null ? null : targetType)+"'");
+					+targetType+"'");
 		
 		if(targetType == null)
-		{
-			if(log.isDebugEnabled())
-				log.debug("the target type is null, so the source object will be returned directly");
-			
 			return sourceObj;
-		}
 		
 		if(sourceObj == null)
 		{
@@ -197,26 +191,148 @@ public class DefaultGenericConverter implements GenericConverter
 				return null;
 		}
 		
-		if(SoybeanMilkUtils.isInstanceOf(sourceObj, targetType))
+		if(SoybeanMilkUtils.isInstanceOf(sourceObj, SoybeanMilkUtils.toWrapperType(targetType)))
 			return sourceObj;
 		
 		Converter c = getConverter(sourceObj.getClass(), targetType);
-		if(c == null)
-		{
-			if(targetType.equals(String.class))
-				return sourceObj.toString();
-			else
-				throw new ConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetType+"'");
-		}
+		if(c==null && SoybeanMilkUtils.isPrimitive(targetType))
+			c=getConverter(sourceObj.getClass(), SoybeanMilkUtils.toWrapperType(targetType));
 		
-		try
+		if(c == null)
+			return convertWhenNoSupportConverter(sourceObj, targetType);
+		else
 		{
-			return c.convert(sourceObj, targetType);
+			try
+			{
+				return c.convert(sourceObj, targetType);
+			}
+			catch(Exception e)
+			{
+				return convertWhenException(sourceObj, targetType, e);
+			}
 		}
-		catch(Exception e)
+	}
+	
+	/**
+	 * 当找不到对应的辅助转换器时，此方法将被调用。
+	 * @param sourceObj
+	 * @param targetType
+	 * @return
+	 * @date 2011-1-5
+	 */
+	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
+	{
+		Object re=null;
+		boolean canConvert=true;
+		
+		if(targetType.equals(String.class))
+			re=sourceObj.toString();
+		else if(sourceObj.getClass().isArray())
 		{
-			throw new ConvertException(e);
+			Class<?>[] actualTypes=SoybeanMilkUtils.getActualClassTypeInfo(targetType);
+			if(SoybeanMilkUtils.isArray(actualTypes[0]))
+				re=convertToArray(sourceObj, actualTypes[0].getComponentType());
+			else if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))
+			{
+				if(actualTypes.length != 2)
+					throw new ConvertException("'"+targetType+"' is invalid, only generic java.util.List converting is supported");
+				
+				re=convertArrayToList(convertToArray(sourceObj, actualTypes[1]), actualTypes[0]);
+			}
+			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualTypes[0]))
+			{
+				if(actualTypes.length != 2)
+					throw new ConvertException("'"+targetType+"' is invalid, only generic java.util.Set converting is supported");
+				
+				re=convertArrayToSet(convertToArray(sourceObj, actualTypes[1]), actualTypes[0]);
+			}
+			else
+				canConvert=false;
 		}
+		else
+			canConvert=false;
+		
+		if(canConvert)
+			return re;
+		else
+			throw new ConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetType+"'");
+	}
+	
+	/**
+	 * 当转换出现异常时，此方法将被调用。
+	 * @param sourceObj
+	 * @param targetType
+	 * @param cause
+	 * @return
+	 * @date 2011-1-5
+	 */
+	protected Object convertWhenException(Object sourceObj, Type targetType, Exception cause)
+	{
+		if(sourceObj instanceof String
+				&& ((String)sourceObj).length()==0 && !SoybeanMilkUtils.isPrimitive(targetType))
+			return null;
+		
+		if(cause instanceof ConvertException)
+			throw (ConvertException)cause;
+		else
+			throw new ConvertException(cause);
+	}
+	
+	/**
+	 * 由数组转换为{@linkplain java.util.List List}，它不会对数组元素执行类型转换。
+	 * @param array
+	 * @param listClass
+	 * @return
+	 * @date 2011-1-5
+	 */
+	@SuppressWarnings("unchecked")
+	protected Object convertArrayToList(Object array, Class<?> listClass)
+	{
+		List re=(List)instance(listClass, -1);
+		
+		for(int i=0,len=Array.getLength(array);i<len;i++)
+			re.add(Array.get(array, i));
+		
+		return re;
+	}
+	
+	/**
+	 * 由数组转换为{@linkplain java.util.Set Set}，它不会对数组元素执行类型转换。
+	 * @param array
+	 * @param setClass
+	 * @return
+	 * @date 2011-1-5
+	 */
+	@SuppressWarnings("unchecked")
+	protected Object convertArrayToSet(Object array, Class<?> setClass)
+	{
+		Set re=(Set)instance(setClass, -1);
+		
+		for(int i=0,len=Array.getLength(array);i<len;i++)
+			re.add(Array.get(array, i));
+		
+		return re;
+	}
+	
+	/**
+	 * 由对象转换到为数组对象。
+	 * @param sourceObj 源对象
+	 * @param targetElementType 目标数组的元素类型
+	 * @return
+	 * @date 2011-1-5
+	 */
+	protected Object convertToArray(Object sourceObj, Class<?> targetElementType)
+	{
+		if(!sourceObj.getClass().isArray())
+			throw new ConvertException("the source object must be an array");
+		
+		int len=Array.getLength(sourceObj);
+		Object re=Array.newInstance(targetElementType, len);
+		
+		for(int i=0;i<len;i++)
+			Array.set(re, i, convertWithSupportConverter(Array.get(sourceObj, i), targetElementType));
+		
+		return re;
 	}
 	
 	/**
@@ -342,11 +458,10 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @param objectType 类型
 	 * @param arrayLength 要创建数组的长度
 	 * @return
-	 * @throws ConvertException
 	 * @date 2010-12-29
 	 */
 	@SuppressWarnings("unchecked")
-	protected Object instance(Class<?> objectType, int arrayLength) throws ConvertException
+	protected Object instance(Class<?> objectType, int arrayLength)
 	{
 		if(java.util.List.class.equals(objectType))
 			return new ArrayList();
@@ -365,7 +480,7 @@ public class DefaultGenericConverter implements GenericConverter
 			}
 			catch(Exception e)
 			{
-				throw new ConvertException("exception occur while creating instance for class '"+objectType+"' ",e);
+				throw new ConvertException("exception occur while creating instance of class '"+objectType+"' ",e);
 			}
 		}
 	}
@@ -412,40 +527,6 @@ public class DefaultGenericConverter implements GenericConverter
 		addConverter(String.class, java.sql.Timestamp.class, new SqlTimestampConverter());
 	}
 	
-	/**
-	 * 添加可以将字符串数组转换到原子类型数组的辅助转换器
-	 */
-	protected void addStringArraySourceConverters()
-	{
-		//基本类型
-		addConverter(String[].class, boolean[].class, new ArrayConverter(new BooleanConverter()));
-		addConverter(String[].class, byte[].class, new ArrayConverter(new ByteConverter()));
-		addConverter(String[].class, char[].class, new ArrayConverter(new CharacterConverter()));
-		addConverter(String[].class, double[].class, new ArrayConverter(new DoubleConverter()));
-		addConverter(String[].class, float[].class, new ArrayConverter(new FloatConverter()));
-		addConverter(String[].class, int[].class, new ArrayConverter(new IntegerConverter()));
-		addConverter(String[].class, long[].class, new ArrayConverter(new LongConverter()));
-		addConverter(String[].class, short[].class, new ArrayConverter(new ShortConverter()));
-		
-		//包装类型
-		addConverter(String[].class, Boolean[].class, new ArrayConverter(new BooleanConverter()));
-		addConverter(String[].class, Byte[].class, new ArrayConverter(new ByteConverter()));
-		addConverter(String[].class, Character[].class, new ArrayConverter(new CharacterConverter()));
-		addConverter(String[].class, Double[].class, new ArrayConverter(new DoubleConverter()));
-		addConverter(String[].class, Float[].class, new ArrayConverter(new FloatConverter()));
-		addConverter(String[].class, Integer[].class, new ArrayConverter(new IntegerConverter()));
-		addConverter(String[].class, Long[].class, new ArrayConverter(new LongConverter()));
-		addConverter(String[].class, Short[].class, new ArrayConverter(new ShortConverter()));
-		
-		//其他
-		addConverter(String[].class, java.math.BigDecimal[].class, new ArrayConverter(new BigDecimalConverter()));
-		addConverter(String[].class, java.math.BigInteger[].class, new ArrayConverter(new BigIntegerConverter()));
-		addConverter(String[].class, java.util.Date[].class, new ArrayConverter(new DateConverter()));
-		addConverter(String[].class, java.sql.Date[].class, new ArrayConverter(new SqlDateConverter()));
-		addConverter(String[].class, java.sql.Time[].class, new ArrayConverter(new SqlTimeConverter()));
-		addConverter(String[].class, java.sql.Timestamp[].class, new ArrayConverter(new SqlTimestampConverter()));
-	}
-
 	/**
 	 * 取得对象的字符串描述
 	 * @param o

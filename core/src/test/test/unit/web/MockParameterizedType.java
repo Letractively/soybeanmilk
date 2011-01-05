@@ -9,7 +9,7 @@ public class MockParameterizedType implements ParameterizedType
 	private Type[] actualTypeArguments;
 	private Type rawType;
 	
-	public MockParameterizedType(Type rawType, Type[] actualTypeArguments)
+	public MockParameterizedType(Type rawType, Type... actualTypeArguments)
 	{
 		super();
 		this.rawType = rawType;

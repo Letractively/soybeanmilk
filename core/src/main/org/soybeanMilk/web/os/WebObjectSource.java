@@ -438,8 +438,6 @@ public class WebObjectSource extends ConvertableObjectSource
 		if(targetType == null || SoybeanMilkUtils.isInstanceOf(obj, targetType))
 			return obj;
 		
-		Class<?> targetClass=SoybeanMilkUtils.narrowToClassType(targetType);
-		
 		GenericConverter genericConverter=getGenericConverter();
 		
 		Class<?> sourceClass=null;
@@ -456,10 +454,10 @@ public class WebObjectSource extends ConvertableObjectSource
 		else
 			throw new ObjectSourceException("unknown servlet object '"+obj.getClass().getName()+"'");
 		
-		converter=genericConverter.getConverter(sourceClass, targetClass);
+		converter=genericConverter.getConverter(sourceClass, targetType);
 		
 		if(converter == null)
-			throw new ObjectSourceException("no Converter defined for converting '"+sourceClass.getName()+"' to '"+targetClass.getName()+"'");
+			throw new ObjectSourceException("no Converter defined for converting '"+sourceClass.getName()+"' to '"+targetType+"'");
 		
 		return converter.convert(obj, targetType);
 	}

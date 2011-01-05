@@ -34,7 +34,6 @@ public class HashMapObjectSource extends ConvertableObjectSource
 {
 	private static Log log=LogFactory.getLog(HashMapObjectSource.class);
 	
-	
 	private HashMap<Serializable,Object> source;
 	
 	public HashMapObjectSource()

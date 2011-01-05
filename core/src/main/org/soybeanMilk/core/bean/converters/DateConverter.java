@@ -27,11 +27,13 @@ package org.soybeanMilk.core.bean.converters;
  * </ul>
  * @author earthAngry@gmail.com
  * @date 2010-1-29
+ * @see org.apache.commons.beanutils.converters.DateConverter
  */
 public class DateConverter extends ClassTypeConverter
 {
-	private static String[] PATTERNS = new String[]{"yyyy","yyyy-MM","yyyy-MM-dd","yyyy-MM-dd HH",
-		"yyyy-MM-dd HH:mm","yyyy-MM-dd HH:mm:ss","yyyy-MM-dd HH:mm:ss.SSS"};
+	private static String[] PATTERNS = new String[]{
+		"yyyy-MM-dd","yyyy","yyyy-MM","yyyy-MM-dd HH:mm","yyyy-MM-dd HH:mm:ss",
+		"yyyy-MM-dd HH","yyyy-MM-dd HH:mm:ss.SSS"};
 	
 	private org.apache.commons.beanutils.converters.DateConverter c;
 	

@@ -227,8 +227,7 @@ public class Invoke extends AbstractExecutable
 				if(args[i].getValue()!=null || args[i].getKey()==null)
 					values[i]=args[i].getValue();
 				else
-					//如果对象源为null，则应该返回元素都为null的数组
-					values[i]= objectSource==null ? null : objectSource.get(args[i].getKey(), args[i].getType());
+					values[i]= objectSource.get(args[i].getKey(), args[i].getType());
 			}
 		}
 		

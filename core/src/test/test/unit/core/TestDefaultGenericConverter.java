@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import junit.framework.Assert;
 
@@ -11,6 +13,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
+
+import test.unit.web.MockParameterizedType;
 
 
 public class TestDefaultGenericConverter
@@ -24,7 +28,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringToBigDecimal()
+	public void convertString_toBigDecimal()
 	{
 		String src = "1254324.3823823";
 		
@@ -34,18 +38,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringArrayToBigDecimalArray()
-	{
-		String[] src = new String[]{"1254324.3823823","2342.23879102348"};
-		
-		BigDecimal[] dest = (BigDecimal[])converter.convert(src, BigDecimal[].class);
-		
-		Assert.assertEquals(new BigDecimal(src[0]), dest[0]);
-		Assert.assertEquals(new BigDecimal(src[1]), dest[1]);
-	}
-	
-	@Test
-	public void stringToBigInteger()
+	public void convertString_toBigInteger()
 	{
 		String src = "12349787293841930481029348234242134";
 		
@@ -55,18 +48,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringArrayToBigIntegerArray()
-	{
-		String[] src = new String[]{"12349787293841930481029348234242134","3898417890183910927834234"};
-		
-		BigInteger[] dest = (BigInteger[])converter.convert(src, BigInteger[].class);
-		
-		Assert.assertEquals(new BigInteger(src[0]), dest[0]);
-		Assert.assertEquals(new BigInteger(src[1]), dest[1]);
-	}
-	
-	@Test
-	public void stringToBoolean()
+	public void convertString_toBoolean()
 	{
 		{
 			String src = "true";
@@ -95,34 +77,38 @@ public class TestDefaultGenericConverter
 			
 			Assert.assertEquals(Boolean.FALSE, dest);
 		}
-	}
-	
-	@Test
-	public void stringArrayToBooleanArray()
-	{
+		
 		{
-			String[] src = new String[]{"true","1","false","0"};
-			Boolean[] dest = (Boolean[])converter.convert(src, Boolean[].class);
+			String src = "true";
+			Boolean dest = (Boolean)converter.convert(src, boolean.class);
 			
-			Assert.assertEquals(Boolean.TRUE, dest[0]);
-			Assert.assertEquals(Boolean.TRUE, dest[1]);
-			Assert.assertEquals(Boolean.FALSE, dest[2]);
-			Assert.assertEquals(Boolean.FALSE, dest[3]);
+			Assert.assertEquals(Boolean.TRUE, dest);
 		}
 		
 		{
-			String[] src = new String[]{"true","1","false","0"};
-			boolean[] dest = (boolean[])converter.convert(src, boolean[].class);
+			String src = "1";
+			Boolean dest = (Boolean)converter.convert(src, boolean.class);
 			
-			Assert.assertEquals(true, dest[0]);
-			Assert.assertEquals(true, dest[1]);
-			Assert.assertEquals(false, dest[2]);
-			Assert.assertEquals(false, dest[3]);
+			Assert.assertEquals(Boolean.TRUE, dest);
+		}
+		
+		{
+			String src = "false";
+			Boolean dest = (Boolean)converter.convert(src, boolean.class);
+			
+			Assert.assertEquals(Boolean.FALSE, dest);
+		}
+		
+		{
+			String src = "0";
+			Boolean dest = (Boolean)converter.convert(src, boolean.class);
+			
+			Assert.assertEquals(Boolean.FALSE, dest);
 		}
 	}
 	
 	@Test
-	public void stringToByte()
+	public void convertString_toByte()
 	{
 		{
 			String src = "5";
@@ -140,29 +126,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringArrayToByteArray()
-	{
-		{
-			String[] src=new String[]{"5","3","-1"};
-			Byte[] dest = (Byte[])converter.convert(src, Byte[].class);
-			
-			Assert.assertEquals(new Byte((byte)5), dest[0]);
-			Assert.assertEquals(new Byte((byte)3), dest[1]);
-			Assert.assertEquals(new Byte((byte)-1), dest[2]);
-		}
-		
-		{
-			String[] src=new String[]{"5","3","-1"};
-			byte[] dest = (byte[])converter.convert(src, byte[].class);
-			
-			Assert.assertEquals((byte)5, dest[0]);
-			Assert.assertEquals((byte)3, dest[1]);
-			Assert.assertEquals((byte)-1, dest[2]);
-		}
-	}
-	
-	@Test
-	public void stringToCharacter()
+	public void convertString_toCharacter()
 	{
 		{
 			String src = "2";
@@ -180,7 +144,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringToDate()
+	public void convertString_toDate()
 	{
 		{
 			String src = "2010";
@@ -233,7 +197,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringToDouble()
+	public void convertString_toDouble()
 	{
 		{
 			String src = "1";
@@ -269,7 +233,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringToFloat()
+	public void convertString_toFloat()
 	{
 		{
 			String src = "1";
@@ -297,7 +261,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringToInteger()
+	public void convertString_toInteger()
 	{
 		String src = "1";
 		
@@ -313,7 +277,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringToLong()
+	public void convertString_toLong()
 	{
 		String src = "13424235532342";
 		
@@ -329,7 +293,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringArrayToLongArray()
+	public void convertStringArray_toLongArray()
 	{
 		String[] src=new String[]{"2342353413241234", "1342413542348779"};
 		{
@@ -348,7 +312,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringToShort()
+	public void convertString_toShort()
 	{
 		String src = "1342";
 		
@@ -364,7 +328,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringToSqlDate()
+	public void convertString_toSqlDate()
 	{
 		{
 			String src = "2010-10-12";
@@ -375,7 +339,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringToSqlTime()
+	public void convertString_toSqlTime()
 	{
 		{
 			String src = "15:30:20";
@@ -393,7 +357,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringToSqlTimestamp()
+	public void convertString_toSqlTimestamp()
 	{
 		{
 			String src = "2010-10-12 13:00:00";
@@ -412,21 +376,155 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void stringToString()
+	public void convertString_toString()
 	{
 		String src = "string_abc";
-		
 		String dest = (String)converter.convert(src, String.class);
 		
 		Assert.assertEquals(src, dest);
 	}
 	
+	@Test
+	public void convertString_toAncestorType()
+	{
+		String src = "string_abc";
+		String dest = (String)converter.convert(src, Object.class);
+		
+		Assert.assertEquals(src, dest);
+	}
+	
+	@Test
+	public void convertString_emptyStringToObject()
+	{
+		String src="";
+		Integer re=(Integer)converter.convert(src, Integer.class);
+		
+		Assert.assertNull(re);
+	}
+	
 	@Test(expected = ConvertException.class)
-	public void testNullToPrimitiveException()
+	public void convertString_emptyStringToPrimitive()
+	{
+		String src="";
+		Boolean re=(Boolean)converter.convert(src, boolean.class);
+		
+		Assert.assertNull(re);
+	}
+	
+	@Test(expected = ConvertException.class)
+	public void convertNull_toPrimitive()
 	{
 		Object src = null;
-		
 		converter.convert(src, int.class);
+	}
+
+	@Test
+	public void convertStringArray_toStringArray()
+	{
+		String[] src = new String[]{"1254324.3823823","2342.23879102348"};
+		
+		String[] dest = (String[])converter.convert(src, String[].class);
+		
+		Assert.assertEquals(src[0], dest[0]);
+		Assert.assertEquals(src[1], dest[1]);
+	}
+	
+	@Test
+	public void convertStringArray_toBooleanArray()
+	{
+		{
+			String[] src = new String[]{"true","1","false","0"};
+			Boolean[] dest = (Boolean[])converter.convert(src, Boolean[].class);
+			
+			Assert.assertEquals(Boolean.TRUE, dest[0]);
+			Assert.assertEquals(Boolean.TRUE, dest[1]);
+			Assert.assertEquals(Boolean.FALSE, dest[2]);
+			Assert.assertEquals(Boolean.FALSE, dest[3]);
+		}
+		
+		{
+			String[] src = new String[]{"true","1","false","0"};
+			boolean[] dest = (boolean[])converter.convert(src, boolean[].class);
+			
+			Assert.assertEquals(true, dest[0]);
+			Assert.assertEquals(true, dest[1]);
+			Assert.assertEquals(false, dest[2]);
+			Assert.assertEquals(false, dest[3]);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void convertStringArray_toGenericList()
+	{
+		String[] src=new String[]{"123", "456", "789"};
+		
+		List<Integer> dest=(List<Integer>)converter.convert(src, new MockParameterizedType(List.class, Integer.class));
+		
+		for(int i=0;i<src.length;i++)
+		{
+			Assert.assertEquals(new Integer(src[i]), dest.get(i));
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void convertStringArray_toNormalList()
+	{
+		String[] src=new String[]{"123", "456", "789"};
+		
+		try
+		{
+			List<Integer> dest=(List<Integer>)converter.convert(src, List.class);
+		}
+		catch(Exception e)
+		{
+			Assert.assertTrue( e.getMessage().endsWith("only generic java.util.List converting is supported") );
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void convertStringArray_toGenericSet()
+	{
+		String[] src=new String[]{"123", "456", "789"};
+		
+		Set<Integer> dest=(Set<Integer>)converter.convert(src, new MockParameterizedType(Set.class, Integer.class));
+		
+		Assert.assertTrue( dest.size() == src.length );
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void convertStringArray_toNormalSet()
+	{
+		String[] src=new String[]{"123", "456", "789"};
+		
+		try
+		{
+			Set<Integer> dest=(Set<Integer>)converter.convert(src, Set.class);
+			dest.size();
+		}
+		catch(Exception e)
+		{
+			Assert.assertTrue( e.getMessage().endsWith("only generic java.util.Set converting is supported") );
+		}
+	}
+	
+	@Test
+	public void convert_notSupported()
+	{
+		int src=3355;
+		
+		try
+		{
+			Byte dest=(Byte)converter.convert(src, byte.class);
+			dest.byteValue();
+		}
+		catch(Exception e)
+		{
+			Assert.assertTrue( e.getMessage().startsWith("can not find Converter for converting") );
+		}
 	}
 	
 	@Test
@@ -476,7 +574,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test(expected = ConvertException.class)
-	public void getPropertyThrow()
+	public void getProperty_notExistProperty()
 	{
 		MyBean bean=new MyBean();
 		bean.setId("111");

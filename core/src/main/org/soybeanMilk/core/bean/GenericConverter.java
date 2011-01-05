@@ -52,9 +52,9 @@ public interface GenericConverter extends Converter
 	 * 取得对象的属性值，属性值将被转换为<code>targetType</code>类型的对象。
 	 * @param srcObj 源对象
 	 * @param propertyExpression 属性表达式，可以多层嵌套，比如“propertyA.propertyB.propertyC”
-	 * @param targetType 期望返回对象的类型，如果为null，则表示默认
+	 * @param expectType 期望返回对象的类型，如果为null，则表示默认
 	 * @return <code>targetType</code>类型的对象
 	 * @date 2010-12-28
 	 */
-	Object getProperty(Object srcObj, String propertyExpression, Type targetType);
+	Object getProperty(Object srcObj, String propertyExpression, Type expectType);
 }

@@ -39,6 +39,13 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
+	public void convertSimple_singleElementArrayToNoArrayObject_1()
+	{
+		Integer dest=(Integer)converter.convert(new String[]{""}, Integer.class);
+		Assert.assertNull(dest);
+	}
+	
+	@Test
 	public void convertMap_toMap()
 	{
 		HashMap<String,Integer> src=new HashMap<String, Integer>();

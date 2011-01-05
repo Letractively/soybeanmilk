@@ -18,7 +18,6 @@ package org.soybeanMilk.core.bean.converters;
  * 单精度类型转换器。
  * @author earthAngry@gmail.com
  * @date 2010-10-3
- * @see org.apache.commons.beanutils.converters.FloatConverter
  */
 public class FloatConverter extends ClassTypeConverter
 {

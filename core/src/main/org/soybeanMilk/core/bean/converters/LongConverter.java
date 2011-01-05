@@ -18,7 +18,6 @@ package org.soybeanMilk.core.bean.converters;
  * 长整型转换器。
  * @author earthAngry@gmail.com
  * @date 2010-10-3
- * @see org.apache.commons.beanutils.converters.LongConverter
  */
 public class LongConverter extends ClassTypeConverter
 {

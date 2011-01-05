@@ -27,7 +27,6 @@ package org.soybeanMilk.core.bean.converters;
  * </ul>
  * @author earthAngry@gmail.com
  * @date 2010-1-29
- * @see org.apache.commons.beanutils.converters.DateConverter
  */
 public class DateConverter extends ClassTypeConverter
 {

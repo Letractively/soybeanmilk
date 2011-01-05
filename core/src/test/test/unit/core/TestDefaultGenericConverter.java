@@ -476,10 +476,11 @@ public class TestDefaultGenericConverter
 		try
 		{
 			List<Integer> dest=(List<Integer>)converter.convert(src, List.class);
+			dest.size();
 		}
 		catch(Exception e)
 		{
-			Assert.assertTrue( e.getMessage().endsWith("only generic java.util.List converting is supported") );
+			Assert.assertTrue( e.getMessage().endsWith("only generic List converting is supported") );
 		}
 	}
 	
@@ -507,7 +508,7 @@ public class TestDefaultGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertTrue( e.getMessage().endsWith("only generic java.util.Set converting is supported") );
+			Assert.assertTrue( e.getMessage().endsWith("only generic Set converting is supported") );
 		}
 	}
 	

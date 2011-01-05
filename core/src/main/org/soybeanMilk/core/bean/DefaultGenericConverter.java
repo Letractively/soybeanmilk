@@ -231,20 +231,20 @@ public class DefaultGenericConverter implements GenericConverter
 		{
 			Class<?>[] actualTypes=SoybeanMilkUtils.getActualClassTypeInfo(targetType);
 			if(SoybeanMilkUtils.isArray(actualTypes[0]))
-				re=convertToArray(sourceObj, actualTypes[0].getComponentType());
+				re=convertArrayToArray(sourceObj, actualTypes[0].getComponentType());
 			else if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))
 			{
 				if(actualTypes.length != 2)
-					throw new ConvertException("'"+targetType+"' is invalid, only generic java.util.List converting is supported");
+					throw new ConvertException("'"+targetType+"' is invalid, only generic List converting is supported");
 				
-				re=convertArrayToList(convertToArray(sourceObj, actualTypes[1]), actualTypes[0]);
+				re=convertArrayToList(convertArrayToArray(sourceObj, actualTypes[1]), actualTypes[0]);
 			}
 			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualTypes[0]))
 			{
 				if(actualTypes.length != 2)
-					throw new ConvertException("'"+targetType+"' is invalid, only generic java.util.Set converting is supported");
+					throw new ConvertException("'"+targetType+"' is invalid, only generic Set converting is supported");
 				
-				re=convertArrayToSet(convertToArray(sourceObj, actualTypes[1]), actualTypes[0]);
+				re=convertArrayToSet(convertArrayToArray(sourceObj, actualTypes[1]), actualTypes[0]);
 			}
 			else
 				canConvert=false;
@@ -315,13 +315,13 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	/**
-	 * 由对象转换到为数组对象。
+	 * 由一种数组转换到为另一个对象数组。
 	 * @param sourceObj 源对象
 	 * @param targetElementType 目标数组的元素类型
 	 * @return
 	 * @date 2011-1-5
 	 */
-	protected Object convertToArray(Object sourceObj, Class<?> targetElementType)
+	protected Object convertArrayToArray(Object sourceObj, Class<?> targetElementType)
 	{
 		if(!sourceObj.getClass().isArray())
 			throw new ConvertException("the source object must be an array");

@@ -26,12 +26,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.bean.ConvertException;
-import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.PropertyInfo;
 
 /**
- * WEB通用转换器，除了继承的转换支持，它还支持将{@link Map Map&lt;String, Object&gt;}转换为JavaBean对象。
+ * WEB通用转换器，除了继承的转换支持，它还支持将{@link Map Map&lt;String, Object&gt;}转换为JavaBean对象、JavaBean数组、JavaBean集合（List、Set）。
  * @author earthAngry@gmail.com
  * @date 2010-10-8
  */
@@ -44,94 +43,24 @@ public class WebGenericConverter extends DefaultGenericConverter
 		super();
 	}
 	
-	@Override
 	@SuppressWarnings("unchecked")
-	public Object convert(Object sourceObj, Type targetType)
+	@Override
+	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
 	{
-		if(SoybeanMilkUtils.isInstanceOf(sourceObj, Map.class))
+		//如果源对象是数组并且长度为1，而目标类型不是，则使用数组的第一个元素转换
+		if(sourceObj.getClass().isArray() && Array.getLength(sourceObj)==1 && !SoybeanMilkUtils.isClassTypeArray(targetType))
+		{
+			if(log.isDebugEnabled())
+				log.debug("the source '"+getStringDesc(sourceObj)+"' is an array and the length is 1, while the target type not, so it's first element will be used for converting");
+			
+			sourceObj=Array.get(sourceObj, 0);
+			
+			return super.convertWithSupportConverter(sourceObj, targetType);
+		}
+		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, Map.class))
 			return convertMap((Map<String, Object>)sourceObj, targetType);
 		else
-			return convertWithSupportConverter(sourceObj, targetType);
-	}
-	
-	@Override
-	protected Object convertWithSupportConverter(Object sourceObj, Type targetType) throws ConvertException
-	{
-		if(log.isDebugEnabled())
-			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"
-					+(sourceObj == null ? null : sourceObj.getClass().getName())+"' to type '"
-					+(targetType==null ? null : targetType)+"'");
-		
-		if(targetType == null)
-		{
-			if(log.isDebugEnabled())
-			log.debug("the target type is null, so the source object will be returned directly");
-			
-			return sourceObj;
-		}
-		
-		if(sourceObj == null)
-		{
-			Object dv = getDefaultValue(sourceObj, targetType);
-			if(log.isDebugEnabled())
-				log.debug("the source object is null, so the default value '"+dv+"' of type '"+targetType+"' will be used");
-			
-			return dv;
-		}
-		
-		if(SoybeanMilkUtils.isInstanceOf(sourceObj, targetType))
-			return sourceObj;
-		
-		Converter c = getConverter(sourceObj.getClass(), targetType);
-		
-		//如果源对象是数组并且长度为1，而标类型不是，则使用数组的第一个元素转换
-		if(c==null && sourceObj.getClass().isArray() && Array.getLength(sourceObj)==1 && !SoybeanMilkUtils.isClassTypeArray(targetType))
-		{
-			if(log.isDebugEnabled())
-				log.debug("the source '"+getStringDesc(sourceObj)+"' is an array and the length is 1, while the target Class is not, so it's first element will be used for converting");
-			
-			sourceObj=Array.getLength(sourceObj) ==0 ? null : Array.get(sourceObj, 0);
-			
-			if(sourceObj == null)
-			{
-				Object dv = getDefaultValue(sourceObj, targetType);
-				if(log.isDebugEnabled())
-					log.debug("the source object is null, so the default value '"+dv+"' of type '"+targetType+"' will be used");
-				
-				return dv;
-			}
-			
-			if(SoybeanMilkUtils.isInstanceOf(sourceObj, targetType))
-				return sourceObj;
-			
-			c = getConverter(sourceObj.getClass(), targetType);
-		}
-		
-		//如果目标是字符串，并且没有对应的转换器，则调用toString()
-		if(c==null && String.class.equals(targetType))
-		{
-			if(log.isDebugEnabled())
-				log.debug("'toString()' method will be used for converting because the expected type is 'String' but not Converter found");
-			
-			return sourceObj.toString();
-		}
-		
-		if(c == null)
-			throw new ConvertException("no Converter defined for converting '"+sourceObj.getClass().getName()+"' to '"+targetType+"'");
-		
-		try
-		{
-			return c.convert(sourceObj, targetType);
-		}
-		catch(Exception e)
-		{
-			Object dv = getDefaultValue(sourceObj, targetType);
-			
-			if(log.isDebugEnabled())
-				log.debug("default value '"+dv+"' is used while converting '"+sourceObj+"' to '"+targetType+"' because the following exception :", e);
-			
-			return dv;
-		}
+			return super.convertWhenNoSupportConverter(sourceObj, targetType);
 	}
 	
 	/**
@@ -145,24 +74,22 @@ public class WebGenericConverter extends DefaultGenericConverter
 		if(log.isDebugEnabled())
 			log.debug("start converting 'Map<String, Object>' object to '"+targetType+"'");
 		
-		if(valueMap==null || targetType == null)
-			return valueMap;
-		
 		Object result = null;
 		
 		Class<?>[] actualTypes=SoybeanMilkUtils.getActualClassTypeInfo(targetType);
 		
-		if(actualTypes==null || actualTypes.length==0)
-			throw new ConvertException("converting 'Map<String,Object>' to '"+targetType+"' is not supported");
-		else if(isArrayOrCollection(actualTypes[0]))
+		if(isArrayOrCollection(actualTypes[0]))
 		{
+			//数组
+			if(SoybeanMilkUtils.isArray(actualTypes[0]))
+				result=convertMapToJavaBeanArray(valueMap, actualTypes[0].getComponentType());
 			//List
-			if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))
+			else if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))
 			{
 				if(actualTypes.length != 2)
 					throw new ConvertException("'"+targetType+"' is invalid, only generic List converting is supported");
 				
-				result=convertMapToJavaBeanList(valueMap, actualTypes);
+				result=convertArrayToList(convertMapToJavaBeanArray(valueMap, actualTypes[1]), actualTypes[0]);
 			}
 			//Set
 			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualTypes[0]))
@@ -170,18 +97,10 @@ public class WebGenericConverter extends DefaultGenericConverter
 				if(actualTypes.length != 2)
 					throw new ConvertException("'"+targetType+"' is invalid, only generic Set converting is supported");
 				
-				result=convertMapToJavaBeanSet(valueMap, actualTypes);
+				result=convertArrayToSet(convertMapToJavaBeanArray(valueMap, actualTypes[1]), actualTypes[0]);
 			}
-			//Map
-			else if(SoybeanMilkUtils.isAncestorClass(Map.class, actualTypes[0]))
-			{
-				result=valueMap;
-			}
-			//数组
-			else if(SoybeanMilkUtils.isArray(actualTypes[0]))
-				result=convertMapToJavaBeanArray(valueMap, actualTypes[0].getComponentType());
 			else
-				throw new ConvertException("converting to '"+targetType+"' is not supported");
+				throw new ConvertException("converting 'Map<String,Object>' to '"+targetType+"' is not supported");
 		}
 		//JavaBean
 		else
@@ -279,52 +198,6 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 由映射表转换为JavaBean <code>java.util.Set</code>。
-	 * @param valueMap
-	 * @param setGeneric
-	 * @return
-	 * @date 2010-12-31
-	 */
-	@SuppressWarnings("unchecked")
-	protected Set<?> convertMapToJavaBeanSet(Map<String, Object> valueMap, Class<?>[] setGeneric)
-	{
-		Set re=null;
-		
-		Object[] ary=convertMapToJavaBeanArray(valueMap, setGeneric[1]);
-		if(ary != null)
-		{
-			re=(Set)instance(setGeneric[0], -1);
-			for(Object o : ary)
-				re.add(o);
-		}
-		
-		return re;
-	}
-	
-	/**
-	 * 由映射表转换为JavaBean <code>java.util.List</code>。
-	 * @param valueMap
-	 * @param listGeneric
-	 * @return
-	 * @date 2010-12-31
-	 */
-	@SuppressWarnings("unchecked")
-	protected List<?> convertMapToJavaBeanList(Map<String, Object> valueMap, Class<?>[] listGeneric)
-	{
-		List re=null;
-		
-		Object[] ary=convertMapToJavaBeanArray(valueMap, listGeneric[1]);
-		if(ary != null)
-		{
-			re=(List)instance(listGeneric[0], -1);
-			for(Object o : ary)
-				re.add(o);
-		}
-		
-		return re;
-	}
-	
-	/**
 	 * 由映射表转换为JavaBean数组，<code>valueMap</code>中值为<code>null</code>和关键字不是<code>javaBeanClass</code>类属性的元素将被忽略，
 	 * 其他元素必须是数组并且长度一致。<br>
 	 * 此方法不支持嵌套数组和集合（即<code>elementClass</code>不能包含数组和集合类属性）。
@@ -393,38 +266,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			return true;
 		else if(SoybeanMilkUtils.isAncestorClass(Collection.class, clazz))
 			return true;
-		else if(SoybeanMilkUtils.isAncestorClass(Map.class, clazz))
-			return true;
 		else
 			return false;
-	}
-	
-	/**
-	 * 获取转换默认值。当转换不能正常执行时（比如源对象为<code>null</code>而目标类型为基本类型，或者源对象无法转换到目标类型），此方法的结果将被用做转换结果。
-	 * @param srcObject
-	 * @param targetType
-	 * @return
-	 * @date 2011-1-4
-	 */
-	protected Object getDefaultValue(Object srcObject, Type targetType)
-	{
-		if(boolean.class.equals(targetType))
-			return false;
-		else if(byte.class.equals(targetType))
-			return (byte)0;
-		else if(char.class.equals(targetType))
-			return (char)0;
-		else if(double.class.equals(targetType))
-			return (double)0;
-		else if(float.class.equals(targetType))
-			return (float)0;
-		else if(int.class.equals(targetType))
-			return 0;
-		else if(long.class.equals(targetType))
-			return (long)0;
-		else if(short.class.equals(targetType))
-			return (short)0;
-		else
-			return null;
 	}
 }

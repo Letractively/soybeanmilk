@@ -17,8 +17,6 @@ package org.soybeanMilk;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import org.soybeanMilk.core.bean.ConvertException;
-
 /**
  * 框架内部常用类。
  * @author earthAngry@gmail.com
@@ -146,7 +144,6 @@ public class SoybeanMilkUtils
             return type;
 	}
 	
-
 	/**
 	 * 获取类型实际的{@linkplain java.lang.Class Class}类型。
 	 * 如果<code>type</code>是{@linkplain java.lang.Class Class}类型，则结果是包含仅包含它一个元素的数组；

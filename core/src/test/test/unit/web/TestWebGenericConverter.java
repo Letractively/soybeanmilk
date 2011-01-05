@@ -32,117 +32,10 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertSimple_forDefaultValue_boolean()
-	{
-		Boolean dest=(Boolean)converter.convert(null, boolean.class);
-		Assert.assertFalse(dest);
-	}
-	
-	@Test
-	public void convertSimple_forDefaultValue_byte()
-	{
-		Byte dest=(Byte)converter.convert(null, byte.class);
-		Assert.assertEquals(0, dest.byteValue());
-	}
-	
-	@Test
-	public void convertSimple_forDefaultValue_char()
-	{
-		Character dest=(Character)converter.convert(null, char.class);
-		Assert.assertEquals(0, dest.charValue());
-	}
-	
-	@Test
-	public void convertSimple_forDefaultValue_double()
-	{
-		Double dest=(Double)converter.convert(null, double.class);
-		Assert.assertEquals(0d, dest.doubleValue());
-	}
-	
-	@Test
-	public void convertSimple_forDefaultValue_float()
-	{
-		Float dest=(Float)converter.convert(null, float.class);
-		Assert.assertEquals(0f, dest.floatValue());
-	}
-	
-	@Test
-	public void convertSimple_forDefaultValue_int()
-	{
-		Integer dest=(Integer)converter.convert(null, int.class);
-		Assert.assertEquals(0, dest.intValue());
-	}
-	
-	@Test
-	public void convertSimple_forDefaultValue_long()
-	{
-		Long dest=(Long)converter.convert(null, long.class);
-		Assert.assertEquals(0l, dest.longValue());
-	}
-	
-	@Test
-	public void convertSimple_forDefaultValue_short()
-	{
-		Short dest=(Short)converter.convert(null, short.class);
-		Assert.assertEquals((short)0, dest.shortValue());
-	}
-	
-	@Test
-	public void convertSimple_forDefaultValue_Object()
-	{
-		String dest=(String)converter.convert(null, String.class);
-		Assert.assertNull(dest);
-	}
-	
-	@Test
-	public void convertSimple_toString_1()
-	{
-		Integer src=2345;
-		String dest=(String)converter.convert(src, String.class);
-		
-		Assert.assertEquals(src.toString(), dest);
-	}
-	
-	@Test
-	public void convertSimple_toString_2()
-	{
-		JavaBean src=new JavaBean();
-		src.setName("aaa");
-		
-		String dest=(String)converter.convert(src, String.class);
-		
-		Assert.assertEquals(src.toString(), dest);
-	}
-	
-	@Test
 	public void convertSimple_singleElementArrayToNoArrayObject()
 	{
 		Integer dest=(Integer)converter.convert(new String[]{"12345"}, int.class);
 		Assert.assertEquals(12345, dest.intValue());
-	}
-	
-	@Test
-	public void convertSimple_srcNull_1()
-	{
-		Integer[] src=new Integer[]{null};
-		String dest=(String)converter.convert(src, String.class);
-		Assert.assertNull(dest);
-	}
-	
-	@Test
-	public void convertSimple_srcNull_2()
-	{
-		Object dest=converter.convert(null, Object.class);
-		Assert.assertNull(dest);
-	}
-	
-	@Test
-	public void convertSimple_destNull()
-	{
-		Integer src=new Integer(12345);
-		
-		Integer dest=(Integer)converter.convert(src, null);
-		Assert.assertTrue( src==dest );
 	}
 	
 	@Test
@@ -245,7 +138,7 @@ public class TestWebGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertTrue( e.getMessage().startsWith("no Converter defined for converting ") );
+			Assert.assertTrue( e.getMessage().startsWith("can not find Converter for converting") );
 		}
 	}
 	
@@ -256,7 +149,7 @@ public class TestWebGenericConverter
 		
 		String[] id=new String[]{"1"};
 		String[] name=new String[]{"jack"};
-		String[] simpleCollectionProperty=new String[]{"1","2","3"};
+		String[] simpleCollectionProperty=new String[]{"1","3","7"};
 		
 		String[] cmplexCollectionProperty_id=new String[]{"2","5","7"};
 		String[] cmplexCollectionProperty_name=new String[]{"aaa","bbb","ccc"};
@@ -265,8 +158,8 @@ public class TestWebGenericConverter
 		src.put("name", name);
 		
 		src.put("simpleArray", simpleCollectionProperty);
-		//src.put("simpleList", simpleCollectionProperty);
-		//src.put("simpleSet", simpleCollectionProperty);
+		src.put("simpleList", simpleCollectionProperty);
+		src.put("simpleSet", simpleCollectionProperty);
 		
 		src.put("javaBean2Array.id", cmplexCollectionProperty_id);
 		src.put("javaBean2Array.name", cmplexCollectionProperty_name);
@@ -278,7 +171,64 @@ public class TestWebGenericConverter
 		src.put("javaBean2Set.name", cmplexCollectionProperty_name);
 		
 		ComplexJavaBean dest=(ComplexJavaBean)converter.convert(src, ComplexJavaBean.class);
-		dest.getId();
+		
+		Assert.assertEquals(Integer.parseInt(id[0]), dest.getId());
+		Assert.assertEquals(name[0], dest.getName());
+		{
+			Integer[] p=dest.getSimpleArray();
+			for(int i=0;i<p.length;i++)
+				Assert.assertEquals(new Integer(simpleCollectionProperty[i]), p[i]);
+		}
+		{
+			List<Integer> p=dest.getSimpleList();
+			for(int i=0;i<p.size();i++)
+				Assert.assertEquals(new Integer(simpleCollectionProperty[i]), p.get(i));
+		}
+		{
+			Set<Integer> p=dest.getSimpleSet();
+			for(Integer it : p)
+			{
+				int idx=-1;
+				for(int i=0;i<simpleCollectionProperty.length;i++)
+					if(new Integer(simpleCollectionProperty[i]).equals(it))
+						idx=i;
+				
+				Assert.assertTrue( idx> -1 );
+			}
+		}
+		{
+			JavaBean2[] p=dest.getJavaBean2Array();
+			
+			for(int i=0;i<p.length;i++)
+			{
+				Assert.assertEquals(Integer.parseInt(cmplexCollectionProperty_id[i]), p[i].getId());
+				Assert.assertEquals(cmplexCollectionProperty_name[i], p[i].getName());
+			}
+		}
+		{
+			List<JavaBean2> p=dest.getJavaBean2List();
+			
+			for(int i=0;i<p.size();i++)
+			{
+				Assert.assertEquals(Integer.parseInt(cmplexCollectionProperty_id[i]), p.get(i).getId());
+				Assert.assertEquals(cmplexCollectionProperty_name[i], p.get(i).getName());
+			}
+		}
+		{
+			Set<JavaBean2> p=dest.getJavaBean2Set();
+			for(JavaBean2 jb : p)
+			{
+				int idx=-1;
+				for(int i=0;i<cmplexCollectionProperty_id.length;i++)
+				{
+					if(Integer.parseInt(cmplexCollectionProperty_id[i]) ==jb.getId()
+							&& cmplexCollectionProperty_name[i].equals(jb.getName()))
+							idx=i;
+				}
+				
+				Assert.assertTrue( idx> -1 );
+			}
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -345,7 +295,7 @@ public class TestWebGenericConverter
 		src.put("age", ages);
 		src.put("birth", births);
 		
-		Type type=new MockParameterizedType(new MockParameterizedType(null, null), new Type[]{JavaBean.class});
+		Type type=new MockParameterizedType(new MockParameterizedType(null), JavaBean.class);
 		try
 		{
 			List<JavaBean> dest=(List<JavaBean>)converter.convert(src, type);
@@ -371,7 +321,7 @@ public class TestWebGenericConverter
 		src.put("age", ages);
 		src.put("birth", births);
 		
-		Type type=new MockParameterizedType(JavaBean.class, new Type[]{JavaBean.class, new MockParameterizedType(null, null)});
+		Type type=new MockParameterizedType(JavaBean.class, JavaBean.class, new MockParameterizedType(null));
 		try
 		{
 			List<JavaBean> dest=(List<JavaBean>)converter.convert(src, type);

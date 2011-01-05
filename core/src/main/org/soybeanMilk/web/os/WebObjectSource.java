@@ -223,7 +223,7 @@ public class WebObjectSource extends ConvertableObjectSource
 				else if(WebConstants.Scope.APPLICATION.equals(scope))
 					data=getAttributeByKeyExpression(getApplication(), keyInScope, expectType);
 				else if(WebConstants.Scope.RESPONSE.equals(scope))
-					throw new ObjectSourceException("key '"+key+"' is invalid, you can not get data from '"+WebConstants.Scope.RESPONSE+"' scope");
+					throw new ObjectSourceException("key '"+key+"' is not valid, you can not get data from '"+WebConstants.Scope.RESPONSE+"' scope");
 				else
 					data=getWithUnknownScope(scope, keyInScope, expectType);
 			}
@@ -258,7 +258,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		else if(WebConstants.Scope.APPLICATION.equals(scope))
 			setAttributeByKeyExpression(getApplication(), keyInScope, obj);
 		else if(WebConstants.Scope.RESPONSE.equals(scope))
-			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.RESPONSE+"'");
+			throw new ObjectSourceException("'"+key+"' is not valid, you can not save object into '"+WebConstants.Scope.RESPONSE+"'");
 		else
 			setWithUnknownScope(scope, keyInScope, obj);
 		

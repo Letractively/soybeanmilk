@@ -55,18 +55,16 @@ public class DispatchServlet extends HttpServlet
 	
 	private static Log log=LogFactory.getLog(DispatchServlet.class);
 	
-	
-	/**
-	 * servlet规范"include"属性
-	 */
+	/** servlet规范"include"属性-request_uri */
 	public static final String INCLUDE_REQUEST_URI_ATTRIBUTE = "javax.servlet.include.request_uri";
+	/** servlet规范"include"属性-path_info */
 	public static final String INCLUDE_PATH_INFO_ATTRIBUTE = "javax.servlet.include.path_info";
+	/** servlet规范"include"属性-servlet_path */
 	public static final String INCLUDE_SERVLET_PATH_ATTRIBUTE = "javax.servlet.include.servlet_path";
 	
-	/**
-	 * servlet规范"forward"属性
-	 */
+	/** servlet规范"forward"属性-path_info */
 	public static final String FORWARD_PATH_INFO_ATTRIBUTE = "javax.servlet.forward.path_info";
+	/** servlet规范"forward"属性-servlet_path */
 	public static final String FORWARD_SERVLET_PATH_ATTRIBUTE = "javax.servlet.forward.servlet_path";
 	
 	/**执行器*/

@@ -43,7 +43,6 @@ public class Invoke extends AbstractExecutable
 	
 	private static Log log=LogFactory.getLog(Invoke.class);
 	
-	
 	/**解决对象提供者，方法被调用时的对象参数将由它提供*/
 	private transient ResolverProvider resolverProvider;
 	

@@ -71,12 +71,12 @@ public class DefaultExecutor implements Executor
 			objSource.set(itptInfo.getExecutionKey(), context);
 		}
 		
-		//before
-		if(itptInfo!=null && itptInfo.getBeforeHandler()!=null)
-			executeInterceptor(itptInfo.getBeforeHandler(), objSource);
-		
 		try
 		{
+			//before
+			if(itptInfo!=null && itptInfo.getBeforeHandler()!=null)
+				executeInterceptor(itptInfo.getBeforeHandler(), objSource);
+			
 			executable.execute(objSource);
 			
 			//after
@@ -112,46 +112,12 @@ public class DefaultExecutor implements Executor
 	}
 	
 	/**
-	 * 执行拦截器，它不会抛出执行异常
+	 * 执行拦截器
 	 * @param exeInterceptor
 	 * @param objSource
 	 */
-	protected void executeInterceptor(Executable exeInterceptor, ObjectSource objSource)
+	protected void executeInterceptor(Executable exeInterceptor, ObjectSource objSource) throws ExecuteException
 	{
-		try
-		{
-			exeInterceptor.execute(objSource);
-		}
-		catch(ExecuteException e)
-		{
-			throw new InterceptorException(e);
-		}
-	}
-	
-	/**
-	 * 拦截器异常
-	 * @author earthAngry@gmail.com
-	 * @date 2010-11-30
-	 *
-	 */
-	public static class InterceptorException extends RuntimeException
-	{
-		private static final long serialVersionUID = -1443863310934331790L;
-
-		public InterceptorException() {
-			super();
-		}
-
-		public InterceptorException(String message, Throwable cause) {
-			super(message, cause);
-		}
-
-		public InterceptorException(String message) {
-			super(message);
-		}
-
-		public InterceptorException(Throwable cause){
-			super(cause);
-		}
+		exeInterceptor.execute(objSource);
 	}
 }

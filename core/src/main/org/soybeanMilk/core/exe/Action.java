@@ -36,7 +36,6 @@ public class Action extends AbstractExecutable
 	
 	private static Log log=LogFactory.getLog(Action.class);
 	
-	
 	/**动作包含的可执行对象集*/
 	private List<Executable> executables;
 	

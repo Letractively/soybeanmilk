@@ -192,7 +192,7 @@ public class WebObjectSource extends ConvertableObjectSource
 			if(strKey==null)
 				throw new ObjectSourceException("[key] must not be null.");
 			
-			String[] scopeSplit=splitByFirstDot(strKey);
+			String[] scopeSplit=splitByFirstAccessor(strKey);
 			
 			String scope = scopeSplit[0];
 			String keyInScope = scopeSplit[1];
@@ -200,7 +200,7 @@ public class WebObjectSource extends ConvertableObjectSource
 			if(scope == null)
 			{
 				if(WebConstants.Scope.PARAM.equals(keyInScope))
-					data=getFromMap(getRequest().getParameterMap(), null, expectType);
+					data=convertFromMap(getRequest().getParameterMap(), null, expectType);
 				else if(WebConstants.Scope.REQUEST.equals(keyInScope))
 					data=convertServletObject(getRequest(), expectType);
 				else if(WebConstants.Scope.SESSION.equals(keyInScope))
@@ -215,7 +215,7 @@ public class WebObjectSource extends ConvertableObjectSource
 			else
 			{
 				if(WebConstants.Scope.PARAM.equals(scope))
-					data=getFromMap(getRequest().getParameterMap(), keyInScope, expectType);
+					data=convertFromMap(getRequest().getParameterMap(), keyInScope, expectType);
 				else if(WebConstants.Scope.REQUEST.equals(scope))
 					data=getAttributeByKeyExpression(getRequest(), keyInScope, expectType);
 				else if(WebConstants.Scope.SESSION.equals(scope))
@@ -244,7 +244,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		if(strKey == null)
 			throw new IllegalArgumentException("[key] must not be null");
 		
-		String[] scopeSplit=splitByFirstDot(strKey);
+		String[] scopeSplit=splitByFirstAccessor(strKey);
 		
 		String scope = scopeSplit[0];
 		String keyInScope = scopeSplit[1];
@@ -280,7 +280,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		if(scope != null)
 			keyInScope=scope+ACCESSOR+keyInScope;
 		
-		return getFromMap(getRequest().getParameterMap(), keyInScope, objectType);
+		return convertFromMap(getRequest().getParameterMap(), keyInScope, objectType);
 	}
 	
 	/**
@@ -307,7 +307,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	 */
 	protected void setAttributeByKeyExpression(Object servletObj, String keyExpression, Object obj)
 	{
-		String[] objKeyWithProperty=splitByFirstDot(keyExpression);
+		String[] objKeyWithProperty=splitByFirstAccessor(keyExpression);
 		
 		//只有包含了'.'字符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式
 		if(objKeyWithProperty[0] != null)
@@ -332,16 +332,14 @@ public class WebObjectSource extends ConvertableObjectSource
 	 */
 	protected Object getAttributeByKeyExpression(Object servletObj, String keyExpression, Type objectType)
 	{
-		String[] objKeyWithProperty=splitByFirstDot(keyExpression);
-		
-		Class<?> objectClass=SoybeanMilkUtils.narrowToClassType(objectType);
+		String[] objKeyWithProperty=splitByFirstAccessor(keyExpression);
 		
 		//只有包含了'.'字符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式
 		if(objKeyWithProperty[0] != null)
 		{
 			Object data=getServletObjAttribute(servletObj, objKeyWithProperty[0]);
 			if(data != null)
-				return getGenericConverter().getProperty(data, objKeyWithProperty[1], objectClass);
+				return getGenericConverter().getProperty(data, objKeyWithProperty[1], objectType);
 			else
 				return getGenericConverter().convert(getServletObjAttribute(servletObj, keyExpression), objectType);
 		}
@@ -350,7 +348,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	/**
-	 * 将对象保存到servlet对象作用域内，它支持设置作用域内对象的属性。
+	 * 将对象保存到servlet对象作用域内。
 	 * @param servletObj
 	 * @param key
 	 * @param value
@@ -369,7 +367,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	/**
-	 * 从servlet对象作用域内取得对象
+	 * 从servlet对象作用域内取得对象。
 	 * @param servletObj
 	 * @param key
 	 * @param value
@@ -388,43 +386,48 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	/**
-	 * 将从映射表取得对象。<br>
+	 * 从映射表取得对象。<br>
 	 * 如果<code>keyFilter</code>是一个明确的关键字（映射表中有该关键字的值），它将直接根据该关键字的值来转换；<br>
 	 * 如果<code>keyFilter</code>是<code>null</code>，那么它将使用原始的请求参数映射表来进行转换；<br>
 	 * 否则，它会根据<code>keyFilter</code>来对参数映射表进行过滤，产生一个新的映射表（它的关键字将会被替换为原始关键字的“<code>[keyFilter]</code>.”之后的部分，比如由“<code>beanName.propertyName</code>”变为“<code>propertyName</code>”），
 	 * 然后使用它进行转换。
 	 * 
-	 * @param originalValueMap 原始映射表
+	 * @param valueMap 原始映射表
 	 * @param keyFilter 主键筛选器，只有以此筛选器开头的Map关键字才会被转换，如果为null，则表明不做筛选
 	 * @param targetType 目标类型
 	 * 
 	 * @return
 	 */
-	protected Object getFromMap(Map<String,Object> originalValueMap, String keyFilter, Type targetType)
+	protected Object convertFromMap(Map<String,Object> valueMap, String keyFilter, Type targetType)
 	{
-		GenericConverter genericConverter=getGenericConverter();
+		Object src=null;
 		
+		//没有过滤器
 		if(keyFilter == null)
-			return genericConverter.convert(originalValueMap, targetType);
-		
-		//明确的KEY，直接根据值转换
-		Object explicit = originalValueMap.get(keyFilter);
-		if(explicit != null)
-			return genericConverter.convert(explicit, targetType);
+			src=valueMap;
 		else
 		{
-			String keyPrefix = keyFilter+ACCESSOR;
-			
-			Map<String,Object> filtered = new HashMap<String, Object>();
-			Set<String> keys=originalValueMap.keySet();
-			for(String k : keys)
+			//有确切的值
+			Object explicit = valueMap.get(keyFilter);
+			if(explicit != null)
+				src=explicit;
+			else
 			{
-				if(k.startsWith(keyPrefix))
-					filtered.put(k.substring(keyPrefix.length()), originalValueMap.get(k));
+				String keyPrefix = keyFilter+ACCESSOR;
+				
+				Map<String,Object> filtered = new HashMap<String, Object>();
+				Set<String> keys=valueMap.keySet();
+				for(String k : keys)
+				{
+					if(k.startsWith(keyPrefix))
+						filtered.put(k.substring(keyPrefix.length()), valueMap.get(k));
+				}
+				
+				src=filtered;
 			}
-			
-			return genericConverter.convert(filtered, targetType);
 		}
+		
+		return getGenericConverter().convert(src, targetType);
 	}
 	
 	/**
@@ -437,8 +440,6 @@ public class WebObjectSource extends ConvertableObjectSource
 	{
 		if(targetType == null || SoybeanMilkUtils.isInstanceOf(obj, targetType))
 			return obj;
-		
-		GenericConverter genericConverter=getGenericConverter();
 		
 		Class<?> sourceClass=null;
 		Converter converter=null;
@@ -454,7 +455,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		else
 			throw new ObjectSourceException("unknown servlet object '"+obj.getClass().getName()+"'");
 		
-		converter=genericConverter.getConverter(sourceClass, targetType);
+		converter=getGenericConverter().getConverter(sourceClass, targetType);
 		
 		if(converter == null)
 			throw new ObjectSourceException("no Converter defined for converting '"+sourceClass.getName()+"' to '"+targetType+"'");
@@ -468,7 +469,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * @return
 	 * @date 2010-12-30
 	 */
-	protected String[] splitByFirstDot(String str)
+	protected String[] splitByFirstAccessor(String str)
 	{
 		String[] re=new String[2];
 		int idx=str.indexOf(ACCESSOR);

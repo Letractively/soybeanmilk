@@ -30,7 +30,7 @@ import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.PropertyInfo;
 
 /**
- * WEB通用转换器，除了继承的转换支持，它还支持将{@link Map Map&lt;String, Object&gt;}转换为JavaBean对象、JavaBean数组、JavaBean集合（List、Set）。
+ * WEB通用转换器，除了继承的转换支持，它还支持将{@link Map Map&lt;String, Object&gt;}转换为JavaBean对象、JavaBean数组以及JavaBean集合（List、Set）。
  * @author earthAngry@gmail.com
  * @date 2010-10-8
  */

@@ -156,7 +156,7 @@ public class TestWebGenericConverter
 		
 		String[] id=new String[]{"1"};
 		String[] name=new String[]{"jack"};
-		String[] simpleCollectionProperty=new String[]{"1","3","7"};
+		String[] simpleCollectionProperty=new String[]{"1","3","9"};
 		
 		String[] cmplexCollectionProperty_id=new String[]{"2","5","7"};
 		String[] cmplexCollectionProperty_name=new String[]{"aaa","bbb","ccc"};
@@ -191,6 +191,7 @@ public class TestWebGenericConverter
 			for(int i=0;i<p.size();i++)
 				Assert.assertEquals(new Integer(simpleCollectionProperty[i]), p.get(i));
 		}
+		
 		{
 			Set<Integer> p=dest.getSimpleSet();
 			for(Integer it : p)
@@ -203,6 +204,7 @@ public class TestWebGenericConverter
 				Assert.assertTrue( idx> -1 );
 			}
 		}
+		
 		{
 			JavaBean2[] p=dest.getJavaBean2Array();
 			
@@ -212,6 +214,7 @@ public class TestWebGenericConverter
 				Assert.assertEquals(cmplexCollectionProperty_name[i], p[i].getName());
 			}
 		}
+		
 		{
 			List<JavaBean2> p=dest.getJavaBean2List();
 			
@@ -221,6 +224,7 @@ public class TestWebGenericConverter
 				Assert.assertEquals(cmplexCollectionProperty_name[i], p.get(i).getName());
 			}
 		}
+		
 		{
 			Set<JavaBean2> p=dest.getJavaBean2Set();
 			for(JavaBean2 jb : p)

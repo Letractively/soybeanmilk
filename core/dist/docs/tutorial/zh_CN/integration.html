@@ -193,7 +193,7 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 				<span class="tag bold">webObjectSoruce-factory-class</span>（可选）
 			</p>
 			<p>
-				设置自定义的<a href="../../api/org/soybeanMilk/web/servlet/WebObjectSourceFactory.html">WEB对象源工厂</a>。
+				设置自定义的<a href="../../api/org/soybeanMilk/web/os/WebObjectSourceFactory.html">WEB对象源工厂</a>。
 				设置它，你可以让框架使用你自定义的<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>。
 				比如，自定义一个支持更多作用域的<span class="glossary">WEB对象源</span>，从而使<span class="glossary">调用</span>方法的参数和返回结果支持更多的作用域。
 			</p>
@@ -287,6 +287,8 @@ public class MyVelocityViewServlet extends HttpServlet
 	&lt;target url="/myVelocityTest.vm" /&gt;
 &lt;/action&gt;
 </pre>
+			</p>
+			<p>
 				那么你将可以在“<span class="var">myVelocityTest.vm</span>”模板中使用“<span class="var">myResult</span>”对象。
 			</p>
 			<div class="seprator"></div>

@@ -47,19 +47,38 @@ public class DefaultExecutor implements Executor
 	public Executable execute(String executableName, ObjectSource objSource)
 			throws ExecuteException, ExecutableNotFoundException
 	{
-		Executable exe=findExecutable(executableName);
+		Executable exe=findExecutable(executableName, objSource);
 		if(exe == null)
 			throw new ExecutableNotFoundException(executableName);
 		
-		return execute(exe, objSource);
+		return executeInternal(exe, objSource);
 	}
 	
 	@Override
 	public Executable execute(Executable executable, ObjectSource objSource)
 			throws ExecuteException
 	{
+		return executeInternal(executable, objSource);
+	}
+	
+	/**
+	 * 执行，并返回最后执行的那个{@linkplain Executable 可执行对象}（当发生执行异常时，返回作为异常处理器的那个）。
+	 * @param executable
+	 * @param objSource
+	 * @return
+	 * @throws ExecuteException
+	 * @date 2011-1-7
+	 */
+	protected Executable executeInternal(Executable executable, ObjectSource objSource)
+			throws ExecuteException
+	{
 		if(objSource instanceof ConvertableObjectSource)
-			((ConvertableObjectSource)objSource).setGenericConverter(getConfiguration().getGenericConverter());
+		{
+			ConvertableObjectSource cvtObjSource=(ConvertableObjectSource)objSource;
+			
+			if(cvtObjSource.getGenericConverter() == null)
+				cvtObjSource.setGenericConverter(getConfiguration().getGenericConverter());
+		}
 		
 		InterceptorInfo itptInfo = getConfiguration().getInterceptorInfo();
 		
@@ -67,8 +86,13 @@ public class DefaultExecutor implements Executor
 		Execution context=null;
 		if(itptInfo!=null && itptInfo.getExecutionKey()!=null)
 		{
-			context=new Execution(executable, objSource);
-			objSource.set(itptInfo.getExecutionKey(), context);
+			//它可能是持久存储的
+			context=(Execution)objSource.get(itptInfo.getExecutionKey(), null);
+			if(context == null)
+			{
+				context=new Execution(executable, objSource);
+				objSource.set(itptInfo.getExecutionKey(), context);
+			}
 		}
 		
 		try
@@ -104,9 +128,11 @@ public class DefaultExecutor implements Executor
 	/**
 	 * 根据名称查找可执行对象
 	 * @param executableName
+	 * @param objSource
 	 * @return
+	 * @date 2011-1-7
 	 */
-	protected Executable findExecutable(String executableName)
+	protected Executable findExecutable(String executableName, ObjectSource objSource)
 	{
 		return getConfiguration().getExecutable(executableName);
 	}

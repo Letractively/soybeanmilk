@@ -51,18 +51,35 @@ public class Execution implements Serializable
 		this.executeException = executeException;
 	}
 
+	/**
+	 * 获取当前执行的{@linkplain Executable 可执行对象}。
+	 * @return
+	 * @date 2010-11-28
+	 */
 	public Executable getExecutable() {
 		return executable;
 	}
 	public void setExecutable(Executable executable) {
 		this.executable = executable;
 	}
+	
+	/**
+	 * 获取当前执行使用的{@linkplain ObjectSource 对象源}对象。
+	 * @return
+	 * @date 2010-11-28
+	 */
 	public ObjectSource getObjectSource() {
 		return objectSource;
 	}
 	public void setObjectSource(ObjectSource objectSource) {
 		this.objectSource = objectSource;
 	}
+	
+	/**
+	 * 获取当前的{@linkplain ExecuteException 执行异常}。
+	 * @return
+	 * @date 2010-11-28
+	 */
 	public ExecuteException getExecuteException() {
 		return executeException;
 	}

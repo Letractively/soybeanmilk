@@ -67,7 +67,7 @@ import org.soybeanMilk.web.WebConstants;
  *   </td></tr>
  * </table>
  * <br>
- * 另外，如果目标类型为<code>String</code>，而你没有添加对象到<code>String</code>类型的辅助转换器，那么它将返回此对象的<code>toString()</code>结果<br>
+ * 另外，如果目标类型为<code>String</code>，而你没有添加对象到<code>String</code>类型的辅助转换器，那么它将返回此对象的<code>toString()</code>结果。<br>
  * 你也可以通过{@link #addConverter(Type, Type, Converter)}为它添加更多辅助转换器，使其支持更多的类型转换。
  * @author earthAngry@gmail.com
  * @date 2010-10-6

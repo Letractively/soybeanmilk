@@ -47,6 +47,8 @@ import org.soybeanMilk.core.bean.PropertyInfo;
  * 	private List&lt;User&gt; children;
  * 	...
  * }
+ * 
+ * 类型的对象。
  * </pre>
  * @author earthAngry@gmail.com
  * @date 2010-10-8

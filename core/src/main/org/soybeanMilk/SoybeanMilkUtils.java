@@ -65,7 +65,18 @@ public class SoybeanMilkUtils
 	 */
 	public static boolean isPrimitive(Type type)
 	{
-		return type!=null && (type instanceof Class<?>) && ((Class<?>)type).isPrimitive();
+		return type!=null && isClassType(type) && narrowToClassType(type).isPrimitive();
+	}
+	
+	/**
+	 * 是否是枚举类型
+	 * @param type
+	 * @return
+	 * @date 2011-1-9
+	 */
+	public static boolean isEnum(Type type)
+	{
+		return type!=null && isClassType(type) && narrowToClassType(type).isEnum();
 	}
 	
 	/**

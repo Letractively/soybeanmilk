@@ -220,6 +220,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2011-1-5
 	 */
+	@SuppressWarnings("unchecked")
 	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
 	{
 		Object re=null;
@@ -227,6 +228,12 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		if(targetType.equals(String.class))
 			re=sourceObj.toString();
+		else if(SoybeanMilkUtils.isEnum(targetType))
+		{
+			Class enumClass=SoybeanMilkUtils.narrowToClassType(targetType);
+			re= (sourceObj instanceof String) ?
+					Enum.valueOf(enumClass, (String)sourceObj) : Enum.valueOf(enumClass, sourceObj.toString());
+		}
 		else if(sourceObj.getClass().isArray())
 		{
 			Class<?>[] actualTypes=SoybeanMilkUtils.getActualClassTypeInfo(targetType);

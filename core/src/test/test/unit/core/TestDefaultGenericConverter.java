@@ -233,6 +233,23 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
+	public void convertString_toEnum()
+	{
+		{
+			String src="ENUM_1";
+			TestEnum te=(TestEnum)converter.convert(src, TestEnum.class);
+			
+			Assert.assertEquals(src, te.toString());
+		}
+		{
+			String src="ENUM_2";
+			TestEnum te=(TestEnum)converter.convert(src, TestEnum.class);
+			
+			Assert.assertEquals(src, te.toString());
+		}
+	}
+	
+	@Test
 	public void convertString_toFloat()
 	{
 		{
@@ -652,5 +669,11 @@ public class TestDefaultGenericConverter
 		public void setMyBean(MyBean myBean) {
 			this.myBean = myBean;
 		}
+	}
+	
+	public static enum TestEnum
+	{
+		ENUM_1,
+		ENUM_2
 	}
 }

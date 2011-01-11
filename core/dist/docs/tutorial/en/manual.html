@@ -325,6 +325,8 @@
 						<span class="tagAttr">exception</span> (Optional) <br />
 						Set the "exception" interceptor's global <span class="glossary">Executable</span> name.
 						<span class="glossary">Executor</span> will execute it if exception thrown when executing the current <span class="glossary">Executable</span>.
+						Usually, you only need to handle <a href="../../api/org/soybeanMilk/core/InvocationExecuteException.html">InvocationExecuteException</a> and <a href="../../api/org/soybeanMilk/core/ConvertExecuteException.html">ConvertExecuteException</a>
+						in your exception interceptor.
 					</li>
 					<li>
 						<span class="tagAttr">execution-key</span> (Optional) <br />

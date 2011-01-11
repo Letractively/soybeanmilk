@@ -154,15 +154,22 @@ public class Invoke extends AbstractExecutable
 		
 		Method method=getMethod();
 		Object resolver=getResolver(objectSource);
+		Serializable resultKey=getResultKey();
 		
 		try
 		{
-			saveMethodResult(getResultKey(),
-					method.invoke(resolver, getMethodArguments(objectSource)), objectSource);
+			Object result=method.invoke(resolver, getMethodArguments(objectSource));
+			
+			if(resultKey != null)
+				objectSource.set(resultKey, result);
 		}
 		catch(InvocationTargetException e)
 		{
 			throw new InvocationExecuteException(e.getCause());
+		}
+		catch(ConvertException e)
+		{
+			throw new ConvertExecuteException(e);
 		}
 		catch(IllegalArgumentException e)
 		{
@@ -209,9 +216,10 @@ public class Invoke extends AbstractExecutable
 	 * 从对象源中取得方法的参数值数组
 	 * @param objectSource
 	 * @return
-	 * @throws ExecuteException
+	 * @throws ConvertException
+	 * @date 2011-1-11
 	 */
-	protected Object[] getMethodArguments(ObjectSource objectSource) throws ExecuteException
+	protected Object[] getMethodArguments(ObjectSource objectSource) throws ConvertException
 	{
 		Object[] values=null;
 		
@@ -226,16 +234,7 @@ public class Invoke extends AbstractExecutable
 				if(args[i].getValue()!=null || args[i].getKey()==null)
 					values[i]=args[i].getValue();
 				else
-				{
-					try
-					{
-						values[i]= objectSource.get(args[i].getKey(), args[i].getType());
-					}
-					catch(ConvertException e)
-					{
-						throw new ConvertExecuteException(args[i].getKey(), args[i].getType(), e);
-					}
-				}
+					values[i]= objectSource.get(args[i].getKey(), args[i].getType());
 			}
 		}
 		
@@ -251,31 +250,6 @@ public class Invoke extends AbstractExecutable
 		return getClass().getSimpleName()+" [name=" + getName() + ", method=" + method
 				+ ", resultKey=" + resultKey + ", resolverProvider="
 				+ resolverProvider + ", args=" + Arrays.toString(args) + "]";
-	}
-	
-	/**
-	 * 保存方法调用结果到对象源，如果对象源或者<code>key</code>为<code>null</code>，则什么也不做
-	 * @param key
-	 * @param result
-	 * @param objectSource
-	 * @throws ExecuteException
-	 */
-	protected void saveMethodResult(Serializable key,Object result,ObjectSource objectSource) throws ExecuteException
-	{
-		if(objectSource==null)
-			return;
-		
-		if(key != null)
-		{
-			try
-			{
-				objectSource.set(key, result);
-			}
-			catch(ConvertException e)
-			{
-				throw new ExecuteException(e);
-			}
-		}
 	}
 	
 	/**

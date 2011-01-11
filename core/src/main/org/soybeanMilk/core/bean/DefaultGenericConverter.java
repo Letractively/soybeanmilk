@@ -99,9 +99,7 @@ public class DefaultGenericConverter implements GenericConverter
 	public DefaultGenericConverter(boolean initDefaultSupportConverter)
 	{
 		if(initDefaultSupportConverter)
-		{
 			addStringSourceConverters();
-		}
 	}
 	
 	/**
@@ -186,7 +184,7 @@ public class DefaultGenericConverter implements GenericConverter
 		if(sourceObj == null)
 		{
 			if(SoybeanMilkUtils.isPrimitive(targetType))
-				throw new ConvertException(sourceObj, targetType);
+				throw new ConvertException("the source object is null but primitive type '"+targetType+"' expected");
 			else
 				return null;
 		}
@@ -292,6 +290,9 @@ public class DefaultGenericConverter implements GenericConverter
 	@SuppressWarnings("unchecked")
 	protected Object convertArrayToList(Object array, Class<?> listClass)
 	{
+		if(array == null)
+			return null;
+		
 		List re=(List)instance(listClass, -1);
 		
 		for(int i=0,len=Array.getLength(array);i<len;i++)
@@ -310,6 +311,9 @@ public class DefaultGenericConverter implements GenericConverter
 	@SuppressWarnings("unchecked")
 	protected Object convertArrayToSet(Object array, Class<?> setClass)
 	{
+		if(array == null)
+			return null;
+		
 		Set re=(Set)instance(setClass, -1);
 		
 		for(int i=0,len=Array.getLength(array);i<len;i++)
@@ -502,16 +506,6 @@ public class DefaultGenericConverter implements GenericConverter
 	 */
 	protected void addStringSourceConverters()
 	{
-		//基本类型
-		addConverter(String.class, boolean.class, new BooleanConverter());
-		addConverter(String.class, byte.class, new ByteConverter());
-		addConverter(String.class, char.class, new CharacterConverter());
-		addConverter(String.class, double.class, new DoubleConverter());
-		addConverter(String.class, float.class, new FloatConverter());
-		addConverter(String.class, int.class, new IntegerConverter());
-		addConverter(String.class, long.class, new LongConverter());
-		addConverter(String.class, short.class, new ShortConverter());
-		
 		//包装类型
 		addConverter(String.class, Boolean.class, new BooleanConverter());
 		addConverter(String.class, Byte.class, new ByteConverter());

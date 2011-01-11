@@ -44,6 +44,7 @@ public interface GenericConverter extends Converter
 	 * @param srcObj 源对象
 	 * @param propertyExpression 属性表达式，可以多层嵌套，比如“propertyA.propertyB.propertyC”
 	 * @param value 要设置的属性值
+	 * @throws ConvertException
 	 * @date 2010-12-28
 	 */
 	void setProperty(Object srcObj, String propertyExpression, Object value) throws ConvertException;
@@ -54,6 +55,7 @@ public interface GenericConverter extends Converter
 	 * @param propertyExpression 属性表达式，可以多层嵌套，比如“propertyA.propertyB.propertyC”
 	 * @param expectType 期望返回对象的类型，如果为null，则表示默认
 	 * @return <code>targetType</code>类型的对象
+	 * @throws ConvertException
 	 * @date 2010-12-28
 	 */
 	Object getProperty(Object srcObj, String propertyExpression, Type expectType) throws ConvertException;

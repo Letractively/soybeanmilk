@@ -40,7 +40,7 @@ public class BigDecimalConverter extends ClassTypeConverter
 		}
 		catch(Exception e)
 		{
-			throw new ConvertException(sourceObj, targetType, e);
+			throw new ConvertException(e);
 		}
 	}
 }

@@ -1,13 +1,24 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
+ */
+
 package org.soybeanMilk.core;
 
-import java.io.Serializable;
-import java.lang.reflect.Type;
-
 import org.soybeanMilk.core.bean.ConvertException;
-import org.soybeanMilk.core.exe.Invoke;
 
 /**
- * 执行异常。当{@linkplain Invoke 调用}从对象源取得其方法参数的对象时出现转换异常，它的源异常是{@linkplain ConvertException}。
+ * 执行异常。{@linkplain Executor 执行器}从对象源取得对象或者将对象保存到对象源中时出现类型转换异常，
+ * 这一般是由于非法输入导致的。它的源异常是{@linkplain ConvertException}。
  * @author earthAngry@gmail.com
  * @date 2011-1-11
  *
@@ -16,42 +27,11 @@ public class ConvertExecuteException extends ExecuteException
 {
 	private static final long serialVersionUID = -5063626619646972164L;
 	
-	private Serializable argKey;
-	private Type argType;
-	
-	public ConvertExecuteException(Serializable argKey, Type argType, ConvertException cause)
+	public ConvertExecuteException(ConvertException cause)
 	{
 		super(cause);
-		this.argKey = argKey;
-		this.argType = argType;
 	}
 	
-	/**
-	 * 获取{@linkplain Invoke 调用}方法的参数关键字。
-	 * @return
-	 * @date 2011-1-11
-	 */
-	public Serializable getArgKey() {
-		return argKey;
-	}
-
-	public void setArgKey(Serializable argKey) {
-		this.argKey = argKey;
-	}
-
-	/**
-	 * 获取{@linkplain Invoke 调用}方法的参数的类型。
-	 * @return
-	 * @date 2011-1-11
-	 */
-	public Type getArgType() {
-		return argType;
-	}
-
-	public void setArgType(Type argType) {
-		this.argType = argType;
-	}
-
 	/**
 	 * 获取源转换异常。
 	 */

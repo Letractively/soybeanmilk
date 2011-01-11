@@ -1,6 +1,18 @@
-package org.soybeanMilk.core.bean;
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
+ */
 
-import java.lang.reflect.Type;
+package org.soybeanMilk.core.bean;
 
 /**
  * 转换异常。
@@ -11,52 +23,24 @@ import java.lang.reflect.Type;
 public class ConvertException extends Exception
 {
 	private static final long serialVersionUID = 5534640330364525246L;
-	
-	/**
-	 * 转换的源对象
-	 */
-	private transient Object source;
-	
-	/**
-	 * 转换的目标类型
-	 */
-	private Type targetType;
-	
-	public ConvertException(Object source, Type targetType)
+
+	public ConvertException()
 	{
-		this(source, targetType, null);
+		super();
 	}
-	
-	public ConvertException(Object source, Type targetType, Throwable cause)
+
+	public ConvertException(String arg0, Throwable arg1)
 	{
-		super(cause);
-		this.source = source;
-		this.targetType = targetType;
+		super(arg0, arg1);
 	}
 
-	/**
-	 * 获取转换源对象
-	 * @return
-	 * @date 2011-1-11
-	 */
-	public Object getSource() {
-		return source;
+	public ConvertException(String arg0)
+	{
+		super(arg0);
 	}
 
-	public void setSource(Object source) {
-		this.source = source;
-	}
-
-	/**
-	 * 获取转换目标类型
-	 * @return
-	 * @date 2011-1-11
-	 */
-	public Type getTargetType() {
-		return targetType;
-	}
-
-	public void setTargetType(Type targetType) {
-		this.targetType = targetType;
+	public ConvertException(Throwable arg0)
+	{
+		super(arg0);
 	}
 }

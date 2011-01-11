@@ -46,7 +46,7 @@ public class HashMapObjectSource extends ConvertableObjectSource
 		this.source = new HashMap<Serializable, Object>();
 		super.setGenericConverter(genericConverter);
 	}
-
+	
 	@Override
 	public Object get(Serializable key, Type expectType) throws ConvertException
 	{
@@ -57,7 +57,7 @@ public class HashMapObjectSource extends ConvertableObjectSource
 		if(cvt == null)
 		{
 			if(re==null && SoybeanMilkUtils.isPrimitive(expectType))
-				throw new ConvertException(re, expectType);
+				throw new ConvertException("the source object is null but primitive type '"+expectType+"' expected");
 			else
 				return re;
 		}

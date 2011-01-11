@@ -32,21 +32,21 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertSimple_singleElementArrayToNoArrayObject()
+	public void convertSimple_singleElementArrayToNoArrayObject() throws Exception
 	{
 		Integer dest=(Integer)converter.convert(new String[]{"12345"}, int.class);
 		Assert.assertEquals(12345, dest.intValue());
 	}
 	
 	@Test
-	public void convertSimple_singleElementArrayToNoArrayObject_1()
+	public void convertSimple_singleElementArrayToNoArrayObject_1() throws Exception
 	{
 		Integer dest=(Integer)converter.convert(new String[]{""}, Integer.class);
 		Assert.assertNull(dest);
 	}
 	
 	@Test
-	public void convertMap_toMap()
+	public void convertMap_toMap() throws Exception
 	{
 		HashMap<String,Integer> src=new HashMap<String, Integer>();
 		
@@ -475,7 +475,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toJavaBeanArray()
+	public void convertMap_toJavaBeanArray() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		

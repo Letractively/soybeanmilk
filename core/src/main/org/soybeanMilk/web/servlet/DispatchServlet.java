@@ -31,6 +31,7 @@ import org.soybeanMilk.core.DefaultExecutor;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.Executor;
+import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.resolver.ResolverFactory;
@@ -221,14 +222,23 @@ public class DispatchServlet extends HttpServlet
 				for(int i=0;i<pathNodes.length;i++)
 				{
 					if(pathNodes[i].isVariable())
-						webObjSource.set(pathNodes[i].getNodeValue(), valuePath.getPathNode(i).getNodeValue());
+					{
+						try
+						{
+							webObjSource.set(pathNodes[i].getNodeValue(), valuePath.getPathNode(i).getNodeValue());
+						}
+						catch(ConvertException e)
+						{
+							throw new ServletException(e);
+						}
+					}
 				}
 			}
 		}
 		
 		if(exe == null)
 		{
-			handleExecutableNotFound(exeName, request, response);
+			handleExecutableNotFound(exeName, webObjSource);
 			return;
 		}
 		
@@ -288,21 +298,35 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 没有找到能够处理请求的可执行对象
+	 * 没有找到能够处理请求的可执行对象。
 	 * @param executableName
-	 * @param request
-	 * @param response
+	 * @param webObjectSource
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	protected void handleExecutableNotFound(String executableName, HttpServletRequest request, HttpServletResponse response)
+	protected void handleExecutableNotFound(String executableName, WebObjectSource webObjectSource)
 			throws ServletException, IOException
 	{
 		//servlet规范规定这里要抛出FileNotFoundException异常
-		if(isIncludeRequest(request))
+		if(isIncludeRequest(webObjectSource.getRequest()))
 			throw new FileNotFoundException(executableName);
 		
-		response.sendError(HttpServletResponse.SC_NOT_FOUND, executableName);
+		webObjectSource.getResponse().sendError(HttpServletResponse.SC_NOT_FOUND, executableName);
+	}
+	
+	/**
+	 * 处理执行异常。
+	 * @param executableName
+	 * @param webObjectSource
+	 * @param e
+	 * @throws ServletException
+	 * @throws IOException
+	 * @date 2011-1-11
+	 */
+	protected void handleExecuteException(String executableName, WebObjectSource webObjectSource, ExecuteException e)
+			throws ServletException, IOException
+	{
+		throw new ServletException(e);
 	}
 	
 	/**
@@ -365,7 +389,7 @@ public class DispatchServlet extends HttpServlet
 	 * @param objectSource
 	 * @return
 	 */
-	protected String processVariableTargetUrl(String targetUrl, WebObjectSource objectSource)
+	protected String processVariableTargetUrl(String targetUrl, WebObjectSource objectSource) throws ServletException, IOException
 	{
 		StringBuffer result=new StringBuffer();
 		
@@ -384,8 +408,15 @@ public class DispatchServlet extends HttpServlet
 				String var=targetUrl.substring(start, j);
 				if(c == WebConstants.VARIABLE_QUOTE_RIGHT)
 				{
-					String value=(String)objectSource.get(var, String.class);
-					result.append(value==null ? "null" : value);
+					try
+					{
+						String value=(String)objectSource.get(var, String.class);
+						result.append(value==null ? "null" : value);
+					}
+					catch(ConvertException e)
+					{
+						throw new ServletException(e);
+					}
 				}
 				else
 				{

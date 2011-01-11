@@ -21,7 +21,7 @@ import java.util.HashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
-import org.soybeanMilk.core.ObjectSourceException;
+import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.GenericConverter;
 
 
@@ -48,17 +48,16 @@ public class HashMapObjectSource extends ConvertableObjectSource
 	}
 
 	@Override
-	public Object get(Serializable key, Type expectType) throws ObjectSourceException
+	public Object get(Serializable key, Type expectType) throws ConvertException
 	{
 		Object re = source.get(key);
-		if(expectType == null)
-			return re;
 		
-		GenericConverter cvt = getGenericConverter();
+		GenericConverter cvt=getGenericConverter();
+		
 		if(cvt == null)
 		{
 			if(re==null && SoybeanMilkUtils.isPrimitive(expectType))
-				throw new ObjectSourceException("the result object is null, but primitive type needed");
+				throw new ConvertException(re, expectType);
 			else
 				return re;
 		}
@@ -72,7 +71,7 @@ public class HashMapObjectSource extends ConvertableObjectSource
 	}
 	
 	@Override
-	public void set(Serializable key, Object obj) throws ObjectSourceException
+	public void set(Serializable key, Object obj) throws ConvertException
 	{
 		source.put(key, obj);
 		

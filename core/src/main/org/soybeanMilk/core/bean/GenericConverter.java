@@ -46,7 +46,7 @@ public interface GenericConverter extends Converter
 	 * @param value 要设置的属性值
 	 * @date 2010-12-28
 	 */
-	void setProperty(Object srcObj, String propertyExpression, Object value);
+	void setProperty(Object srcObj, String propertyExpression, Object value) throws ConvertException;
 	
 	/**
 	 * 取得对象的属性值，属性值将被转换为<code>targetType</code>类型的对象。
@@ -56,5 +56,5 @@ public interface GenericConverter extends Converter
 	 * @return <code>targetType</code>类型的对象
 	 * @date 2010-12-28
 	 */
-	Object getProperty(Object srcObj, String propertyExpression, Type expectType);
+	Object getProperty(Object srcObj, String propertyExpression, Type expectType) throws ConvertException;
 }

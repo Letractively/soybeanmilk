@@ -14,6 +14,8 @@
 
 package org.soybeanMilk.core.bean.converters;
 
+import org.soybeanMilk.core.bean.ConvertException;
+
 /**
  * {@linkplain java.sql.Date}类型转换器，它可以将“yyyy-MM-dd”格式的字符串转换为{@linkplain java.sql.Date}类型的对象。
  * @author earthAngry@gmail.com
@@ -34,8 +36,15 @@ public class SqlDateConverter extends ClassTypeConverter
 	}
 	
 	@Override
-	protected Object convertToClass(Object sourceObj, Class<?> targetType)
+	protected Object convertToClass(Object sourceObj, Class<?> targetType) throws ConvertException
 	{
-		return c.convert(targetType, sourceObj);
+		try
+		{
+			return c.convert(targetType, sourceObj);
+		}
+		catch(Exception e)
+		{
+			throw new ConvertException(sourceObj, targetType, e);
+		}
 	}
 }

@@ -17,6 +17,8 @@ package org.soybeanMilk.core;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 
+import org.soybeanMilk.core.bean.ConvertException;
+
 /**
  * 对象源，用于获取和存储对象。
  * @author earthAngry@gmail.com
@@ -29,13 +31,15 @@ public interface ObjectSource
 	 * @param key 对象关键字
 	 * @param expectType 期望的对象类型，可能为<code>null</code>
 	 * @return
+	 * @throws ConvertException
 	 */
-	Object get(Serializable key, Type expectType);
+	Object get(Serializable key, Type expectType) throws ConvertException;
 	
 	/**
 	 * 保存对象
 	 * @param key 对象关键字
 	 * @param obj 要保存的对象
+	 * @throws ConvertException
 	 */
-	void set(Serializable key, Object obj);
+	void set(Serializable key, Object obj) throws ConvertException;
 }

@@ -14,6 +14,7 @@
 
 package org.soybeanMilk.core;
 
+import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.InterceptorInfo;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
@@ -87,11 +88,18 @@ public class DefaultExecutor implements Executor
 		if(itptInfo!=null && itptInfo.getExecutionKey()!=null)
 		{
 			//它可能是持久存储的
-			context=(Execution)objSource.get(itptInfo.getExecutionKey(), null);
-			if(context == null)
+			try
 			{
-				context=new Execution(executable, objSource);
-				objSource.set(itptInfo.getExecutionKey(), context);
+				context=(Execution)objSource.get(itptInfo.getExecutionKey(), null);
+				if(context == null)
+				{
+					context=new Execution(executable, objSource);
+					objSource.set(itptInfo.getExecutionKey(), context);
+				}
+			}
+			catch(ConvertException e)
+			{
+				throw new ExecuteException(e);
 			}
 		}
 		

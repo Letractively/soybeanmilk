@@ -115,13 +115,13 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	@Override
-	public Object convert(Object sourceObj, Type targetType)
+	public Object convert(Object sourceObj, Type targetType) throws ConvertException
 	{
 		return convertWithSupportConverter(sourceObj, targetType);
 	}
 	
 	@Override
-	public Object getProperty(Object srcObj, String propertyExpression, Type expectType)
+	public Object getProperty(Object srcObj, String propertyExpression, Type expectType) throws ConvertException
 	{
 		if(srcObj == null)
 			throw new IllegalArgumentException("[srcObj] must not be null");
@@ -135,7 +135,7 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	@Override
-	public void setProperty(Object srcObj, String propertyExpression, Object value)
+	public void setProperty(Object srcObj, String propertyExpression, Object value) throws ConvertException
 	{
 		if(srcObj == null)
 			throw new IllegalArgumentException("[srcObj] must not be null");
@@ -173,7 +173,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2010-12-28
 	 */
-	protected Object convertWithSupportConverter(Object sourceObj, Type targetType)
+	protected Object convertWithSupportConverter(Object sourceObj, Type targetType) throws ConvertException
 	{
 		if(log.isDebugEnabled())
 			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"
@@ -186,7 +186,7 @@ public class DefaultGenericConverter implements GenericConverter
 		if(sourceObj == null)
 		{
 			if(SoybeanMilkUtils.isPrimitive(targetType))
-				throw new ConvertException("can not convert null to primitive type");
+				throw new ConvertException(sourceObj, targetType);
 			else
 				return null;
 		}
@@ -206,7 +206,7 @@ public class DefaultGenericConverter implements GenericConverter
 			{
 				return c.convert(sourceObj, targetType);
 			}
-			catch(Exception e)
+			catch(ConvertException e)
 			{
 				return convertWhenException(sourceObj, targetType, e);
 			}
@@ -221,7 +221,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @date 2011-1-5
 	 */
 	@SuppressWarnings("unchecked")
-	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
+	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType) throws ConvertException
 	{
 		Object re=null;
 		boolean canConvert=true;
@@ -242,14 +242,14 @@ public class DefaultGenericConverter implements GenericConverter
 			else if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))
 			{
 				if(actualTypes.length != 2)
-					throw new ConvertException("'"+targetType+"' is invalid, only generic List converting is supported");
+					throw new GenericConvertException("'"+targetType+"' is invalid, only generic List converting is supported");
 				
 				re=convertArrayToList(convertArrayToArray(sourceObj, actualTypes[1]), actualTypes[0]);
 			}
 			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualTypes[0]))
 			{
 				if(actualTypes.length != 2)
-					throw new ConvertException("'"+targetType+"' is invalid, only generic Set converting is supported");
+					throw new GenericConvertException("'"+targetType+"' is invalid, only generic Set converting is supported");
 				
 				re=convertArrayToSet(convertArrayToArray(sourceObj, actualTypes[1]), actualTypes[0]);
 			}
@@ -262,7 +262,7 @@ public class DefaultGenericConverter implements GenericConverter
 		if(canConvert)
 			return re;
 		else
-			throw new ConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetType+"'");
+			throw new GenericConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetType+"'");
 	}
 	
 	/**
@@ -273,16 +273,13 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2011-1-5
 	 */
-	protected Object convertWhenException(Object sourceObj, Type targetType, Exception cause)
+	protected Object convertWhenException(Object sourceObj, Type targetType, ConvertException cause) throws ConvertException
 	{
 		if(sourceObj instanceof String
 				&& ((String)sourceObj).length()==0 && !SoybeanMilkUtils.isPrimitive(targetType))
 			return null;
-		
-		if(cause instanceof ConvertException)
-			throw (ConvertException)cause;
 		else
-			throw new ConvertException(cause);
+			throw cause;
 	}
 	
 	/**
@@ -328,10 +325,10 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2011-1-5
 	 */
-	protected Object convertArrayToArray(Object sourceObj, Class<?> targetElementType)
+	protected Object convertArrayToArray(Object sourceObj, Class<?> targetElementType) throws ConvertException
 	{
 		if(!sourceObj.getClass().isArray())
-			throw new ConvertException("the source object must be an array");
+			throw new GenericConvertException("the source object must be an array");
 		
 		int len=Array.getLength(sourceObj);
 		Object re=Array.newInstance(targetElementType, len);
@@ -351,11 +348,11 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @param index 当前正在处理的属性层级数组的索引
 	 * @param value 属性对应的值
 	 */
-	protected void setProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpressionArray, int index, Object value)
+	protected void setProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpressionArray, int index, Object value) throws ConvertException
 	{
 		PropertyInfo propertyInfo=beanInfo.getSubPropertyInfo(propertyExpressionArray[index]);
 		if(propertyInfo == null)
-			throw new ConvertException("can not find property '"+propertyExpressionArray[index]+"' in class '"+beanInfo.getType().getName()+"'");
+			throw new GenericConvertException("can not find property '"+propertyExpressionArray[index]+"' in class '"+beanInfo.getType().getName()+"'");
 		
 		//自上而下递归，到达末尾时初始化和写入
 		if(index == propertyExpressionArray.length-1)
@@ -367,7 +364,7 @@ public class DefaultGenericConverter implements GenericConverter
 			}
 			catch(Exception e)
 			{
-				throw new ConvertException("exception occur while calling write method '"+propertyInfo.getWriteMethod()+"'",e);
+				throw new GenericConvertException("exception occur while calling write method '"+propertyInfo.getWriteMethod()+"'",e);
 			}
 		}
 		else
@@ -382,7 +379,7 @@ public class DefaultGenericConverter implements GenericConverter
 			}
 			catch(Exception e)
 			{
-				throw new ConvertException("exception occur while calling read method '"+propertyInfo.getReadMethod().getName()+"'",e);
+				throw new GenericConvertException("exception occur while calling read method '"+propertyInfo.getReadMethod().getName()+"'",e);
 			}
 			
 			//初始化
@@ -404,7 +401,7 @@ public class DefaultGenericConverter implements GenericConverter
 				}
 				catch(Exception e)
 				{
-					throw new ConvertException("exception occur while calling write method '"+propertyInfo.getWriteMethod().getName()+"'",e);
+					throw new GenericConvertException("exception occur while calling write method '"+propertyInfo.getWriteMethod().getName()+"'",e);
 				}
 			}
 		}
@@ -420,17 +417,17 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2010-12-30
 	 */
-	protected Object getProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpression, Type targetType)
+	protected Object getProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpression, Type targetType) throws ConvertException
 	{
 		PropertyInfo tmpPropInfo=null;
 		for(int i=0;i<propertyExpression.length;i++)
 		{
 			if(bean == null)
-				throw new ConvertException("can not get property '"+propertyExpression[i]+"' from null object");
+				throw new GenericConvertException("can not get property '"+propertyExpression[i]+"' from null object");
 			
 			tmpPropInfo = beanInfo.getSubPropertyInfo(propertyExpression[i]);
 			if(tmpPropInfo == null)
-				throw new ConvertException("can not find property '"+propertyExpression[i]+"' in class '"+beanInfo.getType().getName()+"'");
+				throw new GenericConvertException("can not find property '"+propertyExpression[i]+"' in class '"+beanInfo.getType().getName()+"'");
 			else
 				beanInfo=tmpPropInfo;
 			
@@ -440,7 +437,7 @@ public class DefaultGenericConverter implements GenericConverter
 			}
 			catch(Exception e)
 			{
-				throw new ConvertException("exception occur while calling read method '"+tmpPropInfo.getReadMethod().getName()+"'",e);
+				throw new GenericConvertException("exception occur while calling read method '"+tmpPropInfo.getReadMethod().getName()+"'",e);
 			}
 		}
 		
@@ -487,7 +484,7 @@ public class DefaultGenericConverter implements GenericConverter
 			}
 			catch(Exception e)
 			{
-				throw new ConvertException("exception occur while creating instance of class '"+objectType+"' ",e);
+				throw new GenericConvertException("exception occur while creating instance of class '"+objectType+"' ",e);
 			}
 		}
 	}

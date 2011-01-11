@@ -14,6 +14,8 @@
 
 package org.soybeanMilk.core.bean.converters;
 
+import org.soybeanMilk.core.bean.ConvertException;
+
 /**
  * {@linkplain java.util.Date Date}类型转换器，它可以将如下格式的字符串转换为{@linkplain java.util.Date Date}对象：
  * <ul>
@@ -43,8 +45,15 @@ public class DateConverter extends ClassTypeConverter
 	}
 
 	@Override
-	protected Object convertToClass(Object sourceObj, Class<?> targetType)
+	protected Object convertToClass(Object sourceObj, Class<?> targetType) throws ConvertException
 	{
-		return c.convert(targetType, sourceObj);
+		try
+		{
+			return c.convert(targetType, sourceObj);
+		}
+		catch(Exception e)
+		{
+			throw new ConvertException(sourceObj, targetType, e);
+		}
 	}
 }

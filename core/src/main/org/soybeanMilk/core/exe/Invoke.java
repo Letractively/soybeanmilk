@@ -23,11 +23,11 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.core.AccessExecuteException;
-import org.soybeanMilk.core.ArgumentExecuteException;
+import org.soybeanMilk.core.ConvertExecuteException;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.InvocationExecuteException;
 import org.soybeanMilk.core.ObjectSource;
+import org.soybeanMilk.core.bean.ConvertException;
 
 /**
  * 调用，它包含执行方法（{@linkplain Method}对象）、方法的{@linkplain Arg 参数信息}、{@linkplain ResolverProvider 解决对象提供者}
@@ -166,11 +166,11 @@ public class Invoke extends AbstractExecutable
 		}
 		catch(IllegalArgumentException e)
 		{
-			throw new ArgumentExecuteException(e);
+			throw new ExecuteException(e);
 		}
 		catch(IllegalAccessException e)
 		{
-			throw new AccessExecuteException(e);
+			throw new ExecuteException(e);
 		}
 		
 		if(log.isDebugEnabled())
@@ -211,7 +211,7 @@ public class Invoke extends AbstractExecutable
 	 * @return
 	 * @throws ExecuteException
 	 */
-	protected Object[] getMethodArguments(ObjectSource objectSource)
+	protected Object[] getMethodArguments(ObjectSource objectSource) throws ExecuteException
 	{
 		Object[] values=null;
 		
@@ -226,7 +226,16 @@ public class Invoke extends AbstractExecutable
 				if(args[i].getValue()!=null || args[i].getKey()==null)
 					values[i]=args[i].getValue();
 				else
-					values[i]= objectSource.get(args[i].getKey(), args[i].getType());
+				{
+					try
+					{
+						values[i]= objectSource.get(args[i].getKey(), args[i].getType());
+					}
+					catch(ConvertException e)
+					{
+						throw new ConvertExecuteException(args[i].getKey(), args[i].getType(), e);
+					}
+				}
 			}
 		}
 		
@@ -235,7 +244,6 @@ public class Invoke extends AbstractExecutable
 		
 		return values;
 	}
-	
 	
 	@Override
 	public String toString()
@@ -250,14 +258,24 @@ public class Invoke extends AbstractExecutable
 	 * @param key
 	 * @param result
 	 * @param objectSource
+	 * @throws ExecuteException
 	 */
-	protected void saveMethodResult(Serializable key,Object result,ObjectSource objectSource)
+	protected void saveMethodResult(Serializable key,Object result,ObjectSource objectSource) throws ExecuteException
 	{
 		if(objectSource==null)
 			return;
 		
 		if(key != null)
-			objectSource.set(key, result);
+		{
+			try
+			{
+				objectSource.set(key, result);
+			}
+			catch(ConvertException e)
+			{
+				throw new ExecuteException(e);
+			}
+		}
 	}
 	
 	/**

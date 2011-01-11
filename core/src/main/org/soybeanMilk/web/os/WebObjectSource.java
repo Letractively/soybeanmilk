@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.ObjectSourceException;
+import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
@@ -173,7 +174,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object get(Serializable key, Type expectType)
+	public Object get(Serializable key, Type expectType) throws ConvertException
 	{
 		Object data = null;
 		if(HttpServletRequest.class.equals(expectType))
@@ -236,7 +237,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	@Override
-	public void set(Serializable key, Object obj)
+	public void set(Serializable key, Object obj) throws ConvertException
 	{
 		String strKey = (String)key;
 		
@@ -249,18 +250,27 @@ public class WebObjectSource extends ConvertableObjectSource
 		String scope = scopeSplit[0];
 		String keyInScope = scopeSplit[1];
 		
-		if(WebConstants.Scope.PARAM.equals(scope))
-			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.PARAM+"'");
-		else if(WebConstants.Scope.REQUEST.equals(scope))
-			setAttributeByKeyExpression(getRequest(), keyInScope, obj);
-		else if(WebConstants.Scope.SESSION.equals(scope))
-			setAttributeByKeyExpression(getRequest().getSession(), keyInScope, obj);
-		else if(WebConstants.Scope.APPLICATION.equals(scope))
-			setAttributeByKeyExpression(getApplication(), keyInScope, obj);
-		else if(WebConstants.Scope.RESPONSE.equals(scope))
-			throw new ObjectSourceException("'"+key+"' is not valid, you can not save object into '"+WebConstants.Scope.RESPONSE+"'");
+		if(WebConstants.Scope.PARAM.equals(scope)
+				|| WebConstants.Scope.RESPONSE.equals(scope))
+			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+scope+"'");
 		else
-			setWithUnknownScope(scope, keyInScope, obj);
+		{
+			Object servletObj=null;
+			
+			if(WebConstants.Scope.REQUEST.equals(scope))
+				servletObj=getRequest();
+			else if(WebConstants.Scope.SESSION.equals(scope))
+				servletObj=getRequest().getSession();
+			else if(WebConstants.Scope.APPLICATION.equals(scope))
+				servletObj=getApplication();
+			else
+				servletObj=null;
+			
+			if(servletObj != null)
+				setAttributeByKeyExpression(servletObj, keyInScope, obj);
+			else
+				setWithUnknownScope(scope, keyInScope, obj);
+		}
 		
 		if(log.isDebugEnabled())
 			log.debug("save '"+obj+"' into '"+scope+"' with key '"+keyInScope+"'");
@@ -272,9 +282,10 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * @param keyInScope 该作用域下的关键字
 	 * @param objectType
 	 * @return
+	 * @throws ConvertException
 	 */
 	@SuppressWarnings("unchecked")
-	protected Object getWithUnknownScope(String scope, String keyInScope, Type objectType)
+	protected Object getWithUnknownScope(String scope, String keyInScope, Type objectType) throws ConvertException
 	{
 		//作用域无法识别，则认为它是param作用域里关键字的一部分
 		if(scope != null)
@@ -288,8 +299,9 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * @param scope 作用域，可能为<code>null</code>
 	 * @param keyInScope 该作用域下的关键字
 	 * @param obj
+	 * @throws ConvertException
 	 */
-	protected void setWithUnknownScope(String scope, String keyInScope, Object obj)
+	protected void setWithUnknownScope(String scope, String keyInScope, Object obj) throws ConvertException
 	{
 		//作用域无法识别，则认为它是request作用域里关键字的一部分
 		if(scope != null)
@@ -303,9 +315,10 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * @param servletObj
 	 * @param keyExpression 关键字表达式，比如“yourBean”、“yourBean.property”
 	 * @param obj
+	 * @throws ConvertException
 	 * @date 2010-12-30
 	 */
-	protected void setAttributeByKeyExpression(Object servletObj, String keyExpression, Object obj)
+	protected void setAttributeByKeyExpression(Object servletObj, String keyExpression, Object obj) throws ConvertException
 	{
 		String[] objKeyWithProperty=splitByFirstAccessor(keyExpression);
 		
@@ -328,9 +341,10 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * @param keyExpression 关键字表达式，比如“yourBean”、“yourBean.property”
 	 * @param objectType
 	 * @return
+	 * @throws ConvertException
 	 * @date 2010-12-30
 	 */
-	protected Object getAttributeByKeyExpression(Object servletObj, String keyExpression, Type objectType)
+	protected Object getAttributeByKeyExpression(Object servletObj, String keyExpression, Type objectType) throws ConvertException
 	{
 		String[] objKeyWithProperty=splitByFirstAccessor(keyExpression);
 		
@@ -395,10 +409,10 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * @param valueMap 原始映射表
 	 * @param keyFilter 主键筛选器，只有以此筛选器开头的Map关键字才会被转换，如果为null，则表明不做筛选
 	 * @param targetType 目标类型
-	 * 
 	 * @return
+	 * @throws ConvertException
 	 */
-	protected Object convertFromMap(Map<String,Object> valueMap, String keyFilter, Type targetType)
+	protected Object convertFromMap(Map<String,Object> valueMap, String keyFilter, Type targetType) throws ConvertException
 	{
 		Object src=null;
 		
@@ -435,8 +449,9 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * @param obj servlet对象，包括：HttpServletRequest、HttpSession、HttpServletResponse、ServletContext
 	 * @param targetType
 	 * @return
+	 * @throws ConvertException
 	 */
-	protected Object convertServletObject(Object obj, Type targetType)
+	protected Object convertServletObject(Object obj, Type targetType) throws ConvertException
 	{
 		if(targetType == null || SoybeanMilkUtils.isInstanceOf(obj, targetType))
 			return obj;

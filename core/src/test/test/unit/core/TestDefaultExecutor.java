@@ -43,7 +43,7 @@ public class TestDefaultExecutor
 	 * 测试拦截器
 	 */
 	@Test
-	public void interceptorExecution()
+	public void interceptorExecution() throws Exception
 	{
 		{
 			HashMapObjectSource os=new HashMapObjectSource();
@@ -79,7 +79,7 @@ public class TestDefaultExecutor
 	}
 	
 	@Test
-	public void interceptorBefore()
+	public void interceptorBefore() throws Exception
 	{
 		{
 			HashMapObjectSource os=new HashMapObjectSource();
@@ -113,7 +113,7 @@ public class TestDefaultExecutor
 	}
 	
 	@Test
-	public void interceptorAfter()
+	public void interceptorAfter() throws Exception
 	{
 		{
 			HashMapObjectSource os=new HashMapObjectSource();
@@ -147,7 +147,7 @@ public class TestDefaultExecutor
 	}
 	
 	@Test
-	public void interceptorException()
+	public void interceptorException() throws Exception
 	{
 		{
 			HashMapObjectSource os=new HashMapObjectSource();

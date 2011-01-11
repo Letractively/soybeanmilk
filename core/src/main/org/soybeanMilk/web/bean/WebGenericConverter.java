@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.bean.ConvertException;
+import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.PropertyInfo;
 
@@ -64,7 +65,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
+	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType) throws ConvertException
 	{
 		//如果源对象是数组并且长度为1，而目标类型不是，则使用数组的第一个元素转换
 		if(sourceObj.getClass().isArray() && Array.getLength(sourceObj)==1 && !SoybeanMilkUtils.isClassTypeArray(targetType))
@@ -87,8 +88,9 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @param valueMap 值映射表，它也可能包含与<code>targetType</code>类属性无关的关键字
 	 * @param targetType
 	 * @return
+	 * @throws ConvertException
 	 */
-	protected Object convertMap(Map<String, Object> valueMap, Type targetType)
+	protected Object convertMap(Map<String, Object> valueMap, Type targetType) throws ConvertException
 	{
 		if(log.isDebugEnabled())
 			log.debug("start converting 'Map<String, Object>' object to '"+targetType+"'");
@@ -106,7 +108,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			else if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))
 			{
 				if(actualTypes.length != 2)
-					throw new ConvertException("'"+targetType+"' is invalid, only generic List converting is supported");
+					throw new GenericConvertException("'"+targetType+"' is invalid, only generic List converting is supported");
 				
 				result=convertArrayToList(convertMapToJavaBeanArray(valueMap, actualTypes[1]), actualTypes[0]);
 			}
@@ -114,12 +116,12 @@ public class WebGenericConverter extends DefaultGenericConverter
 			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualTypes[0]))
 			{
 				if(actualTypes.length != 2)
-					throw new ConvertException("'"+targetType+"' is invalid, only generic Set converting is supported");
+					throw new GenericConvertException("'"+targetType+"' is invalid, only generic Set converting is supported");
 				
 				result=convertArrayToSet(convertMapToJavaBeanArray(valueMap, actualTypes[1]), actualTypes[0]);
 			}
 			else
-				throw new ConvertException("converting 'Map<String,Object>' to '"+targetType+"' is not supported");
+				throw new GenericConvertException("converting 'Map<String,Object>' to '"+targetType+"' is not supported");
 		}
 		//JavaBean
 		else
@@ -127,7 +129,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(actualTypes[0]);
 			
 			if(!beanInfo.hasSubPropertyInfo())
-				throw new ConvertException("the target javaBean Class '"+actualTypes[0]+"' is not valid, it has no javaBean property");
+				throw new GenericConvertException("the target javaBean Class '"+actualTypes[0]+"' is not valid, it has no javaBean property");
 			else
 			{
 				//预存储的集合类属性映射表
@@ -196,7 +198,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			tmpPropInfo=beanInfo.getSubPropertyInfo(propExpressionArray[i]);
 			if(tmpPropInfo == null)
-				throw new ConvertException("can not find property '"+propExpressionArray[i]+"' in class '"+beanInfo.getType().getName()+"'");
+				throw new GenericConvertException("can not find property '"+propExpressionArray[i]+"' in class '"+beanInfo.getType().getName()+"'");
 			else
 				beanInfo=tmpPropInfo;
 			
@@ -223,9 +225,10 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @param valueMap
 	 * @param javaBeanClass
 	 * @return 元素为<code>javaBeanClass</code>类型且长度为<code>valueMap</code>值元素长度的数组
+	 * @throws ConvertException
 	 * @date 2010-12-31
 	 */
-	protected Object[] convertMapToJavaBeanArray(Map<String, Object> valueMap, Class<?> javaBeanClass)
+	protected Object[] convertMapToJavaBeanArray(Map<String, Object> valueMap, Class<?> javaBeanClass) throws ConvertException
 	{
 		if(valueMap==null || valueMap.size()==0)
 			return null;
@@ -235,7 +238,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		
 		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(javaBeanClass);
 		if(!beanInfo.hasSubPropertyInfo())
-			throw new ConvertException("the target javaBean Class '"+javaBeanClass+"' is not valid, it has no javaBean property");
+			throw new GenericConvertException("the target javaBean Class '"+javaBeanClass+"' is not valid, it has no javaBean property");
 		
 		Set<String> keys=valueMap.keySet();
 		for(String key : keys)
@@ -245,14 +248,14 @@ public class WebGenericConverter extends DefaultGenericConverter
 				continue;
 			
 			if(!value.getClass().isArray())
-				throw new ConvertException("the element in the source map must be array");
+				throw new GenericConvertException("the element in the source map must be array");
 			
 			int l=Array.getLength(value);
 			if(len == -1)
 				len=l;
 			else
 				if(l != len)
-					throw new ConvertException("the element array in the source map must be the same length");
+					throw new GenericConvertException("the element array in the source map must be the same length");
 			
 			String[] propertyExp=splitPropertyExpression(key);
 			if(beanInfo.getSubPropertyInfo(propertyExp[0]) != null)

@@ -34,7 +34,6 @@ public class Configuration
 {
 	private static Log log=LogFactory.getLog(Configuration.class);
 	
-	
 	/**解决对象工厂*/
 	private ResolverFactory resolverFactory;
 	

@@ -12,6 +12,7 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.web.bean.WebGenericConverter;
@@ -40,7 +41,7 @@ public class TestWebObjectSource
 	}
 	
 	@Test
-	public void getServletObject()
+	public void getServletObject() throws Exception
 	{
 		//request
 		{
@@ -84,7 +85,7 @@ public class TestWebObjectSource
 	}
 	
 	@Test
-	public void convertServletObject()
+	public void convertServletObject() throws Exception
 	{
 		final JavaBean staticJavaBean=new JavaBean();
 		
@@ -93,7 +94,7 @@ public class TestWebObjectSource
 		Converter converter=new Converter()
 		{
 			@Override
-			public Object convert(Object sourceObj, Type targetClass) 
+			public Object convert(Object sourceObj, Type targetClass) throws ConvertException 
 			{
 				return staticJavaBean;
 			}
@@ -125,7 +126,7 @@ public class TestWebObjectSource
 	}
 	
 	@Test
-	public void convertServletObjectThrow()
+	public void convertServletObjectThrow() throws Exception
 	{
 		String exceptionPrefix="no Converter defined for converting";
 		
@@ -173,7 +174,7 @@ public class TestWebObjectSource
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void getRawRequestParameterMap()
+	public void getRawRequestParameterMap() throws Exception
 	{
 		String value="12345";
 		request.setParameter("value", value);
@@ -186,7 +187,7 @@ public class TestWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetFromParam()
+	public void setAndGetFromParam() throws Exception
 	{
 		String value="12345";
 		
@@ -242,7 +243,7 @@ public class TestWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetFromRequest()
+	public void setAndGetFromRequest() throws Exception
 	{
 		String value="12345";
 		
@@ -282,7 +283,7 @@ public class TestWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetFromSession()
+	public void setAndGetFromSession() throws Exception
 	{
 		String value="12345";
 		
@@ -322,7 +323,7 @@ public class TestWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetFromApplication()
+	public void setAndGetFromApplication() throws Exception
 	{
 		String value="12345";
 		
@@ -362,7 +363,7 @@ public class TestWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetFromUnknownScope()
+	public void setAndGetFromUnknownScope() throws Exception
 	{
 		String value="12345";
 		

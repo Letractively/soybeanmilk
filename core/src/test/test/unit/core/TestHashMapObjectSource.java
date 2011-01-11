@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.ObjectSourceException;
+import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.os.HashMapObjectSource;
 
@@ -20,7 +21,7 @@ public class TestHashMapObjectSource
 	}
 	
 	@Test
-	public void getNoConverter()
+	public void getNoConverter() throws Exception
 	{
 		{
 			Object dest=objSource.get(null, null);
@@ -59,7 +60,7 @@ public class TestHashMapObjectSource
 	}
 	
 	@Test
-	public void getWithConverter()
+	public void getWithConverter() throws Exception
 	{
 		addGenericConverter();
 		
@@ -82,8 +83,8 @@ public class TestHashMapObjectSource
 		}
 	}
 	
-	@Test(expected=ObjectSourceException.class)
-	public void getPrimitiveForNull()
+	@Test(expected=ConvertException.class)
+	public void getPrimitiveForNull() throws Exception
 	{
 		objSource.get("key", int.class);
 	}

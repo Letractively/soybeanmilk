@@ -51,14 +51,14 @@ public class DefaultExecutor implements Executor
 		if(exe == null)
 			throw new ExecutableNotFoundException(executableName);
 		
-		return executeInternal(exe, objSource);
+		return executeWithInteceptor(exe, objSource);
 	}
 	
 	@Override
 	public Executable execute(Executable executable, ObjectSource objSource)
 			throws ExecuteException
 	{
-		return executeInternal(executable, objSource);
+		return executeWithInteceptor(executable, objSource);
 	}
 	
 	/**
@@ -69,7 +69,7 @@ public class DefaultExecutor implements Executor
 	 * @throws ExecuteException
 	 * @date 2011-1-7
 	 */
-	protected Executable executeInternal(Executable executable, ObjectSource objSource)
+	protected Executable executeWithInteceptor(Executable executable, ObjectSource objSource)
 			throws ExecuteException
 	{
 		if(objSource instanceof ConvertableObjectSource)
@@ -101,7 +101,7 @@ public class DefaultExecutor implements Executor
 			if(itptInfo!=null && itptInfo.getBeforeHandler()!=null)
 				executeInterceptor(itptInfo.getBeforeHandler(), objSource);
 			
-			executable.execute(objSource);
+			executeTargetExecutable(executable, objSource);
 			
 			//after
 			if(itptInfo!=null && itptInfo.getAfterHandler()!=null)
@@ -124,17 +124,32 @@ public class DefaultExecutor implements Executor
 			return expExe;
 		}
 	}
-	
+
 	/**
 	 * 根据名称查找可执行对象
 	 * @param executableName
 	 * @param objSource
 	 * @return
+	 * @throws ExecuteException
+	 * @throws ExecutableNotFoundException
 	 * @date 2011-1-7
 	 */
 	protected Executable findExecutable(String executableName, ObjectSource objSource)
+			throws ExecuteException, ExecutableNotFoundException
 	{
 		return getConfiguration().getExecutable(executableName);
+	}
+	
+	/**
+	 * 执行目标可执行对象。
+	 * @param executable
+	 * @param objSource
+	 * @throws ExecuteException
+	 * @date 2011-1-11
+	 */
+	protected void executeTargetExecutable(Executable executable, ObjectSource objSource) throws ExecuteException
+	{
+		executable.execute(objSource);
 	}
 	
 	/**

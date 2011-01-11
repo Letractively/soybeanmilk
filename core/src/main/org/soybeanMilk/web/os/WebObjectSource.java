@@ -176,13 +176,13 @@ public class WebObjectSource extends ConvertableObjectSource
 	public Object get(Serializable key, Type expectType)
 	{
 		Object data = null;
-		if(expectType == HttpServletRequest.class)
+		if(HttpServletRequest.class.equals(expectType))
 			data = getRequest();
-		else if(expectType == HttpServletResponse.class)
+		else if(HttpServletResponse.class.equals(expectType))
 			data = getResponse();
-		else if(expectType == ServletContext.class)
+		else if(ServletContext.class.equals(expectType))
 			data = getApplication();
-		else if(expectType == HttpSession.class)
+		else if(HttpSession.class.equals(expectType))
 			data = getRequest().getSession();
 		else
 		{
@@ -363,7 +363,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		else if(servletObj instanceof ServletContext)
 			((ServletContext)servletObj).setAttribute(key, value);
 		else
-			throw new IllegalArgumentException("unknown servlet object '"+servletObj+"'");
+			throw new ObjectSourceException("unknown servlet object '"+servletObj+"'");
 	}
 	
 	/**
@@ -382,7 +382,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		else if(servletObj instanceof ServletContext)
 			return ((ServletContext)servletObj).getAttribute(key);
 		else
-			throw new IllegalArgumentException("unknown servlet object '"+servletObj+"'");
+			throw new ObjectSourceException("unknown servlet object '"+servletObj+"'");
 	}
 	
 	/**

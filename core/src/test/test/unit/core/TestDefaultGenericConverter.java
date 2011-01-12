@@ -429,7 +429,7 @@ public class TestDefaultGenericConverter
 		Assert.assertNull(re);
 	}
 	
-	@Test(expected = ConvertException.class)
+	@Test(expected = GenericConvertException.class)
 	public void convertNull_toPrimitive() throws Exception
 	{
 		Object src = null;
@@ -592,8 +592,13 @@ public class TestDefaultGenericConverter
 		}
 	}
 	
+<<<<<<< .mine
+	@Test(expected = GenericConvertException.class)
+	public void getProperty_notExistProperty()
+=======
 	@Test(expected = GenericConvertException.class)
 	public void getProperty_notExistProperty() throws Exception
+>>>>>>> .r223
 	{
 		MyBean bean=new MyBean();
 		bean.setId("111");

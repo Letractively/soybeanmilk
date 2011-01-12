@@ -184,7 +184,11 @@ public class DefaultGenericConverter implements GenericConverter
 		if(sourceObj == null)
 		{
 			if(SoybeanMilkUtils.isPrimitive(targetType))
+<<<<<<< .mine
+				throw new GenericConvertException("can not convert null to primitive type");
+=======
 				throw new ConvertException("the source object is null but primitive type '"+targetType+"' expected");
+>>>>>>> .r221
 			else
 				return null;
 		}
@@ -271,7 +275,11 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2011-1-5
 	 */
+<<<<<<< .mine
+	protected Object convertWhenException(Object sourceObj, Type targetType, ConvertException cause)
+=======
 	protected Object convertWhenException(Object sourceObj, Type targetType, ConvertException cause) throws ConvertException
+>>>>>>> .r221
 	{
 		if(sourceObj instanceof String
 				&& ((String)sourceObj).length()==0 && !SoybeanMilkUtils.isPrimitive(targetType))

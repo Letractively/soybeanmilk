@@ -25,7 +25,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
-import org.soybeanMilk.core.bean.ConvertException;
+import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.PropertyInfo;
 
@@ -106,7 +106,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			else if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))
 			{
 				if(actualTypes.length != 2)
-					throw new ConvertException("'"+targetType+"' is invalid, only generic List converting is supported");
+					throw new GenericConvertException("'"+targetType+"' is invalid, only generic List converting is supported");
 				
 				result=convertArrayToList(convertMapToJavaBeanArray(valueMap, actualTypes[1]), actualTypes[0]);
 			}
@@ -114,12 +114,12 @@ public class WebGenericConverter extends DefaultGenericConverter
 			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualTypes[0]))
 			{
 				if(actualTypes.length != 2)
-					throw new ConvertException("'"+targetType+"' is invalid, only generic Set converting is supported");
+					throw new GenericConvertException("'"+targetType+"' is invalid, only generic Set converting is supported");
 				
 				result=convertArrayToSet(convertMapToJavaBeanArray(valueMap, actualTypes[1]), actualTypes[0]);
 			}
 			else
-				throw new ConvertException("converting 'Map<String,Object>' to '"+targetType+"' is not supported");
+				throw new GenericConvertException("converting 'Map<String,Object>' to '"+targetType+"' is not supported");
 		}
 		//JavaBean
 		else
@@ -127,7 +127,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(actualTypes[0]);
 			
 			if(!beanInfo.hasSubPropertyInfo())
-				throw new ConvertException("the target javaBean Class '"+actualTypes[0]+"' is not valid, it has no javaBean property");
+				throw new GenericConvertException("the target javaBean Class '"+actualTypes[0]+"' is not valid, it has no javaBean property");
 			else
 			{
 				//预存储的集合类属性映射表
@@ -196,7 +196,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			tmpPropInfo=beanInfo.getSubPropertyInfo(propExpressionArray[i]);
 			if(tmpPropInfo == null)
-				throw new ConvertException("can not find property '"+propExpressionArray[i]+"' in class '"+beanInfo.getType().getName()+"'");
+				throw new GenericConvertException("can not find property '"+propExpressionArray[i]+"' in class '"+beanInfo.getType().getName()+"'");
 			else
 				beanInfo=tmpPropInfo;
 			
@@ -235,7 +235,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		
 		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(javaBeanClass);
 		if(!beanInfo.hasSubPropertyInfo())
-			throw new ConvertException("the target javaBean Class '"+javaBeanClass+"' is not valid, it has no javaBean property");
+			throw new GenericConvertException("the target javaBean Class '"+javaBeanClass+"' is not valid, it has no javaBean property");
 		
 		Set<String> keys=valueMap.keySet();
 		for(String key : keys)
@@ -245,14 +245,14 @@ public class WebGenericConverter extends DefaultGenericConverter
 				continue;
 			
 			if(!value.getClass().isArray())
-				throw new ConvertException("the element in the source map must be array");
+				throw new GenericConvertException("the element in the source map must be array");
 			
 			int l=Array.getLength(value);
 			if(len == -1)
 				len=l;
 			else
 				if(l != len)
-					throw new ConvertException("the element array in the source map must be the same length");
+					throw new GenericConvertException("the element array in the source map must be the same length");
 			
 			String[] propertyExp=splitPropertyExpression(key);
 			if(beanInfo.getSubPropertyInfo(propertyExp[0]) != null)

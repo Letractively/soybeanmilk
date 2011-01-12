@@ -12,6 +12,7 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.bean.ConvertException;
+import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 
 import test.unit.web.MockParameterizedType;
@@ -428,7 +429,7 @@ public class TestDefaultGenericConverter
 		Assert.assertNull(re);
 	}
 	
-	@Test(expected = ConvertException.class)
+	@Test(expected = GenericConvertException.class)
 	public void convertNull_toPrimitive()
 	{
 		Object src = null;
@@ -591,7 +592,7 @@ public class TestDefaultGenericConverter
 		}
 	}
 	
-	@Test(expected = ConvertException.class)
+	@Test(expected = GenericConvertException.class)
 	public void getProperty_notExistProperty()
 	{
 		MyBean bean=new MyBean();

@@ -23,11 +23,11 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.core.AccessExecuteException;
-import org.soybeanMilk.core.ArgumentExecuteException;
+import org.soybeanMilk.core.ConvertExecuteException;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.InvocationExecuteException;
 import org.soybeanMilk.core.ObjectSource;
+import org.soybeanMilk.core.bean.ConvertException;
 
 /**
  * 调用，它包含执行方法（{@linkplain Method}对象）、方法的{@linkplain Arg 参数信息}、{@linkplain ResolverProvider 解决对象提供者}
@@ -118,6 +118,34 @@ public class Invoke extends AbstractExecutable
 	{
 		init(name, method, args, resultKey, resolverProvider);
 	}
+
+	public ResolverProvider getResolverProvider() {
+		return resolverProvider;
+	}
+	public void setResolverProvider(ResolverProvider resolverProvider) {
+		this.resolverProvider = resolverProvider;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+	public void setMethod(Method method) {
+		this.method = method;
+	}
+
+	public Arg[] getArgs() {
+		return args;
+	}
+	public void setArgs(Arg[] args) {
+		this.args = args;
+	}
+
+	public Serializable getResultKey() {
+		return resultKey;
+	}
+	public void setResultKey(Serializable resultKey) {
+		this.resultKey = resultKey;
+	}
 	
 	/**
 	 * 初始化
@@ -152,13 +180,28 @@ public class Invoke extends AbstractExecutable
 		if(log.isDebugEnabled())
 			log.debug("start  execute '"+this+"'");
 		
-		Method method=getMethod();
-		Object resolver=getResolver(objectSource);
+		executeMethod(objectSource);
+		
+		if(log.isDebugEnabled())
+			log.debug("finish execute '"+this+"'");
+	}
+	
+	/**
+	 * 执行调用方法。
+	 * @param objectSource
+	 * @throws ExecuteException
+	 * @date 2011-1-12
+	 */
+	protected void executeMethod(ObjectSource objectSource) throws ExecuteException
+	{
+		Serializable resultKey=getResultKey();
 		
 		try
 		{
-			saveMethodResult(getResultKey(),
-					method.invoke(resolver, getMethodArguments(objectSource)), objectSource);
+			Object methodResult=getMethod().invoke(getResolver(objectSource), makeMethodArguments(objectSource));
+			
+			if(resultKey != null)
+				objectSource.set(resultKey, methodResult);
 		}
 		catch(InvocationTargetException e)
 		{
@@ -166,43 +209,12 @@ public class Invoke extends AbstractExecutable
 		}
 		catch(IllegalArgumentException e)
 		{
-			throw new ArgumentExecuteException(e);
+			throw new ExecuteException(e);
 		}
 		catch(IllegalAccessException e)
 		{
-			throw new AccessExecuteException(e);
+			throw new ExecuteException(e);
 		}
-		
-		if(log.isDebugEnabled())
-			log.debug("finish execute '"+this+"'");
-	}
-
-	public ResolverProvider getResolverProvider() {
-		return resolverProvider;
-	}
-	public void setResolverProvider(ResolverProvider resolverProvider) {
-		this.resolverProvider = resolverProvider;
-	}
-
-	public Method getMethod() {
-		return method;
-	}
-	public void setMethod(Method method) {
-		this.method = method;
-	}
-
-	public Arg[] getArgs() {
-		return args;
-	}
-	public void setArgs(Arg[] args) {
-		this.args = args;
-	}
-
-	public Serializable getResultKey() {
-		return resultKey;
-	}
-	public void setResultKey(Serializable resultKey) {
-		this.resultKey = resultKey;
 	}
 	
 	/**
@@ -210,8 +222,9 @@ public class Invoke extends AbstractExecutable
 	 * @param objectSource
 	 * @return
 	 * @throws ExecuteException
+	 * @date 2011-1-11
 	 */
-	protected Object[] getMethodArguments(ObjectSource objectSource)
+	protected Object[] makeMethodArguments(ObjectSource objectSource) throws ExecuteException
 	{
 		Object[] values=null;
 		
@@ -226,7 +239,16 @@ public class Invoke extends AbstractExecutable
 				if(args[i].getValue()!=null || args[i].getKey()==null)
 					values[i]=args[i].getValue();
 				else
-					values[i]= objectSource.get(args[i].getKey(), args[i].getType());
+				{
+					try
+					{
+						values[i]= objectSource.get(args[i].getKey(), args[i].getType());
+					}
+					catch(ConvertException e)
+					{
+						throw new ConvertExecuteException(e);
+					}
+				}
 			}
 		}
 		
@@ -236,28 +258,12 @@ public class Invoke extends AbstractExecutable
 		return values;
 	}
 	
-	
 	@Override
 	public String toString()
 	{
 		return getClass().getSimpleName()+" [name=" + getName() + ", method=" + method
 				+ ", resultKey=" + resultKey + ", resolverProvider="
 				+ resolverProvider + ", args=" + Arrays.toString(args) + "]";
-	}
-	
-	/**
-	 * 保存方法调用结果到对象源，如果对象源或者<code>key</code>为<code>null</code>，则什么也不做
-	 * @param key
-	 * @param result
-	 * @param objectSource
-	 */
-	protected void saveMethodResult(Serializable key,Object result,ObjectSource objectSource)
-	{
-		if(objectSource==null)
-			return;
-		
-		if(key != null)
-			objectSource.set(key, result);
 	}
 	
 	/**

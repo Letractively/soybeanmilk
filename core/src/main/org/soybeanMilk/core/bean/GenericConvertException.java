@@ -12,28 +12,30 @@
  * limitations under the License. 
  */
 
-package org.soybeanMilk.core;
-
-import org.soybeanMilk.core.exe.Invoke;
+package org.soybeanMilk.core.bean;
 
 /**
- * 执行异常。{@linkplain Invoke 调用}方法在执行时访问非法，它的源异常是{@linkplain IllegalAccessException}
+ * 通用转换器异常。
  * @author earthAngry@gmail.com
- * @date 2010-12-19
+ * @date 2010-10-6
  */
-public class AccessExecuteException extends ExecuteException
+public class GenericConvertException extends RuntimeException
 {
-	private static final long serialVersionUID = -8990168470353582122L;
-	
-	public AccessExecuteException(IllegalAccessException cause) {
-		super(cause);
+	private static final long serialVersionUID = 1L;
+
+	public GenericConvertException() {
+		super();
 	}
-	
-	/**
-	 * 获取源异常
-	 */
-	public IllegalAccessException getCause()
-	{
-		return (IllegalAccessException)super.getCause();
+
+	public GenericConvertException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public GenericConvertException(String message) {
+		super(message);
+	}
+
+	public GenericConvertException(Throwable cause) {
+		super(cause);
 	}
 }

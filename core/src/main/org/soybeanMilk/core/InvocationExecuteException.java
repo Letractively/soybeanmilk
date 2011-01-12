@@ -17,7 +17,8 @@ package org.soybeanMilk.core;
 import org.soybeanMilk.core.exe.Invoke;
 
 /**
- * 执行异常。{@linkplain Invoke 调用}方法在执行时内部抛出异常，它的源异常是方法异常。
+ * 执行异常。{@linkplain Invoke 调用}方法在执行时内部抛出异常。
+ * 它的源异常是方法异常，是由{@linkplain Invoke 调用}方法的编写者定义的。
  * @author earthAngry@gmail.com
  * @date 2010-12-19
  *

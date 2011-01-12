@@ -14,26 +14,30 @@
 
 package org.soybeanMilk.core;
 
+import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.exe.Invoke;
 
 /**
- * 执行异常。{@linkplain Invoke 调用}方法在执行时参数非法，它的源异常是{@linkplain IllegalArgumentException}
+ * 执行异常。{@linkplain Invoke 调用}在从{@linkplain ObjectSource 对象源}获取方法参数值时出现类型转换异常，这通常是由于输入非法导致的。
+ * 它的源异常是{@linkplain ConvertException}。
  * @author earthAngry@gmail.com
- * @date 2010-12-19
+ * @date 2011-1-11
+ *
  */
-public class ArgumentExecuteException extends ExecuteException
+public class ConvertExecuteException extends ExecuteException
 {
-	private static final long serialVersionUID = 3587718359040102481L;
-
-	public ArgumentExecuteException(IllegalArgumentException cause) {
+	private static final long serialVersionUID = -5063626619646972164L;
+	
+	public ConvertExecuteException(ConvertException cause)
+	{
 		super(cause);
 	}
 	
 	/**
-	 * 获取源异常
+	 * 获取源转换异常。
 	 */
-	public IllegalArgumentException getCause()
+	public ConvertException getCause()
 	{
-		return (IllegalArgumentException)super.getCause();
+		return (ConvertException)super.getCause();
 	}
 }

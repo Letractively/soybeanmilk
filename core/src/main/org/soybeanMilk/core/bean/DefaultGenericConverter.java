@@ -99,9 +99,7 @@ public class DefaultGenericConverter implements GenericConverter
 	public DefaultGenericConverter(boolean initDefaultSupportConverter)
 	{
 		if(initDefaultSupportConverter)
-		{
 			addStringSourceConverters();
-		}
 	}
 	
 	/**
@@ -502,17 +500,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 */
 	protected void addStringSourceConverters()
 	{
-		//基本类型
-		addConverter(String.class, boolean.class, new BooleanConverter());
-		addConverter(String.class, byte.class, new ByteConverter());
-		addConverter(String.class, char.class, new CharacterConverter());
-		addConverter(String.class, double.class, new DoubleConverter());
-		addConverter(String.class, float.class, new FloatConverter());
-		addConverter(String.class, int.class, new IntegerConverter());
-		addConverter(String.class, long.class, new LongConverter());
-		addConverter(String.class, short.class, new ShortConverter());
-		
-		//包装类型
+		//基本类型及其包装类型
 		addConverter(String.class, Boolean.class, new BooleanConverter());
 		addConverter(String.class, Byte.class, new ByteConverter());
 		addConverter(String.class, Character.class, new CharacterConverter());

@@ -46,7 +46,7 @@ import org.soybeanMilk.web.vp.VariablePathMatcher;
 
 
 /**
- * 框架整合servlet，它可以将WEB请求转给WEB执行器。
+ * 框架整合servlet，它可以将WEB请求转给{@linkplain Executor 执行器}。
  * @author earthAngry@gmail.com
  * @date 2010-12-28
  */
@@ -228,7 +228,7 @@ public class DispatchServlet extends HttpServlet
 		
 		if(exe == null)
 		{
-			handleExecutableNotFound(exeName, request, response);
+			handleExecutableNotFound(exeName, webObjSource);
 			return;
 		}
 		
@@ -238,7 +238,7 @@ public class DispatchServlet extends HttpServlet
 		}
 		catch(ExecuteException e)
 		{
-			throw new ServletException(e);
+			handleExecuteException(exe, e, exeName, webObjSource);
 		}
 		
 		processTarget(exe, webObjSource);
@@ -289,20 +289,34 @@ public class DispatchServlet extends HttpServlet
 	
 	/**
 	 * 没有找到能够处理请求的可执行对象
-	 * @param executableName
-	 * @param request
-	 * @param response
+	 * @param requestExeName
+	 * @param objSource
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	protected void handleExecutableNotFound(String executableName, HttpServletRequest request, HttpServletResponse response)
+	protected void handleExecutableNotFound(String requestExeName, WebObjectSource objSource)
 			throws ServletException, IOException
 	{
 		//servlet规范规定这里要抛出FileNotFoundException异常
-		if(isIncludeRequest(request))
-			throw new FileNotFoundException(executableName);
+		if(isIncludeRequest(objSource.getRequest()))
+			throw new FileNotFoundException(requestExeName);
 		
-		response.sendError(HttpServletResponse.SC_NOT_FOUND, executableName);
+		objSource.getResponse().sendError(HttpServletResponse.SC_NOT_FOUND, requestExeName);
+	}
+	
+	/**
+	 * 处理执行异常。
+	 * @param executable
+	 * @param e
+	 * @param requestExeName
+	 * @param webObjSource
+	 * @throws ServletException
+	 * @throws IOException
+	 * @date 2011-1-12
+	 */
+	protected void handleExecuteException(Executable executable, ExecuteException e, String requestExeName, WebObjectSource webObjSource) throws ServletException, IOException
+	{
+		throw new ServletException(e);
 	}
 	
 	/**

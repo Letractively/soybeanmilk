@@ -99,7 +99,9 @@ public class DefaultGenericConverter implements GenericConverter
 	public DefaultGenericConverter(boolean initDefaultSupportConverter)
 	{
 		if(initDefaultSupportConverter)
+		{
 			addStringSourceConverters();
+		}
 	}
 	
 	/**
@@ -113,13 +115,13 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	@Override
-	public Object convert(Object sourceObj, Type targetType) throws ConvertException
+	public Object convert(Object sourceObj, Type targetType)
 	{
 		return convertWithSupportConverter(sourceObj, targetType);
 	}
 	
 	@Override
-	public Object getProperty(Object srcObj, String propertyExpression, Type expectType) throws ConvertException
+	public Object getProperty(Object srcObj, String propertyExpression, Type expectType)
 	{
 		if(srcObj == null)
 			throw new IllegalArgumentException("[srcObj] must not be null");
@@ -133,7 +135,7 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	@Override
-	public void setProperty(Object srcObj, String propertyExpression, Object value) throws ConvertException
+	public void setProperty(Object srcObj, String propertyExpression, Object value)
 	{
 		if(srcObj == null)
 			throw new IllegalArgumentException("[srcObj] must not be null");
@@ -171,7 +173,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2010-12-28
 	 */
-	protected Object convertWithSupportConverter(Object sourceObj, Type targetType) throws ConvertException
+	protected Object convertWithSupportConverter(Object sourceObj, Type targetType)
 	{
 		if(log.isDebugEnabled())
 			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"
@@ -184,11 +186,7 @@ public class DefaultGenericConverter implements GenericConverter
 		if(sourceObj == null)
 		{
 			if(SoybeanMilkUtils.isPrimitive(targetType))
-<<<<<<< .mine
 				throw new GenericConvertException("can not convert null to primitive type");
-=======
-				throw new ConvertException("the source object is null but primitive type '"+targetType+"' expected");
->>>>>>> .r221
 			else
 				return null;
 		}
@@ -223,7 +221,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @date 2011-1-5
 	 */
 	@SuppressWarnings("unchecked")
-	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType) throws ConvertException
+	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
 	{
 		Object re=null;
 		boolean canConvert=true;
@@ -275,11 +273,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2011-1-5
 	 */
-<<<<<<< .mine
 	protected Object convertWhenException(Object sourceObj, Type targetType, ConvertException cause)
-=======
-	protected Object convertWhenException(Object sourceObj, Type targetType, ConvertException cause) throws ConvertException
->>>>>>> .r221
 	{
 		if(sourceObj instanceof String
 				&& ((String)sourceObj).length()==0 && !SoybeanMilkUtils.isPrimitive(targetType))
@@ -298,9 +292,6 @@ public class DefaultGenericConverter implements GenericConverter
 	@SuppressWarnings("unchecked")
 	protected Object convertArrayToList(Object array, Class<?> listClass)
 	{
-		if(array == null)
-			return null;
-		
 		List re=(List)instance(listClass, -1);
 		
 		for(int i=0,len=Array.getLength(array);i<len;i++)
@@ -319,9 +310,6 @@ public class DefaultGenericConverter implements GenericConverter
 	@SuppressWarnings("unchecked")
 	protected Object convertArrayToSet(Object array, Class<?> setClass)
 	{
-		if(array == null)
-			return null;
-		
 		Set re=(Set)instance(setClass, -1);
 		
 		for(int i=0,len=Array.getLength(array);i<len;i++)
@@ -337,7 +325,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2011-1-5
 	 */
-	protected Object convertArrayToArray(Object sourceObj, Class<?> targetElementType) throws ConvertException
+	protected Object convertArrayToArray(Object sourceObj, Class<?> targetElementType)
 	{
 		if(!sourceObj.getClass().isArray())
 			throw new GenericConvertException("the source object must be an array");
@@ -360,7 +348,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @param index 当前正在处理的属性层级数组的索引
 	 * @param value 属性对应的值
 	 */
-	protected void setProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpressionArray, int index, Object value) throws ConvertException
+	protected void setProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpressionArray, int index, Object value)
 	{
 		PropertyInfo propertyInfo=beanInfo.getSubPropertyInfo(propertyExpressionArray[index]);
 		if(propertyInfo == null)
@@ -429,7 +417,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2010-12-30
 	 */
-	protected Object getProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpression, Type targetType) throws ConvertException
+	protected Object getProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpression, Type targetType)
 	{
 		PropertyInfo tmpPropInfo=null;
 		for(int i=0;i<propertyExpression.length;i++)
@@ -514,6 +502,16 @@ public class DefaultGenericConverter implements GenericConverter
 	 */
 	protected void addStringSourceConverters()
 	{
+		//基本类型
+		addConverter(String.class, boolean.class, new BooleanConverter());
+		addConverter(String.class, byte.class, new ByteConverter());
+		addConverter(String.class, char.class, new CharacterConverter());
+		addConverter(String.class, double.class, new DoubleConverter());
+		addConverter(String.class, float.class, new FloatConverter());
+		addConverter(String.class, int.class, new IntegerConverter());
+		addConverter(String.class, long.class, new LongConverter());
+		addConverter(String.class, short.class, new ShortConverter());
+		
 		//包装类型
 		addConverter(String.class, Boolean.class, new BooleanConverter());
 		addConverter(String.class, Byte.class, new ByteConverter());

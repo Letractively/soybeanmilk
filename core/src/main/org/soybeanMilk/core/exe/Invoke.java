@@ -118,6 +118,34 @@ public class Invoke extends AbstractExecutable
 	{
 		init(name, method, args, resultKey, resolverProvider);
 	}
+
+	public ResolverProvider getResolverProvider() {
+		return resolverProvider;
+	}
+	public void setResolverProvider(ResolverProvider resolverProvider) {
+		this.resolverProvider = resolverProvider;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+	public void setMethod(Method method) {
+		this.method = method;
+	}
+
+	public Arg[] getArgs() {
+		return args;
+	}
+	public void setArgs(Arg[] args) {
+		this.args = args;
+	}
+
+	public Serializable getResultKey() {
+		return resultKey;
+	}
+	public void setResultKey(Serializable resultKey) {
+		this.resultKey = resultKey;
+	}
 	
 	/**
 	 * 初始化
@@ -152,24 +180,31 @@ public class Invoke extends AbstractExecutable
 		if(log.isDebugEnabled())
 			log.debug("start  execute '"+this+"'");
 		
-		Method method=getMethod();
-		Object resolver=getResolver(objectSource);
-		Serializable resultKey=getResultKey();
+		executeMethod(objectSource);
 		
+		if(log.isDebugEnabled())
+			log.debug("finish execute '"+this+"'");
+	}
+	
+	/**
+	 * 执行调用方法。
+	 * @param objectSource
+	 * @throws ExecuteException
+	 * @date 2011-1-12
+	 */
+	protected void executeMethod(ObjectSource objectSource) throws ExecuteException
+	{
+		Object methodResult=null;
 		try
 		{
-			Object result=method.invoke(resolver, getMethodArguments(objectSource));
+			methodResult=getMethod().invoke(getResolver(objectSource), makeMethodArguments(objectSource));
 			
 			if(resultKey != null)
-				objectSource.set(resultKey, result);
+				objectSource.set(resultKey, methodResult);
 		}
 		catch(InvocationTargetException e)
 		{
 			throw new InvocationExecuteException(e.getCause());
-		}
-		catch(ConvertException e)
-		{
-			throw new ConvertExecuteException(e);
 		}
 		catch(IllegalArgumentException e)
 		{
@@ -179,37 +214,6 @@ public class Invoke extends AbstractExecutable
 		{
 			throw new ExecuteException(e);
 		}
-		
-		if(log.isDebugEnabled())
-			log.debug("finish execute '"+this+"'");
-	}
-
-	public ResolverProvider getResolverProvider() {
-		return resolverProvider;
-	}
-	public void setResolverProvider(ResolverProvider resolverProvider) {
-		this.resolverProvider = resolverProvider;
-	}
-
-	public Method getMethod() {
-		return method;
-	}
-	public void setMethod(Method method) {
-		this.method = method;
-	}
-
-	public Arg[] getArgs() {
-		return args;
-	}
-	public void setArgs(Arg[] args) {
-		this.args = args;
-	}
-
-	public Serializable getResultKey() {
-		return resultKey;
-	}
-	public void setResultKey(Serializable resultKey) {
-		this.resultKey = resultKey;
 	}
 	
 	/**
@@ -219,7 +223,7 @@ public class Invoke extends AbstractExecutable
 	 * @throws ConvertException
 	 * @date 2011-1-11
 	 */
-	protected Object[] getMethodArguments(ObjectSource objectSource) throws ConvertException
+	protected Object[] makeMethodArguments(ObjectSource objectSource) throws ExecuteException
 	{
 		Object[] values=null;
 		
@@ -234,7 +238,16 @@ public class Invoke extends AbstractExecutable
 				if(args[i].getValue()!=null || args[i].getKey()==null)
 					values[i]=args[i].getValue();
 				else
-					values[i]= objectSource.get(args[i].getKey(), args[i].getType());
+				{
+					try
+					{
+						values[i]= objectSource.get(args[i].getKey(), args[i].getType());
+					}
+					catch(ConvertException e)
+					{
+						throw new ConvertExecuteException(e);
+					}
+				}
 			}
 		}
 		
@@ -250,6 +263,21 @@ public class Invoke extends AbstractExecutable
 		return getClass().getSimpleName()+" [name=" + getName() + ", method=" + method
 				+ ", resultKey=" + resultKey + ", resolverProvider="
 				+ resolverProvider + ", args=" + Arrays.toString(args) + "]";
+	}
+	
+	/**
+	 * 保存方法调用结果到对象源，如果对象源或者<code>key</code>为<code>null</code>，则什么也不做
+	 * @param key
+	 * @param result
+	 * @param objectSource
+	 */
+	protected void saveMethodResult(Serializable key,Object result,ObjectSource objectSource)
+	{
+		if(objectSource==null)
+			return;
+		
+		if(key != null)
+			objectSource.set(key, result);
 	}
 	
 	/**

@@ -17,15 +17,10 @@ package org.soybeanMilk.core.bean;
 /**
  * 转换异常。{@linkplain Converter}在执行对象转换出现异常时将抛出它。
  * @author earthAngry@gmail.com
-<<<<<<< .mine
  * @date 2011-1-12
  *
-=======
- * @date 2011-1-11
- *
->>>>>>> .r221
  */
-public class ConvertException extends Exception
+public class ConvertException extends RuntimeException
 {
 	private static final long serialVersionUID = 5534640330364525246L;
 
@@ -34,36 +29,18 @@ public class ConvertException extends Exception
 		super();
 	}
 
-<<<<<<< .mine
 	public ConvertException(String message, Throwable cause)
 	{
 		super(message, cause);
-=======
-	public ConvertException(String arg0, Throwable arg1)
-	{
-		super(arg0, arg1);
->>>>>>> .r221
 	}
 
-<<<<<<< .mine
 	public ConvertException(String message)
 	{
 		super(message);
-=======
-	public ConvertException(String arg0)
-	{
-		super(arg0);
->>>>>>> .r221
 	}
 
-<<<<<<< .mine
 	public ConvertException(Throwable cause)
 	{
 		super(cause);
-=======
-	public ConvertException(Throwable arg0)
-	{
-		super(arg0);
->>>>>>> .r221
 	}
 }

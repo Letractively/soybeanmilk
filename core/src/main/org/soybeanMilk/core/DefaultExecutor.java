@@ -14,10 +14,6 @@
 
 package org.soybeanMilk.core;
 
-import java.io.Serializable;
-import java.lang.reflect.Type;
-
-import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.InterceptorInfo;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
@@ -55,25 +51,11 @@ public class DefaultExecutor implements Executor
 		if(exe == null)
 			throw new ExecutableNotFoundException(executableName);
 		
-		return executeWithInteceptor(exe, objSource);
+		return execute(exe, objSource);
 	}
 	
 	@Override
 	public Executable execute(Executable executable, ObjectSource objSource)
-			throws ExecuteException
-	{
-		return executeWithInteceptor(executable, objSource);
-	}
-	
-	/**
-	 * 执行，并返回最后执行的那个{@linkplain Executable 可执行对象}（当发生执行异常时，返回作为异常处理器的那个）。
-	 * @param executable
-	 * @param objSource
-	 * @return
-	 * @throws ExecuteException
-	 * @date 2011-1-7
-	 */
-	protected Executable executeWithInteceptor(Executable executable, ObjectSource objSource)
 			throws ExecuteException
 	{
 		if(objSource instanceof ConvertableObjectSource)
@@ -85,42 +67,26 @@ public class DefaultExecutor implements Executor
 		}
 		
 		InterceptorInfo itptInfo = getConfiguration().getInterceptorInfo();
-		//执行语境信息
+		
+		//保存执行语境信息
 		Execution context=null;
 		if(itptInfo!=null && itptInfo.getExecutionKey()!=null)
 		{
-			try
-			{
-				//它可能是持久存储的
-				context=(Execution)objSource.get(itptInfo.getExecutionKey(), null);
-				if(context == null)
-				{
-					context=new Execution(executable, objSource);
-					objSource.set(itptInfo.getExecutionKey(), context);
-				}
-				else
-				{
-					context.setExecutable(executable);
-					context.setObjectSource(objSource);
-				}
-			}
-			catch(ConvertException e)
-			{
-				throw new ExecuteException(e);
-			}
+			context=new Execution(executable, objSource);
+			objSource.set(itptInfo.getExecutionKey(), context);
 		}
 		
 		try
 		{
 			//before
 			if(itptInfo!=null && itptInfo.getBeforeHandler()!=null)
-				itptInfo.getBeforeHandler().execute(objSource);
+				executeInterceptor(itptInfo.getBeforeHandler(), objSource);
 			
 			executeTargetExecutable(executable, objSource);
 			
 			//after
 			if(itptInfo!=null && itptInfo.getAfterHandler()!=null)
-				itptInfo.getAfterHandler().execute(objSource);
+				executeInterceptor(itptInfo.getAfterHandler(), objSource);
 			
 			return executable;
 		}
@@ -134,7 +100,7 @@ public class DefaultExecutor implements Executor
 				throw e;
 			
 			//exception
-			itptInfo.getExceptionHandler().execute(objSource);
+			executeInterceptor(expExe, objSource);
 			
 			return expExe;
 		}
@@ -146,54 +112,12 @@ public class DefaultExecutor implements Executor
 	 * @param objSource
 	 * @return
 	 * @throws ExecuteException
-	 * @throws ExecutableNotFoundException
 	 * @date 2011-1-7
 	 */
 	protected Executable findExecutable(String executableName, ObjectSource objSource)
 			throws ExecuteException
 	{
 		return getConfiguration().getExecutable(executableName);
-	}
-	
-	/**
-	 * 从对象源取得对象
-	 * @param objSource
-	 * @param key
-	 * @param objectType
-	 * @return
-	 * @throws ExecuteException
-	 * @date 2011-1-11
-	 */
-	protected Object getObjectFromObjectSource(ObjectSource objSource, Serializable key, Type objectType) throws ExecuteException
-	{
-		try
-		{
-			return objSource.get(key, objectType);
-		}
-		catch(ConvertException e)
-		{
-			throw new ConvertExecuteException(e);
-		}
-	}
-	
-	/**
-	 * 将对象保存到对象源
-	 * @param objSource
-	 * @param key
-	 * @param value
-	 * @throws ExecuteException
-	 * @date 2011-1-11
-	 */
-	protected void setObjectToObjectSource(ObjectSource objSource, Serializable key, Object value) throws ExecuteException
-	{
-		try
-		{
-			objSource.set(key, value);
-		}
-		catch(ConvertException e)
-		{
-			throw new ConvertExecuteException(e);
-		}
 	}
 	
 	/**
@@ -206,5 +130,15 @@ public class DefaultExecutor implements Executor
 	protected void executeTargetExecutable(Executable executable, ObjectSource objSource) throws ExecuteException
 	{
 		executable.execute(objSource);
+	}
+	
+	/**
+	 * 执行拦截器
+	 * @param exeInterceptor
+	 * @param objSource
+	 */
+	protected void executeInterceptor(Executable exeInterceptor, ObjectSource objSource) throws ExecuteException
+	{
+		exeInterceptor.execute(objSource);
 	}
 }

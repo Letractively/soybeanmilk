@@ -15,10 +15,11 @@
 package org.soybeanMilk.core;
 
 import org.soybeanMilk.core.bean.ConvertException;
+import org.soybeanMilk.core.exe.Invoke;
 
 /**
- * 执行异常。{@linkplain Executor 执行器}从对象源取得对象或者将对象保存到对象源中时出现类型转换异常，
- * 这一般是由于非法输入导致的。它的源异常是{@linkplain ConvertException}。
+ * 执行异常。{@linkplain Invoke 调用}在从{@linkplain ObjectSource 对象源}获取方法参数值时出现类型转换异常，这通常是由于输入非法导致的。
+ * 它的源异常是{@linkplain ConvertException}。
  * @author earthAngry@gmail.com
  * @date 2011-1-11
  *

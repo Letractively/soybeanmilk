@@ -267,17 +267,17 @@ public class DefaultGenericConverter implements GenericConverter
 	 * 当转换出现异常时，此方法将被调用。
 	 * @param sourceObj
 	 * @param targetType
-	 * @param cause
+	 * @param exception
 	 * @return
 	 * @date 2011-1-5
 	 */
-	protected Object convertWhenException(Object sourceObj, Type targetType, ConvertException cause)
+	protected Object convertWhenException(Object sourceObj, Type targetType, ConvertException exception)
 	{
 		if(sourceObj instanceof String
 				&& ((String)sourceObj).length()==0 && !SoybeanMilkUtils.isPrimitive(targetType))
 			return null;
 		else
-			throw cause;
+			throw exception;
 	}
 	
 	/**

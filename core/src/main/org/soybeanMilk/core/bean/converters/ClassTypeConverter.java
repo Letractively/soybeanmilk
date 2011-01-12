@@ -38,7 +38,10 @@ public abstract class ClassTypeConverter implements Converter
 		}
 		catch(Exception e)
 		{
-			throw new ConvertException(e);
+			if(e instanceof ConvertException)
+				throw (ConvertException)e;
+			else
+				throw new ConvertException(e);
 		}
 	}
 	

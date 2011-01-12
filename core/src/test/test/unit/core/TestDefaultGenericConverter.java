@@ -429,6 +429,15 @@ public class TestDefaultGenericConverter
 		Assert.assertNull(re);
 	}
 	
+	@Test(expected = ConvertException.class)
+	public void convertString_invalidStringToInteger()
+	{
+		String src="sdf";
+		Integer re=(Integer)converter.convert(src, Integer.class);
+		
+		Assert.assertNull(re);
+	}
+	
 	@Test(expected = GenericConvertException.class)
 	public void convertNull_toPrimitive()
 	{
@@ -602,6 +611,16 @@ public class TestDefaultGenericConverter
 		converter.getProperty(bean, "age.size", null);
 	}
 	
+	@Test(expected = ConvertException.class)
+	public void getProperty_invalidConvert()
+	{
+		MyBean bean=new MyBean();
+		bean.setId("abc");
+		bean.setSize(7);
+		
+		converter.getProperty(bean, "id", Integer.class);
+	}
+	
 	@Test
 	public void setProperty()
 	{
@@ -620,6 +639,13 @@ public class TestDefaultGenericConverter
 			Assert.assertEquals("222", bean.getMyBean2().getId());
 			Assert.assertEquals(8, bean.getMyBean2().getSize().intValue());
 		}
+	}
+	
+	@Test(expected = ConvertException.class)
+	public void setProperty_invalidConvert()
+	{
+		MyBean bean=new MyBean();
+		converter.setProperty(bean, "myBean2.size", "sdf");
 	}
 	
 	public static class MyBean

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+它只是比core版本多了个<target>标签
+-->
+<!--根元素-->
+<!ELEMENT soybean-milk (global-config?,includes?,resolvers?,executables)>
+
+<!--全局配置-->
+<!ELEMENT global-config (generic-converter?,interceptor?)>
+
+<!--
+通用转换器配置
+-->
+<!ELEMENT generic-converter (converter*)>
+
+<!--
+自定义的辅助转换器
+-->
+<!ELEMENT converter EMPTY>
+
+<!--
+拦截器配置
+-->
+<!ELEMENT interceptor EMPTY>
+
+<!--
+包含的模块配置文件
+-->
+<!ELEMENT includes (file*)>
+<!--
+模块配置文件名，它可以是模糊的也可以是明确的
+比如：
+“my/cfg/*”			表示目录“my/cfg/”下面的所有XML文件（不包括子目录）
+“my/cfg/my.xml”		表示单一的配置文件
+-->
+<!ELEMENT file (#PCDATA)>
+
+<!--
+解决对象配置
+-->
+<!ELEMENT resolvers (resolver*)>
+<!ELEMENT resolver EMPTY>
+
+<!--
+可执行对象配置
+-->
+<!ELEMENT executables (invoke | action)*>
+
+<!--
+动作
+它可以包含多个局部调用或者全局引用
+-->
+<!ELEMENT action ((invoke | ref)*,target?)>
+<!--
+执行引用，将已定义的可执行对象添加到本次执行中
+-->
+<!ELEMENT ref EMPTY>
+
+<!--
+调用配置
+-->
+<!ELEMENT invoke (#PCDATA | arg)*>
+
+<!--
+target 动作的目标URL
+-->
+<!ELEMENT target EMPTY>
+
+<!--
+参数配置
+每个调用的参数配置必须与其执行的方法是一一对应的，也即是方法有几个参数，这里你就要为其配置几个参数。
+-->
+<!ELEMENT arg (#PCDATA)>
+
+<!--
+自定义通用转换器完整类名，它的值需要能够被Class.forName("[class]").newInstance()正确使用
+-->
+<!ATTLIST generic-converter class CDATA #IMPLIED>
+
+<!--
+自定义转换器属性
+src 它支持转换的源类型
+target 它支持转换的目标类型
+class 转换器类名
+-->
+<!ATTLIST converter src CDATA #REQUIRED>
+<!ATTLIST converter target CDATA #REQUIRED>
+<!ATTLIST converter class CDATA #REQUIRED>
+
+<!--
+拦截器属性
+before 作为前切点拦截器的可执行对象名
+after 作为后切点拦截器的可执行对象名
+exception 作为异常时拦截器的可执行对象名
+-->
+<!ATTLIST interceptor before CDATA #IMPLIED>
+<!ATTLIST interceptor after CDATA #IMPLIED>
+<!ATTLIST interceptor exception CDATA #IMPLIED>
+<!ATTLIST interceptor execution-key CDATA #IMPLIED>
+
+<!--
+解决对象配置属性
+id 唯一ID
+class 解决对象类名
+-->
+<!ATTLIST resolver id ID #REQUIRED>
+<!ATTLIST resolver class CDATA #REQUIRED>
+
+<!--
+动作的名称属性
+执行器通过这个名称来查找动作对象并执行
+-->
+<!ATTLIST action name CDATA #REQUIRED>
+
+<!--
+执行引用名称，它可以引用在任何位置定义的全局可执行对象
+-->
+<!ATTLIST ref name CDATA #REQUIRED>
+
+<!--
+调用配置的名称属性
+如果调用是全局的，那么它应该与动作一起是全局唯一的；如果是局部的，则可以为空
+-->
+<!ATTLIST invoke name CDATA #IMPLIED>
+
+<!--
+调用执行的方法名称
+它要能够在之后配置的resolver-class或者resolver类中找到
+-->
+<!ATTLIST invoke method CDATA #REQUIRED>
+
+<!--
+调用的解决对象配置，配置解析器通过它来查找方法对象并确定参数类型
+resolver-class 解决对象类名，如果方法是静态的，你可以仅指定“resolver-class”
+resolver 解决对象ID，如果方法是非静态的，你应该设置它的值
+-->
+<!ATTLIST invoke resolver-class CDATA #IMPLIED>
+<!ATTLIST invoke resolver CDATA #IMPLIED>
+
+<!--
+调用执行结果保存关键字属性，调用的方法执行结果将以此关键字保存到对象源中。
+无论方法是否有返回结果，只要你定义了“result-key”，框架总会执行保存操作，只不过无返回结果的话是以null值保存的。
+-->
+<!ATTLIST invoke result-key CDATA #IMPLIED>
+
+<!--
+动作目标配置属性
+url 目标URL，如果是上下文内的URL，则必须以'/'开头
+type 目标类型（转向或者重定向）
+-->
+<!ATTLIST target url CDATA #REQUIRED>
+<!ATTLIST target type (forward | redirect) #IMPLIED>

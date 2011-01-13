@@ -71,6 +71,11 @@ public class Action extends AbstractExecutable
 			log.debug("finish execute '"+this+"'");
 	}
 
+	/**
+	 * 获取此动作包含的所有{@linkplain Executable 可执行对象}，它可能包含{@linkplain Action 动作}和{@linkplain Invoke 调用}。
+	 * @return
+	 * @date 2011-1-13
+	 */
 	public List<Executable> getExecutables() {
 		return executables;
 	}

@@ -58,7 +58,7 @@ public class HashMapObjectSource extends ConvertableObjectSource
 		if(cvt == null)
 		{
 			if(re==null && SoybeanMilkUtils.isPrimitive(expectType))
-				throw new ObjectSourceException("the result object is null, but primitive type needed");
+				throw new ObjectSourceException("the object of key '"+key+"' is null, but primitive type needed");
 			else
 				return re;
 		}

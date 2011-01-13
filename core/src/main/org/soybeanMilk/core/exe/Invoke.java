@@ -126,6 +126,11 @@ public class Invoke extends AbstractExecutable
 		this.resolverProvider = resolverProvider;
 	}
 
+	/**
+	 * 获取此调用的{@linkplain Method 方法}。
+	 * @return
+	 * @date 2011-1-13
+	 */
 	public Method getMethod() {
 		return method;
 	}
@@ -133,6 +138,11 @@ public class Invoke extends AbstractExecutable
 		this.method = method;
 	}
 
+	/**
+	 * 获取此调用的方法{@linkplain Arg 参数}数组。
+	 * @return
+	 * @date 2011-1-13
+	 */
 	public Arg[] getArgs() {
 		return args;
 	}
@@ -140,11 +150,27 @@ public class Invoke extends AbstractExecutable
 		this.args = args;
 	}
 
+	/**
+	 * 获取此调用的方法结果保存关键字。
+	 * @return
+	 * @date 2011-1-13
+	 */
 	public Serializable getResultKey() {
 		return resultKey;
 	}
 	public void setResultKey(Serializable resultKey) {
 		this.resultKey = resultKey;
+	}
+	
+	/**
+	 * 获取调用方法某个位置的{@linkplain Arg 参数}。
+	 * @param index
+	 * @return
+	 * @date 2011-1-13
+	 */
+	public Arg getArg(int index)
+	{
+		return this.args[index];
 	}
 	
 	/**
@@ -205,7 +231,7 @@ public class Invoke extends AbstractExecutable
 		}
 		catch(InvocationTargetException e)
 		{
-			throw new InvocationExecuteException(e.getCause());
+			throw new InvocationExecuteException(this, e.getCause());
 		}
 		catch(IllegalArgumentException e)
 		{
@@ -246,7 +272,7 @@ public class Invoke extends AbstractExecutable
 					}
 					catch(ConvertException e)
 					{
-						throw new ConvertExecuteException(e);
+						throw new ConvertExecuteException(this, i, e);
 					}
 				}
 			}

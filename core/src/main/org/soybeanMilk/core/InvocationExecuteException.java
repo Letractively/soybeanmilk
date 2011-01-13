@@ -17,8 +17,8 @@ package org.soybeanMilk.core;
 import org.soybeanMilk.core.exe.Invoke;
 
 /**
- * 执行异常。{@linkplain Invoke 调用}方法在执行时内部抛出异常。
- * 它的源异常是方法异常，是由{@linkplain Invoke 调用}方法的编写者定义的。
+ * 执行异常，{@linkplain Invoke 调用}方法在执行时内部抛出异常。
+ * 它的源异常是由{@linkplain Invoke 调用}方法的编写者定义的方法异常。
  * @author earthAngry@gmail.com
  * @date 2010-12-19
  *
@@ -26,9 +26,26 @@ import org.soybeanMilk.core.exe.Invoke;
 public class InvocationExecuteException extends ExecuteException
 {
 	private static final long serialVersionUID = 4055198175289241031L;
-
-	public InvocationExecuteException(Throwable cause) {
+	
+	private transient Invoke invoke;
+	
+	public InvocationExecuteException(Invoke invoke, Throwable cause)
+	{
 		super(cause);
+		this.invoke=invoke;
+	}
+	
+	/**
+	 * 获取产生此异常的{@linkplain Invoke 调用}。
+	 * @return
+	 * @date 2011-1-13
+	 */
+	public Invoke getInvoke() {
+		return invoke;
+	}
+
+	public void setInvoke(Invoke invoke) {
+		this.invoke = invoke;
 	}
 
 	/**

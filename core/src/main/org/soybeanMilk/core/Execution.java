@@ -44,7 +44,8 @@ public class Execution implements Serializable
 	}
 
 	public Execution(Executable executable, ObjectSource objectSource,
-			ExecuteException executeException) {
+			ExecuteException executeException)
+	{
 		super();
 		this.executable = executable;
 		this.objectSource = objectSource;

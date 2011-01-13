@@ -19,8 +19,7 @@ import org.soybeanMilk.core.config.InterceptorInfo;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 
 /**
- * 执行器的一个简单实现，它仅是从{@linkplain Configuration 配置}中查找对应的{@linkplain Executable 可执行对象}，
- * 然后调用{@link Executor#execute(String, ObjectSource)}方法
+ * 执行器的默认实现。
  * @author earthAngry@gmail.com
  * @date 2010-9-30
  */

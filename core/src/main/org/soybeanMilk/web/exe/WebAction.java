@@ -75,9 +75,9 @@ public class WebAction extends Action
 		public static final String REDIRECT="redirect";
 		
 		/**目标URL*/
-		protected String url;
+		private String url;
 		/**目标类型*/
-		protected String type;
+		private String type;
 		
 		public Target()
 		{

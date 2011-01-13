@@ -32,6 +32,7 @@ public abstract class ClassTypeConverter implements Converter
 	{
 		if(targetType == null)
 			return sourceObj;
+		
 		try
 		{
 			return convertToClass(sourceObj, SoybeanMilkUtils.narrowToClassType(targetType));
@@ -41,7 +42,7 @@ public abstract class ClassTypeConverter implements Converter
 			if(e instanceof ConvertException)
 				throw (ConvertException)e;
 			else
-				throw new ConvertException(e);
+				throw new ConvertException(sourceObj, targetType, e);
 		}
 	}
 	

@@ -9,10 +9,16 @@
 	<property name="versionDir" value="versions" />
 	<!--临时目录-->
 	<property name="tmpDir" value="../../tmp" />
+	
+	<!--版本更改时，用于删除旧版-->
+	<property name="appVersion_old" value="1.0-beta" />
 	<!-- 版本 -->
 	<property name="appVersion" value="1.0-beta" />
+	
 	<!-- 名称 -->
+	<property name="appName_old" value="soybeanMilk-${appVersion_old}" />
 	<property name="appName" value="soybeanMilk-${appVersion}" />
+	
 	<!-- 示例工程名 -->
 	<property name="exampleProjectName" value="soybeanMilkExample" />
 	<!-- 示例工程位置 -->
@@ -20,6 +26,7 @@
 	
 	<!--打jar包-->
 	<target name="jarFramework">
+		<delete file="${distDir}/${appName_old}.jar" />
 		<delete file="${distDir}/${appName}.jar" />
 		<jar destfile="${distDir}/${appName}.jar">
 			
@@ -37,6 +44,7 @@
 	
 	<!--拷贝新生成的Jar包到示例工程下-->
 	<target name="copyJarToExampleProject" depends="jarFramework">
+		<delete file="${exampleProjectDir}/WebContent/WEB-INF/lib/${appName_old}.jar" />
 		<delete file="${exampleProjectDir}/WebContent/WEB-INF/lib/${appName}.jar" />
 		<copy file="${distDir}/${appName}.jar" todir="${exampleProjectDir}/WebContent/WEB-INF/lib" />
 	</target>

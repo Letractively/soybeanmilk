@@ -160,7 +160,7 @@ public class SoybeanMilkUtils
 	 * 如果<code>type</code>是{@linkplain java.lang.Class Class}类型，则结果是包含仅包含它一个元素的数组；
 	 * 如果是{@linkplain java.lang.reflect.ParameterizedType ParameterizedType}类型，
 	 * 则返回数组的第一个元素是它的原始类型，而后续的元素则是参数类型；
-	 * 如果是无法识别的类型，则返回<code>null</code>。
+	 * 如果是无法识别的类型，则会抛出异常。
 	 * @param type
 	 * @return
 	 * @date 2011-1-3

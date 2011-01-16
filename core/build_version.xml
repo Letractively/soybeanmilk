@@ -13,7 +13,7 @@
 	<!--版本更改时，用于删除旧版-->
 	<property name="appVersion_old" value="1.0-beta" />
 	<!-- 版本 -->
-	<property name="appVersion" value="1.0-beta" />
+	<property name="appVersion" value="1.0-RC" />
 	
 	<!-- 名称 -->
 	<property name="appName_old" value="soybeanMilk-${appVersion_old}" />
@@ -64,6 +64,7 @@
 	
 	<!--将整个dist打成zip文件并放到versions录下-->
 	<target name="zipDist" depends="copyApiToDocs">
+		<delete file="${versionDir}/${appName_old}.all.zip" />
 		<delete file="${versionDir}/${appName}.all.zip" />
 		<zip destfile="${versionDir}/${appName}.all.zip">
 			<zipfileset dir="${distDir}/docs" prefix="docs" />

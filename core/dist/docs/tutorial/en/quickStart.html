@@ -28,19 +28,20 @@
 			</p>
 			<p>
 				
-				First, you must write a Java class, just like the following calculator example:
+				First, you must write a Java class, just like the following example:
 <pre class="code-java">
 package my;
-public class Calculator
+
+public class User{
+    private Integer id;
+    private String name;
+}
+
+public class UserManager
 {
-        public int multiply(int a, int b)
-        {
-                return a*b;
-        }
-        public int add(int a, int b)
-        {
-                return a+b;
-        }
+    public void save(User user){ ... }
+    
+    public List&lt;User&gt; list(){ ... }
 }
 </pre>
 			</p>
@@ -50,53 +51,28 @@ public class Calculator
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;soybean-milk&gt;
         &lt;resolvers&gt;
-                &lt;resolver id="calculator" class="my.Calculator" /&gt;
+                &lt;resolver id="userManager" class="my.UserManager" /&gt;
         &lt;/resolvers&gt;
 
         &lt;executables&gt;
-                &lt;action name="/calculate.do"&gt;
-                        &lt;invoke&gt;
-                            multiplyResult = calculator.multiply(param.a, 10);
-                        &lt;/invoke&gt;
-                        &lt;invoke&gt;
-                            calculateResult = calculator.add(request.multiplyResult, 10)
-                        &lt;/invoke&gt;
-                        <span style="color:#999999">
-                        &lt;!--or you can use XML mode like this
-                        &lt;invoke method="multiply" resolver="calculator" result-key="multiplyResult"&gt;
-                            &lt;arg&gt;param.a&lt;/arg&gt;
-                            &lt;arg&gt;10&lt;/arg&gt;
-                        &lt;/invoke&gt;
-                        &lt;invoke method="add" resolver="calculator" result-key="calculateResult"&gt;
-                            &lt;arg&gt;request.multiplyResult&lt;/arg&gt;
-                            &lt;arg&gt;10&lt;/arg&gt;
-                        &lt;/invoke&gt;
-                        --&gt;
-                        </span>
-                        &lt;target url="/calculate_result.jsp" /&gt;
+                &lt;action name="/user/add.do"&gt;
+                        &lt;invoke&gt; <span class="var">userManager.save(param)</span> &lt;/invoke&gt;
+                        &lt;target url="/user/list.do" type="redirect" /&gt;
+                &lt;/action&gt;
+                
+                &lt;action name="/user/list.do"&gt;
+                        &lt;invoke&gt; <span class="var">request.userList = userManager.list()</span> &lt;/invoke&gt;
+                        &lt;target url="/user/list.jsp" /&gt;
                 &lt;/action&gt;
         &lt;/executables&gt;
 &lt;/soybean-milk&gt;
 </pre>
 			</p>
 			<p>
-				Then, write the view page named "/calculate_result.jsp":
-<pre class="code-xml">
-&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot; pageEncoding=&quot;UTF-8&quot;%&gt;
-&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;
-&lt;html&gt;
-&lt;head&gt;
-&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;
-&lt;title&gt;Calculate&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-	Calculate: ${calculateResult}
-&lt;/body&gt;
-&lt;/html&gt;
-</pre>
+				OK, the work "Save user" and "Find all users" is finish (The JSP pages are omitted).
 			</p>
 			<p>
-			  	And add the following XML codes to your "web.xml":
+			  	Now, add the following XML codes into your "web.xml":
 <pre class="code-xml">
 &lt;servlet&gt;
     &lt;servlet-name&gt;dispatchServlet&lt;/servlet-name&gt;
@@ -122,8 +98,8 @@ commons-logging-api-1.1.jar
 			</p>
 			<p>
 			  	That's OK!<br/>
-			  	Now, start the web server, and type "http://[<span class="var">youApp</span>]/calculate.do?a=3" in your internet explorer,
-			  	you will see "Calculate: 40".
+			  	Now, start the web server, and type "<span class="var">http://[yourApp]/user/add.do?id=1&name=jack</span>" in your internet explorer,
+			  	user "<span class="var">jack</span>" will be saved and displayed in "<span class="var">/user/list.jsp</span>" page.
 			</p>
 		</div>
 	</div>

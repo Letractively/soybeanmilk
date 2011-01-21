@@ -27,19 +27,20 @@
 				来看看使用<span class="mainTitle">SoybeanMilk</span>时，你需要做些什么。
 			</p>
 			<p>
-					首先，你需要编写你的Java业务类，比如下面的计算器示例：
+					首先，你需要编写你的Java业务类，比如下面的示例：
 <pre class="code-java">
 package my;
-public class Calculator
+
+public class User{
+    private Integer id;
+    private String name;
+}
+
+public class UserManager
 {
-        public int multiply(int a, int b)
-        {
-                return a*b;
-        }
-        public int add(int a, int b)
-        {
-                return a+b;
-        }
+    public void save(User user){ ... }
+    
+    public List&lt;User&gt; list(){ ... }
 }
 </pre>
 			</p>
@@ -49,61 +50,32 @@ public class Calculator
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;soybean-milk&gt;
         &lt;resolvers&gt;
-                &lt;resolver id="calculator" class="my.Calculator" /&gt;
+                &lt;resolver id="userManager" class="my.UserManager" /&gt;
         &lt;/resolvers&gt;
 
         &lt;executables&gt;
-                &lt;action name="/calculate.do"&gt;
-                        &lt;invoke&gt;
-                            multiplyResult = calculator.multiply(param.a, 10);
-                        &lt;/invoke&gt;
-                        &lt;invoke&gt;
-                            calculateResult = calculator.add(request.multiplyResult, 10)
-                        &lt;/invoke&gt;
-                        <span style="color:#999999">
-                        &lt;!--或者使用结构更清晰的XML方式
-                        &lt;invoke method="multiply" resolver="calculator" result-key="multiplyResult"&gt;
-                            &lt;arg&gt;param.a&lt;/arg&gt;
-                            &lt;arg&gt;10&lt;/arg&gt;
-                        &lt;/invoke&gt;
-                        &lt;invoke method="add" resolver="calculator" result-key="calculateResult"&gt;
-                            &lt;arg&gt;request.multiplyResult&lt;/arg&gt;
-                            &lt;arg&gt;10&lt;/arg&gt;
-                        &lt;/invoke&gt;
-                        --&gt;
-                        </span>
-                        &lt;target url="/calculate_result.jsp" /&gt;
+                &lt;action name="/user/add.do"&gt;
+                        &lt;invoke&gt; <span class="var">userManager.save(param)</span> &lt;/invoke&gt;
+                        &lt;target url="/user/list.do" type="redirect" /&gt;
+                &lt;/action&gt;
+                
+                &lt;action name="/user/list.do"&gt;
+                        &lt;invoke&gt; <span class="var">request.userList = userManager.list()</span> &lt;/invoke&gt;
+                        &lt;target url="/user/list.jsp" /&gt;
                 &lt;/action&gt;
         &lt;/executables&gt;
 &lt;/soybean-milk&gt;
 </pre>
 			</p>
 			<p>
-					接下来，编写“/calculate_result.jsp”展示页面：
-<pre class="code-xml">
-&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot; pageEncoding=&quot;UTF-8&quot;%&gt;
-&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;
-&lt;html&gt;
-&lt;head&gt;
-&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;
-&lt;title&gt;计算结果&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-	计算结果：${calculateResult}
-&lt;/body&gt;
-&lt;/html&gt;
-</pre>
+				好了，业务“<span class="var">保存用户</span>”和“<span class="var">查询所有用户列表</span>”已经完成！（JSP页面部分省略...）
 			</p>
 			<p>
-			  	配置web.xml，加入如下内容：
+			  	下面，你需要在你的<span class="var">web.xml</span>中加入如下内容：
 <pre class="code-xml">
 &lt;servlet&gt;
     &lt;servlet-name&gt;dispatchServlet&lt;/servlet-name&gt;
     &lt;servlet-class&gt;org.soybeanMilk.web.servlet.DispatchServlet&lt;/servlet-class&gt;
-    &lt;init-param&gt;
-      &lt;param-name&gt;encoding&lt;/param-name&gt;
-      &lt;param-value&gt;UTF-8&lt;/param-value&gt;
-    &lt;/init-param&gt;
     &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
   &lt;/servlet&gt;
   &lt;servlet-mapping&gt;
@@ -124,7 +96,7 @@ commons-logging-api-1.1.jar
 			  	放入/WEB-INF/lib目录下。
 			</p>
 			<p>
-			  	最后，启动服务器，在浏览器中输入“http://[<span class="var">youApp</span>]/calculate.do?a=3”，页面上将显示“计算结果：40”。
+			  	最后，启动服务器，在浏览器中输入“<span class="var">http://[yourApp]/user/add.do?id=1&name=jack</span>”，用户“<span class="var">jack</span>”将被保存，并显示在“<span class="var">/user/list.jsp</span>”页面上。
 			</p>
 		</div>
 	</div>

@@ -68,6 +68,11 @@ public class PropertyInfo
 			this.genericType=type;
 	}
 	
+	/**
+	 * 获取属性的{@linkplain Class}类型。
+	 * @return
+	 * @date 2011-1-26
+	 */
 	public Class<?> getType() {
 		return type;
 	}
@@ -76,6 +81,11 @@ public class PropertyInfo
 		this.type = type;
 	}
 
+	/**
+	 * 获取属性的类型。它可能包含更多的信息，比如参数化类型。
+	 * @return
+	 * @date 2011-1-26
+	 */
 	public Type getGenericType() {
 		return genericType;
 	}
@@ -84,6 +94,11 @@ public class PropertyInfo
 		this.genericType = genericType;
 	}
 
+	/**
+	 * 获取此属性的子属性信息，以属性名作为关键字。
+	 * @return
+	 * @date 2011-1-26
+	 */
 	public Map<String, PropertyInfo> getSubPropertyInfos() {
 		return subPropertyInfos;
 	}

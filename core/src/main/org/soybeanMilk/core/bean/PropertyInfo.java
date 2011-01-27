@@ -71,7 +71,7 @@ public class PropertyInfo
 	/**
 	 * 获取属性的{@linkplain Class}类型。
 	 * @return
-	 * @date 2011-1-26
+	 * @date 2010-12-28
 	 */
 	public Class<?> getType() {
 		return type;
@@ -84,7 +84,7 @@ public class PropertyInfo
 	/**
 	 * 获取属性的类型。它可能包含更多的信息，比如参数化类型。
 	 * @return
-	 * @date 2011-1-26
+	 * @date 2010-12-28
 	 */
 	public Type getGenericType() {
 		return genericType;
@@ -95,9 +95,9 @@ public class PropertyInfo
 	}
 
 	/**
-	 * 获取此属性的子属性信息，以属性名作为关键字。
+	 * 获取此属性的类信息，以属性名作为关键字。如果没有类信息，则返回<code>null</code>（比如<code>int</code>类型）。
 	 * @return
-	 * @date 2011-1-26
+	 * @date 2010-12-28
 	 */
 	public Map<String, PropertyInfo> getSubPropertyInfos() {
 		return subPropertyInfos;
@@ -107,6 +107,11 @@ public class PropertyInfo
 		this.subPropertyInfos = subPropertyInfos;
 	}
 
+	/**
+	 * 获取属性的读方法。
+	 * @return
+	 * @date 2010-12-28
+	 */
 	public Method getReadMethod() {
 		return readMethod;
 	}
@@ -115,6 +120,11 @@ public class PropertyInfo
 		this.readMethod = readMethod;
 	}
 
+	/**
+	 * 获取属性的写方法。
+	 * @return
+	 * @date 2010-12-28
+	 */
 	public Method getWriteMethod() {
 		return writeMethod;
 	}

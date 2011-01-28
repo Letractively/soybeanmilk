@@ -187,6 +187,23 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 			<p>
 				这样，你就可以在框架配置文件<span class="tag">&lt;invoke&gt;</span>标签的<span class="tagAttr">resolver</span>属性中使用在Spring中定义的那些<span class="tag">&lt;bean&gt;</span>的<span class="tagAttr">id</span>了。
 			</p>
+			<p>
+				比如，假设有下面的Spring配置：
+<pre class="code-xml">
+&lt;bean id="helloWorldBean"&gt;  
+	....
+&lt;/bean&gt; 
+</pre>
+			</p>
+			<p>
+				那么你可以在SoybeanMilk配置中直接调用这个bean的方法：
+<pre class="code-xml">
+&lt;action name="/helloWorld.do"&gt;  
+	&lt;invoke&gt; request.message=helloWorldBean.helloWorld() &lt;/invoke&gt;  
+	&lt;target url="/helloWorld.jsp" /&gt;  
+&lt;/action&gt; 
+</pre>
+			</p>
 			<div class="seprator"></div>
 			<p>
 				<a name="init_webObjectSoruce-factory-class"></a>

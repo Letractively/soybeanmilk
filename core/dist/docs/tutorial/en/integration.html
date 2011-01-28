@@ -189,6 +189,23 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 			<p>
 				Now, you can use any <span class="tagAttr">id</span> of <span class="tag">&lt;bean&gt;</span> defined in Spring as the <span class="tagAttr">resolver</span> attribute of <span class="tag">&lt;invoke&gt;</span>.
 			</p>
+			<p>
+				For example, if there is a bean in Spring like this:
+<pre class="code-xml">
+&lt;bean id="helloWorldBean"&gt;  
+	....
+&lt;/bean&gt; 
+</pre>
+			</p>
+			<p>
+				Then, you can define its action like this:
+<pre class="code-xml">
+&lt;action name="/helloWorld.do"&gt;  
+	&lt;invoke&gt; request.message=helloWorldBean.helloWorld() &lt;/invoke&gt;  
+	&lt;target url="/helloWorld.jsp" /&gt;  
+&lt;/action&gt; 
+</pre>
+			</p>
 						<div class="seprator"></div>
 			<p>
 				<a name="init_webObjectSoruce-factory-class"></a>

@@ -1,0 +1,12 @@
+
+* JS验证组件
+	能自动生成Java类型的JS验证函数，由下面几部分组成：
+	1) JS函数模板
+	2) JS提示信息（用于在验证时，显示提示）
+	3) 验证组件Java接口，String jsValidator(Class[] clazz, String prefix), void jsValidator(Class[] clazz, String prefix, OutputStream out)
+	
+* Spring整合Servlet
+	编写一个现有的org.soybeanMilk.web.servlet.DispatchServlet继承类，使其可以自动识别Spring并整合。
+
+* Velocity整合Servlet
+	与上面类似，可以是现在同一个Servlet中。

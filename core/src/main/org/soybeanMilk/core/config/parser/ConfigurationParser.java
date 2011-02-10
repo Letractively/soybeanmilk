@@ -60,47 +60,46 @@ public class ConfigurationParser
 {
 	private static Log log=LogFactory.getLog(ConfigurationParser.class);
 	
+	protected static final String TAG_ROOT="soybean-milk";
 	
-	public static final String TAG_ROOT="soybean-milk";
+	protected static final String TAG_GLOBAL_CONFIG="global-config";
+	protected static final String TAG_GENERIC_CONVERTER="generic-converter";
+	protected static final String TAG_GENERIC_CONVERTER_ATTR_CLASS="class";
+	protected static final String TAG_CONVERTER="converter";
+	protected static final String TAG_CONVERTER_ATTR_SRC="src";
+	protected static final String TAG_CONVERTER_ATTR_TARGET="target";
+	protected static final String TAG_CONVERTER_ATTR_CLASS=TAG_GENERIC_CONVERTER_ATTR_CLASS;
 	
-	public static final String TAG_GLOBAL_CONFIG="global-config";
-	public static final String TAG_GENERIC_CONVERTER="generic-converter";
-	public static final String TAG_GENERIC_CONVERTER_ATTR_CLASS="class";
-	public static final String TAG_CONVERTER="converter";
-	public static final String TAG_CONVERTER_ATTR_SRC="src";
-	public static final String TAG_CONVERTER_ATTR_TARGET="target";
-	public static final String TAG_CONVERTER_ATTR_CLASS=TAG_GENERIC_CONVERTER_ATTR_CLASS;
+	protected static final String TAG_INTERCEPROT="interceptor";
+	protected static final String TAG_INTERCEPROT_ATTR_BEFORE="before";
+	protected static final String TAG_INTERCEPROT_ATTR_AFTER="after";
+	protected static final String TAG_INTERCEPROT_ATTR_EXCEPTION="exception";
+	protected static final String TAG_INTERCEPROT_ATTR_EXECUTION_KEY="execution-key";
 	
-	public static final String TAG_INTERCEPROT="interceptor";
-	public static final String TAG_INTERCEPROT_ATTR_BEFORE="before";
-	public static final String TAG_INTERCEPROT_ATTR_AFTER="after";
-	public static final String TAG_INTERCEPROT_ATTR_EXCEPTION="exception";
-	public static final String TAG_INTERCEPROT_ATTR_EXECUTION_KEY="execution-key";
+	protected static final String TAG_INCLUDES="includes";
+	protected static final String TAG_FILE="file";
 	
-	public static final String TAG_INCLUDES="includes";
-	public static final String TAG_FILE="file";
+	protected static final String TAG_RESOLVERS="resolvers";
+	protected static final String TAG_RESOLVER="resolver";
+	protected static final String TAG_RESOLVER_ATTR_ID="id";
+	protected static final String TAG_RESOLVER_ATTR_CLASS="class";
 	
-	public static final String TAG_RESOLVERS="resolvers";
-	public static final String TAG_RESOLVER="resolver";
-	public static final String TAG_RESOLVER_ATTR_ID="id";
-	public static final String TAG_RESOLVER_ATTR_CLASS="class";
+	protected static final String TAG_EXECUTABLES="executables";
 	
-	public static final String TAG_EXECUTABLES="executables";
+	protected static final String TAG_ACTION="action";
+	protected static final String TAG_ACTION_ATTR_NAME="name";
 	
-	public static final String TAG_ACTION="action";
-	public static final String TAG_ACTION_ATTR_NAME="name";
+	protected static final String TAG_INVOKE="invoke";
+	protected static final String TAG_INVOKE_ATTR_NAME=TAG_ACTION_ATTR_NAME;
+	protected static final String TAG_INVOKE_ATTR_METHOD="method";
+	protected static final String TAG_INVOKE_ATTR_RESOLVER_OBJECT="resolver";
+	protected static final String TAG_INVOKE_ATTR_RESOLVER_CLASS="resolver-class";
+	protected static final String TAG_INVOKE_ATTR_RESULT_KEY="result-key";
 	
-	public static final String TAG_INVOKE="invoke";
-	public static final String TAG_INVOKE_ATTR_NAME=TAG_ACTION_ATTR_NAME;
-	public static final String TAG_INVOKE_ATTR_METHOD="method";
-	public static final String TAG_INVOKE_ATTR_RESOLVER_OBJECT="resolver";
-	public static final String TAG_INVOKE_ATTR_RESOLVER_CLASS="resolver-class";
-	public static final String TAG_INVOKE_ATTR_RESULT_KEY="result-key";
+	protected static final String TAG_ARG="arg";
 	
-	public static final String TAG_ARG="arg";
-	
-	public static final String TAG_REF="ref";
-	public static final String TAG_REF_ATTR_NAME="name";
+	protected static final String TAG_REF="ref";
+	protected static final String TAG_REF_ATTR_NAME="name";
 	
 	
 	private Document document;

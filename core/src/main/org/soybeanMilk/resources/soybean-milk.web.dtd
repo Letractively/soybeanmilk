@@ -145,8 +145,8 @@ resolver 解决对象ID，如果方法是非静态的，你应该设置它的值
 
 <!--
 动作目标配置属性
-url 目标URL，如果是上下文内的URL，则必须以'/'开头
+url 目标URL
 type 目标类型（转向或者重定向）
 -->
-<!ATTLIST target url CDATA #REQUIRED>
-<!ATTLIST target type (forward | redirect) #IMPLIED>
+<!ATTLIST target url CDATA #IMPLIED>
+<!ATTLIST target type  CDATA #IMPLIED>

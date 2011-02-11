@@ -343,7 +343,10 @@ public class DispatchServlet extends HttpServlet
 		HttpServletRequest request = objSource.getRequest();
 		HttpServletResponse response=objSource.getResponse();
 		
-		String url=processVariableTargetUrl(target.getUrl(), objSource);
+		String url=evaluateVariableUrl(target.getUrl(), objSource);
+		if(url == null)
+			throw new ServletException("the target url of '"+executable+"' must be defined.");
+		
 		if(Target.REDIRECT.equalsIgnoreCase(target.getType()))
 		{
 			//在语境内
@@ -374,28 +377,31 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 处理带有变量的目标URL
-	 * @param targetUrl 目标URL，它可能包含"{...}"格式的变量
+	 * 求变量URL的值
+	 * @param variableUrl 目标URL，它可能包含"{...}"格式的变量
 	 * @param objectSource
 	 * @return
 	 */
-	protected String processVariableTargetUrl(String targetUrl, WebObjectSource objectSource)
+	protected String evaluateVariableUrl(String variableUrl, WebObjectSource objectSource)
 	{
+		if(variableUrl == null)
+			return null;
+		
 		StringBuffer result=new StringBuffer();
 		
-		int i=0, len=targetUrl.length();
+		int i=0, len=variableUrl.length();
 		for(;i<len;i++)
 		{
-			char c=targetUrl.charAt(i);
+			char c=variableUrl.charAt(i);
 			
 			if(c == WebConstants.VARIABLE_QUOTE_LEFT)
 			{
 				int j=i+1;
 				int start=j;
-				for(;j<len && (c=targetUrl.charAt(j))!=WebConstants.VARIABLE_QUOTE_RIGHT;)
+				for(;j<len && (c=variableUrl.charAt(j))!=WebConstants.VARIABLE_QUOTE_RIGHT;)
 					j++;
 				
-				String var=targetUrl.substring(start, j);
+				String var=variableUrl.substring(start, j);
 				if(c == WebConstants.VARIABLE_QUOTE_RIGHT)
 				{
 					String value=(String)objectSource.get(var, String.class);

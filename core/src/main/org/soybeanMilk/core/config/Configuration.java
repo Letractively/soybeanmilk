@@ -34,7 +34,6 @@ public class Configuration
 {
 	private static Log log=LogFactory.getLog(Configuration.class);
 	
-	
 	/**解决对象工厂*/
 	private ResolverFactory resolverFactory;
 	
@@ -133,8 +132,9 @@ public class Configuration
 		
 		checkNameNotNull(executable);
 		
+		//允许重复添加，使得功能可以被替换
 		if(exeMap.get(executable.getName()) != null)
-			throw new IllegalArgumentException("duplicate Executable name '"+executable.getName()+"'");
+			log.warn("duplicate Executable name '"+executable.getName()+"'");
 		
 		exeMap.put(executable.getName(), executable);
 		

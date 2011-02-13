@@ -18,6 +18,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * 解决对象工厂的默认实现，它本身是一个解决对象容器，另外还支持添加<i>外部解决对象工厂</i>，用于支持其他的IOC容器，比如spring和Guice。
  * 如果设置了外部解决对象工厂，它将被优先考虑。
@@ -26,14 +29,13 @@ import java.util.Map;
  */
 public class DefaultResolverFactory implements ResolverFactory
 {
+	private static Log log=LogFactory.getLog(DefaultResolverFactory.class);
+	
 	private Map<Serializable, Object> resolvers;
 	/**外部解决对象工厂*/
 	private ResolverFactory externalResolverFactory;
 	
-	public DefaultResolverFactory()
-	{
-		super();
-	}
+	public DefaultResolverFactory(){}
 	
 	public Map<Serializable, Object> getResolvers() {
 		return resolvers;
@@ -79,8 +81,9 @@ public class DefaultResolverFactory implements ResolverFactory
 			setResolvers(resolvers);
 		}
 		
+		//允许重复添加，使得功能可以被替换
 		if(resolvers.get(id) != null)
-			throw new IllegalArgumentException("duplicate resolver id '"+id+"'");
+			log.warn("duplicate resolver id '"+id+"'");
 		
 		resolvers.put(id, resolver);
 	}

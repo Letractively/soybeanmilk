@@ -326,7 +326,7 @@ public class DispatchServlet extends HttpServlet
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	public void processTarget(Executable executable, WebObjectSource objSource) throws ServletException, IOException
+	protected void processTarget(Executable executable, WebObjectSource objSource) throws ServletException, IOException
 	{
 		Target target=null;
 		if(executable instanceof WebAction)

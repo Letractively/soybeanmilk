@@ -843,7 +843,7 @@ public void handleException(Execution execution)
 				It contains the following attributes:
 				<ul>
 					<li>
-						<span class="tagAttr">url</span> (<span class="required">Required</span>)<br />
+						<span class="tagAttr">url</span> (Optional)<br />
 						The target URL.
 						It must be start with "<span class="var">/</span>" if it is an URL in your application.<br />
 						You can also use the keywords the <span class="glossary">WebObjectSource</span> supported here for dynamic URL (With "<span class="var">{</span>" prefix and "<span class="var">}</span>" suffix).
@@ -859,8 +859,16 @@ public void handleException(Execution execution)
 					<li>
 						<span class="tagAttr">type</span> (Optional)<br />
 						The target type.
-						It has only two values : "<span class="tagValue">forward</span>" or "<span class="tagValue">redirect</span>".
-						The framework will treat it as "<span class="tagValue">forward</span>" type if you did not set it.
+						The framework can process only two values : "<span class="tagValue">forward</span>" or "<span class="tagValue">redirect</span>".
+						And it will treat it as "<span class="tagValue">forward</span>" type if you did not set it.<br />
+						You can also extend <a href="../../api/org/soybeanMilk/web/servlet/DispatchServlet.html">DispatchServlet</a> for customized type supporting,
+						such as JSON supporting as following:
+<pre class="code-xml">
+&lt;action name="/user/list"&gt;
+	&lt;invoke&gt; userList=userResolver.query() &lt;/invoke&gt;
+	&lt;target type="json" /&gt;
+&lt;/action&gt;
+</pre>
 					</li>
 				</ul>
 			</p>

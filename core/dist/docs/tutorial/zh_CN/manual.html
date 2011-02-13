@@ -773,7 +773,7 @@ public void handleException(Execution execution)
 				它包含如下属性：
 				<ul>
 					<li>
-						<span class="tagAttr">url</span>（<span class="required">必须</span>） <br />
+						<span class="tagAttr">url</span>（可选） <br />
 						目标URL，如果是应用内的URL，则必须以“<span class="var">/</span>”开头。<br />
 						你也可以在这里使用对象源支持的关键字（以“<span class="var">{</span>”开始并以“<span class="var">}</span>”结束），以使其支持动态URL，比如：
 <pre class="code-xml">
@@ -786,8 +786,15 @@ public void handleException(Execution execution)
 					</li>
 					<li>
 						<span class="tagAttr">type</span>（可选） <br />
-						类型，它仅有两个可用的值：<span class="tagValue">forward</span>和<span class="tagValue">redirect</span>。
-						如果你没有定义，框架将默认按照<span class="tagValue">forward</span>来处理目标。
+						目标类型。框架目前仅支持两个类型值：<span class="tagValue">forward</span>和<span class="tagValue">redirect</span>。
+						如果你没有定义，框架将默认按照<span class="tagValue">forward</span>来处理目标。<br />
+						你也可以扩展<a href="../../api/org/soybeanMilk/web/servlet/DispatchServlet.html">DispatchServlet</a>类来支持自定义目标类型，比如像下面这样支持JSON类型：
+<pre class="code-xml">
+&lt;action name="/user/list"&gt;
+	&lt;invoke&gt; userList=userResolver.query() &lt;/invoke&gt;
+	&lt;target type="json" /&gt;
+&lt;/action&gt;
+</pre>
 					</li>
 				</ul>
 			</p>

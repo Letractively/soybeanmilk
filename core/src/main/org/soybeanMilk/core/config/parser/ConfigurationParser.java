@@ -728,8 +728,12 @@ public class ConfigurationParser
 		try
 		{
 			DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
-			dbf.setValidating(false);
+			
 			dbf.setNamespaceAware(false);
+			
+			//禁止验证
+			dbf.setValidating(false);
+			dbf.setAttribute("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 			
 			DocumentBuilder db=dbf.newDocumentBuilder();
 			

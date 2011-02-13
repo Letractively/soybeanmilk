@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-它只是比core版本多了个<target>标签
--->
 <!--根元素-->
 <!ELEMENT soybean-milk (global-config?,includes?,resolvers?,executables)>
 
@@ -50,7 +47,7 @@
 动作
 它可以包含多个局部调用或者全局引用
 -->
-<!ELEMENT action ((invoke | ref)*,target?)>
+<!ELEMENT action (invoke | ref)*>
 <!--
 执行引用，将已定义的可执行对象添加到本次执行中
 -->
@@ -60,11 +57,6 @@
 调用配置
 -->
 <!ELEMENT invoke (#PCDATA | arg)*>
-
-<!--
-target 动作的目标URL
--->
-<!ELEMENT target EMPTY>
 
 <!--
 参数配置
@@ -127,7 +119,7 @@ class 解决对象类名
 调用执行的方法名称
 它要能够在之后配置的resolver-class或者resolver类中找到
 -->
-<!ATTLIST invoke method CDATA #REQUIRED>
+<!ATTLIST invoke method CDATA #IMPLIED>
 
 <!--
 调用的解决对象配置，配置解析器通过它来查找方法对象并确定参数类型
@@ -142,11 +134,3 @@ resolver 解决对象ID，如果方法是非静态的，你应该设置它的值
 无论方法是否有返回结果，只要你定义了“result-key”，框架总会执行保存操作，只不过无返回结果的话是以null值保存的。
 -->
 <!ATTLIST invoke result-key CDATA #IMPLIED>
-
-<!--
-动作目标配置属性
-url 目标URL
-type 目标类型（转向或者重定向）
--->
-<!ATTLIST target url CDATA #IMPLIED>
-<!ATTLIST target type  CDATA #IMPLIED>

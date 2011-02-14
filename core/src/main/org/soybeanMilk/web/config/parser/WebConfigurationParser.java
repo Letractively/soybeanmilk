@@ -42,10 +42,9 @@ public class WebConfigurationParser extends ConfigurationParser
 {
 	private static Log log=LogFactory.getLog(WebConfigurationParser.class);
 	
-	
-	public static final String TAG_TARGET="target";
-	public static final String TAG_TARGET_ATTR_URL="url";
-	public static final String TAG_TARGET_ATTR_TYPE="type";
+	protected static final String TAG_TARGET="target";
+	protected static final String TAG_TARGET_ATTR_URL="url";
+	protected static final String TAG_TARGET_ATTR_TYPE="type";
 	
 	private ServletContext servletContext;
 	

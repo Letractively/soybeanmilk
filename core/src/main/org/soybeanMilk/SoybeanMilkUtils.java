@@ -47,7 +47,7 @@ public class SoybeanMilkUtils
 	}
 	
 	/**
-	 * 将类型收缩为<code>Class</code>
+	 * 将类型强制转换为<code>Class</code>
 	 * @param type
 	 * @return
 	 * @date 2010-12-31
@@ -195,5 +195,4 @@ public class SoybeanMilkUtils
 		
 		return re;
 	}
-	
 }

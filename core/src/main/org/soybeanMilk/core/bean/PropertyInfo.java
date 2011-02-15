@@ -219,7 +219,7 @@ public class PropertyInfo
 		}
 		
 		if(log.isDebugEnabled())
-			log.debug(getSpace(depth)+"start  anatomized '"+beanClass.getName()+"' property information");
+			log.debug(getSpace(depth)+"start  anatomizing '"+beanClass.getName()+"' property information");
 		
 		PropertyInfo beanInfo=new PropertyInfo(beanClass);
 		beanInfo.setGenericType(beanClass);
@@ -271,7 +271,7 @@ public class PropertyInfo
 		}
 		
 		if(log.isDebugEnabled())
-			log.debug(getSpace(depth)+"finish anatomized '"+beanClass.getName()+"' property information");
+			log.debug(getSpace(depth)+"finish anatomizing '"+beanClass.getName()+"' property information");
 		
 		propertyInfoCache.putIfAbsent(beanClass, beanInfo);
 		

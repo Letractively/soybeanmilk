@@ -71,11 +71,11 @@ public class WebConstants extends Constants
 	}
 	
 	/**
-	 * 框架支持的对象源作用域
+	 * 框架的Web对象源支持的对象源作用域
 	 * @author earthAngry@gmail.com
 	 * @date 2010-10-7
 	 */
-	public static class Scope
+	public static class WebObjectSourceScope
 	{
 		/**
 		 * 请求参数映射表，它是一个Map对象
@@ -101,5 +101,10 @@ public class WebConstants extends Constants
 		 * 回应，它表示HttpServletResponse对象
 		 */
 		public static final String RESPONSE="response";
+		
+		/**
+		 * WEB对象源本身
+		 */
+		public static final String OBJECT_SOURCE="os";
 	}
 }

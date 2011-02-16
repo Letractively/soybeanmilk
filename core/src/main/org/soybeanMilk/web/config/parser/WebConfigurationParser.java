@@ -133,13 +133,13 @@ public class WebConfigurationParser extends ConfigurationParser
 	@Override
 	protected Class<?> converterClassAttrToClass(String name)
 	{
-		if(WebConstants.Scope.REQUEST.equals(name))
+		if(WebConstants.WebObjectSourceScope.REQUEST.equals(name))
 			return HttpServletRequest.class;
-		else if(WebConstants.Scope.SESSION.equals(name))
+		else if(WebConstants.WebObjectSourceScope.SESSION.equals(name))
 			return HttpSession.class;
-		if(WebConstants.Scope.APPLICATION.equals(name))
+		if(WebConstants.WebObjectSourceScope.APPLICATION.equals(name))
 			return ServletContext.class;
-		if(WebConstants.Scope.RESPONSE.equals(name))
+		if(WebConstants.WebObjectSourceScope.RESPONSE.equals(name))
 			return HttpServletResponse.class;
 		else
 			return super.converterClassAttrToClass(name);

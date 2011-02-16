@@ -199,31 +199,33 @@ public class WebObjectSource extends ConvertableObjectSource
 			
 			if(scope == null)
 			{
-				if(WebConstants.Scope.PARAM.equalsIgnoreCase(keyInScope))
+				if(WebConstants.WebObjectSourceScope.PARAM.equalsIgnoreCase(keyInScope))
 					data=convertFromMap(getRequest().getParameterMap(), null, expectType);
-				else if(WebConstants.Scope.REQUEST.equalsIgnoreCase(keyInScope))
-					data=convertServletObject(getRequest(), expectType);
-				else if(WebConstants.Scope.SESSION.equalsIgnoreCase(keyInScope))
-					data=convertServletObject(getRequest().getSession(), expectType);
-				else if(WebConstants.Scope.APPLICATION.equalsIgnoreCase(keyInScope))
-					data=convertServletObject(getApplication(), expectType);
-				else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(keyInScope))
-					data=convertServletObject(getResponse(), expectType);
+				else if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(keyInScope))
+					data=convertInternalObject(getRequest(), expectType);
+				else if(WebConstants.WebObjectSourceScope.SESSION.equalsIgnoreCase(keyInScope))
+					data=convertInternalObject(getRequest().getSession(), expectType);
+				else if(WebConstants.WebObjectSourceScope.APPLICATION.equalsIgnoreCase(keyInScope))
+					data=convertInternalObject(getApplication(), expectType);
+				else if(WebConstants.WebObjectSourceScope.RESPONSE.equalsIgnoreCase(keyInScope))
+					data=convertInternalObject(getResponse(), expectType);
+				else if(WebConstants.WebObjectSourceScope.OBJECT_SOURCE.equalsIgnoreCase(strKey))
+					data=convertInternalObject(this, expectType);
 				else
 					data=getWithUnknownScope(scope, keyInScope, expectType);
 			}
 			else
 			{
-				if(WebConstants.Scope.PARAM.equalsIgnoreCase(scope))
+				if(WebConstants.WebObjectSourceScope.PARAM.equalsIgnoreCase(scope))
 					data=convertFromMap(getRequest().getParameterMap(), keyInScope, expectType);
-				else if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scope))
+				else if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
 					data=getAttributeByKeyExpression(getRequest(), keyInScope, expectType);
-				else if(WebConstants.Scope.SESSION.equalsIgnoreCase(scope))
+				else if(WebConstants.WebObjectSourceScope.SESSION.equalsIgnoreCase(scope))
 					data=getAttributeByKeyExpression(getRequest().getSession(), keyInScope, expectType);
-				else if(WebConstants.Scope.APPLICATION.equalsIgnoreCase(scope))
+				else if(WebConstants.WebObjectSourceScope.APPLICATION.equalsIgnoreCase(scope))
 					data=getAttributeByKeyExpression(getApplication(), keyInScope, expectType);
-				else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scope))
-					throw new ObjectSourceException("key '"+key+"' is not valid, you can not get data from '"+WebConstants.Scope.RESPONSE+"' scope");
+				else if(WebConstants.WebObjectSourceScope.RESPONSE.equalsIgnoreCase(scope))
+					throw new ObjectSourceException("key '"+key+"' is not valid, you can not get data from '"+WebConstants.WebObjectSourceScope.RESPONSE+"' scope");
 				else
 					data=getWithUnknownScope(scope, keyInScope, expectType);
 			}
@@ -231,6 +233,8 @@ public class WebObjectSource extends ConvertableObjectSource
 			if(log.isDebugEnabled())
 				log.debug("get '"+data+"' from scope '"+scope+"' with key '"+keyInScope+"'");
 		}
+		
+		
 		
 		return data;
 	}
@@ -249,21 +253,21 @@ public class WebObjectSource extends ConvertableObjectSource
 		String scope = scopeSplit[0];
 		String keyInScope = scopeSplit[1];
 		
-		if(WebConstants.Scope.PARAM.equalsIgnoreCase(scope))
-			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.PARAM+"'");
-		else if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scope))
+		if(WebConstants.WebObjectSourceScope.PARAM.equalsIgnoreCase(scope))
+			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.WebObjectSourceScope.PARAM+"'");
+		else if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
 			setAttributeByKeyExpression(getRequest(), keyInScope, obj);
-		else if(WebConstants.Scope.SESSION.equalsIgnoreCase(scope))
+		else if(WebConstants.WebObjectSourceScope.SESSION.equalsIgnoreCase(scope))
 			setAttributeByKeyExpression(getRequest().getSession(), keyInScope, obj);
-		else if(WebConstants.Scope.APPLICATION.equalsIgnoreCase(scope))
+		else if(WebConstants.WebObjectSourceScope.APPLICATION.equalsIgnoreCase(scope))
 			setAttributeByKeyExpression(getApplication(), keyInScope, obj);
-		else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scope))
-			throw new ObjectSourceException("'"+key+"' is not valid, you can not save object into '"+WebConstants.Scope.RESPONSE+"'");
+		else if(WebConstants.WebObjectSourceScope.RESPONSE.equalsIgnoreCase(scope))
+			throw new ObjectSourceException("'"+key+"' is not valid, you can not save object into '"+WebConstants.WebObjectSourceScope.RESPONSE+"'");
 		else
 			setWithUnknownScope(scope, keyInScope, obj);
 		
 		if(log.isDebugEnabled())
-			log.debug("save '"+obj+"' into '"+scope+"' with key '"+keyInScope+"'");
+			log.debug("save '"+obj+"' into scope '"+scope+"' with key '"+keyInScope+"'");
 	}
 	
 	/**
@@ -431,12 +435,12 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	/**
-	 * 转换servlet对象到目标类型的对象
-	 * @param obj servlet对象，包括：HttpServletRequest、HttpSession、HttpServletResponse、ServletContext
+	 * 转换内置对象到目标类型的对象
+	 * @param obj 包括：HttpServletRequest、HttpSession、HttpServletResponse、ServletContext、WebObjectSource
 	 * @param targetType
 	 * @return
 	 */
-	protected Object convertServletObject(Object obj, Type targetType)
+	protected Object convertInternalObject(Object obj, Type targetType)
 	{
 		if(targetType == null || SoybeanMilkUtils.isInstanceOf(obj, targetType))
 			return obj;
@@ -452,6 +456,8 @@ public class WebObjectSource extends ConvertableObjectSource
 			sourceClass=HttpServletResponse.class;
 		else if(obj instanceof ServletContext)
 			sourceClass=ServletContext.class;
+		else if(obj instanceof WebObjectSource)
+			sourceClass=WebObjectSource.class;
 		else
 			throw new ObjectSourceException("unknown servlet object '"+obj.getClass().getName()+"'");
 		

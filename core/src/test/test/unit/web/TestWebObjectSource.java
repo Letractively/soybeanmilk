@@ -81,6 +81,16 @@ public class TestWebObjectSource
 			Object dest=webObjectSource.get("application", ServletContext.class);
 			Assert.assertTrue(application == dest);
 		}
+		
+		//objectSource
+		{
+			Object dest=webObjectSource.get(null, WebObjectSource.class);
+			Assert.assertTrue(webObjectSource == dest);
+		}
+		{
+			Object dest=webObjectSource.get("objectSource", WebObjectSource.class);
+			Assert.assertTrue(webObjectSource == dest);
+		}
 	}
 	
 	@Test

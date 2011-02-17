@@ -85,7 +85,7 @@ import org.soybeanMilk.web.WebConstants;
  *  	<li>
  *  		<span class="tagValue">request</span> <br/>
  *  		请求HttpServletRequest对象。框架本身并没有提供它的转换器，如果目标类型不是“<span class="var">HttpServletRequest</span>”，
- *  		那么你需要为此类的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletRequest</span>”到目标类型的辅助{@linkplain Converter 转换器}。
+ *  		那么你需要为此对象源的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletRequest</span>”到目标类型的辅助{@linkplain Converter 转换器}。
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">request.keyInScope</span> <br/>
@@ -94,7 +94,7 @@ import org.soybeanMilk.web.WebConstants;
  *  	<li>
  *  		<span class="tagValue">session</span> <br/>
  *  		会话HttpSession对象。框架本身并没有提供它的转换器，如果目标类型不是“<span class="var">HttpSession</span>”，
- *  		那么你需要为此类的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpSession</span>”到目标类型的辅助{@linkplain Converter 转换器}。
+ *  		那么你需要为此对象源的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpSession</span>”到目标类型的辅助{@linkplain Converter 转换器}。
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">session.keyInScope</span> <br/>
@@ -103,7 +103,7 @@ import org.soybeanMilk.web.WebConstants;
  *  	<li>
  *  		<span class="tagValue">application</span> <br/>
  *  		应用ServletContext对象。如果目标类型不是“<span class="var">ServletContext</span>”，
- *  		那么你需要为此类的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.ServletContext</span>”到目标类型的辅助{@linkplain Converter 转换器}。
+ *  		那么你需要为此对象源的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.ServletContext</span>”到目标类型的辅助{@linkplain Converter 转换器}。
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">application.keyInScope</span> <br/>
@@ -112,7 +112,12 @@ import org.soybeanMilk.web.WebConstants;
  *  	<li>
  *  		<span class="tagValue">response</span> <br/>
  *  		回应HttpServletResponse对象。如果目标类型不是“<span class="var">HttpServletResponse</span>”，
- *  		那么你需要为此类的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletResponse</span>”到目标类型辅助{@linkplain Converter 转换器}。
+ *  		那么你需要为此对象源的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletResponse</span>”到目标类型辅助{@linkplain Converter 转换器}。
+ *  	</li>
+ *  	<li>
+ *  		<span class="tagValue">objectSource</span> <br/>
+ *  		当前的{@linkplain WebObjectSource}对象，你可以使用它来获取所有servlet对象。如果目标类型不是“<span class="var">WebObjectSource</span>”，
+ *  		那么你需要为此对象源的{@linkplain GenericConverter 通用转换器}添加“<span class="var">org.soybeanMilk.web.os.WebObjectSource</span>”到目标类型辅助{@linkplain Converter 转换器}。
  *  	</li>
  *   </ul>
  *  </li>
@@ -152,18 +157,35 @@ public class WebObjectSource extends ConvertableObjectSource
 		super.setGenericConverter(genericConverter);
 	}
 	
+	/**
+	 * 获得当前请求对象。
+	 * @return
+	 * @date 2010-7-19
+	 */
 	public HttpServletRequest getRequest() {
 		return request;
 	}
 	public void setRequest(HttpServletRequest request) {
 		this.request = request;
 	}
+	
+	/**
+	 * 获得当前回应对象。
+	 * @return
+	 * @date 2010-7-19
+	 */
 	public HttpServletResponse getResponse() {
 		return response;
 	}
 	public void setResponse(HttpServletResponse response) {
 		this.response = response;
 	}
+	
+	/**
+	 * 获得当前应用对象。
+	 * @return
+	 * @date 2010-7-19
+	 */
 	public ServletContext getApplication() {
 		return application;
 	}
@@ -176,6 +198,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	public Object get(Serializable key, Type expectType)
 	{
 		Object data = null;
+		
 		if(HttpServletRequest.class.equals(expectType))
 			data = getRequest();
 		else if(HttpServletResponse.class.equals(expectType))
@@ -184,6 +207,8 @@ public class WebObjectSource extends ConvertableObjectSource
 			data = getApplication();
 		else if(HttpSession.class.equals(expectType))
 			data = getRequest().getSession();
+		else if(WebObjectSource.class.equals(expectType))
+			data=this;
 		else
 		{
 			//WEB环境下只有字符串主键

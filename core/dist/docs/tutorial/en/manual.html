@@ -63,6 +63,10 @@
 			</p>
 			<p>
 				The detail structure of <span class="mainTitle">SoybeanMilk</span> configuration file is listing bellow:
+<pre class="code-xml" style="font-size:small;">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt; <br />
+&lt;!DOCTYPE soybean-milk PUBLIC "-//SoybeanMilk//DTD soybeanMilk web//EN" "http://soybeanmilk.googlecode.com/files/soybeanMilk-web-1.0.dtd"&gt;
+</pre>
 				<ul>
 					<li>
 						<a href="javascript:void(0);">&lt;soybean-milk&gt;</a>
@@ -667,6 +671,14 @@ public void handleException(Execution execution)
 								who converting "<span class="var">javax.servlet.http.HttpServletResponse</span>" source to your destination type
 								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpServletResponse</span>.
 							</li>
+							<li>
+						  		<span class="tagValue">objectSource</span> <br/>
+						  		The current <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> object, you can get all the servlet objects from it.
+						  		The framework can not convert it by default.
+								So, you must define your own <a href="#tag_converter">support converter</a>
+								who converting "<span class="var">org.soybeanMilk.web.os.WebObjectSource</span>" source to your destination type
+								if the <span class="glossary">Invoke</span> method argument is not <span class="var">WebObjectSource</span>.
+						  	</li>
 						</ul>
 						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
 						because they will be directly passed to its <span class="var">get(...)</span> method.<br>

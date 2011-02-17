@@ -105,6 +105,6 @@ public class WebConstants extends Constants
 		/**
 		 * WEB对象源本身
 		 */
-		public static final String OBJECT_SOURCE="os";
+		public static final String OBJECT_SOURCE="objectSource";
 	}
 }

@@ -50,6 +50,10 @@
 			</p>
 			<p>
 				下面从配置文件结构开始，来详细介绍框架：<br>
+<pre class="code-xml" style="font-size:small;">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt; <br />
+&lt;!DOCTYPE soybean-milk PUBLIC "-//SoybeanMilk//DTD soybeanMilk web//EN" "http://soybeanmilk.googlecode.com/files/soybeanMilk-web-1.0.dtd"&gt;
+</pre>
 				<ul>
 					<li>
 						<a href="javascript:void(0);">&lt;soybean-milk&gt;</a>
@@ -614,6 +618,11 @@ public void handleException(Execution execution)
 								回应HttpServletResponse对象。如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">HttpServletResponse</span>”，
 								那么你需要自定义“<span class="var">javax.servlet.http.HttpServletResponse</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
+							<li>
+						  		<span class="tagValue">objectSource</span> <br/>
+						  		当前的<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>对象，你可以使用它来获取所有servlet对象。如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">WebObjectSource</span>”，
+						  		那么你需要自定义“<span class="var">org.soybeanMilk.web.os.WebObjectSource</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
+						  	</li>
 						</ul>
 						实际上，这里的关键字格式是由<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>类决定的，
 						因为它们会被直接传递给它的<span class="var">get(...)</span>方法。<br>

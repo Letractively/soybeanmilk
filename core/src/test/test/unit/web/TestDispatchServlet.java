@@ -30,7 +30,7 @@ public class TestDispatchServlet
 	private static String myExternalResolverKey="myExternalResolver";
 	private static String myEncoding="GBK";
 	private static String myExecutorKey="myExecutorKey";
-	private static String mySoybeanMilkFile="test/unit/web/soybean-milk.config.xml";
+	private static String mySoybeanMilkFile="test/unit/web/soybean-milk.cfg.xml";
 	private static String myWebObjectSourceFactoryClass="test.unit.web.TestDispatchServlet$MyWebObjectSourceFactory";
 	
 	private static String CONTEXT_PATH="/testContext";

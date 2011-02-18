@@ -24,5 +24,5 @@ public class Constants
 	/**
 	 * 默认的配置文件
 	 */
-	public static final String DEFAULT_CONFIG_FILE="soybean-milk.config.xml";
+	public static final String DEFAULT_CONFIG_FILE="soybean-milk.cfg.xml";
 }

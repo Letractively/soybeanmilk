@@ -452,7 +452,8 @@ public class WebObjectSource extends ConvertableObjectSource
 						filtered.put(k.substring(keyPrefix.length()), valueMap.get(k));
 				}
 				
-				src=filtered;
+				//如果没有过滤到，则表明源为null，使用空Map会导致非预期的错误
+				src= filtered.isEmpty() ? null : filtered;
 			}
 		}
 		

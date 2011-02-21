@@ -49,13 +49,16 @@ public class PropertyInfo
 	
 	/**此属性的写方法*/
 	private Method writeMethod;
+
+	/**此属性名*/
+	private String name;
 	
 	protected PropertyInfo(Class<?> propertyType)
 	{
-		this(propertyType, null, null);
+		this(propertyType, null, null, null);
 	}
 	
-	protected PropertyInfo(Class<?> type, Method readMethod, Method writeMethod)
+	protected PropertyInfo(Class<?> type, Method readMethod, Method writeMethod, String name)
 	{
 		super();
 		this.type = type;
@@ -66,6 +69,8 @@ public class PropertyInfo
 			this.genericType=writeMethod.getGenericParameterTypes()[0];
 		else
 			this.genericType=type;
+		
+		this.name=name;
 	}
 	
 	/**
@@ -77,7 +82,7 @@ public class PropertyInfo
 		return type;
 	}
 
-	public void setType(Class<?> type) {
+	protected void setType(Class<?> type) {
 		this.type = type;
 	}
 
@@ -90,7 +95,7 @@ public class PropertyInfo
 		return genericType;
 	}
 
-	public void setGenericType(Type genericType) {
+	protected void setGenericType(Type genericType) {
 		this.genericType = genericType;
 	}
 
@@ -103,7 +108,7 @@ public class PropertyInfo
 		return subPropertyInfos;
 	}
 
-	public void setSubPropertyInfos(Map<String, PropertyInfo> subPropertyInfos) {
+	protected void setSubPropertyInfos(Map<String, PropertyInfo> subPropertyInfos) {
 		this.subPropertyInfos = subPropertyInfos;
 	}
 
@@ -116,7 +121,7 @@ public class PropertyInfo
 		return readMethod;
 	}
 
-	public void setReadMethod(Method readMethod) {
+	protected void setReadMethod(Method readMethod) {
 		this.readMethod = readMethod;
 	}
 
@@ -129,25 +134,32 @@ public class PropertyInfo
 		return writeMethod;
 	}
 
-	public void setWriteMethod(Method writeMethod) {
+	protected void setWriteMethod(Method writeMethod) {
 		this.writeMethod = writeMethod;
 	}
 	
+	public String getName() {
+		return name;
+	}
+
+	protected void setName(String name) {
+		this.name = name;
+	}
+	
 	/**
-	 * 添加子属性类信息
-	 * @param name
+	 * 添加此属性所属类型的子属性信息
 	 * @param propertyInfo
 	 * @date 2010-12-28
 	 */
-	public void addSubPropertyInfo(String name, PropertyInfo propertyInfo)
+	public void addSubPropertyInfo(PropertyInfo propertyInfo)
 	{
 		if(subPropertyInfos == null)
 			subPropertyInfos=new HashMap<String, PropertyInfo>();
 		
-		if(name == null)
-			throw new IllegalArgumentException("[name] must not be null.");
+		if(propertyInfo.getName() == null)
+			throw new IllegalArgumentException("the name of this PropertyInfo must not be null.");
 		
-		subPropertyInfos.put(name, propertyInfo);
+		subPropertyInfos.put(propertyInfo.getName(), propertyInfo);
 	}
 	
 	/**
@@ -172,9 +184,8 @@ public class PropertyInfo
 	
 	@Override
 	public String toString() {
-		return "PropertyInfo [type=" + type + ", genericType=" + genericType
-				+ ", readMethod=" + readMethod + ", writeMethod=" + writeMethod
-				+ "]";
+		return "PropertyInfo [name=" + name + ", type=" + type
+				+ ", genericType=" + genericType + "]";
 	}
 	
 	/**
@@ -259,14 +270,14 @@ public class PropertyInfo
 				if(exist == null)
 					exist=getPropertyInfoAnatomized(propertyClazz, localExists, depth+1);
 				
-				//拷贝已缓存的并设置特有的读写方法
-				PropertyInfo copied=new PropertyInfo(propertyClazz, rm, wm);
+				//拷贝已缓存的并设置特有的读写方法和名称
+				PropertyInfo copied=new PropertyInfo(propertyClazz, rm, wm, name);
 				copied.setSubPropertyInfos(exist.getSubPropertyInfos());
 				
-				beanInfo.addSubPropertyInfo(name, copied);
+				beanInfo.addSubPropertyInfo(copied);
 				
 				if(log.isDebugEnabled())
-					log.debug(getSpace(depth)+"add '"+name+"' named '"+copied+"'");
+					log.debug(getSpace(depth)+"add '"+copied+"'");
 			}
 		}
 		

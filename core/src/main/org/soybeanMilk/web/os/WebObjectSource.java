@@ -413,7 +413,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		else if(servletObj instanceof ServletContext)
 			((ServletContext)servletObj).setAttribute(key, value);
 		else
-			throw new ObjectSourceException("can not set attribute to object '"+servletObj+"'");
+			throw new ObjectSourceException("can not set attribute to servlet object '"+servletObj+"'");
 	}
 	
 	/**
@@ -432,7 +432,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		else if(servletObj instanceof ServletContext)
 			return ((ServletContext)servletObj).getAttribute(key);
 		else
-			throw new ObjectSourceException("can not get attribute from object '"+servletObj+"'");
+			throw new ObjectSourceException("can not get attribute from servlet object '"+servletObj+"'");
 	}
 	
 	/**

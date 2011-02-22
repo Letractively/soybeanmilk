@@ -58,10 +58,11 @@ public class PropertyInfo
 		this(propertyType, null, null, null);
 	}
 	
-	protected PropertyInfo(Class<?> type, Method readMethod, Method writeMethod, String name)
+	protected PropertyInfo(Class<?> type, String name, Method readMethod, Method writeMethod)
 	{
 		super();
 		this.type = type;
+		this.name=name;
 		this.readMethod = readMethod;
 		this.writeMethod = writeMethod;
 		
@@ -70,7 +71,6 @@ public class PropertyInfo
 		else
 			this.genericType=type;
 		
-		this.name=name;
 	}
 	
 	/**
@@ -271,7 +271,7 @@ public class PropertyInfo
 					exist=getPropertyInfoAnatomized(propertyClazz, localExists, depth+1);
 				
 				//拷贝已缓存的并设置特有的读写方法和名称
-				PropertyInfo copied=new PropertyInfo(propertyClazz, rm, wm, name);
+				PropertyInfo copied=new PropertyInfo(propertyClazz, name, rm, wm);
 				copied.setSubPropertyInfos(exist.getSubPropertyInfos());
 				
 				beanInfo.addSubPropertyInfo(copied);

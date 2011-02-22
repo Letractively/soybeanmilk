@@ -44,51 +44,51 @@ public class TestWebObjectSource
 	{
 		//request
 		{
-			Object dest=webObjectSource.get(null, HttpServletRequest.class);
+			Object dest=webObjectSource.get("request", HttpServletRequest.class);
 			Assert.assertTrue(request == dest);
 		}
 		{
-			Object dest=webObjectSource.get("request", HttpServletRequest.class);
+			Object dest=webObjectSource.get("request", null);
 			Assert.assertTrue(request == dest);
 		}
 		
 		//response
 		{
-			Object dest=webObjectSource.get(null, HttpServletResponse.class);
+			Object dest=webObjectSource.get("response", HttpServletResponse.class);
 			Assert.assertTrue(response == dest);
 		}
 		{
-			Object dest=webObjectSource.get("response", HttpServletResponse.class);
+			Object dest=webObjectSource.get("response", null);
 			Assert.assertTrue(response == dest);
 		}
 		
 		//session
 		{
-			Object dest=webObjectSource.get(null, HttpSession.class);
+			Object dest=webObjectSource.get("session", HttpSession.class);
 			Assert.assertTrue(request.getSession() == dest);
 		}
 		{
-			Object dest=webObjectSource.get("session", HttpSession.class);
+			Object dest=webObjectSource.get("session", null);
 			Assert.assertTrue(request.getSession() == dest);
 		}
 		
 		//application
 		{
-			Object dest=webObjectSource.get(null, ServletContext.class);
+			Object dest=webObjectSource.get("application", ServletContext.class);
 			Assert.assertTrue(application == dest);
 		}
 		{
-			Object dest=webObjectSource.get("application", ServletContext.class);
+			Object dest=webObjectSource.get("application", null);
 			Assert.assertTrue(application == dest);
 		}
 		
 		//objectSource
 		{
-			Object dest=webObjectSource.get(null, WebObjectSource.class);
+			Object dest=webObjectSource.get("objectSource", WebObjectSource.class);
 			Assert.assertTrue(webObjectSource == dest);
 		}
 		{
-			Object dest=webObjectSource.get("objectSource", WebObjectSource.class);
+			Object dest=webObjectSource.get("objectSource", null);
 			Assert.assertTrue(webObjectSource == dest);
 		}
 	}
@@ -228,7 +228,7 @@ public class TestWebObjectSource
 			request.setParameter("my.myBean.yourBean.id", new String[]{"2"});
 			request.setParameter("my.myBean.yourBean.name", new String[]{"tom"});
 			
-			MyBean dest=(MyBean)webObjectSource.get("my.myBean", MyBean.class);
+			MyBean dest=(MyBean)webObjectSource.get("param.my.myBean", MyBean.class);
 			
 			Assert.assertEquals(1, dest.getId().intValue());
 			Assert.assertEquals("jack", dest.getName());
@@ -384,13 +384,6 @@ public class TestWebObjectSource
 			Object dest=webObjectSource.get("request.value", String.class);
 			Assert.assertEquals(value, dest);
 		}
-		{
-			webObjectSource.set("my.set.value", value);
-			Assert.assertEquals(value, request.getAttribute("my.set.value"));
-			
-			Object dest=webObjectSource.get("request.my.set.value", String.class);
-			Assert.assertEquals(value, dest);
-		}
 		
 		//默认应该从param取
 		{
@@ -398,11 +391,6 @@ public class TestWebObjectSource
 			
 			Object dest0=webObjectSource.get("value", String.class);
 			Assert.assertEquals(value, dest0);
-		}
-		{
-			request.setParameter("my.set.value", value);
-			
-			Assert.assertEquals(value, webObjectSource.get("my.set.value",String.class));
 		}
 	}
 	

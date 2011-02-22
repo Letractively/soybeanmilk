@@ -199,67 +199,58 @@ public class WebObjectSource extends ConvertableObjectSource
 	{
 		Object data = null;
 		
-		if(HttpServletRequest.class.equals(expectType))
-			data = getRequest();
-		else if(HttpServletResponse.class.equals(expectType))
-			data = getResponse();
-		else if(ServletContext.class.equals(expectType))
-			data = getApplication();
-		else if(HttpSession.class.equals(expectType))
-			data = getRequest().getSession();
-		else if(WebObjectSource.class.equals(expectType))
-			data=this;
-		else
+		//WEB环境下只有字符串主键
+		String strKey = (String)key;
+		
+		if(strKey==null)
+			throw new ObjectSourceException("[key] must not be null.");
+		
+		String[] scopedKey=splitByFirstAccessor(strKey);
+		
+		String scope = scopedKey[0];
+		String subKey = scopedKey.length==1 ? null : scopedKey[1];
+		
+		if(WebConstants.WebObjectSourceScope.PARAM.equalsIgnoreCase(scope))
 		{
-			//WEB环境下只有字符串主键
-			String strKey = (String)key;
+			data=convertFromMap(getRequest().getParameterMap(), subKey, expectType);
+		}
+		else if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
+		{
+			data=convertServletObjectAttribute(getRequest(), subKey, expectType);
+		}
+		else if(WebConstants.WebObjectSourceScope.SESSION.equalsIgnoreCase(scope))
+		{
+			data=convertServletObjectAttribute(getRequest().getSession(), subKey, expectType);
+		}
+		else if(WebConstants.WebObjectSourceScope.APPLICATION.equalsIgnoreCase(scope))
+		{
+			data=convertServletObjectAttribute(getApplication(), subKey, expectType);
+		}
+		else if(WebConstants.WebObjectSourceScope.RESPONSE.equalsIgnoreCase(scope))
+		{
+			data=convertServletObjectAttribute(getResponse(), subKey, expectType);
+		}
+		else if(WebConstants.WebObjectSourceScope.OBJECT_SOURCE.equalsIgnoreCase(scope))
+		{
+			if(subKey != null)
+				throw new ObjectSourceException("invalide key '"+strKey+"', get object from '"+WebConstants.WebObjectSourceScope.OBJECT_SOURCE+"' scope is not supported");
 			
-			if(strKey==null)
-				throw new ObjectSourceException("[key] must not be null.");
-			
-			String[] scopeSplit=splitByFirstAccessor(strKey);
-			
-			String scope = scopeSplit[0];
-			String keyInScope = scopeSplit[1];
-			
-			if(scope == null)
-			{
-				if(WebConstants.WebObjectSourceScope.PARAM.equalsIgnoreCase(keyInScope))
-					data=convertFromMap(getRequest().getParameterMap(), null, expectType);
-				else if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(keyInScope))
-					data=convertInternalObject(getRequest(), expectType);
-				else if(WebConstants.WebObjectSourceScope.SESSION.equalsIgnoreCase(keyInScope))
-					data=convertInternalObject(getRequest().getSession(), expectType);
-				else if(WebConstants.WebObjectSourceScope.APPLICATION.equalsIgnoreCase(keyInScope))
-					data=convertInternalObject(getApplication(), expectType);
-				else if(WebConstants.WebObjectSourceScope.RESPONSE.equalsIgnoreCase(keyInScope))
-					data=convertInternalObject(getResponse(), expectType);
-				else if(WebConstants.WebObjectSourceScope.OBJECT_SOURCE.equalsIgnoreCase(strKey))
-					data=convertInternalObject(this, expectType);
-				else
-					data=getWithUnknownScope(scope, keyInScope, expectType);
-			}
+			if(expectType==null || SoybeanMilkUtils.isInstanceOf(this, expectType))
+				data=this;
 			else
 			{
-				if(WebConstants.WebObjectSourceScope.PARAM.equalsIgnoreCase(scope))
-					data=convertFromMap(getRequest().getParameterMap(), keyInScope, expectType);
-				else if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
-					data=getAttributeByKeyExpression(getRequest(), keyInScope, expectType);
-				else if(WebConstants.WebObjectSourceScope.SESSION.equalsIgnoreCase(scope))
-					data=getAttributeByKeyExpression(getRequest().getSession(), keyInScope, expectType);
-				else if(WebConstants.WebObjectSourceScope.APPLICATION.equalsIgnoreCase(scope))
-					data=getAttributeByKeyExpression(getApplication(), keyInScope, expectType);
-				else if(WebConstants.WebObjectSourceScope.RESPONSE.equalsIgnoreCase(scope))
-					throw new ObjectSourceException("key '"+key+"' is not valid, you can not get data from '"+WebConstants.WebObjectSourceScope.RESPONSE+"' scope");
-				else
-					data=getWithUnknownScope(scope, keyInScope, expectType);
+				Converter cvt=getGenericConverter().getConverter(WebObjectSource.class, expectType);
+				if(cvt == null)
+					throw new ObjectSourceException("no Converter defined for converting '"+WebObjectSource.class+"' to '"+expectType+"'");
+				
+				data=cvt.convert(this, expectType);
 			}
-			
-			if(log.isDebugEnabled())
-				log.debug("get '"+data+"' from scope '"+scope+"' with key '"+keyInScope+"'");
 		}
+		else
+			data=getObjectForUnknownKey(strKey, expectType);
 		
-		
+		if(log.isDebugEnabled())
+			log.debug("get '"+data+"' from scope '"+scope+"' with key '"+subKey+"'");
 		
 		return data;
 	}
@@ -276,59 +267,114 @@ public class WebObjectSource extends ConvertableObjectSource
 		String[] scopeSplit=splitByFirstAccessor(strKey);
 		
 		String scope = scopeSplit[0];
-		String keyInScope = scopeSplit[1];
+		String subKey = scopeSplit.length == 1 ? null : scopeSplit[1];
 		
-		if(WebConstants.WebObjectSourceScope.PARAM.equalsIgnoreCase(scope))
-			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.WebObjectSourceScope.PARAM+"'");
-		else if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
-			setAttributeByKeyExpression(getRequest(), keyInScope, obj);
+		if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
+		{
+			setAttributeByKeyExpression(getRequest(), subKey, obj);
+		}
 		else if(WebConstants.WebObjectSourceScope.SESSION.equalsIgnoreCase(scope))
-			setAttributeByKeyExpression(getRequest().getSession(), keyInScope, obj);
+		{
+			setAttributeByKeyExpression(getRequest().getSession(), subKey, obj);
+		}
 		else if(WebConstants.WebObjectSourceScope.APPLICATION.equalsIgnoreCase(scope))
-			setAttributeByKeyExpression(getApplication(), keyInScope, obj);
+		{
+			setAttributeByKeyExpression(getApplication(), subKey, obj);
+		}
+		else if(WebConstants.WebObjectSourceScope.PARAM.equalsIgnoreCase(scope))
+		{
+			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.WebObjectSourceScope.PARAM+"' scope");
+		}
 		else if(WebConstants.WebObjectSourceScope.RESPONSE.equalsIgnoreCase(scope))
-			throw new ObjectSourceException("'"+key+"' is not valid, you can not save object into '"+WebConstants.WebObjectSourceScope.RESPONSE+"'");
+		{
+			throw new ObjectSourceException("'"+key+"' is not valid, you can not save object into '"+WebConstants.WebObjectSourceScope.RESPONSE+"' scope");
+		}
 		else
-			setWithUnknownScope(scope, keyInScope, obj);
+			setObjectForUnknownKey(strKey, obj);
 		
 		if(log.isDebugEnabled())
-			log.debug("save '"+obj+"' into scope '"+scope+"' with key '"+keyInScope+"'");
+			log.debug("save '"+obj+"' into scope '"+scope+"' with key '"+subKey+"'");
 	}
 	
 	/**
-	 * 从无法识别的作用域取得对象
-	 * @param scope 作用域，可能为<code>null</code>
-	 * @param keyInScope 该作用域下的关键字
-	 * @param objectType
+	 * 取得默认无法识别的关键字所对应的对象。
+	 * @param key
+	 * @param expectType
 	 * @return
+	 * @date 2011-2-22
 	 */
 	@SuppressWarnings("unchecked")
-	protected Object getWithUnknownScope(String scope, String keyInScope, Type objectType)
+	protected Object getObjectForUnknownKey(String key, Type expectType)
 	{
-		//作用域无法识别，则认为它是param作用域里关键字的一部分
-		if(scope != null)
-			keyInScope=scope+ACCESSOR+keyInScope;
-		
-		return convertFromMap(getRequest().getParameterMap(), keyInScope, objectType);
+		if(!containAccessor(key))
+			return convertFromMap(getRequest().getParameterMap(), key, expectType);
+		else
+			throw new ObjectSourceException("key '"+key+"' is invalid, the 'get' method can not recognize it");
 	}
 	
 	/**
-	 * 将对象存储到无法识别的作用域中
-	 * @param scope 作用域，可能为<code>null</code>
-	 * @param keyInScope 该作用域下的关键字
+	 * 保存默认无法识别关键字所对应的对象。
+	 * @param key 关键字
 	 * @param obj
 	 */
-	protected void setWithUnknownScope(String scope, String keyInScope, Object obj)
+	protected void setObjectForUnknownKey(String key, Object obj)
 	{
-		//作用域无法识别，则认为它是request作用域里关键字的一部分
-		if(scope != null)
-			keyInScope=scope+ACCESSOR+keyInScope;
-		
-		setAttributeByKeyExpression(getRequest(), keyInScope, obj);
+		if(!containAccessor(key))
+			setAttributeByKeyExpression(getRequest(), key, obj);
+		else
+			throw new ObjectSourceException("key '"+key+"' is invalid, the 'set' method can not recognize it");
 	}
 	
 	/**
-	 * 将对象保存到servlet对象作用域内，它支持设置作用域内对象的属性。
+	 * 转换Servlet对象的属性对象，如果<code>keyExpression</code>为空，Servlet对象本身将被用于转换。
+	 * @param servletObj
+	 * @param keyExpression 关键字表达式，比如“myobj”、“myobj.myProperty”
+	 * @param targetType
+	 * @return
+	 * @date 2011-2-22
+	 */
+	protected Object convertServletObjectAttribute(Object servletObj, String keyExpression, Type targetType)
+	{
+		Object re=null;
+		
+		if(keyExpression==null || keyExpression.length()==0)
+		{
+			if(targetType==null || SoybeanMilkUtils.isInstanceOf(servletObj, targetType))
+				re=servletObj;
+			else
+			{
+				Type srcType=getServletObjectType(servletObj);
+				
+				Converter cvt=getGenericConverter().getConverter(srcType, targetType);
+				if(cvt == null)
+					throw new ObjectSourceException("no Converter defined for converting '"+srcType+"' to '"+targetType+"'");
+				
+				re=cvt.convert(servletObj, targetType);
+			}
+		}
+		else
+		{
+			String[] keyWithProperty=splitByFirstAccessor(keyExpression);
+			re=getServletObjAttribute(servletObj, keyWithProperty[0]);
+			
+			//关键字表达式不包访问符
+			if(keyWithProperty.length == 1)
+				re=getGenericConverter().convert(re, targetType);
+			else
+			{
+				//包含访问符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式
+				if(re == null)
+					re=getGenericConverter().convert(getServletObjAttribute(servletObj, keyExpression), targetType);
+				else
+					re=getGenericConverter().getProperty(re, keyWithProperty[1], targetType);
+			}
+		}
+		
+		return re;
+	}
+	
+	/**
+	 * 将对象保存到servlet对象作用域内。
 	 * @param servletObj
 	 * @param keyExpression 关键字表达式，比如“yourBean”、“yourBean.property”
 	 * @param obj
@@ -338,8 +384,8 @@ public class WebObjectSource extends ConvertableObjectSource
 	{
 		String[] objKeyWithProperty=splitByFirstAccessor(keyExpression);
 		
-		//只有包含了'.'字符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式
-		if(objKeyWithProperty[0] != null)
+		//只有包含了访问符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式
+		if(objKeyWithProperty.length == 2)
 		{
 			Object data=getServletObjAttribute(servletObj, objKeyWithProperty[0]);
 			if(data != null)
@@ -349,31 +395,6 @@ public class WebObjectSource extends ConvertableObjectSource
 		}
 		else
 			setServletObjAttribute(servletObj, keyExpression, obj);
-	}
-	
-	/**
-	 * 从servlet对象作用域内取得对象，它支持取得作用域内对象的属性。
-	 * @param servletObj
-	 * @param keyExpression 关键字表达式，比如“yourBean”、“yourBean.property”
-	 * @param objectType
-	 * @return
-	 * @date 2010-12-30
-	 */
-	protected Object getAttributeByKeyExpression(Object servletObj, String keyExpression, Type objectType)
-	{
-		String[] objKeyWithProperty=splitByFirstAccessor(keyExpression);
-		
-		//只有包含了'.'字符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式
-		if(objKeyWithProperty[0] != null)
-		{
-			Object data=getServletObjAttribute(servletObj, objKeyWithProperty[0]);
-			if(data != null)
-				return getGenericConverter().getProperty(data, objKeyWithProperty[1], objectType);
-			else
-				return getGenericConverter().convert(getServletObjAttribute(servletObj, keyExpression), objectType);
-		}
-		else
-			return getGenericConverter().convert(getServletObjAttribute(servletObj, keyExpression), objectType);
 	}
 	
 	/**
@@ -392,7 +413,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		else if(servletObj instanceof ServletContext)
 			((ServletContext)servletObj).setAttribute(key, value);
 		else
-			throw new ObjectSourceException("unknown servlet object '"+servletObj+"'");
+			throw new ObjectSourceException("can not set attribute to object '"+servletObj+"'");
 	}
 	
 	/**
@@ -411,7 +432,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		else if(servletObj instanceof ServletContext)
 			return ((ServletContext)servletObj).getAttribute(key);
 		else
-			throw new ObjectSourceException("unknown servlet object '"+servletObj+"'");
+			throw new ObjectSourceException("can not get attribute from object '"+servletObj+"'");
 	}
 	
 	/**
@@ -461,59 +482,61 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	/**
-	 * 转换内置对象到目标类型的对象
-	 * @param obj 包括：HttpServletRequest、HttpSession、HttpServletResponse、ServletContext、WebObjectSource
-	 * @param targetType
+	 * 取得Servlet对象的标准类型
+	 * @param servletObject
 	 * @return
+	 * @date 2011-2-22
 	 */
-	protected Object convertInternalObject(Object obj, Type targetType)
+	protected Class<?> getServletObjectType(Object servletObject)
 	{
-		if(targetType == null || SoybeanMilkUtils.isInstanceOf(obj, targetType))
-			return obj;
+		Class<?> type=null;
 		
-		Class<?> sourceClass=null;
-		Converter converter=null;
-		
-		if(obj instanceof HttpServletRequest)
-			sourceClass=HttpServletRequest.class;
-		else if(obj instanceof HttpSession)
-			sourceClass=HttpSession.class;
-		else if(obj instanceof HttpServletResponse)
-			sourceClass=HttpServletResponse.class;
-		else if(obj instanceof ServletContext)
-			sourceClass=ServletContext.class;
-		else if(obj instanceof WebObjectSource)
-			sourceClass=WebObjectSource.class;
+		if(servletObject instanceof HttpServletRequest)
+			type=HttpServletRequest.class;
+		else if(servletObject instanceof HttpSession)
+			type=HttpSession.class;
+		else if(servletObject instanceof HttpServletResponse)
+			type=HttpServletResponse.class;
+		else if(servletObject instanceof ServletContext)
+			type=ServletContext.class;
 		else
-			throw new ObjectSourceException("unknown servlet object '"+obj.getClass().getName()+"'");
+			throw new ObjectSourceException("unknown servlet object '"+servletObject.getClass().getName()+"'");
 		
-		converter=getGenericConverter().getConverter(sourceClass, targetType);
-		
-		if(converter == null)
-			throw new ObjectSourceException("no Converter defined for converting '"+sourceClass.getName()+"' to '"+targetType+"'");
-		
-		return converter.convert(obj, targetType);
+		return type;
 	}
 	
 	/**
-	 * 将字符串从第一个'.'位置拆分为两部分，如果不包含'.'，则第一个元素为<code>null</code>，第二个元素为原字符串。
+	 * 将字符串从第一个'.'位置拆分为两部分，如果不包含'.'，则返回仅包含原字符串的长度为1的数组，否则返回长度为2的且元素为拆分后的字符串的数组。
 	 * @param str
 	 * @return
 	 * @date 2010-12-30
 	 */
 	protected String[] splitByFirstAccessor(String str)
 	{
-		String[] re=new String[2];
+		String[] re=null;
+		
 		int idx=str.indexOf(ACCESSOR);
 		
 		if(idx<=0 || idx==str.length()-1)
-			re[1]=str;
+			re=new String[]{str};
 		else
 		{
+			re=new String[2];
 			re[0]=str.substring(0,idx);
 			re[1]=str.substring(idx+1);
 		}
 		
 		return re;
+	}
+	
+	/**
+	 * 字符串是否包含访问符'.'
+	 * @param str
+	 * @return
+	 * @date 2011-2-22
+	 */
+	protected boolean containAccessor(String str)
+	{
+		return str!=null && str.indexOf(ACCESSOR)>=0;
 	}
 }

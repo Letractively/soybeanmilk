@@ -16,25 +16,25 @@ public class MockParameterizedType implements ParameterizedType
 		this.actualTypeArguments = actualTypeArguments;
 	}
 	
-	@Override
+	//@Override
 	public Type[] getActualTypeArguments()
 	{
 		return this.actualTypeArguments;
 	}
 
-	@Override
+	//@Override
 	public Type getOwnerType()
 	{
 		return null;
 	}
 	
-	@Override
+	//@Override
 	public Type getRawType()
 	{
 		return this.rawType;
 	}
 
-	@Override
+	//@Override
 	public String toString() {
 		return "MockParameterizedType [rawType=" + rawType
 				+ ", actualTypeArguments="

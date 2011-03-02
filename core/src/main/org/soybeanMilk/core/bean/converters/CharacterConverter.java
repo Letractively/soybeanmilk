@@ -30,7 +30,7 @@ public class CharacterConverter extends ClassTypeConverter
 		c=new org.apache.commons.beanutils.converters.CharacterConverter();
 	}
 
-	@Override
+	//@Override
 	protected Object convertToClass(Object sourceObj, Class<?> targetType)
 	{
 		return c.convert(targetType, sourceObj);

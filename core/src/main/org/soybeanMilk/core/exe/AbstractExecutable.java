@@ -30,10 +30,10 @@ public abstract class AbstractExecutable implements Executable
 	/**可执行对象名称*/
 	private String name;
 	
-	@Override
+	//@Override
 	public abstract void execute(ObjectSource objectSource) throws ExecuteException;
 	
-	@Override
+	//@Override
 	public String getName()
 	{
 		return name;

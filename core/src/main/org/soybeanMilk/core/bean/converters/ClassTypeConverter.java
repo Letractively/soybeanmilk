@@ -27,7 +27,7 @@ import org.soybeanMilk.core.bean.Converter;
  */
 public abstract class ClassTypeConverter implements Converter
 {
-	@Override
+	//@Override
 	public Object convert(Object sourceObj, Type targetType)
 	{
 		if(targetType == null)

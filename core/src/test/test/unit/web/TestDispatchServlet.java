@@ -335,7 +335,7 @@ public class TestDispatchServlet
 	
 	public static class MyResolverFactory implements ResolverFactory
 	{
-		@Override
+		//@Override
 		public Object getResolver(Serializable resolverId)
 		{
 			return null;
@@ -344,7 +344,7 @@ public class TestDispatchServlet
 	
 	public static class MyWebObjectSourceFactory implements WebObjectSourceFactory
 	{
-		@Override
+		//@Override
 		public WebObjectSource create(HttpServletRequest request,
 				HttpServletResponse response, ServletContext application) 
 		{

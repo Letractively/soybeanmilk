@@ -54,7 +54,7 @@ public class PathNode implements Comparable<PathNode>,Serializable
 		this.isVariable = isVariable;
 	}
 
-	@Override
+	//@Override
 	public int compareTo(PathNode o)
 	{
 		if(o == null)
@@ -74,7 +74,7 @@ public class PathNode implements Comparable<PathNode>,Serializable
 		return re;
 	}
 	
-	@Override
+	//@Override
 	public String toString() {
 		return "PathNode [nodeValue=" + nodeValue + ", isVariable="
 				+ isVariable + "]";

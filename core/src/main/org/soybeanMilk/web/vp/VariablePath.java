@@ -92,7 +92,7 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 	 * 	<li>顺序比较每个相同位置的路径节点（变量节点小于非变量节点，变量节点等于变量节点），如果此位置相等，则继续下一位置路径节点的比较</li>
 	 * </ol>
 	 */
-	@Override
+	//@Override
 	public int compareTo(VariablePath o)
 	{
 		PathNode[] targetNodes=o.getPathNodes();
@@ -131,7 +131,7 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 		}
 	}
 	
-	@Override
+	//@Override
 	public String toString()
 	{
 		return this.variablePath;

@@ -47,7 +47,7 @@ public class HashMapObjectSource extends ConvertableObjectSource
 		super.setGenericConverter(genericConverter);
 	}
 
-	@Override
+	//@Override
 	public Object get(Serializable key, Type expectType) throws ObjectSourceException
 	{
 		Object re = source.get(key);
@@ -71,7 +71,7 @@ public class HashMapObjectSource extends ConvertableObjectSource
 		return re;
 	}
 	
-	@Override
+	//@Override
 	public void set(Serializable key, Object obj) throws ObjectSourceException
 	{
 		source.put(key, obj);

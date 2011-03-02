@@ -193,7 +193,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		this.application = application;
 	}
 	
-	@Override
+	//@Override
 	@SuppressWarnings("unchecked")
 	public Object get(Serializable key, Type expectType)
 	{
@@ -255,7 +255,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		return data;
 	}
 	
-	@Override
+	//@Override
 	public void set(Serializable key, Object obj)
 	{
 		String strKey = (String)key;

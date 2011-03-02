@@ -112,13 +112,13 @@ public class DefaultGenericConverter implements GenericConverter
 		return converters==null ? null : converters.values();
 	}
 	
-	@Override
+	//@Override
 	public Object convert(Object sourceObj, Type targetType)
 	{
 		return convertWithSupportConverter(sourceObj, targetType);
 	}
 	
-	@Override
+	//@Override
 	public Object getProperty(Object srcObj, String propertyExpression, Type expectType)
 	{
 		if(srcObj == null)
@@ -132,7 +132,7 @@ public class DefaultGenericConverter implements GenericConverter
 		return getProperty(srcObj, PropertyInfo.getPropertyInfo(srcObj.getClass()), splitPropertyExpression(propertyExpression), expectType);
 	}
 	
-	@Override
+	//@Override
 	public void setProperty(Object srcObj, String propertyExpression, Object value)
 	{
 		if(srcObj == null)
@@ -146,7 +146,7 @@ public class DefaultGenericConverter implements GenericConverter
 		setProperty(srcObj, PropertyInfo.getPropertyInfo(srcObj.getClass()), splitPropertyExpression(propertyExpression), 0, value);
 	}
 	
-	@Override
+	//@Override
 	public void addConverter(Type sourceType,Type targetType,Converter converter)
 	{
 		if(getConverters() == null)
@@ -158,7 +158,7 @@ public class DefaultGenericConverter implements GenericConverter
 			log.debug("add a support Converter '"+converter.getClass().getName()+"' for converting '"+sourceType+"' to '"+targetType+"'");
 	}
 	
-	@Override
+	//@Override
 	public Converter getConverter(Type sourceType, Type targetType)
 	{
 		return getConverters() == null ? null : getConverters().get(generateConverterKey(sourceType, targetType));

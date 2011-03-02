@@ -771,7 +771,7 @@ public class ConfigurationParser
 			
 			File[] files=folder.listFiles(new FileFilter()
 			{
-				@Override
+				//@Override
 				public boolean accept(File pathname)
 				{
 					String name=pathname.getName().toLowerCase();
@@ -1165,19 +1165,19 @@ public class ConfigurationParser
 			this.refName = refName;
 		}
 
-		@Override
+		//@Override
 		public void execute(ObjectSource objectSource) throws ExecuteException
 		{
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
+		//@Override
 		public String getName()
 		{
 			throw new UnsupportedOperationException();
 		}
 
-		@Override
+		//@Override
 		public String toString()
 		{
 			return "Executable [name=" + refName + "]";

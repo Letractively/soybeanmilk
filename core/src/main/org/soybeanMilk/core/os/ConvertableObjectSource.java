@@ -42,9 +42,9 @@ public abstract class ConvertableObjectSource implements ObjectSource
 		this.genericConverter = genericConverter;
 	}
 	
-	@Override
+	//@Override
 	public abstract Object get(Serializable key, Type expectType);
 	
-	@Override
+	//@Override
 	public abstract void set(Serializable key, Object obj);
 }

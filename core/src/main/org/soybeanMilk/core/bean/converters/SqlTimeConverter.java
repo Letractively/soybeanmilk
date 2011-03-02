@@ -33,7 +33,7 @@ public class SqlTimeConverter extends ClassTypeConverter
 		c.setPatterns(PATTERNS);
 	}
 	
-	@Override
+	//@Override
 	protected Object convertToClass(Object sourceObj, Class<?> targetType)
 	{
 		return c.convert(targetType, sourceObj);

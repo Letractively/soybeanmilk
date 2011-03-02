@@ -55,7 +55,7 @@ public class FactoryResolverProvider implements ResolverProvider
 		this.resolverId = resolverId;
 	}
 
-	@Override
+	//@Override
 	public Object getResolver()
 	{
 		return getResolverFactory().getResolver(getResolverId());

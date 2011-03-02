@@ -102,7 +102,7 @@ public class TestWebObjectSource
 		
 		Converter converter=new Converter()
 		{
-			@Override
+			//@Override
 			public Object convert(Object sourceObj, Type targetClass) 
 			{
 				return staticJavaBean;

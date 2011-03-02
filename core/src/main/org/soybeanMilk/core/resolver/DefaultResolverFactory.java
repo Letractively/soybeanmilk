@@ -56,7 +56,7 @@ public class DefaultResolverFactory implements ResolverFactory
 		this.externalResolverFactory = externalResolverFactory;
 	}
 	
-	@Override
+	//@Override
 	public Object getResolver(Serializable resolverBeanId)
 	{
 		Object re= getExternalResolverFactory()==null ? null : getExternalResolverFactory().getResolver(resolverBeanId);

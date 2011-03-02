@@ -76,7 +76,7 @@ public class WebConfigurationParser extends ConfigurationParser
 		this.servletContext = servletContext;
 	}
 	
-	@Override
+	//@Override
 	protected void setActionProperties(Action action, Element element)
 	{
 		super.setActionProperties(action, element);
@@ -119,7 +119,7 @@ public class WebConfigurationParser extends ConfigurationParser
 		targetInfo.setType(type);
 	}
 	
-	@Override
+	//@Override
 	protected String formatIncludeFileName(String rawFileName)
 	{
 		if(rawFileName.startsWith("/WEB-INF/"))
@@ -130,7 +130,7 @@ public class WebConfigurationParser extends ConfigurationParser
 			return rawFileName;
 	}
 	
-	@Override
+	//@Override
 	protected Class<?> converterClassAttrToClass(String name)
 	{
 		if(WebConstants.WebObjectSourceScope.REQUEST.equals(name))
@@ -145,19 +145,19 @@ public class WebConfigurationParser extends ConfigurationParser
 			return super.converterClassAttrToClass(name);
 	}
 	
-	@Override
+	//@Override
 	protected String getDefaultConfigFile()
 	{
 		return WebConstants.DEFAULT_CONFIG_FILE;
 	}
 	
-	@Override
+	//@Override
 	protected GenericConverter createGenericConverterInstance()
 	{
 		return new WebGenericConverter();
 	}
 	
-	@Override
+	//@Override
 	protected Action createActionIntance()
 	{
 		return new WebAction();

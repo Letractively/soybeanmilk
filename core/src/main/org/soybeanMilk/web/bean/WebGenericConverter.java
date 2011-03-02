@@ -35,8 +35,12 @@ import org.soybeanMilk.core.bean.PropertyInfo;
  * <pre>
  * "id"            -&gt;  "1" 或 ["1"]
  * "name"          -&gt;  "jack" 或 ["jack"]
- * "children.id"   -&gt;  ["11", "12"]
- * "children.name" -&gt;  ["tom", "mary"]
+ * "listChildren.id"   -&gt;  ["11", "12"]
+ * "listChildren.name" -&gt;  ["tom", "mary"]
+ * "setChildren.id"   -&gt;  ["11", "12"]
+ * "setChildren.name" -&gt;  ["tom", "mary"]
+ * "arrayChildren.id"   -&gt;  ["11", "12"]
+ * "arrayChildren.name" -&gt;  ["tom", "mary"]
  * "ignored"       -&gt;  "this value will be ignored"
  * </pre>
  * 转换为：
@@ -44,7 +48,9 @@ import org.soybeanMilk.core.bean.PropertyInfo;
  * class User{
  * 	private Integer id;
  * 	private String name;
- * 	private List&lt;User&gt; children;
+ * 	private List&lt;User&gt; listChildren;
+ * 	private Set&lt;User&gt; setChildren;
+ * 	private User[] arrayChildren;
  * 	...
  * }
  * 
@@ -63,7 +69,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	@SuppressWarnings("unchecked")
-	@Override
+	//@Override
 	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
 	{
 		//如果源对象是数组并且长度为1，而目标类型不是，则使用数组的第一个元素转换

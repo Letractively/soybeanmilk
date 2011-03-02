@@ -116,21 +116,21 @@ public class DispatchServlet extends HttpServlet
 		this.appExecutorKey = appExecutorKey;
 	}
 
-	@Override
+	//@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException
 	{
 		doProcess(req,resp);
 	}
 
-	@Override
+	//@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException
 	{
 		doProcess(req,resp);
 	}
 	
-	@Override
+	//@Override
 	public void destroy()
 	{
 		String aek=getAppExecutorKey();
@@ -141,7 +141,7 @@ public class DispatchServlet extends HttpServlet
 		super.destroy();
 	}
 	
-	@Override
+	//@Override
 	public void init() throws ServletException
 	{
 		super.init();
@@ -168,7 +168,7 @@ public class DispatchServlet extends HttpServlet
 		{
 			wsf=new WebObjectSourceFactory()
 			{
-				@Override
+				//@Override
 				public WebObjectSource create(HttpServletRequest request, HttpServletResponse response, ServletContext application)
 				{
 					return createDefaultObjectSource(request, response, application);

@@ -36,7 +36,7 @@ public class ObjectResolverProvider implements ResolverProvider
 		this.resolver = resolver;
 	}
 
-	@Override
+	//@Override
 	public Object getResolver()
 	{
 		return resolver;

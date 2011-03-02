@@ -22,13 +22,13 @@ public class MockDispathServlet extends DispatchServlet
 		this.servletInitParameters=servletInitParameters;
 	}
 	
-	@Override
+	//@Override
 	public String getInitParameter(String name)
 	{
 		return servletInitParameters.get(name);
 	}
 
-	@Override
+	//@Override
 	public ServletContext getServletContext()
 	{
 		return servletContext;

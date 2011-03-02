@@ -33,7 +33,7 @@ public class DefaultExecutor implements Executor
 		this.configuration = configuration;
 	}
 	
-	@Override
+	//@Override
 	public Configuration getConfiguration()
 	{
 		return this.configuration;
@@ -42,7 +42,7 @@ public class DefaultExecutor implements Executor
 		this.configuration = configuration;
 	}
 	
-	@Override
+	//@Override
 	public Executable execute(String executableName, ObjectSource objSource)
 			throws ExecuteException, ExecutableNotFoundException
 	{
@@ -53,7 +53,7 @@ public class DefaultExecutor implements Executor
 		return executeWithInteceptor(exe, objSource);
 	}
 	
-	@Override
+	//@Override
 	public Executable execute(Executable executable, ObjectSource objSource)
 			throws ExecuteException
 	{

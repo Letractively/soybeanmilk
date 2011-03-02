@@ -182,7 +182,7 @@ public class PropertyInfo
 		return this.subPropertyInfos!=null && !this.subPropertyInfos.isEmpty();
 	}
 	
-	@Override
+	//@Override
 	public String toString() {
 		return "PropertyInfo [name=" + name + ", type=" + type
 				+ ", genericType=" + genericType + "]";

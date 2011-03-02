@@ -101,12 +101,14 @@ public class ConfigurationParser
 	protected static final String TAG_REF="ref";
 	protected static final String TAG_REF_ATTR_NAME="name";
 	
-	
-	private Document document;
+	/**主文档*/
+	private Document rootDocument;
 	private Configuration configuration;
-	
-	private Document currentDocument;
+	/**主文档包含的模块文档*/
 	private List<Document> modules;
+	
+	/**当前的解析文档*/
+	private Document currentDocument;
 	
 	/**
 	 * 创建解析器，不预设存储配置对象
@@ -147,7 +149,7 @@ public class ConfigurationParser
 	 */
 	public Document getDocument()
 	{
-		return this.document;
+		return this.rootDocument;
 	}
 	
 	/**
@@ -155,11 +157,11 @@ public class ConfigurationParser
 	 * @param document
 	 */
 	public void setDocument(Document document) {
-		this.document = document;
+		this.rootDocument = document;
 	}
 	
 	/**
-	 * 取得模块文档
+	 * 取得模块文档对象
 	 * @return
 	 */
 	public List<Document> getModules() {
@@ -167,7 +169,7 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 设置模块文档
+	 * 设置模块文档对象
 	 * @param modules
 	 */
 	public void setModules(List<Document> modules) {
@@ -234,7 +236,7 @@ public class ConfigurationParser
 		if(getConfiguration() == null)
 			setConfiguration(createConfigurationInstance());
 		
-		setCurrentDocument(document);
+		setCurrentDocument(rootDocument);
 		
 		parseGlobalConfigs();
 		
@@ -250,7 +252,7 @@ public class ConfigurationParser
 			}
 		}
 		
-		setCurrentDocument(document);
+		setCurrentDocument(rootDocument);
 		
 		parseExecutables();
 		if(modules !=null)
@@ -262,7 +264,7 @@ public class ConfigurationParser
 			}
 		}
 		
-		setCurrentDocument(document);
+		setCurrentDocument(rootDocument);
 		
 		parseRefs();
 	}
@@ -673,7 +675,6 @@ public class ConfigurationParser
 		}
 	}
 	
-
 	/**
 	 * 替换拦截器的代理为真实的可执行对象
 	 */
@@ -682,13 +683,13 @@ public class ConfigurationParser
 		InterceptorInfo ii=getConfiguration().getInterceptorInfo();
 		if(ii == null)
 			return;
-		{	
+		{
 			Executable before=ii.getBeforeHandler();
 			if(before instanceof ExecutableRefProxy)
 			{
 				Executable real = getConfiguration().getExecutable(((ExecutableRefProxy)before).getRefName());
 				if(real == null)
-					throw new ParseException("can not find before interceptor named '"+((ExecutableRefProxy)before).getRefName()+"'");
+					throw new ParseException("can not find 'before' interceptor named '"+((ExecutableRefProxy)before).getRefName()+"'");
 				
 				ii.setBeforeHandler(real);
 			}
@@ -699,7 +700,7 @@ public class ConfigurationParser
 			{
 				Executable real = getConfiguration().getExecutable(((ExecutableRefProxy)after).getRefName());
 				if(real == null)
-					throw new ParseException("can not find after interceptor named '"+((ExecutableRefProxy)after).getRefName()+"'");
+					throw new ParseException("can not find 'after' interceptor named '"+((ExecutableRefProxy)after).getRefName()+"'");
 				
 				ii.setAfterHandler(real);
 			}
@@ -710,7 +711,7 @@ public class ConfigurationParser
 			{
 				Executable real = getConfiguration().getExecutable(((ExecutableRefProxy)exception).getRefName());
 				if(real == null)
-					throw new ParseException("can not find exception interceptor named '"+((ExecutableRefProxy)exception).getRefName()+"'");
+					throw new ParseException("can not find 'exception' interceptor named '"+((ExecutableRefProxy)exception).getRefName()+"'");
 				
 				ii.setExceptionHandler(real);
 			}
@@ -847,6 +848,16 @@ public class ConfigurationParser
 			log.debug("parsing Document object from '"+fileName+"'");
 		
 		return doc;
+	}
+
+	/**
+	 * 自定义可执行对象的名称，所有可执行对象的名称定义和引用处都将使用该自定义规则
+	 * @param rawName
+	 * @return
+	 */
+	protected String customizeExecutableName(String rawName)
+	{
+		return rawName;
 	}
 	
 	/**
@@ -1024,16 +1035,6 @@ public class ConfigurationParser
 		String re=element.getTextContent();
 		
 		return re==null || re.length()==0 ? null : re;
-	}
-	
-	/**
-	 * 自定义可执行对象的名称，所有可执行对象的名称定义和引用处都将使用该自定义规则
-	 * @param rawName
-	 * @return
-	 */
-	protected String customizeExecutableName(String rawName)
-	{
-		return rawName;
 	}
 	
 	/**

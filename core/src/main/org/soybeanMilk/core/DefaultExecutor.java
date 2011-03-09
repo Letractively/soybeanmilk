@@ -89,13 +89,15 @@ public class DefaultExecutor implements Executor
 			context=(Execution)objSource.get(itptInfo.getExecutionKey(), null);
 			if(context == null)
 			{
-				context=new Execution();
+				context=new Execution(executable, objSource, null);
 				objSource.set(itptInfo.getExecutionKey(), context);
 			}
-			
-			context.setExecutable(executable);
-			context.setObjectSource(objSource);
-			context.setExecuteException(null);
+			else
+			{
+				context.setExecutable(executable);
+				context.setObjectSource(objSource);
+				context.setExecuteException(null);
+			}
 		}
 		
 		try

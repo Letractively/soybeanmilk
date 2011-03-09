@@ -229,6 +229,10 @@ public class Invoke extends AbstractExecutable
 			if(resultKey != null)
 				objectSource.set(resultKey, methodResult);
 		}
+		catch(InvocationTargetException e)
+		{
+			throw new InvocationExecuteException(this, e.getCause());
+		}
 		catch(IllegalArgumentException e)
 		{
 			throw new ExecuteException(e);
@@ -236,14 +240,6 @@ public class Invoke extends AbstractExecutable
 		catch(IllegalAccessException e)
 		{
 			throw new ExecuteException(e);
-		}
-		catch(InvocationTargetException e)
-		{
-			throw new InvocationExecuteException(this, e.getCause());
-		}
-		catch(RuntimeException e)
-		{
-			throw new InvocationExecuteException(this, e);
 		}
 	}
 	

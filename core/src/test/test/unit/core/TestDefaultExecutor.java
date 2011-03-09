@@ -10,7 +10,9 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.DefaultExecutor;
+import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.Execution;
+import org.soybeanMilk.core.InvocationExecuteException;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
 import org.soybeanMilk.core.os.HashMapObjectSource;
@@ -179,6 +181,23 @@ public class TestDefaultExecutor
 	}
 	
 	@Test
+	public void testInterceptorRuntimeException() throws Exception
+	{
+		HashMapObjectSource os=new HashMapObjectSource();
+		
+		try
+		{
+			executor.execute("helloThrowRuntime", os);
+		}
+		catch(ExecuteException e)
+		{
+			log.error("",e);
+		}
+		ExecuteException execution=(ExecuteException)((Execution)os.get(KEY_EXECUTION, null)).getExecuteException();
+		Assert.assertTrue( execution instanceof InvocationExecuteException );
+	}
+	
+	@Test
 	public void execute() throws Exception
 	{
 		//参数化类型，默认不支持
@@ -222,6 +241,11 @@ public class TestDefaultExecutor
 		public void helloThrow()
 		{
 			throw new UnsupportedOperationException();
+		}
+		
+		public void helloThrowRuntime()
+		{
+			throw new NullPointerException("helloThrowRuntime");
 		}
 		
 		public void helloParameterized(List<String> list){}

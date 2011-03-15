@@ -70,19 +70,25 @@
 						1.0-b3 (当前)
 						<ul>
 							<li>
-								为<a href="manual.html#tag_arg">调用参数</a>增加“<span class="tagValue">objectSource</span>”关键字，用于取得当前<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">Web对象源</a>对象
+								为<a href="manual.html#tag_executables">&lt;executables&gt;</a>标签增加“<span class="tagAttr">prefix</span>”属性，便于模块配置
 							</li>
 							<li>
-								修改<a href="manual.html#tag_target">动作目标</a>配置，取消<span class="tagAttr">type</span>属性值限制
+								为<a href="manual.html#tag_arg">&lt;arg&gt;</a>标签增加“<span class="tagValue">objectSource</span>”关键字，用于取得当前<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">Web对象源</a>对象
 							</li>
 							<li>
-								修改<span class="tag">&lt;resolver&gt;</span>标签的<span class="tagAttr">id</span>属性、<span class="tag">&lt;action&gt;</span>和<span class="tag">&lt;invoke&gt;</span>标签的<span class="tagAttr">name</span>属性为允许重复，使功能可以被替换
+								修改<a href="manual.html#tag_target">&lt;target&gt;</a>标签配置，取消<span class="tagAttr">type</span>属性值限制
+							</li>
+							<li>
+								修改<a href="manual.html#tag_resolver" class="tag">&lt;resolver&gt;</a>标签的<span class="tagAttr">id</span>属性、<a href="manual.html#tag_action" class="tag">&lt;action&gt;</a>和<a href="manual.html#tag_invoke" class="tag">&lt;invoke&gt;</a>标签的<span class="tagAttr">name</span>属性为允许重复，使功能可以被替换
 							</li>
 							<li>
 								默认的配置文件名由“<span class="tagValue">soybean-milk.config.xml</span>”改为“<span class="tagValue">soybean-milk.cfg.xml</span>”
 							</li>
 							<li>
 								为示例工程（<span class="tagValue">docs/example/web/soybeanMilkExample.zip</span>）增加了一些新示例
+							</li>
+							<li>
+								BUG修复：从<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">Web对象源</a>的<span class="tagAttr">param</span>作用域中获取不存在的基本类型对象导致异常产生
 							</li>
 						</ul>
 					</li>

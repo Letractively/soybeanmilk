@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE soybean-milk PUBLIC "-//SoybeanMilk//DTD soybeanMilk web//EN" "http://soybeanmilk.googlecode.com/files/soybeanMilk-web-1.0.dtd">
+<soybean-milk>
+	<global-config>
+		<generic-converter>
+			<converter class="test.unit.core.TestConfigurationParser$TestConverter" target="int" src="String" />
+			<converter class="test.unit.core.TestConfigurationParser$TestConverter" target="float" src="String" />
+		</generic-converter>
+		
+		<interceptor before="global_before" after="global_after" exception="m1_exception" execution-key="executionKey"/>
+	</global-config>
+	
+	<includes>
+		<file>test/unit/core/TestConfigurationParser-1.xml</file>
+		<file>test/unit/core/TestConfigurationParser-2.xml</file>
+	</includes>
+	
+	<resolvers>
+		<resolver class="test.unit.core.TestConfigurationParser$TestResolver" id="tr"/>
+	</resolvers>
+	
+	<executables prefix="global_">
+	
+		<invoke name="before">
+			tr.test0();
+		</invoke>
+		<action name="after"></action>
+		
+		<action name=""></action>
+		
+		<action name="exe0"></action>
+		
+		<action name="exe1">
+			<invoke>
+				tr.test0();
+			</invoke>
+			<ref name="exe0"/>
+		</action>
+		
+		<action name="exe2">
+			<invoke name="test2" method="test2" resolver="tr" result-key="result">
+				<arg>arg0</arg>
+				<arg>arg1</arg>
+			</invoke>
+			<ref name="global_exe0"/>
+		</action>
+		
+	</executables>
+	
+</soybean-milk>

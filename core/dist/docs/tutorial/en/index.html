@@ -69,13 +69,16 @@
 						1.0-b3 (current)
 						<ul>
 							<li>
-								Add an "<span class="tagValue">objectSource</span>" keyword for <a href="manual.html#tag_arg"><span class="tag">&lt;arg&gt;</span></a> value, for getting the <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> object itself.
+								Add "<span class="tagAttr">prefix</span>" attribute for <a href="manual.html#tag_executables" class="tag">&lt;executables&gt;</a> tag, for easy module configuration.
 							</li>
 							<li>
-								Update <a href="manual.html#tag_target">Target</a> configuration, cancelling the limitation of the <span class="tagAttr">type</span> attribute value.
+								Add an "<span class="tagValue">objectSource</span>" keyword for <a href="manual.html#tag_arg" class="tag"><span class="tag">&lt;arg&gt;</span></a> tag value, for getting the <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> object itself.
 							</li>
 							<li>
-								Update <span class="tag">&lt;resolver&gt;</span> tag's <span class="tagAttr">id</span> attribute, <span class="tag">&lt;action&gt;</span> and <span class="tag">&lt;invoke&gt;</span> tag's <span class="tagAttr">name</span> attribute, allowing to be duplicate.
+								Update <a href="manual.html#tag_target">&lt;target&gt;</a> tag configuration, cancelling the limitation of the <span class="tagAttr">type</span> attribute value.
+							</li>
+							<li>
+								Update <a href="manual.html#tag_resolver" class="tag">&lt;resolver&gt;</a> tag's <span class="tagAttr">id</span> attribute, <a href="manual.html#tag_action" class="tag">&lt;action&gt;</a> and <a href="manual.html#tag_invoke" class="tag">&lt;invoke&gt;</a> tag's <span class="tagAttr">name</span> attribute, allowing to be duplicate.
 								This makes one function can be replaced.
 							</li>
 							<li>
@@ -83,6 +86,9 @@
 							</li>
 							<li>
 								 Add some new examples to the example project(<span class="tagValue">docs/example/web/soybeanMilkExample.zip</span>)
+							</li>
+							<li>
+								BUG fix : Exception thrown while getting nonexistent primitive object from the <span class="tagAttr">param</span> scope of <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> object
 							</li>
 						</ul>
 					</li>

@@ -425,7 +425,16 @@ public void handleException(Execution execution)
 				<span class="tag bold">&lt;executables&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				<span class="glossary">可执行对象</span>配置块。它只是作为一个父标签，没有任何属性。
+				<span class="glossary">可执行对象</span>配置块。
+			</p>
+			<p>
+				它包含如下属性：
+				<ul>
+					<li>
+						<span class="tagAttr">prefix</span>（可选） <br />
+						指定此配置文件域内的所有全局<span class="glossary">可执行对象</span>的名称前缀，这在子模块配置文件中会很有用。
+					</li>
+				</ul>
 			</p>
 			<div class="seprator"></div>
 			<p>
@@ -766,7 +775,8 @@ public void handleException(Execution execution)
 				<ul>
 					<li>
 						<span class="tagAttr">name</span>（<span class="required">必须</span>） <br />
-						要引用的全局<span class="glossary">可执行对象</span>名。
+						要引用的全局<span class="glossary">可执行对象</span>名。<br />
+						如果目标<span class="glossary">可执行对象</span>不再此配置文件域内，你需要指定它的完整名称（包含前缀）。
 					</li>
 				</ul>
 			</p>

@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 import test.unit.core.TestClassShortName;
+import test.unit.core.TestConfigurationParser;
 import test.unit.core.TestDefaultExecutor;
 import test.unit.core.TestDefaultGenericConverter;
 import test.unit.core.TestHashMapObjectSource;
@@ -24,6 +25,7 @@ TestDefaultGenericConverter.class,
 TestHashMapObjectSource.class,
 TestInvokeStatementParser.class,
 TestPropertyInfo.class,
+TestConfigurationParser.class,
 
 TestDispatchServlet.class,
 TestPathNode.class,

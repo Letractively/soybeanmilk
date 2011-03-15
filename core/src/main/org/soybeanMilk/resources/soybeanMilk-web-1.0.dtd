@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-它只是比core版本多了个<target>标签
--->
+<!--===========================================-->
+<!-- 它只是比core版本多了个<target>标签 -->
+<!--===========================================-->
+
 <!--根元素-->
 <!ELEMENT soybean-milk (global-config?,includes?,resolvers?,executables)>
 
@@ -107,13 +108,18 @@ class 解决对象类名
 <!ATTLIST resolver class CDATA #REQUIRED>
 
 <!--
+本文件域内所有全局可执行对象的前缀
+-->
+<!ATTLIST executables prefix CDATA #IMPLIED>
+
+<!--
 动作的名称属性
 执行器通过这个名称来查找动作对象并执行
 -->
 <!ATTLIST action name CDATA #REQUIRED>
 
 <!--
-执行引用名称，它可以引用在任何位置定义的全局可执行对象
+执行引用名称，它可以引用在任何位置定义的全局可执行对象（本文件域内不需要加前缀）
 -->
 <!ATTLIST ref name CDATA #REQUIRED>
 

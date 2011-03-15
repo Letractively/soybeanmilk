@@ -449,7 +449,16 @@ public void handleException(Execution execution)
 				<span class="tag bold">&lt;executables&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				<span class="glossary">Executable</span> configuration block. It is just defined as a parent tag with no attribute.
+				<span class="glossary">Executable</span> configuration block.
+			</p>
+			<p>
+				It contains the following attributes:
+				<ul>
+					<li>
+						<span class="tagAttr">prefix</span> (Optional)  <br />
+						Set the prefix of all the <span class="glossary">Executable</span>s in this configuration file scope, it will be useful in module configuration files.
+					</li>
+				</ul>
 			</p>
 			<div class="seprator"></div>
 			<p>
@@ -839,7 +848,8 @@ public void handleException(Execution execution)
 				<ul>
 					<li>
 						<span class="tagAttr">name</span> (<span class="required">Required</span>) <br />
-						Set the global name of <span class="glossary">Executable</span> you want to reference.
+						Set the global name of <span class="glossary">Executable</span> you want to reference.<br />
+						You must set the full name (with prefix) of the target <span class="glossary">Executable</span> if it is not in this configuration file scope.
 					</li>
 				</ul>
 			</p>

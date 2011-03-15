@@ -85,6 +85,7 @@ public class ConfigurationParser
 	protected static final String TAG_RESOLVER_ATTR_CLASS="class";
 	
 	protected static final String TAG_EXECUTABLES="executables";
+	protected static final String TAG_EXECUTABLES_ATTR_PREFIX="prefix";
 	
 	protected static final String TAG_ACTION="action";
 	protected static final String TAG_ACTION_ATTR_NAME="name";
@@ -109,6 +110,8 @@ public class ConfigurationParser
 	
 	/**当前的解析文档*/
 	private Document currentDocument;
+	/**当前可执行对象前缀*/
+	private String currentExecutablePrefix;
 	
 	/**
 	 * 创建解析器，不预设存储配置对象
@@ -353,6 +356,8 @@ public class ConfigurationParser
 		Element executables=getSingleElementByTagName(getCurrentDocumentRoot(),TAG_EXECUTABLES);
 		if(executables != null)
 		{
+			setCurrentExecutablePrefix(getAttribute(executables, TAG_EXECUTABLES_ATTR_PREFIX));
+			
 			List<Element> children=getChildrenByTagName(executables, null);
 			
 			if(children != null)
@@ -361,7 +366,10 @@ public class ConfigurationParser
 				{
 					Executable executable=createExecutableInstance(e.getTagName());
 					
-					setExecutableProperties(executable,e);
+					if(executable instanceof Action)
+						setActionProperties((Action)executable,e);
+					else
+						setInvokeProperties((Invoke)executable,e, true);
 					
 					if(log.isDebugEnabled())
 						log.debug("parsed '"+executable+"'");
@@ -450,28 +458,15 @@ public class ConfigurationParser
 		
 		InterceptorInfo ii=createInterceptorInfoInstance();
 		
-		ii.setBeforeHandler(new ExecutableRefProxy(before));
-		ii.setAfterHandler(new ExecutableRefProxy(after));
-		ii.setExceptionHandler(new ExecutableRefProxy(exception));
+		ii.setBeforeHandler(new ExecutableRefProxy(before, getCurrentExecutablePrefix()));
+		ii.setAfterHandler(new ExecutableRefProxy(after, getCurrentExecutablePrefix()));
+		ii.setExceptionHandler(new ExecutableRefProxy(exception, getCurrentExecutablePrefix()));
 		ii.setExecutionKey(executionKey);
 		
 		if(log.isDebugEnabled())
 			log.debug("parsed '"+ii+"'");
 		
 		getConfiguration().setInterceptorInfo(ii);
-	}
-	
-	/**
-	 * 从可执行对象对应的元素中解析并设置对象的属性。
-	 * @param executable 可执行对象，可能是Action也可能是Invoke
-	 * @param element
-	 */
-	protected void setExecutableProperties(Executable executable,Element element)
-	{
-		if(executable instanceof Action)
-			setActionProperties((Action)executable,element);
-		else
-			setInvokeProperties((Invoke)executable,element);
 	}
 	
 	/**
@@ -486,7 +481,7 @@ public class ConfigurationParser
 		String name=getAttribute(element,TAG_ACTION_ATTR_NAME);
 		assertNotNull(name, "<"+TAG_ACTION+"> attribute ["+TAG_ACTION_ATTR_NAME+"] must not be null");
 		
-		action.setName(customizeExecutableName(name));
+		action.setName(formatGlobalExecutableName(name));
 		
 		List<Element> children=getChildrenByTagName(element, null);
 		for(Element e : children)
@@ -497,12 +492,12 @@ public class ConfigurationParser
 				String refExecutableName=getAttribute(e,TAG_REF_ATTR_NAME);
 				assertNotNull(refExecutableName, "<"+TAG_REF+"> attribute ["+TAG_REF_ATTR_NAME+"] in <"+TAG_ACTION+"> named '"+action.getName()+"' must not be null");
 				
-				action.addExecutable(new ExecutableRefProxy(customizeExecutableName(refExecutableName)));
+				action.addExecutable(new ExecutableRefProxy(refExecutableName, getCurrentExecutablePrefix()));
 			}
 			else if(TAG_INVOKE.equals(tagName))
 			{
 				Invoke invoke=createInvokeIntance();
-				setInvokeProperties(invoke,e);
+				setInvokeProperties(invoke,e, false);
 				
 				action.addExecutable(invoke);
 			}
@@ -513,30 +508,34 @@ public class ConfigurationParser
 	 * 从元素中解析并设置调用的属性
 	 * @param invoke
 	 * @param element
+	 * @param global 是否全局调用
 	 */
-	protected void setInvokeProperties(Invoke invoke, Element element)
+	protected void setInvokeProperties(Invoke invoke, Element element, boolean global)
 	{
 		String methodName=getAttributeIngoreEmpty(element, TAG_INVOKE_ATTR_METHOD);
 		
 		if(methodName == null)
-			setInvokePropertiesStatement(invoke, element);
+			setInvokePropertiesStatement(invoke, element, global);
 		else
-			setInvokePropertiesXml(invoke, element);
+			setInvokePropertiesXml(invoke, element, global);
 	}
 	
 	/**
 	 * 设置以表达式方式定义的调用属性
 	 * @param invoke
 	 * @param element
+	 * @param global 是否全局调用
 	 */
-	protected void setInvokePropertiesStatement(Invoke invoke, Element element)
+	protected void setInvokePropertiesStatement(Invoke invoke, Element element, boolean global)
 	{
 		String statement=getTextContent(element);
 		assertNotEmpty(statement, "<"+TAG_INVOKE+"> content must not be empty");
 		
 		String name=getAttribute(element,TAG_INVOKE_ATTR_NAME);
+		if(global)
+			name=formatGlobalExecutableName(name);
 		
-		invoke.setName(customizeExecutableName(name));
+		invoke.setName(name);
 		
 		new InvokeStatementParser(invoke, statement, configuration.getResolverFactory()).parse();
 	}
@@ -545,10 +544,13 @@ public class ConfigurationParser
 	 * 设置以XML方式定义的调用属性
 	 * @param invoke
 	 * @param element
+	 * @param global 是否全局调用
 	 */
-	protected void setInvokePropertiesXml(Invoke invoke,Element element)
+	protected void setInvokePropertiesXml(Invoke invoke,Element element, boolean global)
 	{
 		String name=getAttribute(element,TAG_INVOKE_ATTR_NAME);
+		if(global)
+			name=formatGlobalExecutableName(name);
 		String methodName=getAttributeIngoreEmpty(element, TAG_INVOKE_ATTR_METHOD);
 		String resolverId=getAttributeIngoreEmpty(element,TAG_INVOKE_ATTR_RESOLVER_OBJECT);
 		String resolverClazz=getAttributeIngoreEmpty(element, TAG_INVOKE_ATTR_RESOLVER_CLASS);
@@ -580,7 +582,7 @@ public class ConfigurationParser
 		
 		Method method=Invoke.findMethodThrow(resolverClass, methodName, argNums);
 		
-		invoke.setName(customizeExecutableName(name));
+		invoke.setName(name);
 		invoke.setMethod(method);
 		invoke.setResultKey(resultKey);
 		
@@ -662,19 +664,19 @@ public class ConfigurationParser
 					
 					if(e instanceof ExecutableRefProxy)
 					{
-						String refName=((ExecutableRefProxy)e).getRefName();
-						Executable refExe=configuration.getExecutable(refName);
+						ExecutableRefProxy proxy=((ExecutableRefProxy)e);
+						Executable targetExe=getTargetRefExecutable((ExecutableRefProxy)e);
 						
-						if(refExe == null)
-							throw new ParseException("can not find Executable named '"+refName+"' referenced in Action '"+action.getName()+"'");
+						if(targetExe == null)
+							throw new ParseException("can not find Executable named '"+proxy.getName()+"' referenced in Action '"+action.getName()+"'");
 						
-						actionExes.set(i, refExe);
+						actionExes.set(i, targetExe);
 					}
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * 替换拦截器的代理为真实的可执行对象
 	 */
@@ -683,39 +685,78 @@ public class ConfigurationParser
 		InterceptorInfo ii=getConfiguration().getInterceptorInfo();
 		if(ii == null)
 			return;
+		
 		{
 			Executable before=ii.getBeforeHandler();
 			if(before instanceof ExecutableRefProxy)
 			{
-				Executable real = getConfiguration().getExecutable(((ExecutableRefProxy)before).getRefName());
-				if(real == null)
+				Executable targetExe=getTargetRefExecutable((ExecutableRefProxy)before);
+				if(targetExe == null)
 					throw new ParseException("can not find 'before' interceptor named '"+((ExecutableRefProxy)before).getRefName()+"'");
 				
-				ii.setBeforeHandler(real);
+				ii.setBeforeHandler(targetExe);
 			}
 		}
+		
 		{
 			Executable after=ii.getAfterHandler();
 			if(after instanceof ExecutableRefProxy)
 			{
-				Executable real = getConfiguration().getExecutable(((ExecutableRefProxy)after).getRefName());
-				if(real == null)
+				Executable targetExe=getTargetRefExecutable((ExecutableRefProxy)after);
+				if(targetExe == null)
 					throw new ParseException("can not find 'after' interceptor named '"+((ExecutableRefProxy)after).getRefName()+"'");
 				
-				ii.setAfterHandler(real);
+				ii.setAfterHandler(targetExe);
 			}
 		}
+		
 		{
 			Executable exception=ii.getExceptionHandler();
 			if(exception instanceof ExecutableRefProxy)
 			{
-				Executable real = getConfiguration().getExecutable(((ExecutableRefProxy)exception).getRefName());
-				if(real == null)
+				Executable targetExe=getTargetRefExecutable((ExecutableRefProxy)exception);
+				if(targetExe == null)
 					throw new ParseException("can not find 'exception' interceptor named '"+((ExecutableRefProxy)exception).getRefName()+"'");
 				
-				ii.setExceptionHandler(real);
+				ii.setExceptionHandler(targetExe);
 			}
 		}
+	}
+	
+	/**
+	 * 获取代理目标
+	 * @param proxy
+	 * @return
+	 * @date 2011-3-15
+	 */
+	protected Executable getTargetRefExecutable(ExecutableRefProxy proxy)
+	{
+		Executable target=null;
+		
+		//先从它的文件作用域内取
+		if(target == null)
+		{
+			if(proxy.getCurrentExecutablePrefix() != null)
+				target=configuration.getExecutable(proxy.getCurrentExecutablePrefix()+proxy.getRefName());
+		}
+		
+		if(target == null)
+			target=configuration.getExecutable(proxy.getRefName());
+		
+		return target;
+	}
+	
+	/**
+	 * 格式化全局可执行对象名称，比如增加当前前缀。
+	 * @param rawName
+	 * @return
+	 * @date 2011-3-15
+	 */
+	protected String formatGlobalExecutableName(String rawName)
+	{
+		String cep=getCurrentExecutablePrefix();
+		
+		return cep == null ? rawName : cep+rawName;
 	}
 	
 	/**
@@ -849,16 +890,6 @@ public class ConfigurationParser
 		
 		return doc;
 	}
-
-	/**
-	 * 自定义可执行对象的名称，所有可执行对象的名称定义和引用处都将使用该自定义规则
-	 * @param rawName
-	 * @return
-	 */
-	protected String customizeExecutableName(String rawName)
-	{
-		return rawName;
-	}
 	
 	/**
 	 * 格式化包含模块文件
@@ -900,6 +931,21 @@ public class ConfigurationParser
 	protected Element getCurrentDocumentRoot()
 	{
 		return this.currentDocument.getDocumentElement();
+	}
+	
+	protected void setCurrentExecutablePrefix(String  currentExecutablePrefix)
+	{
+		this.currentExecutablePrefix=currentExecutablePrefix;
+	}
+	
+	/**
+	 * 获取当前可执行对象前缀
+	 * @return
+	 * @date 2011-3-15
+	 */
+	protected String getCurrentExecutablePrefix()
+	{
+		return this.currentExecutablePrefix;
 	}
 	
 	/**
@@ -1150,11 +1196,13 @@ public class ConfigurationParser
 		private static final long serialVersionUID = 1L;
 		
 		private String refName;
+		private String currentExecutablePrefix;
 
-		public ExecutableRefProxy(String refName)
+		public ExecutableRefProxy(String refName, String currentExecutablePrefix)
 		{
 			super();
 			this.refName = refName;
+			this.currentExecutablePrefix=currentExecutablePrefix;
 		}
 
 		public String getRefName() {
@@ -1163,6 +1211,16 @@ public class ConfigurationParser
 
 		public void setRefName(String refName) {
 			this.refName = refName;
+		}
+
+		public String getCurrentExecutablePrefix()
+		{
+			return currentExecutablePrefix;
+		}
+
+		public void setCurrentExecutablePrefix(String currentExecutablePrefix)
+		{
+			this.currentExecutablePrefix = currentExecutablePrefix;
 		}
 
 		//@Override

@@ -33,15 +33,15 @@ import org.soybeanMilk.core.bean.PropertyInfo;
  * WEB通用转换器，除了继承的转换支持，它还支持将{@link Map Map&lt;String, Object&gt;}转换为JavaBean对象、JavaBean数组以及JavaBean集合（List、Set）。<br>
  * 比如可以将下面的映射表：
  * <pre>
- * "id"            -&gt;  "1" 或 ["1"]
- * "name"          -&gt;  "jack" 或 ["jack"]
- * "listChildren.id"   -&gt;  ["11", "12"]
- * "listChildren.name" -&gt;  ["tom", "mary"]
- * "setChildren.id"   -&gt;  ["11", "12"]
- * "setChildren.name" -&gt;  ["tom", "mary"]
+ * "id"                 -&gt;  "1" 或 ["1"]
+ * "name"               -&gt;  "jack" 或 ["jack"]
+ * "listChildren.id"    -&gt;  ["11", "12"]
+ * "listChildren.name"  -&gt;  ["tom", "mary"]
+ * "setChildren.id"     -&gt;  ["11", "12"]
+ * "setChildren.name"   -&gt;  ["tom", "mary"]
  * "arrayChildren.id"   -&gt;  ["11", "12"]
  * "arrayChildren.name" -&gt;  ["tom", "mary"]
- * "ignored"       -&gt;  "this value will be ignored"
+ * "ignored"            -&gt;  "this value will be ignored"
  * </pre>
  * 转换为：
  * <pre>

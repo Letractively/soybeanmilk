@@ -4,7 +4,6 @@ package test.unit.core;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import junit.framework.Assert;
 

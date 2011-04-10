@@ -212,7 +212,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		
 		if(WebConstants.WebObjectSourceScope.PARAM.equalsIgnoreCase(scope))
 		{
-			data=convertFromMap(getRequest().getParameterMap(), subKey, expectType);
+			data=convertParameterMap(getRequest().getParameterMap(), subKey, expectType);
 		}
 		else if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
 		{
@@ -307,7 +307,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	protected Object getObjectForUnknownKey(String key, Type expectType)
 	{
 		if(!containAccessor(key))
-			return convertFromMap(getRequest().getParameterMap(), key, expectType);
+			return convertParameterMap(getRequest().getParameterMap(), key, expectType);
 		else
 			throw new ObjectSourceException("key '"+key+"' is invalid, the 'get' method can not recognize it");
 	}
@@ -436,29 +436,29 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	/**
-	 * 从映射表取得对象。<br>
+	 * 转换请求参数映射表。<br>
 	 * 如果<code>keyFilter</code>是一个明确的关键字（映射表中有该关键字的值），它将直接根据该关键字的值来转换；<br>
 	 * 如果<code>keyFilter</code>是<code>null</code>，那么它将使用原始的请求参数映射表来进行转换；<br>
 	 * 否则，它会根据<code>keyFilter</code>来对参数映射表进行过滤，产生一个新的映射表（它的关键字将会被替换为原始关键字的“<code>[keyFilter]</code>.”之后的部分，比如由“<code>beanName.propertyName</code>”变为“<code>propertyName</code>”），
 	 * 然后使用它进行转换。
 	 * 
-	 * @param valueMap 原始映射表
+	 * @param paramMap 请求参数映射表
 	 * @param keyFilter 主键筛选器，只有以此筛选器开头的Map关键字才会被转换，如果为null，则表明不做筛选
 	 * @param targetType 目标类型
 	 * 
 	 * @return
 	 */
-	protected Object convertFromMap(Map<String,Object> valueMap, String keyFilter, Type targetType)
+	protected Object convertParameterMap(Map<String,Object> paramMap, String keyFilter, Type targetType)
 	{
 		Object src=null;
 		
 		//没有过滤器
 		if(keyFilter == null)
-			src=valueMap;
+			src=paramMap;
 		else
 		{
 			//有确切的值
-			Object explicit = valueMap.get(keyFilter);
+			Object explicit = paramMap.get(keyFilter);
 			if(explicit != null)
 				src=explicit;
 			else
@@ -466,11 +466,11 @@ public class WebObjectSource extends ConvertableObjectSource
 				String keyPrefix = keyFilter+ACCESSOR;
 				
 				Map<String,Object> filtered = new HashMap<String, Object>();
-				Set<String> keys=valueMap.keySet();
+				Set<String> keys=paramMap.keySet();
 				for(String k : keys)
 				{
 					if(k.startsWith(keyPrefix))
-						filtered.put(k.substring(keyPrefix.length()), valueMap.get(k));
+						filtered.put(k.substring(keyPrefix.length()), paramMap.get(k));
 				}
 				
 				//如果没有过滤到，则表明源为null，使用空Map会导致非预期的错误

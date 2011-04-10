@@ -73,14 +73,16 @@ public class WebGenericConverter extends DefaultGenericConverter
 	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
 	{
 		//如果源对象是数组并且长度为1，而目标类型不是，则使用数组的第一个元素转换
-		if(sourceObj.getClass().isArray() && Array.getLength(sourceObj)==1 && !SoybeanMilkUtils.isClassTypeArray(targetType))
+		if(sourceObj.getClass().isArray()
+				&& Array.getLength(sourceObj)==1
+				&& !SoybeanMilkUtils.isClassTypeArray(targetType))
 		{
 			if(log.isDebugEnabled())
-				log.debug("the source '"+getStringDesc(sourceObj)+"' is an array and the length is 1, while the target type not, so it's first element will be used for converting");
+				log.debug("the src '"+getStringDesc(sourceObj)+"' is array of length 1, while the target type not, so it's first element will be used for converting");
 			
 			sourceObj=Array.get(sourceObj, 0);
 			
-			return super.convertWithSupportConverter(sourceObj, targetType);
+			return convert(sourceObj, targetType);
 		}
 		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, Map.class))
 			return convertMap((Map<String, Object>)sourceObj, targetType);

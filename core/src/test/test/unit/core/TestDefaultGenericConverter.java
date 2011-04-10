@@ -420,7 +420,7 @@ public class TestDefaultGenericConverter
 		Assert.assertNull(re);
 	}
 	
-	@Test(expected = ConvertException.class)
+	@Test(expected = GenericConvertException.class)
 	public void convertString_emptyStringToPrimitive()
 	{
 		String src="";

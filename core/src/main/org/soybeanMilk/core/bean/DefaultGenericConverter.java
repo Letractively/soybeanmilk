@@ -115,7 +115,32 @@ public class DefaultGenericConverter implements GenericConverter
 	//@Override
 	public Object convert(Object sourceObj, Type targetType)
 	{
-		return convertWithSupportConverter(sourceObj, targetType);
+		if(log.isDebugEnabled())
+			log.debug("start converting \""+getStringDesc(sourceObj)+"\" of type \""
+					+(sourceObj == null ? null : sourceObj.getClass().getName())+"\" to type \""
+					+targetType+"\"");
+		
+		if(targetType == null)
+			return sourceObj;
+		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, SoybeanMilkUtils.toWrapperType(targetType)))
+			return sourceObj;
+		else if(sourceObj==null
+				|| (sourceObj instanceof String && ((String)sourceObj).length()==0))
+		{
+			if(SoybeanMilkUtils.isPrimitive(targetType))
+				throw new GenericConvertException("can not convert \""+sourceObj+"\" to primitive type \""+targetType+"\"");
+			else
+				return null;
+		}
+		else
+		{
+			Converter converter = getConverter(sourceObj.getClass(), targetType);
+			
+			if(converter == null)
+				return convertWhenNoSupportConverter(sourceObj, targetType);
+			else
+				return doConvert(converter, sourceObj, targetType);
+		}
 	}
 	
 	//@Override
@@ -161,54 +186,17 @@ public class DefaultGenericConverter implements GenericConverter
 	//@Override
 	public Converter getConverter(Type sourceType, Type targetType)
 	{
-		return getConverters() == null ? null : getConverters().get(generateConverterKey(sourceType, targetType));
-	}
-	
-	/**
-	 * 使用辅助转换器转换类型
-	 * @param sourceObj 源对象
-	 * @param targetType 目标类型，为<code>null</code>则表示不需转换
-	 * @return
-	 * @date 2010-12-28
-	 */
-	protected Object convertWithSupportConverter(Object sourceObj, Type targetType)
-	{
-		if(log.isDebugEnabled())
-			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"
-					+(sourceObj == null ? null : sourceObj.getClass().getName())+"' to type '"
-					+targetType+"'");
+		Converter re=null;
+		Map<String,Converter> converters=getConverters();
 		
-		if(targetType == null)
-			return sourceObj;
-		
-		if(sourceObj == null)
+		if(converters != null)
 		{
-			if(SoybeanMilkUtils.isPrimitive(targetType))
-				throw new GenericConvertException("can not convert null to primitive type");
-			else
-				return null;
+			re=converters.get(generateConverterKey(sourceType, targetType));
+			if(re==null && SoybeanMilkUtils.isPrimitive(targetType))
+				re=converters.get(generateConverterKey(sourceType, SoybeanMilkUtils.toWrapperType(targetType)));
 		}
 		
-		if(SoybeanMilkUtils.isInstanceOf(sourceObj, SoybeanMilkUtils.toWrapperType(targetType)))
-			return sourceObj;
-		
-		Converter c = getConverter(sourceObj.getClass(), targetType);
-		if(c==null && SoybeanMilkUtils.isPrimitive(targetType))
-			c=getConverter(sourceObj.getClass(), SoybeanMilkUtils.toWrapperType(targetType));
-		
-		if(c == null)
-			return convertWhenNoSupportConverter(sourceObj, targetType);
-		else
-		{
-			try
-			{
-				return c.convert(sourceObj, targetType);
-			}
-			catch(ConvertException e)
-			{
-				return convertWhenException(sourceObj, targetType, e);
-			}
-		}
+		return re;
 	}
 	
 	/**
@@ -264,20 +252,23 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	/**
-	 * 当转换出现异常时，此方法将被调用。
+	 * 使用转换器转换对象
+	 * @param converter
 	 * @param sourceObj
 	 * @param targetType
-	 * @param exception
 	 * @return
-	 * @date 2011-1-5
+	 * @date 2011-4-10
 	 */
-	protected Object convertWhenException(Object sourceObj, Type targetType, ConvertException exception)
+	protected Object doConvert(Converter converter, Object sourceObj, Type targetType)
 	{
-		if(sourceObj instanceof String
-				&& ((String)sourceObj).length()==0 && !SoybeanMilkUtils.isPrimitive(targetType))
-			return null;
-		else
-			throw exception;
+		try
+		{
+			return converter.convert(sourceObj, targetType);
+		}
+		catch(Exception e)
+		{
+			throw new ConvertException(sourceObj, targetType, e);
+		}
 	}
 	
 	/**
@@ -332,7 +323,7 @@ public class DefaultGenericConverter implements GenericConverter
 		Object re=Array.newInstance(targetElementType, len);
 		
 		for(int i=0;i<len;i++)
-			Array.set(re, i, convertWithSupportConverter(Array.get(sourceObj, i), targetElementType));
+			Array.set(re, i, convert(Array.get(sourceObj, i), targetElementType));
 		
 		return re;
 	}

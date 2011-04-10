@@ -13,9 +13,9 @@
 	<property name="tmpDir" value="../../tmp" />
 	
 	<!--版本更改时，用于删除旧版-->
-	<property name="appVersion_old" value="1.0-b2" />
+	<property name="appVersion_old" value="1.0-b3" />
 	<!-- 版本 -->
-	<property name="appVersion" value="1.0-b3" />
+	<property name="appVersion" value="1.0-b4" />
 	
 	<!-- 名称 -->
 	<property name="appName_old" value="soybeanMilk-${appVersion_old}" />

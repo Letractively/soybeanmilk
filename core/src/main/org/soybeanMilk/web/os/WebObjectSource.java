@@ -16,6 +16,8 @@ package org.soybeanMilk.web.os;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -459,7 +461,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		{
 			//有确切的值
 			Object explicit = paramMap.get(keyFilter);
-			if(explicit != null)
+			if(explicit!=null || isSingleParameterKey(targetType))
 				src=explicit;
 			else
 			{
@@ -503,6 +505,44 @@ public class WebObjectSource extends ConvertableObjectSource
 			throw new ObjectSourceException("unknown servlet object '"+servletObject.getClass().getName()+"'");
 		
 		return type;
+	}
+	
+	/**
+	 * 类型在请求参数映射表中是否只会有一个关键字与其对应。
+	 * @param type
+	 * @return
+	 * @date 2011-4-11
+	 */
+	protected boolean isSingleParameterKey(Type type)
+	{
+		if(type==null)
+			return false;
+		else if(!SoybeanMilkUtils.isClassType(type))
+			return false;
+		else
+		{
+			if(SoybeanMilkUtils.narrowToClassType(type).isPrimitive())
+				return true;
+			else
+			{
+				if (Integer.class.equals(type)
+						|| Double.class.equals(type)
+						|| Long.class.equals(type)
+						|| Boolean.class.equals(type)
+						|| Float.class.equals(type)
+						|| Short.class.equals(type)
+						|| Byte.class.equals(type)
+						|| Character.class.equals(type)
+						
+						|| String.class.equals(type)
+						
+						|| BigInteger.class.equals(type)
+						|| BigDecimal.class.equals(type))
+					return true;
+				else
+					return false;
+			}
+		}
 	}
 	
 	/**

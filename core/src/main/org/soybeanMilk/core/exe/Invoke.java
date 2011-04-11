@@ -265,16 +265,7 @@ public class Invoke extends AbstractExecutable
 				if(args[i].getValue()!=null || args[i].getKey()==null)
 					values[i]=args[i].getValue();
 				else
-				{
-					try
-					{
-						values[i]= objectSource.get(args[i].getKey(), args[i].getType());
-					}
-					catch(ConvertException e)
-					{
-						throw new ConvertExecuteException(this, i, e);
-					}
-				}
+					values[i]=getArgValueFromObjectSource(args, i, objectSource);
 			}
 		}
 		
@@ -282,6 +273,31 @@ public class Invoke extends AbstractExecutable
 			log.debug("construct method arguments '"+Arrays.toString(values)+"'");
 		
 		return values;
+	}
+	
+	/**
+	 * 从对象源中取得第<code>argIdx</code>个参数的值。
+	 * @param args
+	 * @param argIdx
+	 * @param objectSource
+	 * @return
+	 * @throws ExecuteException
+	 * @date 2011-4-11
+	 */
+	protected Object getArgValueFromObjectSource(Arg[] args, int argIdx, ObjectSource objectSource) throws ExecuteException
+	{
+		Object re=null;
+		
+		try
+		{
+			re=objectSource.get(args[argIdx].getKey(), args[argIdx].getType());
+		}
+		catch(ConvertException e)
+		{
+			throw new ConvertExecuteException(this, argIdx, e);
+		}
+		
+		return re;
 	}
 	
 	//@Override

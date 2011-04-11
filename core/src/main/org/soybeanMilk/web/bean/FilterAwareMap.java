@@ -1,3 +1,17 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
+ */
+
 package org.soybeanMilk.web.bean;
 
 import java.util.Collection;
@@ -15,11 +29,16 @@ import java.util.Set;
  */
 public class FilterAwareMap<K, V> implements Map<String, V>
 {
+	public static final String EXPLICIT_KEY="";
+	
 	/**过滤器*/
 	private String filter;
 	
-	/**内部使用的存储映射表*/
+	/**存储过滤结果的映射表*/
 	private Map<String, V> map;
+	
+	/**过滤结果是否唯一*/
+	private boolean explicit;
 	
 	protected FilterAwareMap()
 	{
@@ -49,6 +68,31 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 	protected void setMap(Map<String, V> map)
 	{
 		this.map = map;
+	}
+	
+	/**
+	 * 此映射表是否是经过过滤的。
+	 * @return
+	 * @date 2011-4-11
+	 */
+	public boolean isFiltered()
+	{
+		return this.filter!=null && this.filter.length()!=0;
+	}
+
+	/**
+	 * 过滤器在原始映射表中是否对应明确的值。
+	 * @return
+	 * @date 2011-4-11
+	 */
+	public boolean isExplicit()
+	{
+		return explicit;
+	}
+
+	protected void setExplicit(boolean explicit)
+	{
+		this.explicit = explicit;
 	}
 
 	//@Override
@@ -123,7 +167,7 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 	}
 	
 	/**
-	 * 过滤映射表，如果原始映射表中没有包含过滤器的关键字，它不会返回<code>null</code>
+	 * 过滤映射表，如果原始映射表中没有包含过滤器的关键字，它将返回一个不包含任何元素的映射表对象。
 	 * @param original
 	 * @param filter
 	 * @return
@@ -151,11 +195,22 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 			else
 				filtered.setFilter(filter);
 			
-			Set<String> keys=original.keySet();
-			for(String k : keys)
+			Object explicit=original.get(filter);
+			if(explicit != null)
 			{
-				if(k.startsWith(filter))
-					filtered.put(k.substring(filter.length()), original.get(k));
+				filtered.put(EXPLICIT_KEY, explicit);
+				filtered.setExplicit(true);
+			}
+			else
+			{
+				Set<String> keys=original.keySet();
+				for(String k : keys)
+				{
+					if(k.startsWith(filter))
+						filtered.put(k.substring(filter.length()), original.get(k));
+				}
+				
+				filtered.setExplicit(false);
 			}
 		}
 		

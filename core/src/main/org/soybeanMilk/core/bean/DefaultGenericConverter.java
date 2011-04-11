@@ -116,9 +116,9 @@ public class DefaultGenericConverter implements GenericConverter
 	public Object convert(Object sourceObj, Type targetType)
 	{
 		if(log.isDebugEnabled())
-			log.debug("start converting \""+getStringDesc(sourceObj)+"\" of type \""
-					+(sourceObj == null ? null : sourceObj.getClass().getName())+"\" to type \""
-					+targetType+"\"");
+			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"
+					+(sourceObj == null ? null : sourceObj.getClass().getName())+"' to type '"
+					+targetType+"'");
 		
 		if(targetType == null)
 			return sourceObj;
@@ -128,7 +128,7 @@ public class DefaultGenericConverter implements GenericConverter
 				|| (sourceObj instanceof String && ((String)sourceObj).length()==0))
 		{
 			if(SoybeanMilkUtils.isPrimitive(targetType))
-				throw new GenericConvertException("can not convert \""+sourceObj+"\" to primitive type \""+targetType+"\"");
+				throw new GenericConvertException("can not convert '"+sourceObj+"' to primitive type '"+targetType+"'");
 			else
 				return null;
 		}

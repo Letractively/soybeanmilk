@@ -99,12 +99,12 @@ public class WebGenericConverter extends DefaultGenericConverter
 	protected Object convertMap(Map<String, Object> valueMap, Type targetType)
 	{
 		if(log.isDebugEnabled())
-			log.debug("start converting 'Map<String, Object>' object to '"+targetType+"'");
+			log.debug("start converting 'Map<String, Object>' object to type '"+targetType+"'");
 		
 		Object result = null;
 		
 		if(valueMap==null || valueMap.size()==0)
-			return result;
+			return null;
 		
 		Class<?>[] actualTypes=SoybeanMilkUtils.getActualClassTypeInfo(targetType);
 		
@@ -112,7 +112,9 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			//数组
 			if(SoybeanMilkUtils.isArray(actualTypes[0]))
+			{
 				result=convertMapToJavaBeanArray(valueMap, actualTypes[0].getComponentType());
+			}
 			//List
 			else if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))
 			{
@@ -263,7 +265,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 				len=l;
 			else
 				if(l != len)
-					throw new GenericConvertException("the element array in the source map must be the same length");
+					throw new GenericConvertException("the array element in the source map must be the same length");
 			
 			String[] propertyExp=splitPropertyExpression(key);
 			if(beanInfo.getSubPropertyInfo(propertyExp[0]) != null)

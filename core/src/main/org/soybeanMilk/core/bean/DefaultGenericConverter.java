@@ -223,8 +223,11 @@ public class DefaultGenericConverter implements GenericConverter
 		else if(sourceObj.getClass().isArray())
 		{
 			Class<?>[] actualTypes=SoybeanMilkUtils.getActualClassTypeInfo(targetType);
+			
 			if(SoybeanMilkUtils.isArray(actualTypes[0]))
+			{
 				re=convertArrayToArray(sourceObj, actualTypes[0].getComponentType());
+			}
 			else if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))
 			{
 				if(actualTypes.length != 2)

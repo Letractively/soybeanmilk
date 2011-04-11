@@ -18,9 +18,7 @@ import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +33,7 @@ import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.web.WebConstants;
+import org.soybeanMilk.web.bean.FilterAwareMap;
 
 /**
  * 用于WEB应用的对象源，它的实例的生命周期与一次请求的生命周期相同。
@@ -452,33 +451,29 @@ public class WebObjectSource extends ConvertableObjectSource
 	 */
 	protected Object convertParameterMap(Map<String,Object> paramMap, String keyFilter, Type targetType)
 	{
-		Object src=null;
+		FilterAwareMap<String, Object> src=null;
 		
 		//没有过滤器
-		if(keyFilter == null)
-			src=paramMap;
+		if(keyFilter==null || keyFilter.length()==0)
+			src=FilterAwareMap.wrap(paramMap);
 		else
 		{
-			//有确切的值
-			Object explicit = paramMap.get(keyFilter);
-			if(explicit!=null || isSingleParameterKey(targetType))
-				src=explicit;
+			boolean explicitValue;
+			//有确切的值或者仅对应一个参数
+			if(paramMap.get(keyFilter)!=null || isSingleParameterKey(targetType))
+				explicitValue=true;
 			else
 			{
-				String keyPrefix = keyFilter+ACCESSOR;
-				
-				Map<String,Object> filtered = new HashMap<String, Object>();
-				Set<String> keys=paramMap.keySet();
-				for(String k : keys)
-				{
-					if(k.startsWith(keyPrefix))
-						filtered.put(k.substring(keyPrefix.length()), paramMap.get(k));
-				}
-				
-				//如果没有过滤到，则表明源为null，使用空Map会导致非预期的错误
-				src= filtered.isEmpty() ? null : filtered;
+				explicitValue=false;
+				keyFilter=keyFilter+ACCESSOR;
 			}
+			
+			src=FilterAwareMap.filter(paramMap, keyFilter, explicitValue);
 		}
+		
+		//设置为null，减少转换开销
+		if(src.isEmpty())
+			src=null;
 		
 		return getGenericConverter().convert(src, targetType);
 	}

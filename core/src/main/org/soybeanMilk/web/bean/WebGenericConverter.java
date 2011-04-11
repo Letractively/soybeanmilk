@@ -78,16 +78,20 @@ public class WebGenericConverter extends DefaultGenericConverter
 				&& !SoybeanMilkUtils.isClassTypeArray(targetType))
 		{
 			if(log.isDebugEnabled())
-				log.debug("the src '"+getStringDesc(sourceObj)+"' is array of length 1, while the target type not, so it's first element will be used for converting");
+				log.debug("the src '"+getStringDesc(sourceObj)+"' is array with length 1, while the target type not, so it's first element will be used for converting");
 			
 			sourceObj=Array.get(sourceObj, 0);
 			
 			return convert(sourceObj, targetType);
 		}
 		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, Map.class))
-			return convertMap((Map<String, Object>)sourceObj, targetType);
+		{
+			return convertMap(FilterAwareMap.wrap((Map<String, Object>)sourceObj), targetType);
+		}
 		else
+		{
 			return super.convertWhenNoSupportConverter(sourceObj, targetType);
+		}
 	}
 	
 	/**
@@ -96,94 +100,103 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @param targetType
 	 * @return
 	 */
-	protected Object convertMap(Map<String, Object> valueMap, Type targetType)
+	protected Object convertMap(FilterAwareMap<String, Object> valueMap, Type targetType)
 	{
 		if(log.isDebugEnabled())
 			log.debug("start converting 'Map<String, Object>' object to type '"+targetType+"'");
 		
 		Object result = null;
 		
-		if(valueMap==null || valueMap.size()==0)
-			return null;
-		
-		Class<?>[] actualTypes=SoybeanMilkUtils.getActualClassTypeInfo(targetType);
-		
-		if(isArrayOrCollection(actualTypes[0]))
+		if(valueMap==null || valueMap.isEmpty())//空元素的映射表作为null处理
 		{
-			//数组
-			if(SoybeanMilkUtils.isArray(actualTypes[0]))
+			result=convert(null, targetType);
+		}
+		else if(valueMap.isExplicitValue())
+		{
+			result=convert(valueMap.get(FilterAwareMap.EXPLICIT_KEY), targetType);
+		}
+		else
+		{
+			Class<?>[] actualTypes=SoybeanMilkUtils.getActualClassTypeInfo(targetType);
+			
+			if(SoybeanMilkUtils.isArray(actualTypes[0]))//array
 			{
 				result=convertMapToJavaBeanArray(valueMap, actualTypes[0].getComponentType());
 			}
-			//List
-			else if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))
+			else if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))//List
 			{
 				if(actualTypes.length != 2)
 					throw new GenericConvertException("'"+targetType+"' is invalid, only generic List converting is supported");
 				
 				result=convertArrayToList(convertMapToJavaBeanArray(valueMap, actualTypes[1]), actualTypes[0]);
 			}
-			//Set
-			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualTypes[0]))
+			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualTypes[0]))//Set
 			{
 				if(actualTypes.length != 2)
 					throw new GenericConvertException("'"+targetType+"' is invalid, only generic Set converting is supported");
 				
 				result=convertArrayToSet(convertMapToJavaBeanArray(valueMap, actualTypes[1]), actualTypes[0]);
 			}
-			else
-				throw new GenericConvertException("converting 'Map<String,Object>' to '"+targetType+"' is not supported");
-		}
-		//JavaBean
-		else
-		{
-			PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(actualTypes[0]);
-			
-			if(!beanInfo.hasSubPropertyInfo())
-				throw new GenericConvertException("the target javaBean Class '"+actualTypes[0]+"' is not valid, it has no javaBean property");
-			else
+			else if(SoybeanMilkUtils.isAncestorClass(Collection.class, actualTypes[0]))//不支持的集合类
 			{
-				//预存储的集合类属性映射表
-				Map<String, Map<String, Object>> collectionProperties=new HashMap<String, Map<String,Object>>();
-				String[] collectionPropSplits=new String[2];
+				throw new GenericConvertException("converting 'Map<String,Object>' to '"+targetType+"' is not supported");
+			}
+			else//JavaBean
+			{
+				PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(actualTypes[0]);
 				
-				Set<String> keys=valueMap.keySet();
-				for(String propExp : keys)
+				if(!beanInfo.hasSubPropertyInfo())
+					throw new GenericConvertException("the target javaBean Class '"+actualTypes[0]+"' is not valid, it has no javaBean property");
+				else
 				{
-					String[] propExpAry=splitPropertyExpression(propExp);
+					//预存储的集合类属性映射表
+					Map<String, Map<String, Object>> collectionProperties=new HashMap<String, Map<String,Object>>();
+					String[] collectionPropSplits=new String[2];
 					
-					//剔除无关属性
-					if(beanInfo.getSubPropertyInfo(propExpAry[0]) != null)
+					Set<String> keys=valueMap.keySet();
+					for(String propExp : keys)
 					{
-						//延迟初始化
-						if(result == null)
-							result = instance(beanInfo.getType(), -1);
+						String[] propExpAry=splitPropertyExpression(propExp);
 						
-						splitCollectionProperty(beanInfo, propExpAry, collectionPropSplits);
-						
-						if(collectionPropSplits[0] == null)
-							setProperty(result, beanInfo, propExpAry, 0, valueMap.get(propExp));
+						if(beanInfo.getSubPropertyInfo(propExpAry[0]) == null)//剔除无关属性
+						{
+							if(valueMap.isFiltered())
+								throw new GenericConvertException("can not find property '"+propExpAry[0]+"' in class '"+beanInfo.getType().getName()+"'");
+							else
+								continue;
+						}
 						else
 						{
-							Map<String, Object> clsnValueMap=collectionProperties.get(collectionPropSplits[0]);
-							if(clsnValueMap == null)
-							{
-								clsnValueMap=new HashMap<String, Object>();
-								collectionProperties.put(collectionPropSplits[0], clsnValueMap);
-							}
+							//延迟初始化
+							if(result == null)
+								result = instance(beanInfo.getType(), -1);
 							
-							clsnValueMap.put(collectionPropSplits[1], valueMap.get(propExp));
+							splitCollectionProperty(beanInfo, propExpAry, collectionPropSplits);
+							
+							if(collectionPropSplits[0] == null)
+								setProperty(result, beanInfo, propExpAry, 0, valueMap.get(propExp));
+							else
+							{
+								Map<String, Object> clsnValueMap=collectionProperties.get(collectionPropSplits[0]);
+								if(clsnValueMap == null)
+								{
+									clsnValueMap=new HashMap<String, Object>();
+									collectionProperties.put(collectionPropSplits[0], clsnValueMap);
+								}
+								
+								clsnValueMap.put(collectionPropSplits[1], valueMap.get(propExp));
+							}
 						}
 					}
-				}
-				
-				//设置集合类型属性的值
-				if(collectionProperties!=null && !collectionProperties.isEmpty())
-				{
-					Set<String> props=collectionProperties.keySet();
 					
-					for(String propExp : props)
-						setProperty(result, propExp, collectionProperties.get(propExp));
+					//设置集合类型属性的值
+					if(collectionProperties!=null && !collectionProperties.isEmpty())
+					{
+						Set<String> props=collectionProperties.keySet();
+						
+						for(String propExp : props)
+							setProperty(result, propExp, collectionProperties.get(propExp));
+					}
 				}
 			}
 		}
@@ -238,7 +251,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @return 元素为<code>javaBeanClass</code>类型且长度为<code>valueMap</code>值元素长度的数组
 	 * @date 2010-12-31
 	 */
-	protected Object[] convertMapToJavaBeanArray(Map<String, Object> valueMap, Class<?> javaBeanClass)
+	protected Object[] convertMapToJavaBeanArray(FilterAwareMap<String, Object> valueMap, Class<?> javaBeanClass)
 	{
 		if(valueMap==null || valueMap.size()==0)
 			return null;

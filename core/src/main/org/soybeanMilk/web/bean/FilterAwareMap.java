@@ -38,7 +38,7 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 	private Map<String, V> map;
 	
 	/**过滤结果是否唯一*/
-	private boolean explicit;
+	private boolean explicitValue;
 	
 	protected FilterAwareMap()
 	{
@@ -55,7 +55,7 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 		return filter;
 	}
 
-	protected void setFilter(String filter)
+	public void setFilter(String filter)
 	{
 		this.filter = filter;
 	}
@@ -85,14 +85,14 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 	 * @return
 	 * @date 2011-4-11
 	 */
-	public boolean isExplicit()
+	public boolean isExplicitValue()
 	{
-		return explicit;
+		return explicitValue;
 	}
 
-	protected void setExplicit(boolean explicit)
+	public void setExplicitValue(boolean explicitValue)
 	{
-		this.explicit = explicit;
+		this.explicitValue = explicitValue;
 	}
 
 	//@Override
@@ -123,6 +123,11 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 	public V get(Object key)
 	{
 		return this.map.get(key);
+	}
+	
+	public String getRootKey(String key)
+	{
+		return this.filter==null ? key : this.filter+key;
 	}
 	
 	//@Override
@@ -167,23 +172,48 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 	}
 	
 	/**
+	 * 包装
+	 * @param original
+	 * @return
+	 * @date 2011-4-11
+	 */
+	public static FilterAwareMap<String, Object> wrap(Map<String, Object> original)
+	{
+		if(original instanceof FilterAwareMap<?, ?>)
+			return (FilterAwareMap<String, Object>)original;
+		else
+			return filter(original, null, false);
+	}
+	
+	/**
 	 * 过滤映射表，如果原始映射表中没有包含过滤器的关键字，它将返回一个不包含任何元素的映射表对象。
 	 * @param original
 	 * @param filter
+	 * @param explicitValue 指定<code>filter</code>是否作为明确关键字
 	 * @return
 	 * @date 2011-4-10
 	 */
-	public static FilterAwareMap<String, Object> filter(Map<String, Object> original, String filter)
+	public static FilterAwareMap<String, Object> filter(Map<String, Object> original, String filter, boolean explicitValue)
 	{
-		FilterAwareMap<String, Object> filtered=new FilterAwareMap<String, Object>();
+		FilterAwareMap<String, Object> filtered=null;
 		
 		if(filter==null || filter.length()==0)
 		{
-			filtered.setMap(original);
-			filtered.setFilter(null);
+			if(original instanceof FilterAwareMap<?, ?>)
+				filtered=(FilterAwareMap<String, Object>)original;
+			else
+			{
+				filtered=new FilterAwareMap<String, Object>();
+				
+				filtered.setMap(original);
+				filtered.setFilter(null);
+				filtered.setExplicitValue(false);
+			}
 		}
 		else
 		{
+			filtered=new FilterAwareMap<String, Object>();
+			
 			if(original instanceof FilterAwareMap<?, ?>)
 			{
 				String pf=((FilterAwareMap<?, ?>)original).getFilter();
@@ -195,11 +225,11 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 			else
 				filtered.setFilter(filter);
 			
-			Object explicit=original.get(filter);
-			if(explicit != null)
+			if(explicitValue)
 			{
-				filtered.put(EXPLICIT_KEY, explicit);
-				filtered.setExplicit(true);
+				Object value=original.get(filter);
+				if(value != null)
+					filtered.put(EXPLICIT_KEY, value);
 			}
 			else
 			{
@@ -209,9 +239,9 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 					if(k.startsWith(filter))
 						filtered.put(k.substring(filter.length()), original.get(k));
 				}
-				
-				filtered.setExplicit(false);
 			}
+			
+			filtered.setExplicitValue(explicitValue);
 		}
 		
 		return filtered;

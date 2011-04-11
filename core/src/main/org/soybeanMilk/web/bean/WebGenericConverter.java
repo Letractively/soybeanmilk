@@ -172,6 +172,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 						
 						if(collectionPropertyExp == null)
 							setProperty(result, beanInfo, propExpressionArray, 0, sourceMap.get(propExp));
+						//集合属性需要特殊处理
 						else
 						{
 							if(collectionPropertyProcessed.get(collectionPropertyExp) == null)

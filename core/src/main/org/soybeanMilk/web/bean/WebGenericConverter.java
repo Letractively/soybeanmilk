@@ -103,6 +103,9 @@ public class WebGenericConverter extends DefaultGenericConverter
 		
 		Object result = null;
 		
+		if(valueMap==null || valueMap.size()==0)
+			return result;
+		
 		Class<?>[] actualTypes=SoybeanMilkUtils.getActualClassTypeInfo(targetType);
 		
 		if(isArrayOrCollection(actualTypes[0]))

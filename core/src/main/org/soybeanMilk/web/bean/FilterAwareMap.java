@@ -40,11 +40,19 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 	/**过滤结果是否唯一*/
 	private boolean explicitValue;
 	
-	protected FilterAwareMap()
+	public FilterAwareMap()
 	{
-		this.map=new HashMap<String, V>();
+		this(null);
 	}
 	
+	public FilterAwareMap(String filter)
+	{
+		super();
+		this.filter = filter;
+		this.explicitValue=false;
+		this.map=new HashMap<String, V>();
+	}
+
 	/**
 	 * 获取过滤关键字
 	 * @return
@@ -171,6 +179,12 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 		return this.map.values();
 	}
 	
+	@Override
+	public String toString()
+	{
+		return "FilterAwareMap [" + map + "]";
+	}
+
 	/**
 	 * 包装
 	 * @param original

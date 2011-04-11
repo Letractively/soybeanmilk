@@ -96,24 +96,24 @@ public class WebGenericConverter extends DefaultGenericConverter
 	
 	/**
 	 * 将映射表转换成<code>targetType</code>类型的对象
-	 * @param valueMap 值映射表，它也可能包含与<code>targetType</code>类属性无关的关键字
+	 * @param sourceMap 值映射表，它也可能包含与<code>targetType</code>类属性无关的关键字
 	 * @param targetType
 	 * @return
 	 */
-	protected Object convertMap(FilterAwareMap<String, Object> valueMap, Type targetType)
+	protected Object convertMap(FilterAwareMap<String, Object> sourceMap, Type targetType)
 	{
 		if(log.isDebugEnabled())
 			log.debug("start converting 'Map<String, Object>' object to type '"+targetType+"'");
 		
 		Object result = null;
 		
-		if(valueMap==null || valueMap.isEmpty())//空元素的映射表作为null处理
+		if(sourceMap==null || sourceMap.isEmpty())//空元素的映射表作为null处理
 		{
 			result=convert(null, targetType);
 		}
-		else if(valueMap.isExplicitValue())
+		else if(sourceMap.isExplicitValue())
 		{
-			result=convert(valueMap.get(FilterAwareMap.EXPLICIT_KEY), targetType);
+			result=convert(sourceMap.get(FilterAwareMap.EXPLICIT_KEY), targetType);
 		}
 		else
 		{
@@ -121,21 +121,21 @@ public class WebGenericConverter extends DefaultGenericConverter
 			
 			if(SoybeanMilkUtils.isArray(actualTypes[0]))//array
 			{
-				result=convertMapToJavaBeanArray(valueMap, actualTypes[0].getComponentType());
+				result=convertMapToJavaBeanArray(sourceMap, actualTypes[0].getComponentType());
 			}
 			else if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))//List
 			{
 				if(actualTypes.length != 2)
 					throw new GenericConvertException("'"+targetType+"' is invalid, only generic List converting is supported");
 				
-				result=convertArrayToList(convertMapToJavaBeanArray(valueMap, actualTypes[1]), actualTypes[0]);
+				result=convertArrayToList(convertMapToJavaBeanArray(sourceMap, actualTypes[1]), actualTypes[0]);
 			}
 			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualTypes[0]))//Set
 			{
 				if(actualTypes.length != 2)
 					throw new GenericConvertException("'"+targetType+"' is invalid, only generic Set converting is supported");
 				
-				result=convertArrayToSet(convertMapToJavaBeanArray(valueMap, actualTypes[1]), actualTypes[0]);
+				result=convertArrayToSet(convertMapToJavaBeanArray(sourceMap, actualTypes[1]), actualTypes[0]);
 			}
 			else if(SoybeanMilkUtils.isAncestorClass(Collection.class, actualTypes[0]))//不支持的集合类
 			{
@@ -147,56 +147,43 @@ public class WebGenericConverter extends DefaultGenericConverter
 				
 				if(!beanInfo.hasSubPropertyInfo())
 					throw new GenericConvertException("the target javaBean Class '"+actualTypes[0]+"' is not valid, it has no javaBean property");
-				else
+				
+				Map<String, Boolean> collectionPropertyProcessed=new HashMap<String, Boolean>();
+				
+				Set<String> keys=sourceMap.keySet();
+				for(String propExp : keys)
 				{
-					//预存储的集合类属性映射表
-					Map<String, Map<String, Object>> collectionProperties=new HashMap<String, Map<String,Object>>();
-					String[] collectionPropSplits=new String[2];
+					String[] propExpressionArray=splitPropertyExpression(propExp);
 					
-					Set<String> keys=valueMap.keySet();
-					for(String propExp : keys)
+					//忽略无关属性
+					if(beanInfo.getSubPropertyInfo(propExpressionArray[0])==null)
 					{
-						String[] propExpAry=splitPropertyExpression(propExp);
+						//如果被过滤过，则属性必须存在
+						if(sourceMap.isFiltered())
+							throw new GenericConvertException("can not find property '"+propExpressionArray[0]+"' in class '"+beanInfo.getType().getName()+"'");
+					}
+					else
+					{
+						//延迟初始化
+						if(result == null)
+							result = instance(beanInfo.getType(), -1);
 						
-						if(beanInfo.getSubPropertyInfo(propExpAry[0]) == null)//剔除无关属性
-						{
-							//如果被过滤过，则属性必须存在
-							if(valueMap.isFiltered())
-								throw new GenericConvertException("can not find property '"+propExpAry[0]+"' in class '"+beanInfo.getType().getName()+"'");
-							else
-								continue;
-						}
+						String collectionPropertyExp=detectCollectionProperty(beanInfo, propExpressionArray);
+						
+						if(collectionPropertyExp == null)
+							setProperty(result, beanInfo, propExpressionArray, 0, sourceMap.get(propExp));
 						else
 						{
-							//延迟初始化
-							if(result == null)
-								result = instance(beanInfo.getType(), -1);
-							
-							splitCollectionProperty(beanInfo, propExpAry, collectionPropSplits);
-							
-							if(collectionPropSplits[0] == null)
-								setProperty(result, beanInfo, propExpAry, 0, valueMap.get(propExp));
-							else
+							if(collectionPropertyProcessed.get(collectionPropertyExp) == null)
 							{
-								Map<String, Object> clsnValueMap=collectionProperties.get(collectionPropSplits[0]);
-								if(clsnValueMap == null)
-								{
-									clsnValueMap=new HashMap<String, Object>();
-									collectionProperties.put(collectionPropSplits[0], clsnValueMap);
-								}
+								FilterAwareMap<String, Object> collectionPropertyValueMap=FilterAwareMap.filter(
+										sourceMap, collectionPropertyExp+ACCESSOR, false);
 								
-								clsnValueMap.put(collectionPropSplits[1], valueMap.get(propExp));
+								setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
+								
+								collectionPropertyProcessed.put(collectionPropertyExp, true);
 							}
 						}
-					}
-					
-					//设置集合类型属性的值
-					if(collectionProperties!=null && !collectionProperties.isEmpty())
-					{
-						Set<String> props=collectionProperties.keySet();
-						
-						for(String propExp : props)
-							setProperty(result, propExp, collectionProperties.get(propExp));
 					}
 				}
 			}
@@ -206,17 +193,17 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 拆分javaBean的集合类属性表达式。<br>
-	 * 如果表达式没有包含集合类属性或者末尾节点是集合类，则<code>splits</code>将被清空；
-	 * 否则，<code>splits[0]</code>是原表达式中到集合类属性为止的子属性，<code>splits[1]</code>则是之后的部分。
+	 * 查询<code>propExpressionArray</code>属性表达式中是否包含集合类属性。<br>
+	 * 如果表达式没有包含集合类属性或者末尾节点是集合类，则返回<code>null</code>；否则，返回原表达式中到集合类属性为止（包括）的字符串。
 	 * @param beanInfo
 	 * @param propExpressionArray
-	 * @param splits
 	 * @return 集合类属性的类型
 	 * @date 2011-1-4
 	 */
-	protected void splitCollectionProperty(PropertyInfo beanInfo, String[] propExpressionArray, String[] splits)
+	protected String detectCollectionProperty(PropertyInfo beanInfo, String[] propExpressionArray)
 	{
+		String re=null;
+		
 		int i=0;
 		PropertyInfo tmpPropInfo=null;
 		for(;i<propExpressionArray.length;i++)
@@ -232,29 +219,23 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		
 		if(i < propExpressionArray.length-1)
-		{
-			splits[0]=assemblePropertyExpression(propExpressionArray, 0, i+1);
-			splits[1]=assemblePropertyExpression(propExpressionArray, i+1, propExpressionArray.length);
-		}
-		else
-		{
-			splits[0]=null;
-			splits[1]=null;
-		}
+			re=assemblePropertyExpression(propExpressionArray, 0, i+1);
+		
+		return re;
 	}
 	
 	/**
 	 * 由映射表转换为JavaBean数组，<code>valueMap</code>中值为<code>null</code>和关键字不是<code>javaBeanClass</code>类属性的元素将被忽略，
 	 * 其他元素必须是数组并且长度一致。<br>
 	 * 此方法不支持嵌套数组和集合（即<code>elementClass</code>不能包含数组和集合类属性）。
-	 * @param valueMap
+	 * @param sourceMap
 	 * @param javaBeanClass
 	 * @return 元素为<code>javaBeanClass</code>类型且长度为<code>valueMap</code>值元素长度的数组
 	 * @date 2010-12-31
 	 */
-	protected Object[] convertMapToJavaBeanArray(FilterAwareMap<String, Object> valueMap, Class<?> javaBeanClass)
+	protected Object[] convertMapToJavaBeanArray(FilterAwareMap<String, Object> sourceMap, Class<?> javaBeanClass)
 	{
-		if(valueMap==null || valueMap.size()==0)
+		if(sourceMap==null || sourceMap.size()==0)
 			return null;
 		
 		Object[] re=null;
@@ -264,10 +245,10 @@ public class WebGenericConverter extends DefaultGenericConverter
 		if(!beanInfo.hasSubPropertyInfo())
 			throw new GenericConvertException("the target javaBean Class '"+javaBeanClass+"' is not valid, it has no javaBean property");
 		
-		Set<String> keys=valueMap.keySet();
+		Set<String> keys=sourceMap.keySet();
 		for(String key : keys)
 		{
-			Object value=valueMap.get(key);
+			Object value=sourceMap.get(key);
 			if(value == null)
 				continue;
 			
@@ -282,7 +263,15 @@ public class WebGenericConverter extends DefaultGenericConverter
 					throw new GenericConvertException("the array element in the source map must be the same length");
 			
 			String[] propertyExp=splitPropertyExpression(key);
-			if(beanInfo.getSubPropertyInfo(propertyExp[0]) != null)
+			
+			//忽略无关属性
+			if(beanInfo.getSubPropertyInfo(propertyExp[0])==null)
+			{
+				//如果被过滤过，则属性必须存在
+				if(sourceMap.isFiltered())
+					throw new GenericConvertException("can not find property '"+propertyExp[0]+"' in class '"+beanInfo.getType().getName()+"'");
+			}
+			else
 			{
 				//延迟初始化
 				if(re == null)

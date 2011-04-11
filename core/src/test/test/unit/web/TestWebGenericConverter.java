@@ -19,6 +19,7 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 
 public class TestWebGenericConverter
@@ -79,6 +80,83 @@ public class TestWebGenericConverter
 		src.put("abc", 356);
 		
 		Object dest = converter.convert(src, JavaBean.class);
+		
+		Assert.assertNull(dest);
+	}
+	
+	@Test(expected = GenericConvertException.class)
+	public void convertMap_toJavaBean_srcHasNotExistsSubPropertyContain() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		src.put("javaBean.def", 356);
+		
+		Object dest = converter.convert(src, JavaBean2.class);
+		
+		Assert.assertNull(dest);
+	}
+	
+	@Test(expected = GenericConvertException.class)
+	public void convertMap_toJavaBean_srcHasNotExistsPropertyContainInSubArrayProperty() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		String[] id=new String[]{"1"};
+		String[] name=new String[]{"jack"};
+		
+		String[] cmplexCollectionProperty_id=new String[]{"2","5","7"};
+		String[] cmplexCollectionProperty_name=new String[]{"aaa","bbb","ccc"};
+		
+		src.put("id", id);
+		src.put("name", name);
+		
+		src.put("javaBean2Array.id", cmplexCollectionProperty_id);
+		src.put("javaBean2Array.name", cmplexCollectionProperty_name);
+		src.put("javaBean2Array.notExistsProperty", cmplexCollectionProperty_name);
+		
+		Object dest = converter.convert(src, ComplexJavaBean.class);
+		
+		Assert.assertNull(dest);
+	}
+	
+	@Test(expected = GenericConvertException.class)
+	public void convertMap_toJavaBean_srcHasNotExistsPropertyContainInSubListProperty() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		String[] id=new String[]{"1"};
+		String[] name=new String[]{"jack"};
+		
+		String[] cmplexCollectionProperty_id=new String[]{"2","5","7"};
+		String[] cmplexCollectionProperty_name=new String[]{"aaa","bbb","ccc"};
+		
+		src.put("id", id);
+		src.put("name", name);
+		
+		src.put("javaBean2List.id", cmplexCollectionProperty_id);
+		src.put("javaBean2List.name", cmplexCollectionProperty_name);
+		src.put("javaBean2List.notExistsProperty", cmplexCollectionProperty_name);
+		
+		Object dest = converter.convert(src, ComplexJavaBean.class);
+		
+		Assert.assertNull(dest);
+	}
+	
+	@Test(expected = GenericConvertException.class)
+	public void convertMap_toJavaBean_srcHasNotExistsPropertyContainInSubSetProperty() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		String[] id=new String[]{"1"};
+		String[] name=new String[]{"jack"};
+		
+		String[] cmplexCollectionProperty_id=new String[]{"2","5","7"};
+		String[] cmplexCollectionProperty_name=new String[]{"aaa","bbb","ccc"};
+		
+		src.put("id", id);
+		src.put("name", name);
+		
+		src.put("javaBean2Set.id", cmplexCollectionProperty_id);
+		src.put("javaBean2Set.name", cmplexCollectionProperty_name);
+		src.put("javaBean2Set.notExistsProperty", cmplexCollectionProperty_name);
+		
+		Object dest = converter.convert(src, ComplexJavaBean.class);
 		
 		Assert.assertNull(dest);
 	}
@@ -552,6 +630,7 @@ public class TestWebGenericConverter
 	{
 		private int id;
 		private String name;
+		private JavaBean javaBean;
 		
 		public int getId() {
 			return id;
@@ -566,6 +645,14 @@ public class TestWebGenericConverter
 			this.name = name;
 		}
 		
+		public JavaBean getJavaBean()
+		{
+			return javaBean;
+		}
+		public void setJavaBean(JavaBean javaBean)
+		{
+			this.javaBean = javaBean;
+		}
 		//@Override
 		public int compareTo(JavaBean2 o)
 		{

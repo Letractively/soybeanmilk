@@ -78,6 +78,8 @@ public class DefaultGenericConverter implements GenericConverter
 	
 	protected static final Object[] EMPTY_ARGS={};
 	
+	protected static final char ACCESSOR=WebConstants.ACCESSOR;
+	
 	protected static final String ACCESSOR_REGEX="\\"+WebConstants.ACCESSOR;
 	
 	protected static final String SEPRATOR="->";
@@ -562,21 +564,21 @@ public class DefaultGenericConverter implements GenericConverter
 	/**
 	 * 组装属性表达式数组为字符串
 	 * @param propExpressionAry
-	 * @param from
+	 * @param start
 	 * @param end
 	 * @return
 	 * @date 2011-1-4
 	 */
-	protected String assemblePropertyExpression(String[] propExpressionAry, int from, int end)
+	protected String assemblePropertyExpression(String[] propExpressionAry, int start, int end)
 	{
 		StringBuffer re=new StringBuffer();
 		
-		for(int i=from;i<end;i++)
+		for(int i=start;i<end;i++)
 		{
 			re.append(propExpressionAry[i]);
 			
 			if(i<end-1)
-				re.append(WebConstants.ACCESSOR);
+				re.append(ACCESSOR);
 		}
 		
 		return re.toString();

@@ -201,6 +201,9 @@ public class PropertyInfo
 	 */
 	public static PropertyInfo getPropertyInfo(Class<?> beanClass)
 	{
+		if(beanClass == null)
+			return null;
+		
 		PropertyInfo beanInfo=null;
 		
 		beanInfo=propertyInfoCache.get(beanClass);

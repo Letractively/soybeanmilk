@@ -179,10 +179,7 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 	 */
 	public static FilterAwareMap<String, Object> wrap(Map<String, Object> original)
 	{
-		if(original instanceof FilterAwareMap<?, ?>)
-			return (FilterAwareMap<String, Object>)original;
-		else
-			return filter(original, null, false);
+		return filter(original, null, false);
 	}
 	
 	/**

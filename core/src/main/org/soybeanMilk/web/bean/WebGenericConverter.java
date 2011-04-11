@@ -160,6 +160,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 						
 						if(beanInfo.getSubPropertyInfo(propExpAry[0]) == null)//剔除无关属性
 						{
+							//如果被过滤过，则属性必须存在
 							if(valueMap.isFiltered())
 								throw new GenericConvertException("can not find property '"+propExpAry[0]+"' in class '"+beanInfo.getType().getName()+"'");
 							else

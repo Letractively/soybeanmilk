@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 可以记住过滤关键字的映射表
+ * 过滤器映射表，它可以记住过滤关键字。
  * @author earthAngry@gmail.com
  * @date 2011-4-10
  *
@@ -40,19 +40,63 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 	/**过滤结果是否唯一*/
 	private boolean explicitValue;
 	
-	public FilterAwareMap()
+	/**
+	 * 创建过滤器映射表。
+	 * @param originalMap 原始映射表
+	 * @param filter 过滤器
+	 * @param explicitValue 指定<code>filter</code>是否作为明确关键字
+	 * @return
+	 * @date 2011-4-10
+	 */
+	@SuppressWarnings("unchecked")
+	public FilterAwareMap(Map<String, ?> originalMap, String filter, boolean explicitValue)
 	{
-		this(null);
+		if(filter==null || filter.length()==0)
+		{
+			setMap((Map<String, V>)originalMap);
+			setFilter(null);
+			setExplicitValue(false);
+		}
+		else
+		{
+			init();
+			
+			if(originalMap instanceof FilterAwareMap)
+			{
+				String pf=((FilterAwareMap)originalMap).getFilter();
+				if(pf != null)
+					setFilter(pf+filter);
+				else
+					setFilter(filter);
+			}
+			else
+				setFilter(filter);
+			
+			if(explicitValue)
+			{
+				V value=(V)originalMap.get(filter);
+				if(value != null)
+					put(EXPLICIT_KEY, value);
+			}
+			else
+			{
+				Set<String> keys=originalMap.keySet();
+				for(String k : keys)
+				{
+					if(k.startsWith(filter))
+						put(k.substring(filter.length()), (V)originalMap.get(k));
+				}
+			}
+			
+			setExplicitValue(explicitValue);
+		}
 	}
 	
-	public FilterAwareMap(String filter)
+	protected void init()
 	{
-		super();
-		this.filter = filter;
-		this.explicitValue=false;
 		this.map=new HashMap<String, V>();
 	}
-
+	
 	/**
 	 * 获取过滤关键字
 	 * @return
@@ -63,7 +107,7 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 		return filter;
 	}
 
-	protected void setFilter(String filter)
+	public void setFilter(String filter)
 	{
 		this.filter = filter;
 	}
@@ -98,7 +142,7 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 		return explicitValue;
 	}
 
-	protected void setExplicitValue(boolean explicitValue)
+	public void setExplicitValue(boolean explicitValue)
 	{
 		this.explicitValue = explicitValue;
 	}
@@ -187,75 +231,15 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 
 	/**
 	 * 包装
-	 * @param original
+	 * @param originalMap
 	 * @return
 	 * @date 2011-4-11
 	 */
-	public static FilterAwareMap<String, ?> wrap(Map<String, ?> original)
-	{
-		return filter(original, null, false);
-	}
-	
-	/**
-	 * 过滤映射表，如果原始映射表中没有包含过滤器的关键字，它将返回一个不包含任何元素的映射表对象。
-	 * @param originalMap
-	 * @param filter
-	 * @param explicitValue 指定<code>filter</code>是否作为明确关键字
-	 * @return
-	 * @date 2011-4-10
-	 */
 	@SuppressWarnings("unchecked")
-	public static FilterAwareMap<String, ?> filter(Map<String, ?> originalMap, String filter, boolean explicitValue)
+	public static FilterAwareMap<String, ?> wrap(Map<String, ?> originalMap)
 	{
-		FilterAwareMap<String, Object> filtered=null;
-		
-		if(filter==null || filter.length()==0)
-		{
-			if(originalMap instanceof FilterAwareMap)
-				filtered=(FilterAwareMap<String, Object>) originalMap;
-			else
-			{
-				filtered=new FilterAwareMap<String, Object>();
-				
-				filtered.setMap((Map<String, Object>)originalMap);
-				filtered.setFilter(null);
-				filtered.setExplicitValue(false);
-			}
-		}
-		else
-		{
-			filtered=new FilterAwareMap<String, Object>();
-			
-			if(originalMap instanceof FilterAwareMap)
-			{
-				String pf=((FilterAwareMap)originalMap).getFilter();
-				if(pf != null)
-					filtered.setFilter(pf+filter);
-				else
-					filtered.setFilter(filter);
-			}
-			else
-				filtered.setFilter(filter);
-			
-			if(explicitValue)
-			{
-				Object value=originalMap.get(filter);
-				if(value != null)
-					filtered.put(EXPLICIT_KEY, value);
-			}
-			else
-			{
-				Set<String> keys=originalMap.keySet();
-				for(String k : keys)
-				{
-					if(k.startsWith(filter))
-						filtered.put(k.substring(filter.length()), originalMap.get(k));
-				}
-			}
-			
-			filtered.setExplicitValue(explicitValue);
-		}
-		
-		return filtered;
+		if(originalMap instanceof FilterAwareMap)
+			return (FilterAwareMap<String, Object>) originalMap;
+		return new FilterAwareMap<String, Object>(originalMap, null, false);
 	}
 }

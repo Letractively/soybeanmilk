@@ -25,9 +25,11 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.PropertyInfo;
+import org.soybeanMilk.web.os.WebObjectSource.FilterAwareParamMap;
 
 /**
  * WEB通用转换器，除了继承的转换支持，它还支持将{@link Map Map&lt;String, Object&gt;}转换为JavaBean对象、JavaBean数组以及JavaBean集合（List、Set）。<br>
@@ -107,13 +109,28 @@ public class WebGenericConverter extends DefaultGenericConverter
 		
 		Object result = null;
 		
+		//是否是参数映射表，只有参数映射表才需要特殊异常处理
+		boolean isParamMap= (sourceMap instanceof FilterAwareParamMap<?, ?>);
+		
 		if(sourceMap==null || sourceMap.isEmpty())//空元素的映射表作为null处理
 		{
 			result=convert(null, targetType);
 		}
 		else if(sourceMap.isExplicitValue())
 		{
-			result=convert(sourceMap.get(FilterAwareMap.EXPLICIT_KEY), targetType);
+			if(isParamMap)
+			{
+				try
+				{
+					result=convert(sourceMap.get(FilterAwareMap.EXPLICIT_KEY), targetType);
+				}
+				catch(ConvertException e)
+				{
+					handleParamConvertException(sourceMap, FilterAwareMap.EXPLICIT_KEY, e);
+				}
+			}
+			else
+				result=convert(sourceMap.get(FilterAwareMap.EXPLICIT_KEY), targetType);
 		}
 		else
 		{
@@ -151,9 +168,9 @@ public class WebGenericConverter extends DefaultGenericConverter
 				Map<String, Boolean> collectionPropertyProcessed=new HashMap<String, Boolean>();
 				
 				Set<String> keys=sourceMap.keySet();
-				for(String propExp : keys)
+				for(String propertyKey : keys)
 				{
-					String[] propExpressionArray=splitPropertyExpression(propExp);
+					String[] propExpressionArray=splitPropertyExpression(propertyKey);
 					
 					//忽略无关属性
 					if(beanInfo.getSubPropertyInfo(propExpressionArray[0])==null)
@@ -171,16 +188,45 @@ public class WebGenericConverter extends DefaultGenericConverter
 						String collectionPropertyExp=detectCollectionProperty(beanInfo, propExpressionArray);
 						
 						if(collectionPropertyExp == null)
-							setProperty(result, beanInfo, propExpressionArray, 0, sourceMap.get(propExp));
+						{
+							if(isParamMap)
+							{
+								try
+								{
+									setProperty(result, beanInfo, propExpressionArray, 0, sourceMap.get(propertyKey));
+								}
+								catch(ConvertException e)
+								{
+									handleParamConvertException(sourceMap, propertyKey, e);
+								}
+							}
+							else
+								setProperty(result, beanInfo, propExpressionArray, 0, sourceMap.get(propertyKey));
+						}
 						//集合属性需要特殊处理
 						else
 						{
 							if(collectionPropertyProcessed.get(collectionPropertyExp) == null)
 							{
-								FilterAwareMap<String, ?> collectionPropertyValueMap=FilterAwareMap.filter(
-										sourceMap, collectionPropertyExp+ACCESSOR, false);
-								
-								setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
+								if(isParamMap)
+								{
+									FilterAwareMap<String, ?> collectionPropertyValueMap=new FilterAwareParamMap<String, Object>(
+											sourceMap, collectionPropertyExp+ACCESSOR, false);
+									try
+									{
+										setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
+									}
+									catch(ConvertException e)
+									{
+										handleParamConvertException(sourceMap, collectionPropertyExp, e);
+									}
+								}
+								else
+								{
+									FilterAwareMap<String, ?> collectionPropertyValueMap=new FilterAwareMap<String, Object>(
+											sourceMap, collectionPropertyExp+ACCESSOR, false);
+									setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
+								}
 								
 								//标记此集合属性已经处理过
 								collectionPropertyProcessed.put(collectionPropertyExp, true);
@@ -243,14 +289,17 @@ public class WebGenericConverter extends DefaultGenericConverter
 		Object[] re=null;
 		int len=-1;
 		
+		//是否是参数映射表
+		boolean isParamMap= (sourceMap instanceof FilterAwareParamMap<?, ?>);
+		
 		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(javaBeanClass);
 		if(!beanInfo.hasSubPropertyInfo())
 			throw new GenericConvertException("the target javaBean Class '"+javaBeanClass+"' is not valid, it has no javaBean property");
 		
 		Set<String> keys=sourceMap.keySet();
-		for(String key : keys)
+		for(String propertyKey : keys)
 		{
-			Object value=sourceMap.get(key);
+			Object value=sourceMap.get(propertyKey);
 			if(value == null)
 				continue;
 			
@@ -264,14 +313,14 @@ public class WebGenericConverter extends DefaultGenericConverter
 				if(l != len)
 					throw new GenericConvertException("the array element in the source map must be the same length");
 			
-			String[] propertyExp=splitPropertyExpression(key);
+			String[] propertyExpArray=splitPropertyExpression(propertyKey);
 			
 			//忽略无关属性
-			if(beanInfo.getSubPropertyInfo(propertyExp[0])==null)
+			if(beanInfo.getSubPropertyInfo(propertyExpArray[0])==null)
 			{
 				//如果被过滤过，则属性必须存在
 				if(sourceMap.isFiltered())
-					throw new GenericConvertException("can not find property '"+propertyExp[0]+"' in class '"+beanInfo.getType().getName()+"'");
+					throw new GenericConvertException("can not find property '"+propertyExpArray[0]+"' in class '"+beanInfo.getType().getName()+"'");
 			}
 			else
 			{
@@ -284,11 +333,40 @@ public class WebGenericConverter extends DefaultGenericConverter
 				}
 				
 				for(int i=0;i<len;i++)
-					setProperty(re[i], beanInfo, propertyExp, 0, Array.get(value, i));
+				{
+					if(isParamMap)
+					{
+						try
+						{
+							setProperty(re[i], beanInfo, propertyExpArray, 0, Array.get(value, i));
+						}
+						catch(ConvertException e)
+						{
+							handleParamConvertException(sourceMap, propertyKey, e);
+						}
+					}
+					else
+						setProperty(re[i], beanInfo, propertyExpArray, 0, Array.get(value, i));
+				}
 			}
 		}
 		
 		return re;
+	}
+	
+	/**
+	 * 处理映射表转换中出现的转换异常。
+	 * @param paramMap 当前处理的映射表
+	 * @param key 当前处理的映射表关键字
+	 * @param e 当前的转换异常
+	 * @date 2011-4-12
+	 */
+	protected void handleParamConvertException(FilterAwareMap<String, ?> paramMap, String key, ConvertException e)
+	{
+		if(e instanceof ParamConvertException)
+			throw e;
+		else
+			throw new ParamConvertException(paramMap.getRootKey(key), e.getSourceObject(), e.getTargetType(), e.getCause());
 	}
 	
 	/**

@@ -67,4 +67,10 @@ public class ConvertException extends RuntimeException
 	public void setTargetType(Type targetType) {
 		this.targetType = targetType;
 	}
+
+	@Override
+	public String toString()
+	{
+		return "ConvertException [targetType=" + targetType + "]";
+	}
 }

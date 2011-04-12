@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,6 +16,7 @@ import org.junit.Test;
 import org.soybeanMilk.core.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.resolver.ResolverFactory;
 import org.soybeanMilk.web.WebConstants;
+import org.soybeanMilk.web.bean.ParamConvertException;
 import org.soybeanMilk.web.os.WebObjectSource;
 import org.soybeanMilk.web.os.WebObjectSourceFactory;
 import org.soybeanMilk.web.servlet.DispatchServlet;
@@ -265,6 +267,31 @@ public class TestDispatchServlet
 			
 			Assert.assertEquals("edit(35,233)", (String)request.getAttribute("result"));
 			Assert.assertEquals("/jsp/product/35/233/edit.jsp", response.getForwardedUrl());
+		}
+		
+		{
+			MockHttpServletRequest request=new MockHttpServletRequest();
+			MockHttpServletResponse response=new MockHttpServletResponse();
+			
+			request.setMethod("POST");
+			request.setContextPath(CONTEXT_PATH);
+			
+			request.setPathInfo("/user/edit.do");
+			request.setServletPath("");
+			
+			request.setParameter("userId", "invalidValue");
+			
+			try
+			{
+				servlet.service(request, response);
+			}
+			catch(ServletException e)
+			{
+				ParamConvertException ce=(ParamConvertException)e.getCause().getCause();
+				
+				Assert.assertEquals("userId", ce.getParamName());
+				Assert.assertEquals("invalidValue", ce.getSourceObject());
+			}
 		}
 	}
 	

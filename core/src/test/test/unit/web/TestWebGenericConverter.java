@@ -20,7 +20,10 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.bean.GenericConvertException;
+import org.soybeanMilk.web.bean.FilterAwareMap;
+import org.soybeanMilk.web.bean.ParamConvertException;
 import org.soybeanMilk.web.bean.WebGenericConverter;
+import org.soybeanMilk.web.os.WebObjectSource.FilterAwareParamMap;
 
 public class TestWebGenericConverter
 {
@@ -159,6 +162,98 @@ public class TestWebGenericConverter
 		Object dest = converter.convert(src, ComplexJavaBean.class);
 		
 		Assert.assertNull(dest);
+	}
+	
+	@Test
+	public void convertFilterAwareMap_toSimple_srcIsInvalidValue() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		String[] id=new String[]{"invalidValue"};
+		String[] name=new String[]{"jack"};
+		
+		src.put("id", id);
+		src.put("name", name);
+		
+		
+		FilterAwareMap<String, ?> fm=new FilterAwareParamMap<String, Object>(src, "id", true);
+		
+		try
+		{
+			converter.convert(fm, int.class);
+		}
+		catch(ParamConvertException e)
+		{
+			Assert.assertEquals("id", e.getParamName());
+			Assert.assertEquals("invalidValue", e.getSourceObject());
+			Assert.assertEquals(int.class, e.getTargetType());
+		}
+	}
+	
+	@Test
+	public void convertFilterAwareMap_toJavaBean_srcArrayPropertyContainInvalidValue() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] id=new String[]{"1"};
+		String[] name=new String[]{"jack"};
+		String[] simpleCollectionProperty=new String[]{"1","invalidValue","9"};
+		
+		src.put("filter.id", id);
+		src.put("filter.name", name);
+		
+		src.put("filter.simpleArray", simpleCollectionProperty);
+		
+		
+		
+		FilterAwareMap<String, ?> fm=new FilterAwareParamMap<String, Object>(src, "filter.", false);
+		try
+		{
+			converter.convert(fm, ComplexJavaBean.class);
+		}
+		catch(ParamConvertException e)
+		{
+			Assert.assertEquals("filter.simpleArray", e.getParamName());
+			Assert.assertEquals("invalidValue", e.getSourceObject());
+			Assert.assertEquals(Integer.class, e.getTargetType());
+		}
+	}
+	
+	@Test
+	public void convertFilterAwareMap_toJavaBean_srcComplexPropertyContainInvalidValue() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] id=new String[]{"1"};
+		String[] name=new String[]{"jack"};
+		String[] simpleCollectionProperty=new String[]{"1","3","9"};
+		
+		String[] cmplexCollectionProperty_id=new String[]{"2","invalidValue","7"};
+		String[] cmplexCollectionProperty_name=new String[]{"aaa","bbb","ccc"};
+		
+		src.put("filter.id", id);
+		src.put("filter.name", name);
+		
+		src.put("filter.simpleArray", simpleCollectionProperty);
+		src.put("filter.simpleList", simpleCollectionProperty);
+		src.put("filter.simpleSet", simpleCollectionProperty);
+		
+		src.put("filter.javaBean2List.id", cmplexCollectionProperty_id);
+		src.put("filter.javaBean2List.name", cmplexCollectionProperty_name);
+		
+		
+		
+		FilterAwareMap<String, ?> fm=new FilterAwareParamMap<String, Object>(src, "filter.", false);
+		
+		try
+		{
+			converter.convert(fm, ComplexJavaBean.class);
+		}
+		catch(ParamConvertException e)
+		{
+			Assert.assertEquals("filter.javaBean2List.id", e.getParamName());
+			Assert.assertEquals("invalidValue", e.getSourceObject());
+			Assert.assertEquals(int.class, e.getTargetType());
+		}
 	}
 	
 	@Test

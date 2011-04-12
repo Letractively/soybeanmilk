@@ -195,7 +195,6 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	//@Override
-	@SuppressWarnings("unchecked")
 	public Object get(Serializable key, Type expectType)
 	{
 		Object data = null;
@@ -213,7 +212,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		
 		if(WebConstants.WebObjectSourceScope.PARAM.equalsIgnoreCase(scope))
 		{
-			data=convertParameterMap(getRequest().getParameterMap(), subKey, expectType);
+			data=convertParameterMap(getRequest(), subKey, expectType);
 		}
 		else if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
 		{
@@ -304,11 +303,10 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * @return
 	 * @date 2011-2-22
 	 */
-	@SuppressWarnings("unchecked")
 	protected Object getObjectForUnknownKey(String key, Type expectType)
 	{
 		if(!containAccessor(key))
-			return convertParameterMap(getRequest().getParameterMap(), key, expectType);
+			return convertParameterMap(getRequest(), key, expectType);
 		else
 			throw new ObjectSourceException("key '"+key+"' is invalid, the 'get' method can not recognize it");
 	}
@@ -443,32 +441,37 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * 否则，它会根据<code>keyFilter</code>来对参数映射表进行过滤，产生一个新的映射表（它的关键字将会被替换为原始关键字的“<code>[keyFilter]</code>.”之后的部分，比如由“<code>beanName.propertyName</code>”变为“<code>propertyName</code>”），
 	 * 然后使用它进行转换。
 	 * 
-	 * @param paramMap 请求参数映射表
-	 * @param keyFilter 筛选器，只有以此筛选器开头的Map关键字才会被转换，如果为null，则表明不做筛选
+	 * @param request 请求对象
+	 * @param paramKeyFilter 筛选器，只有以此筛选器开头的参数关键字才会被转换，如果为null，则表明不做筛选
 	 * @param targetType 目标类型
-	 * 
 	 * @return
 	 */
-	protected Object convertParameterMap(Map<String, ?> paramMap, String keyFilter, Type targetType)
+	@SuppressWarnings("unchecked")
+	protected Object convertParameterMap(HttpServletRequest request, String paramKeyFilter, Type targetType)
 	{
-		FilterAwareMap<String, ?> src=null;
+		Map<String, ?> paramMap=request.getParameterMap();
 		
-		//没有过滤器
-		if(keyFilter==null || keyFilter.length()==0)
-			src=FilterAwareMap.wrap(paramMap);
+		FilterAwareParamMap<String, ?> src=null;
+		
+		//是否设置过滤器
+		boolean hasFilter= (paramKeyFilter!=null && paramKeyFilter.length()>0);
+		if(!hasFilter)
+		{
+			src=new FilterAwareParamMap<String, Object>(paramMap, null, false);
+		}
 		else
 		{
 			boolean explicitValue;
 			//有确切的值或者仅对应一个参数
-			if(paramMap.get(keyFilter)!=null || isSingleParameterKey(targetType))
+			if(paramMap.get(paramKeyFilter)!=null || isSingleParameterKey(targetType))
 				explicitValue=true;
 			else
 			{
 				explicitValue=false;
-				keyFilter=keyFilter+ACCESSOR;
+				paramKeyFilter=paramKeyFilter+ACCESSOR;
 			}
 			
-			src=FilterAwareMap.filter(paramMap, keyFilter, explicitValue);
+			src=new FilterAwareParamMap<String, Object>(paramMap, paramKeyFilter, explicitValue);
 		}
 		
 		//设置为null，减少转换开销
@@ -573,5 +576,28 @@ public class WebObjectSource extends ConvertableObjectSource
 	protected boolean containAccessor(String str)
 	{
 		return str!=null && str.indexOf(ACCESSOR)>=0;
+	}
+	
+	/**
+	 * 请求参数过滤器映射表。
+	 * @author earthAngry@gmail.com
+	 * @date 2011-4-12
+	 *
+	 * @param <K>
+	 * @param <V>
+	 */
+	public static class FilterAwareParamMap<K, V> extends FilterAwareMap<String, V>
+	{
+		/**
+		 * 创建请求参数过滤器映射表。
+		 * @param originalMap
+		 * @param filter
+		 * @param explicitValue
+		 */
+		public FilterAwareParamMap(Map<String, ?> originalMap, String filter,
+				boolean explicitValue)
+		{
+			super(originalMap, filter, explicitValue);
+		}
 	}
 }

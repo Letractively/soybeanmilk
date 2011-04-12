@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
+import org.soybeanMilk.web.bean.ParamConvertException;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 import org.soybeanMilk.web.os.WebObjectSource;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -248,6 +249,78 @@ public class TestWebObjectSource
 			Assert.assertEquals("jack", dest.getName());
 			Assert.assertEquals(2, dest.getYourBean().getId().intValue());
 			Assert.assertEquals("tom", dest.getYourBean().getName());
+		}
+	}
+	
+	@Test
+	public void getFromParamWithInvalidParamValue() throws Exception
+	{
+		String value="invalidValue";
+		
+		{
+			request.setParameter("value", value);
+			
+			try
+			{
+				webObjectSource.get("param.value", int.class);
+			}
+			catch(ParamConvertException e)
+			{
+				Assert.assertEquals("value", e.getParamName());
+				Assert.assertEquals(value, e.getSourceObject());
+				Assert.assertEquals(int.class, e.getTargetType());
+			}
+		}
+		
+		{
+			request.setParameter("my.set.value", value);
+			
+			try
+			{
+				webObjectSource.get("param.my.set.value", Boolean.class);
+			}
+			catch(ParamConvertException e)
+			{
+				Assert.assertEquals("my.set.value", e.getParamName());
+				Assert.assertEquals(value, e.getSourceObject());
+				Assert.assertEquals(Boolean.class, e.getTargetType());
+			}
+		}
+		
+		{
+			request.setParameter("id", new String[]{"1"});
+			request.setParameter("name", new String[]{"jack"});
+			request.setParameter("yourBean.id", new String[]{value});
+			request.setParameter("yourBean.name", new String[]{"tom"});
+			
+			try
+			{
+				webObjectSource.get("param", MyBean.class);
+			}
+			catch(ParamConvertException e)
+			{
+				Assert.assertEquals("yourBean.id", e.getParamName());
+				Assert.assertEquals(value, e.getSourceObject());
+				Assert.assertEquals(Integer.class, e.getTargetType());
+			}
+		}
+		
+		{
+			request.setParameter("my.myBean.id", new String[]{"1"});
+			request.setParameter("my.myBean.name", new String[]{"jack"});
+			request.setParameter("my.myBean.yourBean.id", new String[]{value});
+			request.setParameter("my.myBean.yourBean.name", new String[]{"tom"});
+			
+			try
+			{
+				webObjectSource.get("param.my.myBean", MyBean.class);
+			}
+			catch(ParamConvertException e)
+			{
+				Assert.assertEquals("my.myBean.yourBean.id", e.getParamName());
+				Assert.assertEquals(value, e.getSourceObject());
+				Assert.assertEquals(Integer.class, e.getTargetType());
+			}
 		}
 	}
 	

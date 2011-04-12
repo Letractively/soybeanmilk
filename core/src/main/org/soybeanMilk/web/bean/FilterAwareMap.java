@@ -191,32 +191,33 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 	 * @return
 	 * @date 2011-4-11
 	 */
-	public static FilterAwareMap<String, Object> wrap(Map<String, Object> original)
+	public static FilterAwareMap<String, ?> wrap(Map<String, ?> original)
 	{
 		return filter(original, null, false);
 	}
 	
 	/**
 	 * 过滤映射表，如果原始映射表中没有包含过滤器的关键字，它将返回一个不包含任何元素的映射表对象。
-	 * @param original
+	 * @param originalMap
 	 * @param filter
 	 * @param explicitValue 指定<code>filter</code>是否作为明确关键字
 	 * @return
 	 * @date 2011-4-10
 	 */
-	public static FilterAwareMap<String, Object> filter(Map<String, Object> original, String filter, boolean explicitValue)
+	@SuppressWarnings("unchecked")
+	public static FilterAwareMap<String, ?> filter(Map<String, ?> originalMap, String filter, boolean explicitValue)
 	{
 		FilterAwareMap<String, Object> filtered=null;
 		
 		if(filter==null || filter.length()==0)
 		{
-			if(original instanceof FilterAwareMap<?, ?>)
-				filtered=(FilterAwareMap<String, Object>)original;
+			if(originalMap instanceof FilterAwareMap)
+				filtered=(FilterAwareMap<String, Object>) originalMap;
 			else
 			{
 				filtered=new FilterAwareMap<String, Object>();
 				
-				filtered.setMap(original);
+				filtered.setMap((Map<String, Object>)originalMap);
 				filtered.setFilter(null);
 				filtered.setExplicitValue(false);
 			}
@@ -225,9 +226,9 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 		{
 			filtered=new FilterAwareMap<String, Object>();
 			
-			if(original instanceof FilterAwareMap<?, ?>)
+			if(originalMap instanceof FilterAwareMap)
 			{
-				String pf=((FilterAwareMap<?, ?>)original).getFilter();
+				String pf=((FilterAwareMap)originalMap).getFilter();
 				if(pf != null)
 					filtered.setFilter(pf+filter);
 				else
@@ -238,17 +239,17 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 			
 			if(explicitValue)
 			{
-				Object value=original.get(filter);
+				Object value=originalMap.get(filter);
 				if(value != null)
 					filtered.put(EXPLICIT_KEY, value);
 			}
 			else
 			{
-				Set<String> keys=original.keySet();
+				Set<String> keys=originalMap.keySet();
 				for(String k : keys)
 				{
 					if(k.startsWith(filter))
-						filtered.put(k.substring(filter.length()), original.get(k));
+						filtered.put(k.substring(filter.length()), originalMap.get(k));
 				}
 			}
 			

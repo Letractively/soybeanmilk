@@ -449,9 +449,9 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * 
 	 * @return
 	 */
-	protected Object convertParameterMap(Map<String,Object> paramMap, String keyFilter, Type targetType)
+	protected Object convertParameterMap(Map<String, ?> paramMap, String keyFilter, Type targetType)
 	{
-		FilterAwareMap<String, Object> src=null;
+		FilterAwareMap<String, ?> src=null;
 		
 		//没有过滤器
 		if(keyFilter==null || keyFilter.length()==0)

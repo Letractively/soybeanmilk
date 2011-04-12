@@ -86,7 +86,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, Map.class))
 		{
-			return convertMap(FilterAwareMap.wrap((Map<String, Object>)sourceObj), targetType);
+			return convertMap(FilterAwareMap.wrap((Map<String, ?>)sourceObj), targetType);
 		}
 		else
 		{
@@ -100,7 +100,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @param targetType
 	 * @return
 	 */
-	protected Object convertMap(FilterAwareMap<String, Object> sourceMap, Type targetType)
+	protected Object convertMap(FilterAwareMap<String, ?> sourceMap, Type targetType)
 	{
 		if(log.isDebugEnabled())
 			log.debug("start converting 'Map<String, Object>' object to type '"+targetType+"'");
@@ -177,7 +177,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 						{
 							if(collectionPropertyProcessed.get(collectionPropertyExp) == null)
 							{
-								FilterAwareMap<String, Object> collectionPropertyValueMap=FilterAwareMap.filter(
+								FilterAwareMap<String, ?> collectionPropertyValueMap=FilterAwareMap.filter(
 										sourceMap, collectionPropertyExp+ACCESSOR, false);
 								
 								setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
@@ -235,7 +235,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @return 元素为<code>javaBeanClass</code>类型且长度为<code>valueMap</code>值元素长度的数组
 	 * @date 2010-12-31
 	 */
-	protected Object[] convertMapToJavaBeanArray(FilterAwareMap<String, Object> sourceMap, Class<?> javaBeanClass)
+	protected Object[] convertMapToJavaBeanArray(FilterAwareMap<String, ?> sourceMap, Class<?> javaBeanClass)
 	{
 		if(sourceMap==null || sourceMap.size()==0)
 			return null;

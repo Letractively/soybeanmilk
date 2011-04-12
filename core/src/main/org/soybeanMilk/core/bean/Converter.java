@@ -28,6 +28,7 @@ public interface Converter
 	 * @param sourceObj 源对象
 	 * @param targetType 目标类型，比如{@linkplain java.lang.Class Class}、{@linkplain java.lang.reflect.ParameterizedType ParameterizedType}等，也可能是<code>null</code>
 	 * @return 目标类型的对象
+	 * @throws ConvertException
 	 */
-	Object convert(Object sourceObj, Type targetType);
+	Object convert(Object sourceObj, Type targetType) throws ConvertException;
 }

@@ -63,7 +63,7 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 		return filter;
 	}
 
-	public void setFilter(String filter)
+	protected void setFilter(String filter)
 	{
 		this.filter = filter;
 	}
@@ -98,7 +98,7 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 		return explicitValue;
 	}
 
-	public void setExplicitValue(boolean explicitValue)
+	protected void setExplicitValue(boolean explicitValue)
 	{
 		this.explicitValue = explicitValue;
 	}

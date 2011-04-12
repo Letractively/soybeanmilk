@@ -182,6 +182,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 								
 								setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
 								
+								//标记此集合属性已经处理过
 								collectionPropertyProcessed.put(collectionPropertyExp, true);
 							}
 						}
@@ -291,7 +292,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 是否是数组或者集合类
+	 * 是否是数组或者集合类型
 	 * @param clazz
 	 * @return
 	 * @date 2011-1-3

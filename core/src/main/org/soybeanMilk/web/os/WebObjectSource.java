@@ -444,7 +444,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	 * 然后使用它进行转换。
 	 * 
 	 * @param paramMap 请求参数映射表
-	 * @param keyFilter 主键筛选器，只有以此筛选器开头的Map关键字才会被转换，如果为null，则表明不做筛选
+	 * @param keyFilter 筛选器，只有以此筛选器开头的Map关键字才会被转换，如果为null，则表明不做筛选
 	 * @param targetType 目标类型
 	 * 
 	 * @return

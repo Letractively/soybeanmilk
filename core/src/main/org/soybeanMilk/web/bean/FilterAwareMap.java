@@ -42,31 +42,31 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 	private Map<String, V> internalMap;
 	
 	/**过滤器是否为明确关键字*/
-	private boolean explicitValue;
+	private boolean explicitKey;
 	
 	/**
 	 * 使用过滤器（<code>filter</code>）过滤原始映射表，创建过滤映射表。
 	 * @param originalMap 原始映射表
 	 * @param filter 过滤器，此过滤映射表只会保留<code>originalMap</code>中关键字以此过滤器开头的对象。
-	 * @param explicitValue 指定<code>filter</code>是否作为明确关键字
+	 * @param explicitKey 指定<code>filter</code>是否作为明确关键字
 	 * @return
 	 * @date 2011-4-10
 	 */
 	@SuppressWarnings("unchecked")
-	public FilterAwareMap(Map<String, ?> originalMap, String filter, boolean explicitValue)
+	public FilterAwareMap(Map<String, ?> originalMap, String filter, boolean explicitKey)
 	{
 		if(filter==null || filter.length()==0)
 		{
 			setInternalMap((Map<String, V>)originalMap);
 			setFilterFromRoot(null);
 			setFilter(null);
-			setExplicitValue(false);
+			setExplicitKey(false);
 		}
 		else
 		{
 			initInternalMap();
 			setFilter(filter);
-			setExplicitValue(explicitValue);
+			setExplicitKey(explicitKey);
 			
 			if(originalMap instanceof FilterAwareMap)
 			{
@@ -79,7 +79,7 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 			else
 				setFilterFromRoot(this.filter);
 			
-			if(this.explicitValue)
+			if(this.explicitKey)
 			{
 				V value=(V)originalMap.get(this.filter);
 				if(value != null)
@@ -129,13 +129,13 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 	}
 	
 	/**
-	 * 过滤器是否作为明确关键字。
+	 * 过滤器是否作为明确关键字，如果是，那么你需要使用{@linkplain #EXPLICIT_KEY}来取值。
 	 * @return
 	 * @date 2011-4-11
 	 */
-	public boolean isExplicitValue()
+	public boolean isExplicitKey()
 	{
-		return explicitValue;
+		return explicitKey;
 	}
 	
 	/**
@@ -246,9 +246,9 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 		this.filter = filter;
 	}
 
-	protected void setExplicitValue(boolean explicitValue)
+	protected void setExplicitKey(boolean explicitKey)
 	{
-		this.explicitValue = explicitValue;
+		this.explicitKey = explicitKey;
 	}
 	
 	protected void setFilterFromRoot(String filterFromRoot)

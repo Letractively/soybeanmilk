@@ -116,7 +116,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			result=convert(null, targetType);
 		}
-		else if(sourceMap.isExplicitValue())
+		else if(sourceMap.isExplicitKey())
 		{
 			if(isParamMap)
 			{

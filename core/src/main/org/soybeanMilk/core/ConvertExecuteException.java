@@ -53,7 +53,7 @@ public class ConvertExecuteException extends ExecuteException
 	}
 
 	/**
-	 * 获取产生此异常的方法参数位置。
+	 * 获取产生此异常的{@linkplain Invoke 调用}方法参数位置。
 	 * @return
 	 * @date 2011-1-13
 	 */
@@ -66,7 +66,7 @@ public class ConvertExecuteException extends ExecuteException
 	}
 	
 	/**
-	 * 获取产生此异常的方法参数。
+	 * 获取产生此异常的{@linkplain Invoke 调用}方法{@linkplain Arg 参数}。
 	 * @return
 	 * @date 2011-1-13
 	 */

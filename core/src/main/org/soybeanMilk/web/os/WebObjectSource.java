@@ -451,13 +451,13 @@ public class WebObjectSource extends ConvertableObjectSource
 	{
 		Map<String, ?> paramMap=request.getParameterMap();
 		
-		FilterAwareParamMap<String, ?> src=null;
+		ParamFilterAwareMap<String, ?> src=null;
 		
 		//是否设置过滤器
 		boolean hasFilter= (paramKeyFilter!=null && paramKeyFilter.length()>0);
 		if(!hasFilter)
 		{
-			src=new FilterAwareParamMap<String, Object>(paramMap, null, false);
+			src=new ParamFilterAwareMap<String, Object>(paramMap, null, false);
 		}
 		else
 		{
@@ -471,7 +471,7 @@ public class WebObjectSource extends ConvertableObjectSource
 				paramKeyFilter=paramKeyFilter+ACCESSOR;
 			}
 			
-			src=new FilterAwareParamMap<String, Object>(paramMap, paramKeyFilter, explicitValue);
+			src=new ParamFilterAwareMap<String, Object>(paramMap, paramKeyFilter, explicitValue);
 		}
 		
 		//设置为null，减少转换开销
@@ -579,14 +579,14 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	/**
-	 * 请求参数过滤器映射表。
+	 * 请求参数过滤映射表。它只是作为一个标识类型，不做任何重写。
 	 * @author earthAngry@gmail.com
 	 * @date 2011-4-12
 	 *
 	 * @param <K>
 	 * @param <V>
 	 */
-	public static class FilterAwareParamMap<K, V> extends FilterAwareMap<String, V>
+	public static class ParamFilterAwareMap<K, V> extends FilterAwareMap<String, V>
 	{
 		/**
 		 * 创建请求参数过滤器映射表。
@@ -594,7 +594,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		 * @param filter
 		 * @param explicitValue
 		 */
-		public FilterAwareParamMap(Map<String, ?> originalMap, String filter,
+		public ParamFilterAwareMap(Map<String, ?> originalMap, String filter,
 				boolean explicitValue)
 		{
 			super(originalMap, filter, explicitValue);

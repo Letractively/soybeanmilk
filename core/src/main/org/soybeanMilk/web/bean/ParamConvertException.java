@@ -1,12 +1,28 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
+ */
+
 package org.soybeanMilk.web.bean;
 
 import java.lang.reflect.Type;
 
+import org.soybeanMilk.core.Execution;
 import org.soybeanMilk.core.bean.ConvertException;
+import org.soybeanMilk.core.config.InterceptorInfo;
 
 /**
- * 转换请求参数时出现转换异常，
- * 它可以记录导致异常的请求参数名（参考{@linkplain #getParamName()}方法）。<br>
+ * 转换请求参数时出现转换异常，它可以记录导致异常的请求参数名，
+ * 这在框架执行拦截器中会很有用（参考{@linkplain Execution}类和{@linkplain InterceptorInfo}类说明）。<br>
  * 注意：<br>
  * {@linkplain #getSourceObject()}方法获取的源对象不一定是参数值本身，
  * 因为转换器可能会将参数值数组拆分后转换，通常，源对象只是参数值数组中的某一个元素。

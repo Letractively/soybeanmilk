@@ -29,7 +29,7 @@ import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.PropertyInfo;
-import org.soybeanMilk.web.os.WebObjectSource.FilterAwareParamMap;
+import org.soybeanMilk.web.os.WebObjectSource.ParamFilterAwareMap;
 
 /**
  * WEB通用转换器，除了继承的转换支持，它还支持将{@link Map Map&lt;String, Object&gt;}转换为JavaBean对象、JavaBean数组以及JavaBean集合（List、Set）。<br>
@@ -110,7 +110,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		Object result = null;
 		
 		//是否是参数映射表，只有参数映射表才需要特殊异常处理
-		boolean isParamMap= (sourceMap instanceof FilterAwareParamMap<?, ?>);
+		boolean isParamMap= (sourceMap instanceof ParamFilterAwareMap<?, ?>);
 		
 		if(sourceMap==null || sourceMap.isEmpty())//空元素的映射表作为null处理
 		{
@@ -126,7 +126,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 				}
 				catch(ConvertException e)
 				{
-					handleParamConvertException(sourceMap, FilterAwareMap.EXPLICIT_KEY, e);
+					handleParamConvertException((ParamFilterAwareMap<String, ?>)sourceMap, FilterAwareMap.EXPLICIT_KEY, e);
 				}
 			}
 			else
@@ -197,7 +197,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 								}
 								catch(ConvertException e)
 								{
-									handleParamConvertException(sourceMap, propertyKey, e);
+									handleParamConvertException((ParamFilterAwareMap<String, ?>)sourceMap, propertyKey, e);
 								}
 							}
 							else
@@ -210,7 +210,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 							{
 								if(isParamMap)
 								{
-									FilterAwareMap<String, ?> collectionPropertyValueMap=new FilterAwareParamMap<String, Object>(
+									FilterAwareMap<String, ?> collectionPropertyValueMap=new ParamFilterAwareMap<String, Object>(
 											sourceMap, collectionPropertyExp+ACCESSOR, false);
 									try
 									{
@@ -218,7 +218,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 									}
 									catch(ConvertException e)
 									{
-										handleParamConvertException(sourceMap, collectionPropertyExp, e);
+										handleParamConvertException((ParamFilterAwareMap<String, ?>)sourceMap, collectionPropertyExp, e);
 									}
 								}
 								else
@@ -290,7 +290,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		int len=-1;
 		
 		//是否是参数映射表
-		boolean isParamMap= (sourceMap instanceof FilterAwareParamMap<?, ?>);
+		boolean isParamMap= (sourceMap instanceof ParamFilterAwareMap<?, ?>);
 		
 		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(javaBeanClass);
 		if(!beanInfo.hasSubPropertyInfo())
@@ -342,7 +342,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 						}
 						catch(ConvertException e)
 						{
-							handleParamConvertException(sourceMap, propertyKey, e);
+							handleParamConvertException((ParamFilterAwareMap<String, ?>)sourceMap, propertyKey, e);
 						}
 					}
 					else
@@ -355,18 +355,18 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 处理映射表转换中出现的转换异常。
-	 * @param paramMap 当前处理的映射表
+	 * 处理请求参数映射表转换中出现的转换异常。
+	 * @param paramMap 当前处理的请求参数映射表
 	 * @param key 当前处理的映射表关键字
 	 * @param e 当前的转换异常
 	 * @date 2011-4-12
 	 */
-	protected void handleParamConvertException(FilterAwareMap<String, ?> paramMap, String key, ConvertException e)
+	protected void handleParamConvertException(ParamFilterAwareMap<String, ?> paramMap, String key, ConvertException e)
 	{
 		if(e instanceof ParamConvertException)
 			throw e;
 		else
-			throw new ParamConvertException(paramMap.getRootKey(key), e.getSourceObject(), e.getTargetType(), e.getCause());
+			throw new ParamConvertException(paramMap.getKeyInRoot(key), e.getSourceObject(), e.getTargetType(), e.getCause());
 	}
 	
 	/**

@@ -23,7 +23,7 @@ import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.web.bean.FilterAwareMap;
 import org.soybeanMilk.web.bean.ParamConvertException;
 import org.soybeanMilk.web.bean.WebGenericConverter;
-import org.soybeanMilk.web.os.WebObjectSource.FilterAwareParamMap;
+import org.soybeanMilk.web.os.WebObjectSource.ParamFilterAwareMap;
 
 public class TestWebGenericConverter
 {
@@ -175,7 +175,7 @@ public class TestWebGenericConverter
 		src.put("name", name);
 		
 		
-		FilterAwareMap<String, ?> fm=new FilterAwareParamMap<String, Object>(src, "id", true);
+		FilterAwareMap<String, ?> fm=new ParamFilterAwareMap<String, Object>(src, "id", true);
 		
 		try
 		{
@@ -205,7 +205,7 @@ public class TestWebGenericConverter
 		
 		
 		
-		FilterAwareMap<String, ?> fm=new FilterAwareParamMap<String, Object>(src, "filter.", false);
+		FilterAwareMap<String, ?> fm=new ParamFilterAwareMap<String, Object>(src, "filter.", false);
 		try
 		{
 			converter.convert(fm, ComplexJavaBean.class);
@@ -242,7 +242,7 @@ public class TestWebGenericConverter
 		
 		
 		
-		FilterAwareMap<String, ?> fm=new FilterAwareParamMap<String, Object>(src, "filter.", false);
+		FilterAwareMap<String, ?> fm=new ParamFilterAwareMap<String, Object>(src, "filter.", false);
 		
 		try
 		{

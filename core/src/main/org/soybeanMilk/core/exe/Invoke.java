@@ -364,9 +364,9 @@ public class Invoke extends AbstractExecutable
 		/**从对象源中取得参数值的关键字*/
 		private Serializable key;
 		/**参数类型*/
-		private Type type;
+		private transient Type type;
 		/**参数值*/
-		private Object value;
+		private transient Object value;
 		
 		public Arg(){}
 		
@@ -402,18 +402,35 @@ public class Invoke extends AbstractExecutable
 			this.type = type;
 		}
 		
+		/**
+		 * 获取此参数的值在{@linkplain ObjectSource 对象源}中的关键字
+		 * @return
+		 * @date 2010-10-3
+		 */
 		public Serializable getKey() {
 			return key;
 		}
 		public void setKey(Serializable key) {
 			this.key = key;
 		}
+		
+		/**
+		 * 获取此参数的类型
+		 * @return
+		 * @date 2010-10-3
+		 */
 		public Type getType() {
 			return type;
 		}
 		public void setType(Type type) {
 			this.type = type;
 		}
+		
+		/**
+		 * 获取此参数的预设值，没有则返回<code>null</code>
+		 * @return
+		 * @date 2010-10-3
+		 */
 		public Object getValue() {
 			return value;
 		}

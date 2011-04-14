@@ -16,14 +16,15 @@ package org.soybeanMilk.web.bean;
 
 import java.lang.reflect.Type;
 
+import org.soybeanMilk.core.ConvertExecuteException;
 import org.soybeanMilk.core.Execution;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.config.InterceptorInfo;
 
 /**
- * 转换请求参数时出现转换异常，它可以记录导致异常的请求参数名，
- * 这在框架执行拦截器中会很有用（参考{@linkplain Execution}类和{@linkplain InterceptorInfo}类说明）。<br>
- * 注意：<br>
+ * 请求参数转换异常，它可以记录导致异常的请求参数名，
+ * 这在框架执行拦截器中会很有用（参考{@linkplain ConvertExecuteException}以及{@linkplain Execution}和{@linkplain InterceptorInfo}类说明）。<br>
+ * 注意：
  * {@linkplain #getSourceObject()}方法获取的源对象不一定是参数值本身，
  * 因为转换器可能会将参数值数组拆分后转换，通常，源对象只是参数值数组中的某一个元素。
  * @author earthAngry@gmail.com

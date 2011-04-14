@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.Converter;
+import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.web.WebConstants;
@@ -239,11 +240,8 @@ public class WebObjectSource extends ConvertableObjectSource
 				data=this;
 			else
 			{
-				Converter cvt=getGenericConverter().getConverter(WebObjectSource.class, expectType);
-				if(cvt == null)
-					throw new ObjectSourceException("no Converter defined for converting '"+WebObjectSource.class+"' to '"+expectType+"'");
-				
-				data=cvt.convert(this, expectType);
+				data=DefaultGenericConverter.getConverterNotNull(
+						getGenericConverter(), WebObjectSource.class, expectType).convert(this, expectType);
 			}
 		}
 		else
@@ -308,7 +306,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		if(!containAccessor(key))
 			return convertParameterMap(getRequest(), key, expectType);
 		else
-			throw new ObjectSourceException("key '"+key+"' is invalid, the 'get' method can not recognize it");
+			throw new ObjectSourceException("key '"+key+"' is invalid, the 'get(Serializable key, Type expectType)' method can not recognize it");
 	}
 	
 	/**
@@ -321,7 +319,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		if(!containAccessor(key))
 			setAttributeByKeyExpression(getRequest(), key, obj);
 		else
-			throw new ObjectSourceException("key '"+key+"' is invalid, the 'set' method can not recognize it");
+			throw new ObjectSourceException("key '"+key+"' is invalid, the 'set(Serializable key, Object obj)' method can not recognize it");
 	}
 	
 	/**
@@ -344,11 +342,8 @@ public class WebObjectSource extends ConvertableObjectSource
 			{
 				Type srcType=getServletObjectType(servletObj);
 				
-				Converter cvt=getGenericConverter().getConverter(srcType, targetType);
-				if(cvt == null)
-					throw new ObjectSourceException("no Converter defined for converting '"+srcType+"' to '"+targetType+"'");
-				
-				re=cvt.convert(servletObj, targetType);
+				re=DefaultGenericConverter.getConverterNotNull(
+						getGenericConverter(), srcType, targetType).convert(servletObj, targetType);
 			}
 		}
 		else
@@ -436,9 +431,9 @@ public class WebObjectSource extends ConvertableObjectSource
 	
 	/**
 	 * 转换请求参数映射表。<br>
-	 * 如果<code>keyFilter</code>是一个明确的关键字（映射表中有该关键字的值），它将直接根据该关键字的值来转换；<br>
-	 * 如果<code>keyFilter</code>是<code>null</code>，那么它将使用原始的请求参数映射表来进行转换；<br>
-	 * 否则，它会根据<code>keyFilter</code>来对参数映射表进行过滤，产生一个新的映射表（它的关键字将会被替换为原始关键字的“<code>[keyFilter]</code>.”之后的部分，比如由“<code>beanName.propertyName</code>”变为“<code>propertyName</code>”），
+	 * 如果<code>paramKeyFilter</code>是一个明确的关键字（映射表中有该关键字的值），它将直接根据该关键字的值来转换；<br>
+	 * 如果<code>paramKeyFilter</code>是<code>null</code>，那么它将使用原始的请求参数映射表来进行转换；<br>
+	 * 否则，它会根据<code>paramKeyFilter</code>来对参数映射表进行过滤，产生一个新的映射表（它的关键字将会被替换为原始关键字的“<code>[paramKeyFilter]</code>.”之后的部分，比如由“<code>beanName.propertyName</code>”变为“<code>propertyName</code>”），
 	 * 然后使用它进行转换。
 	 * 
 	 * @param request 请求对象

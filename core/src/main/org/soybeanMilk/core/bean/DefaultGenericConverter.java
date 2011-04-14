@@ -583,4 +583,21 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		return re.toString();
 	}
+	
+	/**
+	 * 查找转换器，返回结果不会为<code>null</code>
+	 * @param genericConverter
+	 * @param sourceType
+	 * @param targetType
+	 * @return
+	 * @date 2011-4-14
+	 */
+	public static Converter getConverterNotNull(GenericConverter genericConverter, Type sourceType, Type targetType)
+	{
+		Converter cvt=genericConverter.getConverter(sourceType, targetType);
+		if(cvt == null)
+			throw new GenericConvertException("no Converter defined for converting '"+sourceType+"' to '"+targetType+"'");
+		
+		return cvt;
+	}
 }

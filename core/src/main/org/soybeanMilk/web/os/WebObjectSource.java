@@ -456,17 +456,17 @@ public class WebObjectSource extends ConvertableObjectSource
 		}
 		else
 		{
-			boolean explicitValue;
+			boolean explicitKey;
 			//有确切的值或者仅对应一个参数
 			if(paramMap.get(paramKeyFilter)!=null || isSingleParameterKey(targetType))
-				explicitValue=true;
+				explicitKey=true;
 			else
 			{
-				explicitValue=false;
+				explicitKey=false;
 				paramKeyFilter=paramKeyFilter+ACCESSOR;
 			}
 			
-			src=new ParamFilterAwareMap<String, Object>(paramMap, paramKeyFilter, explicitValue);
+			src=new ParamFilterAwareMap<String, Object>(paramMap, paramKeyFilter, explicitKey);
 		}
 		
 		//设置为null，减少转换开销

@@ -333,9 +333,9 @@ public class ConfigurationParser
 			
 			for(Element e : children)
 			{
-				String id=getAttributeIngoreEmpty(e,TAG_RESOLVER_ATTR_ID);
+				String id=getAttributeValueIngoreEmpty(e,TAG_RESOLVER_ATTR_ID);
 				assertNotEmpty(id,"<"+TAG_RESOLVER+"> attribute ["+TAG_RESOLVER_ATTR_ID+"] must not be null");
-				String clazz=getAttributeIngoreEmpty(e,TAG_RESOLVER_ATTR_CLASS);
+				String clazz=getAttributeValueIngoreEmpty(e,TAG_RESOLVER_ATTR_CLASS);
 				assertNotEmpty(clazz,"<"+TAG_RESOLVER+"> of id '"+id+"' attribute ["+TAG_RESOLVER_ATTR_CLASS+"] must not be null");
 				
 				Object resolver=createClassInstance(clazz);
@@ -356,7 +356,7 @@ public class ConfigurationParser
 		Element executables=getSingleElementByTagName(getCurrentDocumentRoot(),TAG_EXECUTABLES);
 		if(executables != null)
 		{
-			setCurrentExecutablePrefix(getAttribute(executables, TAG_EXECUTABLES_ATTR_PREFIX));
+			setCurrentExecutablePrefix(getAttributeValue(executables, TAG_EXECUTABLES_ATTR_PREFIX));
 			
 			List<Element> children=getChildrenByTagName(executables, null);
 			
@@ -397,7 +397,7 @@ public class ConfigurationParser
 	{
 		Element cvtEl = getSingleElementByTagName(parent, TAG_GENERIC_CONVERTER);
 		
-		String clazz = cvtEl==null ? null : getAttributeIngoreEmpty(cvtEl, TAG_GENERIC_CONVERTER_ATTR_CLASS);
+		String clazz = cvtEl==null ? null : getAttributeValueIngoreEmpty(cvtEl, TAG_GENERIC_CONVERTER_ATTR_CLASS);
 		
 		GenericConverter genericConverter = configuration.getGenericConverter();
 		if(genericConverter == null)
@@ -426,9 +426,9 @@ public class ConfigurationParser
 		
 		for(Element e : children)
 		{
-			String src = getAttributeIngoreEmpty(e, TAG_CONVERTER_ATTR_SRC);
-			String target = getAttributeIngoreEmpty(e, TAG_CONVERTER_ATTR_TARGET);
-			String clazz = getAttributeIngoreEmpty(e, TAG_CONVERTER_ATTR_CLASS);
+			String src = getAttributeValueIngoreEmpty(e, TAG_CONVERTER_ATTR_SRC);
+			String target = getAttributeValueIngoreEmpty(e, TAG_CONVERTER_ATTR_TARGET);
+			String clazz = getAttributeValueIngoreEmpty(e, TAG_CONVERTER_ATTR_CLASS);
 			
 			assertNotEmpty(src, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_SRC+"] must not be empty");
 			assertNotEmpty(target, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_TARGET+"] must not be empty");
@@ -448,10 +448,10 @@ public class ConfigurationParser
 		if(el == null)
 			return;
 		
-		String before=getAttributeIngoreEmpty(el, TAG_INTERCEPROT_ATTR_BEFORE);
-		String after=getAttributeIngoreEmpty(el, TAG_INTERCEPROT_ATTR_AFTER);
-		String exception=getAttributeIngoreEmpty(el, TAG_INTERCEPROT_ATTR_EXCEPTION);
-		String executionKey=getAttributeIngoreEmpty(el, TAG_INTERCEPROT_ATTR_EXECUTION_KEY);
+		String before=getAttributeValueIngoreEmpty(el, TAG_INTERCEPROT_ATTR_BEFORE);
+		String after=getAttributeValueIngoreEmpty(el, TAG_INTERCEPROT_ATTR_AFTER);
+		String exception=getAttributeValueIngoreEmpty(el, TAG_INTERCEPROT_ATTR_EXCEPTION);
+		String executionKey=getAttributeValueIngoreEmpty(el, TAG_INTERCEPROT_ATTR_EXECUTION_KEY);
 		
 		if(before==null && after==null && exception==null && executionKey==null)
 			return;
@@ -478,7 +478,7 @@ public class ConfigurationParser
 	{
 		//动作和调用的名称可以为空字符串""，因为在servlet规范中会有空字符串名的serlvet路径
 		
-		String name=getAttribute(element,TAG_ACTION_ATTR_NAME);
+		String name=getAttributeValue(element,TAG_ACTION_ATTR_NAME);
 		assertNotNull(name, "<"+TAG_ACTION+"> attribute ["+TAG_ACTION_ATTR_NAME+"] must not be null");
 		
 		action.setName(formatGlobalExecutableName(name));
@@ -489,7 +489,7 @@ public class ConfigurationParser
 			String tagName=e.getTagName();
 			if(TAG_REF.equals(tagName))
 			{
-				String refExecutableName=getAttribute(e,TAG_REF_ATTR_NAME);
+				String refExecutableName=getAttributeValue(e,TAG_REF_ATTR_NAME);
 				assertNotNull(refExecutableName, "<"+TAG_REF+"> attribute ["+TAG_REF_ATTR_NAME+"] in <"+TAG_ACTION+"> named '"+action.getName()+"' must not be null");
 				
 				action.addExecutable(new ExecutableRefProxy(refExecutableName, getCurrentExecutablePrefix()));
@@ -512,7 +512,7 @@ public class ConfigurationParser
 	 */
 	protected void setInvokeProperties(Invoke invoke, Element element, boolean global)
 	{
-		String methodName=getAttributeIngoreEmpty(element, TAG_INVOKE_ATTR_METHOD);
+		String methodName=getAttributeValueIngoreEmpty(element, TAG_INVOKE_ATTR_METHOD);
 		
 		if(methodName == null)
 			setInvokePropertiesStatement(invoke, element, global);
@@ -531,7 +531,7 @@ public class ConfigurationParser
 		String statement=getTextContent(element);
 		assertNotEmpty(statement, "<"+TAG_INVOKE+"> content must not be empty");
 		
-		String name=getAttribute(element,TAG_INVOKE_ATTR_NAME);
+		String name=getAttributeValue(element,TAG_INVOKE_ATTR_NAME);
 		if(global)
 			name=formatGlobalExecutableName(name);
 		
@@ -548,13 +548,13 @@ public class ConfigurationParser
 	 */
 	protected void setInvokePropertiesXml(Invoke invoke,Element element, boolean global)
 	{
-		String name=getAttribute(element,TAG_INVOKE_ATTR_NAME);
+		String name=getAttributeValue(element,TAG_INVOKE_ATTR_NAME);
 		if(global)
 			name=formatGlobalExecutableName(name);
-		String methodName=getAttributeIngoreEmpty(element, TAG_INVOKE_ATTR_METHOD);
-		String resolverId=getAttributeIngoreEmpty(element,TAG_INVOKE_ATTR_RESOLVER_OBJECT);
-		String resolverClazz=getAttributeIngoreEmpty(element, TAG_INVOKE_ATTR_RESOLVER_CLASS);
-		String resultKey=getAttributeIngoreEmpty(element,TAG_INVOKE_ATTR_RESULT_KEY);
+		String methodName=getAttributeValueIngoreEmpty(element, TAG_INVOKE_ATTR_METHOD);
+		String resolverId=getAttributeValueIngoreEmpty(element,TAG_INVOKE_ATTR_RESOLVER_OBJECT);
+		String resolverClazz=getAttributeValueIngoreEmpty(element, TAG_INVOKE_ATTR_RESOLVER_CLASS);
+		String resultKey=getAttributeValueIngoreEmpty(element,TAG_INVOKE_ATTR_RESULT_KEY);
 		
 		if(methodName == null)
 			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_METHOD+"] must not be null");
@@ -1053,7 +1053,7 @@ public class ConfigurationParser
 	 * @param attrName
 	 * @return
 	 */
-	protected String getAttributeIngoreEmpty(Element element,String attrName)
+	protected String getAttributeValueIngoreEmpty(Element element,String attrName)
 	{
 		String v=element.getAttribute(attrName);
 		return v==null || v.length()==0 ? null : v;
@@ -1065,7 +1065,7 @@ public class ConfigurationParser
 	 * @param attrName
 	 * @return
 	 */
-	protected String getAttribute(Element element, String attrName)
+	protected String getAttributeValue(Element element, String attrName)
 	{
 		Attr attr=element.getAttributeNode(attrName);
 		return attr == null ? null : attr.getValue();

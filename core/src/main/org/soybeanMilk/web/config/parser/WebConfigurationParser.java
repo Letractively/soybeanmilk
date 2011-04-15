@@ -111,9 +111,9 @@ public class WebConfigurationParser extends ConfigurationParser
 	protected void setTargetInfoProperties(Target targetInfo,Element element)
 	{
 		//与动作和调用名称一样，url也应该可以为空字符串
-		String url=getAttribute(element, TAG_TARGET_ATTR_URL);
+		String url=getAttributeValue(element, TAG_TARGET_ATTR_URL);
 		assertNotNull(url, "<"+TAG_TARGET+"> attribute ["+TAG_TARGET_ATTR_URL+"] must not be null");
-		String type=getAttributeIngoreEmpty(element, TAG_TARGET_ATTR_TYPE);
+		String type=getAttributeValueIngoreEmpty(element, TAG_TARGET_ATTR_TYPE);
 		
 		targetInfo.setUrl(url);
 		targetInfo.setType(type);

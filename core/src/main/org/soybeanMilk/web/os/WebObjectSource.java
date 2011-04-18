@@ -142,6 +142,11 @@ public class WebObjectSource extends ConvertableObjectSource
 	private HttpServletResponse response;
 	private ServletContext application;
 	
+	public WebObjectSource()
+	{
+		super();
+	}
+
 	public WebObjectSource(HttpServletRequest request,
 			HttpServletResponse response, ServletContext application)
 	{

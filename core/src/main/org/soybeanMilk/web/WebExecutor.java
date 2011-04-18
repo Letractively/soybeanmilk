@@ -1,81 +1,46 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
+ */
+
 package org.soybeanMilk.web;
 
-import java.util.Collection;
+import java.io.IOException;
 
-import org.soybeanMilk.core.DefaultExecutor;
-import org.soybeanMilk.core.Executable;
+import javax.servlet.ServletException;
+
 import org.soybeanMilk.core.ExecutableNotFoundException;
 import org.soybeanMilk.core.ExecuteException;
-import org.soybeanMilk.core.ObjectSource;
-import org.soybeanMilk.core.config.Configuration;
-import org.soybeanMilk.web.vp.PathNode;
-import org.soybeanMilk.web.vp.VariablePath;
-import org.soybeanMilk.web.vp.VariablePathMatcher;
+import org.soybeanMilk.core.Executor;
+import org.soybeanMilk.web.os.WebObjectSource;
 
-public class WebExecutor extends DefaultExecutor
+/**
+ * Web执行器。
+ * @author earthAngry@gmail.com
+ * @date 2011-4-18
+ *
+ */
+public interface WebExecutor extends Executor
 {
-	private VariablePathMatcher variablePathMatcher;
-	
-	public WebExecutor()
-	{
-		this(null);
-	}
-
-	public WebExecutor(Configuration configuration)
-	{
-		super(configuration);
-		
-		if(isEnableVariablePath() && getConfiguration()!=null)
-		{
-			//初始化变量路径匹配器并且设为非空以便使用
-			Collection<String> exeNames=getConfiguration().getExecutableNames();
-			VariablePathMatcher vpm=new VariablePathMatcher(exeNames);
-			setVariablePathMatcher(vpm);
-		}
-	}
-
-	public VariablePathMatcher getVariablePathMatcher()
-	{
-		return variablePathMatcher;
-	}
-
-	protected void setVariablePathMatcher(VariablePathMatcher variablePathMatcher)
-	{
-		this.variablePathMatcher = variablePathMatcher;
-	}
-	
-	@Override
-	protected Executable findExecutable(String executableName, ObjectSource objSource)
-			throws ExecuteException, ExecutableNotFoundException
-	{
-		Executable re=super.findExecutable(executableName, objSource);
-		if(re==null && isEnableVariablePath())
-		{
-			VariablePath valuePath=new VariablePath(executableName);
-			VariablePath targetPath=getVariablePathMatcher().getMatched(valuePath);
-			if(targetPath != null)
-				re=getConfiguration().getExecutable(targetPath.getVariablePath());
-			
-			if(re != null)
-			{
-				PathNode[] pathNodes=targetPath.getPathNodes();
-				for(int i=0;i<pathNodes.length;i++)
-				{
-					if(pathNodes[i].isVariable())
-						objSource.set(pathNodes[i].getNodeValue(), valuePath.getPathNode(i).getNodeValue());
-				}
-			}
-		}
-		
-		return re;
-	}
-
 	/**
-	 * 是否开启变量路径功能
-	 * @return
+	 * Web环境下的执行接口。
+	 * @param executableName
+	 * @param webObjSource
+	 * @throws ExecuteException
+	 * @throws ExecutableNotFoundException
+	 * @throws ServletException
+	 * @throws IOException
+	 * @date 2011-4-18
 	 */
-	protected boolean isEnableVariablePath()
-	{
-		return true;
-	}
+	void execute(String executableName, WebObjectSource webObjSource)
+			throws ExecuteException, ExecutableNotFoundException, ServletException, IOException;
 }

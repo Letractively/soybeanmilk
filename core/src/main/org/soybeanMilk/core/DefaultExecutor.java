@@ -137,11 +137,10 @@ public class DefaultExecutor implements Executor
 	 * @param objSource
 	 * @return
 	 * @throws ExecuteException
-	 * @throws ExecutableNotFoundException
 	 * @date 2011-1-7
 	 */
 	protected Executable findExecutable(String executableName, ObjectSource objSource)
-			throws ExecuteException, ExecutableNotFoundException
+			throws ExecuteException
 	{
 		return getConfiguration().getExecutable(executableName);
 	}

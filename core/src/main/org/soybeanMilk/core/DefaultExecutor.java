@@ -27,9 +27,10 @@ public class DefaultExecutor implements Executor
 {
 	private Configuration configuration;
 	
+	public DefaultExecutor(){}
+
 	public DefaultExecutor(Configuration configuration)
 	{
-		super();
 		this.configuration = configuration;
 	}
 	

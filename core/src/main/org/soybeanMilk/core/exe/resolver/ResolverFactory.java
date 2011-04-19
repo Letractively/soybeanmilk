@@ -12,7 +12,7 @@
  * limitations under the License. 
  */
 
-package org.soybeanMilk.core.resolver;
+package org.soybeanMilk.core.exe.resolver;
 
 import java.io.Serializable;
 

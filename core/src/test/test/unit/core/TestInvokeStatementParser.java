@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.soybeanMilk.core.config.parser.InvokeStatementParser;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
-import org.soybeanMilk.core.resolver.DefaultResolverFactory;
+import org.soybeanMilk.core.exe.resolver.DefaultResolverFactory;
 
 
 public class TestInvokeStatementParser

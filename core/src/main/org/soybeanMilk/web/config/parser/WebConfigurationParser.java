@@ -15,6 +15,7 @@
 package org.soybeanMilk.web.config.parser;
 
 import java.io.File;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -29,8 +30,12 @@ import org.soybeanMilk.core.config.parser.ConfigurationParser;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.bean.WebGenericConverter;
+import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
+import org.soybeanMilk.web.exe.th.DefaultTypeTargetHandler;
+import org.soybeanMilk.web.exe.th.TargetHandler;
+import org.soybeanMilk.web.exe.th.TypeTargetHandler;
 import org.w3c.dom.Element;
 
 /**
@@ -41,6 +46,12 @@ import org.w3c.dom.Element;
 public class WebConfigurationParser extends ConfigurationParser
 {
 	private static Log log=LogFactory.getLog(WebConfigurationParser.class);
+	
+	protected static final String TAG_TARGET_HANDLER="target-handler";
+	protected static final String TAG_TARGET_HANDLER_ATTR_CLASS="class";
+	protected static final String TAG_HANDLER="handler";
+	protected static final String TAG_HANDLER_ATTR_TARGET_TYPE="target-type";
+	protected static final String TAG_HANDLER_ATTR_CLASS=TAG_GENERIC_CONVERTER_ATTR_CLASS;
 	
 	protected static final String TAG_TARGET="target";
 	protected static final String TAG_TARGET_ATTR_URL="url";
@@ -59,12 +70,12 @@ public class WebConfigurationParser extends ConfigurationParser
 	
 	/**
 	 * 创建WEB解析器并预设存储配置对象
-	 * @param configuration
+	 * @param webConfiguration
 	 * @param servletContext
 	 */
-	public WebConfigurationParser(Configuration configuration, ServletContext servletContext)
+	public WebConfigurationParser(WebConfiguration webConfiguration, ServletContext servletContext)
 	{
-		super(configuration);
+		super(webConfiguration);
 		this.servletContext=servletContext;
 	}
 	
@@ -74,6 +85,74 @@ public class WebConfigurationParser extends ConfigurationParser
 	
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
+	}
+	
+	/**
+	 * 获取解析结果
+	 * @return
+	 * @date 2011-4-19
+	 */
+	public WebConfiguration getWebConfiguration()
+	{
+		return (WebConfiguration)getConfiguration();
+	}
+	
+	//@Override
+	protected void parseGlobalConfigs(Element docRoot)
+	{
+		super.parseGlobalConfigs(docRoot);
+		
+		parseTypeTargetHandler(getSingleElementByTagName(docRoot, TAG_GLOBAL_CONFIG));
+	}
+	
+	/**
+	 * 解析{@linkplain TypeTargetHandler 类型目标处理器}
+	 * @param parent
+	 * @date 2011-4-19
+	 */
+	protected void parseTypeTargetHandler(Element parent)
+	{
+		Element hdlEl = getSingleElementByTagName(parent, TAG_TARGET_HANDLER);
+		
+		WebConfiguration cfg=getWebConfiguration();
+		
+		String clazz = hdlEl==null ? null : getAttributeValueIngoreEmpty(hdlEl, TAG_TARGET_HANDLER_ATTR_CLASS);
+		TypeTargetHandler targetHandler=cfg.getTypeTargetHandler();
+		if(targetHandler == null)
+		{
+			if(clazz==null || clazz.length()==0)
+				targetHandler = createTypeTargetHandlerInstance();
+			else
+				targetHandler = (TypeTargetHandler)createClassInstance(clazz);
+			
+			cfg.setTypeTargetHandler(targetHandler);
+		}
+		
+		parseTargetHandler(targetHandler, hdlEl);
+	}
+	
+	/**
+	 * 解析子类型处理器
+	 * @param typeTargetHandler
+	 * @param parent
+	 * @date 2011-4-19
+	 */
+	protected void parseTargetHandler(TypeTargetHandler typeTargetHandler, Element parent)
+	{
+		List<Element> children=getChildrenByTagName(parent, TAG_HANDLER);
+		if(children==null || children.isEmpty())
+			return;
+		
+		for(Element e : children)
+		{
+			String targetType = getAttributeValueIngoreEmpty(e, TAG_HANDLER_ATTR_TARGET_TYPE);
+			String clazz = getAttributeValueIngoreEmpty(e, TAG_HANDLER_ATTR_CLASS);
+			
+			assertNotEmpty(targetType, "<"+TAG_HANDLER+"> attribute ["+TAG_HANDLER_ATTR_TARGET_TYPE+"] must not be empty");
+			assertNotEmpty(clazz, "<"+TAG_HANDLER+"> attribute ["+TAG_HANDLER_ATTR_CLASS+"] must not be empty");
+			
+			typeTargetHandler.addTargetHandler(targetType, (TargetHandler)createClassInstance(clazz));
+		}
 	}
 	
 	//@Override
@@ -112,8 +191,10 @@ public class WebConfigurationParser extends ConfigurationParser
 	{
 		//与动作和调用名称一样，url也应该可以为空字符串
 		String url=getAttributeValue(element, TAG_TARGET_ATTR_URL);
-		assertNotNull(url, "<"+TAG_TARGET+"> attribute ["+TAG_TARGET_ATTR_URL+"] must not be null");
 		String type=getAttributeValueIngoreEmpty(element, TAG_TARGET_ATTR_TYPE);
+		
+		if(type == null)
+			type=Target.FORWARD;
 		
 		targetInfo.setUrl(url);
 		targetInfo.setType(type);
@@ -151,6 +232,12 @@ public class WebConfigurationParser extends ConfigurationParser
 		return WebConstants.DEFAULT_CONFIG_FILE;
 	}
 	
+	@Override
+	protected Configuration createConfigurationInstance()
+	{
+		return new WebConfiguration();
+	}
+
 	//@Override
 	protected GenericConverter createGenericConverterInstance()
 	{
@@ -166,5 +253,10 @@ public class WebConfigurationParser extends ConfigurationParser
 	protected Target createTargetInstance()
 	{
 		return new Target();
+	}
+	
+	protected TypeTargetHandler createTypeTargetHandlerInstance()
+	{
+		return new DefaultTypeTargetHandler();
 	}
 }

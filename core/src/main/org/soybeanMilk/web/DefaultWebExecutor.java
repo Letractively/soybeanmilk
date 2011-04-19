@@ -18,20 +18,15 @@ import java.io.IOException;
 import java.util.Collection;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.core.DefaultExecutor;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecutableNotFoundException;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.config.Configuration;
+import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.exe.WebAction;
-import org.soybeanMilk.web.exe.WebAction.Target;
 import org.soybeanMilk.web.os.WebObjectSource;
 import org.soybeanMilk.web.vp.PathNode;
 import org.soybeanMilk.web.vp.VariablePath;
@@ -45,19 +40,7 @@ import org.soybeanMilk.web.vp.VariablePathMatcher;
  */
 public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 {
-	private static Log log=LogFactory.getLog(DefaultWebExecutor.class);
-	
-	/** servlet规范"include"属性-request_uri */
-	public static final String INCLUDE_REQUEST_URI_ATTRIBUTE = "javax.servlet.include.request_uri";
-	/** servlet规范"include"属性-path_info */
-	public static final String INCLUDE_PATH_INFO_ATTRIBUTE = "javax.servlet.include.path_info";
-	/** servlet规范"include"属性-servlet_path */
-	public static final String INCLUDE_SERVLET_PATH_ATTRIBUTE = "javax.servlet.include.servlet_path";
-	
-	/** servlet规范"forward"属性-path_info */
-	public static final String FORWARD_PATH_INFO_ATTRIBUTE = "javax.servlet.forward.path_info";
-	/** servlet规范"forward"属性-servlet_path */
-	public static final String FORWARD_SERVLET_PATH_ATTRIBUTE = "javax.servlet.forward.servlet_path";
+	private WebConfiguration webConfiguration;
 	
 	private VariablePathMatcher variablePathMatcher;
 	
@@ -66,16 +49,28 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 		this(null);
 	}
 
-	public DefaultWebExecutor(Configuration configuration)
+	public DefaultWebExecutor(WebConfiguration configuration)
 	{
-		super(configuration);
+		setWebConfiguration(configuration);
 		initVariablePathMatcher();
 	}
 
 	@Override
 	public void setConfiguration(Configuration configuration)
 	{
-		super.setConfiguration(configuration);
+		setWebConfiguration((WebConfiguration)configuration);
+	}
+	
+	public WebConfiguration getWebConfiguration()
+	{
+		return this.webConfiguration;
+	}
+
+	public void setWebConfiguration(WebConfiguration webConfiguration)
+	{
+		this.webConfiguration = webConfiguration;
+		super.setConfiguration(webConfiguration);
+		
 		initVariablePathMatcher();
 	}
 
@@ -106,60 +101,17 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 	 * 处理{@linkplain Executable 可执行对象}的目标属性。目前只有{@linkplain WebAction}定义了目标属性。
 	 * @param executable
 	 * @param webObjectSource
-	 * @throws ExecuteException
 	 * @throws ServletException
 	 * @throws IOException
 	 * @date 2011-4-18
 	 */
 	protected void handleTarget(Executable executable, WebObjectSource webObjectSource)
-			throws ExecuteException, ServletException, IOException
+			throws ServletException, IOException
 	{
-		Target target=null;
-		if(executable instanceof WebAction)
-			target = ((WebAction)executable).getTarget();
-		
-		if(target == null)
-		{
-			if(log.isDebugEnabled())
-				log.debug("Executable named '"+executable.getName()+"' not dispatched, because no Target defined");
-			
+		if(!(executable instanceof WebAction))
 			return;
-		}
 		
-		HttpServletRequest request = webObjectSource.getRequest();
-		HttpServletResponse response=webObjectSource.getResponse();
-		
-		String url=evaluateVariableUrl(target.getUrl(), webObjectSource);
-		if(url == null)
-			throw new ServletException("the target url of '"+executable+"' must be defined.");
-		
-		if(Target.REDIRECT.equalsIgnoreCase(target.getType()))
-		{
-			//在语境内
-			if(url.startsWith("/"))
-				response.sendRedirect(request.getContextPath()+url);
-			else
-				response.sendRedirect(url);
-			
-			if(log.isDebugEnabled())
-				log.debug("redirect '"+url+"' for request");
-		}
-		else
-		{
-			if(isIncludeRequest(request))
-			{
-				request.getRequestDispatcher(url).include(request, response);
-				
-				if(log.isDebugEnabled())
-					log.debug("include '"+url+"' for request");
-			}
-			else
-			{
-				request.getRequestDispatcher(url).forward(request, response);
-				if(log.isDebugEnabled())
-					log.debug("forward '"+url+"' for request");
-			}
-		}
+		getWebConfiguration().getTypeTargetHandler().handleTarget((WebAction)executable, webObjectSource);
 	}
 
 	@Override
@@ -189,61 +141,6 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 	}
 	
 	/**
-	 * 求变量URL的值
-	 * @param variableUrl 目标URL，它可能包含"{...}"格式的变量
-	 * @param objectSource
-	 * @return
-	 */
-	protected String evaluateVariableUrl(String variableUrl, WebObjectSource objectSource)
-	{
-		if(variableUrl == null)
-			return null;
-		
-		StringBuffer result=new StringBuffer();
-		
-		int i=0, len=variableUrl.length();
-		for(;i<len;i++)
-		{
-			char c=variableUrl.charAt(i);
-			
-			if(c == WebConstants.VARIABLE_QUOTE_LEFT)
-			{
-				int j=i+1;
-				int start=j;
-				for(;j<len && (c=variableUrl.charAt(j))!=WebConstants.VARIABLE_QUOTE_RIGHT;)
-					j++;
-				
-				String var=variableUrl.substring(start, j);
-				if(c == WebConstants.VARIABLE_QUOTE_RIGHT)
-				{
-					String value=(String)objectSource.get(var, String.class);
-					result.append(value==null ? "null" : value);
-				}
-				else
-				{
-					result.append(WebConstants.VARIABLE_QUOTE_LEFT);
-					result.append(var);
-				}
-				
-				i=j;
-			}
-			else
-				result.append(c);
-		}
-		
-		return result.toString();
-	}
-	
-	/**
-	 * 是否是"include"请求
-	 * @param request
-	 * @return
-	 */
-	protected boolean isIncludeRequest(ServletRequest request) {
-		return (request.getAttribute(INCLUDE_REQUEST_URI_ATTRIBUTE) != null);
-	}
-	
-	/**
 	 * 初始化路径匹配器
 	 * @date 2011-4-19
 	 */
@@ -257,7 +154,7 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 			setVariablePathMatcher(vpm);
 		}
 	}
-
+	
 	/**
 	 * 是否开启变量路径功能
 	 * @return

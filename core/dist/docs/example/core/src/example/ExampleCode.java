@@ -9,10 +9,10 @@ import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
+import org.soybeanMilk.core.exe.resolver.DefaultResolverFactory;
+import org.soybeanMilk.core.exe.resolver.FactoryResolverProvider;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.core.os.HashMapObjectSource;
-import org.soybeanMilk.core.resolver.DefaultResolverFactory;
-import org.soybeanMilk.core.resolver.FactoryResolverProvider;
 
 import example.resolver.HelloResolver;
 

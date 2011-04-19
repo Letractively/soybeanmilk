@@ -22,8 +22,8 @@ import java.util.List;
 import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
-import org.soybeanMilk.core.resolver.FactoryResolverProvider;
-import org.soybeanMilk.core.resolver.ResolverFactory;
+import org.soybeanMilk.core.exe.resolver.FactoryResolverProvider;
+import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 
 /**
  * 调用语句解析器，它解析诸如"myReulst = myResolver.method(argKey0, argKey1, "string")"之类字符串中的与{@linkplain Invoke 调用}对应的属性

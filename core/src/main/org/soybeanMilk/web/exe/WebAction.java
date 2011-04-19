@@ -61,7 +61,7 @@ public class WebAction extends Action
 	}
 	
 	/**
-	 * 动作的目标，包括目标URL和类型（转向、重定向）
+	 * 动作的目标，包括目标URL和类型（转向、重定向等）
 	 * @author earthAngry@gmail.com
 	 * @date 2010-10-4
 	 */

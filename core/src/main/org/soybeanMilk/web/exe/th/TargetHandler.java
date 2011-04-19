@@ -12,43 +12,32 @@
  * limitations under the License. 
  */
 
-package org.soybeanMilk.web;
+package org.soybeanMilk.web.exe.th;
 
 import java.io.IOException;
 
 import javax.servlet.ServletException;
 
-import org.soybeanMilk.core.ExecutableNotFoundException;
-import org.soybeanMilk.core.ExecuteException;
-import org.soybeanMilk.core.Executor;
-import org.soybeanMilk.web.config.WebConfiguration;
+import org.soybeanMilk.web.exe.WebAction;
+import org.soybeanMilk.web.exe.WebAction.Target;
 import org.soybeanMilk.web.os.WebObjectSource;
 
 /**
- * Web执行器。
+ * {@linkplain WebAction Web动作}的{@linkplain Target 目标}处理器。
  * @author earthAngry@gmail.com
- * @date 2011-4-18
+ * @date 2011-4-19
  *
  */
-public interface WebExecutor extends Executor
+public interface TargetHandler
 {
 	/**
-	 * 获取{@linkplain Web配置}信息。
-	 * @return
-	 * @date 2011-4-19
-	 */
-	WebConfiguration getWebConfiguration();
-	
-	/**
-	 * Web环境下的执行接口。
-	 * @param executableName
-	 * @param webObjSource
-	 * @throws ExecuteException
-	 * @throws ExecutableNotFoundException
+	 * 处理{@linkplain WebAction Web动作}的目标。
+	 * @param webAction {@linkplain WebAction Web动作}对象，它也可能没有定义{@linkplain Target 目标}属性。
+	 * @param webObjectSource 此{@linkplain WebAction Web动作}使用的{@linkplain WebObjectSource Web对象源}。
 	 * @throws ServletException
 	 * @throws IOException
-	 * @date 2011-4-18
+	 * @date 2011-4-19
 	 */
-	void execute(String executableName, WebObjectSource webObjSource)
-			throws ExecuteException, ExecutableNotFoundException, ServletException, IOException;
+	void handleTarget(WebAction webAction, WebObjectSource webObjectSource)
+			throws ServletException, IOException;
 }

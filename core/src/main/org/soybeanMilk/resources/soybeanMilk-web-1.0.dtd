@@ -4,10 +4,15 @@
 <!--===========================================-->
 
 <!--根元素-->
-<!ELEMENT soybean-milk (global-config?,includes?,resolvers?,executables)>
+<!ELEMENT soybean-milk (global-config?, includes?, resolvers?, executables)>
 
 <!--全局配置-->
-<!ELEMENT global-config (generic-converter?,interceptor?)>
+<!ELEMENT global-config ((interceptor?,generic-converter?,target-handler?) | (interceptor?,target-handler?,generic-converter?) | (generic-converter?,interceptor?,target-handler?) | (generic-converter?,target-handler?,interceptor?) | (target-handler?,generic-converter?,interceptor?) | (target-handler?,interceptor?,generic-converter?))>
+
+<!--
+拦截器配置
+-->
+<!ELEMENT interceptor EMPTY>
 
 <!--
 通用转换器配置
@@ -20,9 +25,14 @@
 <!ELEMENT converter EMPTY>
 
 <!--
-拦截器配置
+类型目标处理器
 -->
-<!ELEMENT interceptor EMPTY>
+<!ELEMENT target-handler (handler*)>
+
+<!--
+自定义的目标处理器
+-->
+<!ELEMENT handler EMPTY>
 
 <!--
 包含的模块配置文件
@@ -98,6 +108,20 @@ exception 作为异常时拦截器的可执行对象名
 <!ATTLIST interceptor after CDATA #IMPLIED>
 <!ATTLIST interceptor exception CDATA #IMPLIED>
 <!ATTLIST interceptor execution-key CDATA #IMPLIED>
+
+<!--
+类型目标处理器类名
+-->
+<!ATTLIST target-handler class CDATA #IMPLIED>
+
+<!--
+目标处理器可以处理的类型
+-->
+<!ATTLIST handler target-type CDATA #REQUIRED>
+<!--
+目标处理器类名
+-->
+<!ATTLIST handler class CDATA #REQUIRED>
 
 <!--
 解决对象配置属性

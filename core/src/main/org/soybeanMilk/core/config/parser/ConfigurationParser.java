@@ -41,9 +41,9 @@ import org.soybeanMilk.core.config.InterceptorInfo;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
-import org.soybeanMilk.core.resolver.DefaultResolverFactory;
-import org.soybeanMilk.core.resolver.FactoryResolverProvider;
-import org.soybeanMilk.core.resolver.ResolverFactory;
+import org.soybeanMilk.core.exe.resolver.DefaultResolverFactory;
+import org.soybeanMilk.core.exe.resolver.FactoryResolverProvider;
+import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -108,8 +108,6 @@ public class ConfigurationParser
 	/**主文档包含的模块文档*/
 	private List<Document> modules;
 	
-	/**当前的解析文档*/
-	private Document currentDocument;
 	/**当前可执行对象前缀*/
 	private String currentExecutablePrefix;
 	
@@ -239,35 +237,27 @@ public class ConfigurationParser
 		if(getConfiguration() == null)
 			setConfiguration(createConfigurationInstance());
 		
-		setCurrentDocument(rootDocument);
+		Element rootDocEle=getDocumentRootElement(rootDocument);
 		
-		parseGlobalConfigs();
+		parseGlobalConfigs(rootDocEle);
+		parseIncludes(rootDocEle);
+		parseResolvers(rootDocEle);
 		
-		parseIncludes();
+		if(modules !=null)
+		{
+			for(Document doc : modules)
+				parseResolvers(getDocumentRootElement(doc));
+		}
 		
-		parseResolvers();
+		parseExecutables(rootDocEle);
+		
 		if(modules !=null)
 		{
 			for(Document doc : modules)
 			{
-				setCurrentDocument(doc);
-				parseResolvers();
+				parseExecutables(getDocumentRootElement(doc));
 			}
 		}
-		
-		setCurrentDocument(rootDocument);
-		
-		parseExecutables();
-		if(modules !=null)
-		{
-			for(Document doc : modules)
-			{
-				setCurrentDocument(doc);
-				parseExecutables();
-			}
-		}
-		
-		setCurrentDocument(rootDocument);
 		
 		parseRefs();
 	}
@@ -275,9 +265,9 @@ public class ConfigurationParser
 	/**
 	 * 解析全局配置
 	 */
-	protected void parseGlobalConfigs()
+	protected void parseGlobalConfigs(Element docRoot)
 	{
-		Element parent=getSingleElementByTagName(getCurrentDocumentRoot(), TAG_GLOBAL_CONFIG);
+		Element parent=getSingleElementByTagName(docRoot, TAG_GLOBAL_CONFIG);
 		
 		parseGenericConverter(parent);
 		
@@ -287,9 +277,9 @@ public class ConfigurationParser
 	/**
 	 * 解析包含的模块配置
 	 */
-	protected void parseIncludes()
+	protected void parseIncludes(Element docRoot)
 	{
-		List<Element> files=getChildrenByTagName(getSingleElementByTagName(getCurrentDocumentRoot(), TAG_INCLUDES), TAG_FILE);
+		List<Element> files=getChildrenByTagName(getSingleElementByTagName(docRoot, TAG_INCLUDES), TAG_FILE);
 		
 		if(files == null || files.isEmpty())
 			return;
@@ -313,9 +303,9 @@ public class ConfigurationParser
 	/**
 	 * 解析并构建解决对象
 	 */
-	protected void parseResolvers()
+	protected void parseResolvers(Element docRoot)
 	{
-		List<Element> children=getChildrenByTagName(getSingleElementByTagName(getCurrentDocumentRoot(), TAG_RESOLVERS), TAG_RESOLVER);
+		List<Element> children=getChildrenByTagName(getSingleElementByTagName(docRoot, TAG_RESOLVERS), TAG_RESOLVER);
 		
 		if(children!=null && !children.isEmpty())
 		{
@@ -351,9 +341,9 @@ public class ConfigurationParser
 	/**
 	 * 解析并构建可执行对象
 	 */
-	protected void parseExecutables()
+	protected void parseExecutables(Element docRoot)
 	{
-		Element executables=getSingleElementByTagName(getCurrentDocumentRoot(),TAG_EXECUTABLES);
+		Element executables=getSingleElementByTagName(docRoot,TAG_EXECUTABLES);
 		if(executables != null)
 		{
 			setCurrentExecutablePrefix(getAttributeValue(executables, TAG_EXECUTABLES_ATTR_PREFIX));
@@ -916,21 +906,12 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 设置当前解析文档
-	 * @param doc
-	 */
-	protected void setCurrentDocument(Document doc)
-	{
-		this.currentDocument=doc;
-	}
-	
-	/**
-	 * 取得当前解析的文档根元素
+	 * 取得文档根元素
 	 * @return
 	 */
-	protected Element getCurrentDocumentRoot()
+	protected Element getDocumentRootElement(Document doc)
 	{
-		return this.currentDocument.getDocumentElement();
+		return doc.getDocumentElement();
 	}
 	
 	protected void setCurrentExecutablePrefix(String  currentExecutablePrefix)

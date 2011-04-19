@@ -16,34 +16,28 @@ package org.soybeanMilk.web.servlet;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Collection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.core.DefaultExecutor;
-import org.soybeanMilk.core.Executable;
+import org.soybeanMilk.core.ExecutableNotFoundException;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.Executor;
-import org.soybeanMilk.core.config.Configuration;
-import org.soybeanMilk.core.resolver.DefaultResolverFactory;
-import org.soybeanMilk.core.resolver.ResolverFactory;
+import org.soybeanMilk.core.exe.resolver.DefaultResolverFactory;
+import org.soybeanMilk.core.exe.resolver.ResolverFactory;
+import org.soybeanMilk.web.DefaultWebExecutor;
 import org.soybeanMilk.web.WebConstants;
+import org.soybeanMilk.web.WebExecutor;
+import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.config.parser.WebConfigurationParser;
-import org.soybeanMilk.web.exe.WebAction;
-import org.soybeanMilk.web.exe.WebAction.Target;
+import org.soybeanMilk.web.exe.th.AbstractTargetHandler;
 import org.soybeanMilk.web.os.WebObjectSource;
 import org.soybeanMilk.web.os.WebObjectSourceFactory;
-import org.soybeanMilk.web.vp.PathNode;
-import org.soybeanMilk.web.vp.VariablePath;
-import org.soybeanMilk.web.vp.VariablePathMatcher;
-
 
 /**
  * 框架整合servlet，它可以将WEB请求转给{@linkplain Executor 执行器}。
@@ -56,20 +50,8 @@ public class DispatchServlet extends HttpServlet
 	
 	private static Log log=LogFactory.getLog(DispatchServlet.class);
 	
-	/** servlet规范"include"属性-request_uri */
-	public static final String INCLUDE_REQUEST_URI_ATTRIBUTE = "javax.servlet.include.request_uri";
-	/** servlet规范"include"属性-path_info */
-	public static final String INCLUDE_PATH_INFO_ATTRIBUTE = "javax.servlet.include.path_info";
-	/** servlet规范"include"属性-servlet_path */
-	public static final String INCLUDE_SERVLET_PATH_ATTRIBUTE = "javax.servlet.include.servlet_path";
-	
-	/** servlet规范"forward"属性-path_info */
-	public static final String FORWARD_PATH_INFO_ATTRIBUTE = "javax.servlet.forward.path_info";
-	/** servlet规范"forward"属性-servlet_path */
-	public static final String FORWARD_SERVLET_PATH_ATTRIBUTE = "javax.servlet.forward.servlet_path";
-	
-	/**执行器*/
-	private Executor executor;
+	/**Web执行器*/
+	private WebExecutor webExecutor;
 	
 	/**WEB对象源工厂*/
 	private WebObjectSourceFactory webObjectSourceFactory;
@@ -80,22 +62,20 @@ public class DispatchServlet extends HttpServlet
 	/**WEB执行器存储关键字*/
 	private String appExecutorKey;
 	
-	/**
-	 * 用于查找RESTful风格的可执行对象名
-	 */
-	private VariablePathMatcher variablePathMatcher;
-	
 	public DispatchServlet()
 	{
 		super();
 	}
 	
-	public Executor getExecutor() {
-		return executor;
+	public WebExecutor getWebExecutor()
+	{
+		return webExecutor;
 	}
-	public void setExecutor(Executor executor) {
-		this.executor = executor;
+	public void setWebExecutor(WebExecutor webExecutor)
+	{
+		this.webExecutor = webExecutor;
 	}
+	
 	public WebObjectSourceFactory getWebObjectSourceFactory() {
 		return webObjectSourceFactory;
 	}
@@ -103,12 +83,14 @@ public class DispatchServlet extends HttpServlet
 			WebObjectSourceFactory webObjectSourceFactory) {
 		this.webObjectSourceFactory = webObjectSourceFactory;
 	}
+	
 	public String getEncoding() {
 		return encoding;
 	}
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
 	}
+	
 	public String getAppExecutorKey() {
 		return appExecutorKey;
 	}
@@ -137,7 +119,7 @@ public class DispatchServlet extends HttpServlet
 		if(aek != null)
 			getServletContext().removeAttribute(aek);
 		
-		setExecutor(null);
+		setWebExecutor(null);
 		super.destroy();
 	}
 	
@@ -153,14 +135,7 @@ public class DispatchServlet extends HttpServlet
 		setEncoding(ec);
 		
 		//执行器
-		setExecutor(getInitExecutor());
-		if(isEnableVariablePath())
-		{
-			//初始化变量路径匹配器并且设为非空以便使用
-			Collection<String> exeNames=getExecutor().getConfiguration().getExecutableNames();
-			VariablePathMatcher vpm=new VariablePathMatcher(exeNames);
-			setVariablePathMatcher(vpm);
-		}
+		setWebExecutor(getInitWebExecutor());
 		
 		//WEB对象源工厂
 		WebObjectSourceFactory wsf=getInitWebObjectSourceFactory();
@@ -183,7 +158,7 @@ public class DispatchServlet extends HttpServlet
 		if(aek==null || aek.length()==0)
 			setAppExecutorKey(null);
 		if(aek != null)
-			getServletContext().setAttribute(aek, getExecutor());
+			getServletContext().setAttribute(aek, getWebExecutor());
 	}
 	
 	/**
@@ -199,49 +174,25 @@ public class DispatchServlet extends HttpServlet
 		if(request.getCharacterEncoding() == null)
 			request.setCharacterEncoding(getEncoding());
 		
-		Configuration cfg=getExecutor().getConfiguration();
-		WebObjectSource webObjSource=getWebObjectSourceFactory().create(request, response, getServletContext());
 		String exeName=getRequestExecutableName(request, response);
+		
 		if(log.isDebugEnabled())
-			log.debug("processing request with name '"+exeName+"'");
+			log.debug("processing request '"+exeName+"'");
 		
-		Executable exe=cfg.getExecutable(exeName);
-		
-		//按照变量路径方式匹配
-		if(exe==null && isEnableVariablePath())
-		{
-			VariablePath valuePath=new VariablePath(exeName);
-			VariablePath targetPath=getVariablePathMatcher().getMatched(valuePath);
-			if(targetPath != null)
-				exe=cfg.getExecutable(targetPath.getVariablePath());
-			
-			if(exe != null)
-			{
-				PathNode[] pathNodes=targetPath.getPathNodes();
-				for(int i=0;i<pathNodes.length;i++)
-				{
-					if(pathNodes[i].isVariable())
-						webObjSource.set(pathNodes[i].getNodeValue(), valuePath.getPathNode(i).getNodeValue());
-				}
-			}
-		}
-		
-		if(exe == null)
-		{
-			handleExecutableNotFound(exeName, webObjSource);
-			return;
-		}
+		WebObjectSource webObjSource=getWebObjectSourceFactory().create(request, response, getServletContext());
 		
 		try
 		{
-			exe=getExecutor().execute(exe, webObjSource);
+			getWebExecutor().execute(exeName, webObjSource);
+		}
+		catch(ExecutableNotFoundException e)
+		{
+			handleExecutableNotFound(exeName, webObjSource);
 		}
 		catch(ExecuteException e)
 		{
-			handleExecuteException(exe, e, exeName, webObjSource);
+			handleExecuteException(e, exeName, webObjSource);
 		}
-		
-		processTarget(exe, webObjSource);
 	}
 	
 	/**
@@ -261,8 +212,8 @@ public class DispatchServlet extends HttpServlet
 		String servletPath=null;
 		
 		//include请求
-		pathInfo=(String)request.getAttribute(INCLUDE_PATH_INFO_ATTRIBUTE);
-		servletPath=(String)request.getAttribute(INCLUDE_SERVLET_PATH_ATTRIBUTE);
+		pathInfo=(String)request.getAttribute(AbstractTargetHandler.INCLUDE_PATH_INFO_ATTRIBUTE);
+		servletPath=(String)request.getAttribute(AbstractTargetHandler.INCLUDE_SERVLET_PATH_ATTRIBUTE);
 		if(pathInfo==null && servletPath==null)
 		{
 			pathInfo=request.getPathInfo();
@@ -298,7 +249,7 @@ public class DispatchServlet extends HttpServlet
 			throws ServletException, IOException
 	{
 		//servlet规范规定这里要抛出FileNotFoundException异常
-		if(isIncludeRequest(objSource.getRequest()))
+		if(AbstractTargetHandler.isIncludeRequest(objSource.getRequest()))
 			throw new FileNotFoundException(requestExeName);
 		
 		objSource.getResponse().sendError(HttpServletResponse.SC_NOT_FOUND, requestExeName);
@@ -306,7 +257,6 @@ public class DispatchServlet extends HttpServlet
 	
 	/**
 	 * 处理执行异常。
-	 * @param executable
 	 * @param e
 	 * @param requestExeName
 	 * @param webObjSource
@@ -314,112 +264,10 @@ public class DispatchServlet extends HttpServlet
 	 * @throws IOException
 	 * @date 2011-1-12
 	 */
-	protected void handleExecuteException(Executable executable, ExecuteException e, String requestExeName, WebObjectSource webObjSource) throws ServletException, IOException
+	protected void handleExecuteException(ExecuteException e, String requestExeName, WebObjectSource webObjSource)
+			throws ServletException, IOException
 	{
 		throw new ServletException(e);
-	}
-	
-	/**
-	 * 处理可执行对象的目标
-	 * @param executable
-	 * @param objSource
-	 * @throws ServletException
-	 * @throws IOException
-	 */
-	protected void processTarget(Executable executable, WebObjectSource objSource) throws ServletException, IOException
-	{
-		Target target=null;
-		if(executable instanceof WebAction)
-			target = ((WebAction)executable).getTarget();
-		
-		if(target == null)
-		{
-			if(log.isDebugEnabled())
-				log.debug("Executable named '"+executable.getName()+"' not dispatched,because no Target defined");
-			
-			return;
-		}
-		
-		HttpServletRequest request = objSource.getRequest();
-		HttpServletResponse response=objSource.getResponse();
-		
-		String url=evaluateVariableUrl(target.getUrl(), objSource);
-		if(url == null)
-			throw new ServletException("the target url of '"+executable+"' must be defined.");
-		
-		if(Target.REDIRECT.equalsIgnoreCase(target.getType()))
-		{
-			//在语境内
-			if(url.startsWith("/"))
-				response.sendRedirect(request.getContextPath()+url);
-			else
-				response.sendRedirect(url);
-			
-			if(log.isDebugEnabled())
-				log.debug("redirect '"+url+"' for request");
-		}
-		else
-		{
-			if(isIncludeRequest(request))
-			{
-				request.getRequestDispatcher(url).include(request, response);
-				
-				if(log.isDebugEnabled())
-					log.debug("include '"+url+"' for request");
-			}
-			else
-			{
-				request.getRequestDispatcher(url).forward(request, response);
-				if(log.isDebugEnabled())
-					log.debug("forward '"+url+"' for request");
-			}
-		}
-	}
-	
-	/**
-	 * 求变量URL的值
-	 * @param variableUrl 目标URL，它可能包含"{...}"格式的变量
-	 * @param objectSource
-	 * @return
-	 */
-	protected String evaluateVariableUrl(String variableUrl, WebObjectSource objectSource)
-	{
-		if(variableUrl == null)
-			return null;
-		
-		StringBuffer result=new StringBuffer();
-		
-		int i=0, len=variableUrl.length();
-		for(;i<len;i++)
-		{
-			char c=variableUrl.charAt(i);
-			
-			if(c == WebConstants.VARIABLE_QUOTE_LEFT)
-			{
-				int j=i+1;
-				int start=j;
-				for(;j<len && (c=variableUrl.charAt(j))!=WebConstants.VARIABLE_QUOTE_RIGHT;)
-					j++;
-				
-				String var=variableUrl.substring(start, j);
-				if(c == WebConstants.VARIABLE_QUOTE_RIGHT)
-				{
-					String value=(String)objectSource.get(var, String.class);
-					result.append(value==null ? "null" : value);
-				}
-				else
-				{
-					result.append(WebConstants.VARIABLE_QUOTE_LEFT);
-					result.append(var);
-				}
-				
-				i=j;
-			}
-			else
-				result.append(c);
-		}
-		
-		return result.toString();
 	}
 	
 	/**
@@ -433,32 +281,6 @@ public class DispatchServlet extends HttpServlet
 			HttpServletResponse response, ServletContext application)
 	{
 		return new WebObjectSource(request, response, application);
-	}
-	
-	protected VariablePathMatcher getVariablePathMatcher() {
-		return variablePathMatcher;
-	}
-	
-	protected void setVariablePathMatcher(VariablePathMatcher variablePathMatcher) {
-		this.variablePathMatcher = variablePathMatcher;
-	}
-	
-	/**
-	 * 是否开启变量路径功能
-	 * @return
-	 */
-	protected boolean isEnableVariablePath()
-	{
-		return true;
-	}
-	
-	/**
-	 * 是否是"include"请求
-	 * @param request
-	 * @return
-	 */
-	protected static boolean isIncludeRequest(ServletRequest request) {
-		return (request.getAttribute(INCLUDE_REQUEST_URI_ATTRIBUTE) != null);
 	}
 	
 	/**
@@ -478,14 +300,14 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 取得初始化{@link Executor 执行器}对象
+	 * 取得初始化{@link WebExecutor Web执行器}对象
 	 */
-	protected Executor getInitExecutor() throws ServletException
+	protected WebExecutor getInitWebExecutor() throws ServletException
 	{
 		DefaultResolverFactory rf=new DefaultResolverFactory();
 		rf.setExternalResolverFactory(getInitExternalResolverFactory());
 		
-		Configuration webConfiguration=new Configuration(rf);
+		WebConfiguration webConfiguration=new WebConfiguration(rf);
 		
 		String configFileName=getInitParameter(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG);
 		
@@ -493,7 +315,7 @@ public class DispatchServlet extends HttpServlet
 		
 		parser.parse(configFileName);
 		
-		return new DefaultExecutor(webConfiguration);
+		return new DefaultWebExecutor(webConfiguration);
 	}
 	
 	/**

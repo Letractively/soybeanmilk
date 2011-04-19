@@ -13,17 +13,16 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.soybeanMilk.core.resolver.DefaultResolverFactory;
-import org.soybeanMilk.core.resolver.ResolverFactory;
+import org.soybeanMilk.core.exe.resolver.DefaultResolverFactory;
+import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.bean.ParamConvertException;
+import org.soybeanMilk.web.exe.th.AbstractTargetHandler;
 import org.soybeanMilk.web.os.WebObjectSource;
 import org.soybeanMilk.web.os.WebObjectSourceFactory;
-import org.soybeanMilk.web.servlet.DispatchServlet;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
-
 
 public class TestDispatchServlet
 {
@@ -169,7 +168,7 @@ public class TestDispatchServlet
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
 			
-			Assert.assertTrue( ((DefaultResolverFactory)servlet.getExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory() == myExternalResolverFactory );
+			Assert.assertTrue( ((DefaultResolverFactory)servlet.getWebExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory() == myExternalResolverFactory );
 		}
 	}
 	
@@ -182,7 +181,7 @@ public class TestDispatchServlet
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
 			
-			Assert.assertNull(((DefaultResolverFactory)servlet.getExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory());
+			Assert.assertNull(((DefaultResolverFactory)servlet.getWebExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory());
 		}
 	}
 	
@@ -193,7 +192,7 @@ public class TestDispatchServlet
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
 			
-			Assert.assertNull(((DefaultResolverFactory)servlet.getExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory());
+			Assert.assertNull(((DefaultResolverFactory)servlet.getWebExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory());
 		}
 	}
 	
@@ -307,7 +306,7 @@ public class TestDispatchServlet
 			
 			request.setMethod("POST");
 			request.setContextPath(CONTEXT_PATH);
-			request.setAttribute(DispatchServlet.INCLUDE_PATH_INFO_ATTRIBUTE,"/product/35/edit/233");
+			request.setAttribute(AbstractTargetHandler.INCLUDE_PATH_INFO_ATTRIBUTE,"/product/35/edit/233");
 			
 			servlet.service(request, response);
 			
@@ -321,8 +320,8 @@ public class TestDispatchServlet
 			
 			request.setMethod("POST");
 			request.setContextPath(CONTEXT_PATH);
-			request.setAttribute(DispatchServlet.INCLUDE_PATH_INFO_ATTRIBUTE,"/35/edit/233");
-			request.setAttribute(DispatchServlet.INCLUDE_SERVLET_PATH_ATTRIBUTE,"/product");
+			request.setAttribute(AbstractTargetHandler.INCLUDE_PATH_INFO_ATTRIBUTE,"/35/edit/233");
+			request.setAttribute(AbstractTargetHandler.INCLUDE_SERVLET_PATH_ATTRIBUTE,"/product");
 			
 			servlet.service(request, response);
 			
@@ -336,7 +335,7 @@ public class TestDispatchServlet
 			
 			request.setMethod("POST");
 			request.setContextPath(CONTEXT_PATH);
-			request.setAttribute(DispatchServlet.INCLUDE_SERVLET_PATH_ATTRIBUTE,"/product/edit.do");
+			request.setAttribute(AbstractTargetHandler.INCLUDE_SERVLET_PATH_ATTRIBUTE,"/product/edit.do");
 			
 			request.setParameter("userId", "35");
 			request.setParameter("id", "233");

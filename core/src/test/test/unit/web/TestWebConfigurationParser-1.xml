@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE soybean-milk PUBLIC "-//SoybeanMilk//DTD soybeanMilk web//EN" "http://soybeanmilk.googlecode.com/files/soybeanMilk-web-1.0.dtd">
+<soybean-milk>
+	<global-config>
+		
+		<target-handler class="test.unit.web.TestWebConfigurationParser$MyTypeTargetHandler">
+			<handler target-type="JSON" class="test.unit.web.TestWebConfigurationParser$JsonTargetHandler"/>
+		</target-handler>
+		
+	</global-config>
+	
+	<executables>
+	
+	</executables>
+	
+</soybean-milk>

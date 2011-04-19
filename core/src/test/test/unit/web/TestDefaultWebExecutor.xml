@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE soybean-milk PUBLIC "-//SoybeanMilk//DTD soybeanMilk web//EN" "http://soybeanmilk.googlecode.com/files/soybeanMilk-web-1.0.dtd">
+<soybean-milk>
+	<global-config>
+		
+		<target-handler>
+			<handler target-type="JSON" class="test.unit.web.TestDefaultWebExecutor$JsonTargetHandler"/>
+		</target-handler>
+		
+	</global-config>
+	
+	<executables>
+	
+		<action name="exe0">
+			<target url="url.jsp" type="forward" />
+		</action>
+		
+		<action name="exe1">
+			<target url="url.jsp" type="redirect" />
+		</action>
+		
+		<action name="exe2">
+			<target type="json" />
+		</action>
+		
+		<action name="test/{request.v0}/1/{request.v1}">
+			<target url="test/{request.v0}/1/{request.v1}.jsp" />
+		</action>
+		
+	</executables>
+	
+</soybean-milk>

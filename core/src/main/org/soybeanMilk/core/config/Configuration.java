@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.bean.GenericConverter;
-import org.soybeanMilk.core.resolver.ResolverFactory;
+import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 
 /**
  * 配置，它包含执行所需的环境信息，比如{@linkplain ResolverFactory 解决对象工厂}、{@linkplain GenericConverter 通用转换器}，

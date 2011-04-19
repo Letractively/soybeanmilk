@@ -19,7 +19,7 @@ import org.soybeanMilk.core.config.parser.ConfigurationParser;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
-import org.soybeanMilk.core.resolver.ResolverFactory;
+import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 
 public class TestConfigurationParser
 {

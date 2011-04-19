@@ -3,7 +3,7 @@
 <!ELEMENT soybean-milk (global-config?,includes?,resolvers?,executables)>
 
 <!--全局配置-->
-<!ELEMENT global-config (generic-converter?,interceptor?)>
+<!ELEMENT global-config ((interceptor?,generic-converter?) | (generic-converter?,interceptor?))>
 
 <!--
 通用转换器配置

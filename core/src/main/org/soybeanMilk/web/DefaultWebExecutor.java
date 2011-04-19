@@ -69,14 +69,14 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 	public DefaultWebExecutor(Configuration configuration)
 	{
 		super(configuration);
-		
-		if(isEnableVariablePath() && getConfiguration()!=null)
-		{
-			//初始化变量路径匹配器并且设为非空以便使用
-			Collection<String> exeNames=getConfiguration().getExecutableNames();
-			VariablePathMatcher vpm=new VariablePathMatcher(exeNames);
-			setVariablePathMatcher(vpm);
-		}
+		initVariablePathMatcher();
+	}
+
+	@Override
+	public void setConfiguration(Configuration configuration)
+	{
+		super.setConfiguration(configuration);
+		initVariablePathMatcher();
 	}
 
 	/**
@@ -106,12 +106,13 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 	 * 处理{@linkplain Executable 可执行对象}的目标属性。目前只有{@linkplain WebAction}定义了目标属性。
 	 * @param executable
 	 * @param webObjectSource
+	 * @throws ExecuteException
 	 * @throws ServletException
 	 * @throws IOException
 	 * @date 2011-4-18
 	 */
 	protected void handleTarget(Executable executable, WebObjectSource webObjectSource)
-			throws ServletException, IOException
+			throws ExecuteException, ServletException, IOException
 	{
 		Target target=null;
 		if(executable instanceof WebAction)
@@ -240,6 +241,21 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 	 */
 	protected boolean isIncludeRequest(ServletRequest request) {
 		return (request.getAttribute(INCLUDE_REQUEST_URI_ATTRIBUTE) != null);
+	}
+	
+	/**
+	 * 初始化路径匹配器
+	 * @date 2011-4-19
+	 */
+	protected void initVariablePathMatcher()
+	{
+		if(isEnableVariablePath() && getConfiguration()!=null)
+		{
+			//初始化变量路径匹配器并且设为非空以便使用
+			Collection<String> exeNames=getConfiguration().getExecutableNames();
+			VariablePathMatcher vpm=new VariablePathMatcher(exeNames);
+			setVariablePathMatcher(vpm);
+		}
 	}
 
 	/**

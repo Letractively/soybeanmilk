@@ -18,6 +18,7 @@ import java.io.IOException;
 
 import javax.servlet.ServletException;
 
+import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecutableNotFoundException;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.Executor;
@@ -40,9 +41,9 @@ public interface WebExecutor extends Executor
 	WebConfiguration getWebConfiguration();
 	
 	/**
-	 * Web环境下的执行接口。
-	 * @param executableName
-	 * @param webObjSource
+	 * 执行。
+	 * @param executableName {@linkplain Executable 可执行对象}名，通常是请求URL。
+	 * @param webObjSource {@linkplain WebObjectSource Web对象源}
 	 * @throws ExecuteException
 	 * @throws ExecutableNotFoundException
 	 * @throws ServletException

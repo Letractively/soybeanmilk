@@ -97,14 +97,14 @@ public class DispatchServlet extends HttpServlet
 	public void setAppExecutorKey(String appExecutorKey) {
 		this.appExecutorKey = appExecutorKey;
 	}
-
+	
 	//@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException
 	{
 		doProcess(req,resp);
 	}
-
+	
 	//@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException
@@ -146,7 +146,7 @@ public class DispatchServlet extends HttpServlet
 				//@Override
 				public WebObjectSource create(HttpServletRequest request, HttpServletResponse response, ServletContext application)
 				{
-					return createDefaultObjectSource(request, response, application);
+					return new WebObjectSource(request, response, application);
 				}
 			};
 		}
@@ -162,7 +162,7 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 处理WEB请求
+	 * 处理WEB请求。
 	 * @param request
 	 * @param response
 	 * @throws ServletException
@@ -196,7 +196,7 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 取得用于处理请求的可执行对象名
+	 * 取得用于处理请求的可执行对象名。
 	 * @param request
 	 * @param response
 	 * @return
@@ -239,7 +239,7 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 没有找到能够处理请求的可执行对象
+	 * 没有找到能够处理请求的可执行对象。
 	 * @param requestExeName
 	 * @param objSource
 	 * @throws ServletException
@@ -271,20 +271,7 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 创建默认的WEB对象源，如果你没有自定义WEB对象源工厂，它将被用于创建对象源
-	 * @param request
-	 * @param response
-	 * @param application
-	 * @return
-	 */
-	protected WebObjectSource createDefaultObjectSource(HttpServletRequest request,
-			HttpServletResponse response, ServletContext application)
-	{
-		return new WebObjectSource(request, response, application);
-	}
-	
-	/**
-	 * 取得初始化编码
+	 * 取得初始化编码。
 	 */
 	protected String getInitEncoding() throws ServletException
 	{
@@ -292,7 +279,7 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 取得执行器在应用中的存储关键字
+	 * 取得执行器在应用中的存储关键字。
 	 */
 	protected String getInitAppExecutorKey() throws ServletException
 	{
@@ -300,7 +287,7 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 取得初始化{@link WebExecutor Web执行器}对象
+	 * 取得初始化{@link WebExecutor Web执行器}对象。
 	 */
 	protected WebExecutor getInitWebExecutor() throws ServletException
 	{
@@ -319,7 +306,7 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 取得初始化{@linkplain WebObjectSourceFactory WEB对象源工厂}
+	 * 取得初始化{@linkplain WebObjectSourceFactory WEB对象源工厂}。
 	 */
 	protected WebObjectSourceFactory getInitWebObjectSourceFactory() throws ServletException
 	{
@@ -342,7 +329,7 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 取得初始化外部解决对象工厂，它将被整合到框架中
+	 * 取得初始化外部解决对象工厂，它将被整合到框架中。
 	 * @return
 	 */
 	protected ResolverFactory getInitExternalResolverFactory() throws ServletException

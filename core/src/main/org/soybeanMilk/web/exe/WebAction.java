@@ -22,7 +22,7 @@ import org.soybeanMilk.core.exe.Action;
 
 
 /**
- * WEB动作，多一个{@link Target Target}属性。
+ * WEB动作，它拥有一个{@link Target 目标}属性。
  * @author earthAngry@gmail.com
  * @date 2010-10-4
  */
@@ -61,7 +61,7 @@ public class WebAction extends Action
 	}
 	
 	/**
-	 * 动作的目标，包括目标URL和类型（转向、重定向等）
+	 * 动作的目标，包括目标URL和类型（转向、重定向等）。
 	 * @author earthAngry@gmail.com
 	 * @date 2010-10-4
 	 */

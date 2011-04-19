@@ -27,6 +27,7 @@ import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.exe.WebAction;
+import org.soybeanMilk.web.exe.WebAction.Target;
 import org.soybeanMilk.web.os.WebObjectSource;
 import org.soybeanMilk.web.vp.PathNode;
 import org.soybeanMilk.web.vp.VariablePath;
@@ -98,7 +99,7 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 	}
 	
 	/**
-	 * 处理{@linkplain Executable 可执行对象}的目标属性。目前只有{@linkplain WebAction}定义了目标属性。
+	 * 处理{@linkplain Executable 可执行对象}的{@linkplain Target 目标}属性，目前只有{@linkplain WebAction}定义了{@linkplain Target 目标}属性。
 	 * @param executable
 	 * @param webObjectSource
 	 * @throws ServletException
@@ -156,7 +157,7 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 	}
 	
 	/**
-	 * 是否开启变量路径功能
+	 * 是否开启变量路径功能。
 	 * @return
 	 */
 	protected boolean isEnableVariablePath()

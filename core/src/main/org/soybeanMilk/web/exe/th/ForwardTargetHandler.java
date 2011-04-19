@@ -42,9 +42,8 @@ public class ForwardTargetHandler extends AbstractTargetHandler
 	}
 	
 	//@Override
-	public void handleTarget(WebAction webAction,
-			WebObjectSource webObjectSource) throws ServletException,
-			IOException
+	public void handleTarget(WebAction webAction, WebObjectSource webObjectSource)
+			throws ServletException, IOException
 	{
 		String url=getActualTargetUrl(webAction, webObjectSource);
 		

@@ -24,13 +24,13 @@ import org.soybeanMilk.core.config.Configuration;
 public interface Executor
 {
 	/**
-	 * 获取执行器使用的{@linkplain Configuration 配置}对象
+	 * 获取执行器使用的{@linkplain Configuration 配置}对象。
 	 * @return
 	 */
 	Configuration getConfiguration();
 	
 	/**
-	 * 执行，并返回可执行对象
+	 * 执行，并返回可执行对象。
 	 * @param executableName 可执行对象名称
 	 * @param objSource 对象源
 	 * @throws ExecuteException

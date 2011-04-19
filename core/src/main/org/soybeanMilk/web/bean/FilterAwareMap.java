@@ -255,18 +255,18 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 	{
 		this.filterFromRoot = filterFromRoot;
 	}
-
+	
 	/**
 	 * 包装
+	 * @param <T>
 	 * @param originalMap
 	 * @return
 	 * @date 2011-4-11
 	 */
-	@SuppressWarnings("unchecked")
-	public static FilterAwareMap<String, ?> wrap(Map<String, ?> originalMap)
+	public static <T> FilterAwareMap<String, T> wrap(Map<String, T> originalMap)
 	{
-		if(originalMap instanceof FilterAwareMap)
-			return (FilterAwareMap<String, Object>) originalMap;
-		return new FilterAwareMap<String, Object>(originalMap, null, false);
+		if(originalMap instanceof FilterAwareMap<?, ?>)
+			return (FilterAwareMap<String, T>) originalMap;
+		return new FilterAwareMap<String, T>(originalMap, null, false);
 	}
 }

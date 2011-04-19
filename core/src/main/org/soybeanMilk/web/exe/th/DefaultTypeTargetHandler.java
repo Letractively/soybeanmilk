@@ -49,9 +49,8 @@ public class DefaultTypeTargetHandler implements TypeTargetHandler
 		addDefaultTargetHandler();
 	}
 	
-	public void handleTarget(WebAction webAction,
-			WebObjectSource webObjectSource) throws ServletException,
-			IOException
+	public void handleTarget(WebAction webAction, WebObjectSource webObjectSource)
+			throws ServletException, IOException
 	{
 		Target target=webAction.getTarget();
 		if(target == null)
@@ -68,7 +67,7 @@ public class DefaultTypeTargetHandler implements TypeTargetHandler
 		
 		th.handleTarget(webAction, webObjectSource);
 	}
-
+	
 	public Map<String, TargetHandler> getTypeHandlers()
 	{
 		return typeHandlers;

@@ -18,6 +18,12 @@ import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 import org.soybeanMilk.web.exe.th.TypeTargetHandler;
 
+/**
+ * Web配置。
+ * @author earthAngry@gmail.com
+ * @date 2011-4-19
+ *
+ */
 public class WebConfiguration extends Configuration
 {
 	/**Web动作的目标处理器*/

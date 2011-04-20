@@ -9,6 +9,10 @@
 		
 	</global-config>
 	
+	<resolvers>
+		<resolver id="testResolver" class="test.unit.web.TestDefaultWebExecutor$TestResolver" />
+	</resolvers>
+	
 	<executables>
 	
 		<action name="exe0">
@@ -20,6 +24,25 @@
 		</action>
 		
 		<action name="exe2">
+			<invoke>
+				result0=testResolver.test();
+			</invoke>
+			<invoke>
+				request.result1=testResolver.test();
+			</invoke>
+			<invoke>
+				session.result2=testResolver.test();
+			</invoke>
+			<invoke>
+				testResolver.test();
+			</invoke>
+			<invoke>
+				application.result3=testResolver.test();
+			</invoke>
+			<invoke>
+				testResolver.test();
+			</invoke>
+			
 			<target type="json" />
 		</action>
 		

@@ -41,38 +41,53 @@ public class TestDefaultWebExecutor
 	}
 
 	@Test
-	public void testExecute() throws Exception
+	public void testExecute_forwardTarget() throws Exception
 	{
-		{
-			WebObjectSource os=createWebObjectSource();
-			webExecutor.execute("exe0", os);
-			
-			Assert.assertEquals("url.jsp", ((MockHttpServletResponse)os.getResponse()).getForwardedUrl());
-		}
+		WebObjectSource os=createWebObjectSource();
+		webExecutor.execute("exe0", os);
 		
-		{
-			WebObjectSource os=createWebObjectSource();
-			webExecutor.execute("exe1", os);
-			
-			Assert.assertEquals("url.jsp", ((MockHttpServletResponse)os.getResponse()).getRedirectedUrl());
-		}
+		Assert.assertEquals("url.jsp", ((MockHttpServletResponse)os.getResponse()).getForwardedUrl());
+	}
+	
+	@Test
+	public void testExecute_redirectTarget() throws Exception
+	{
+		WebObjectSource os=createWebObjectSource();
+		webExecutor.execute("exe1", os);
 		
-		{
-			WebObjectSource os=createWebObjectSource();
-			webExecutor.execute("exe2", os);
-			
-			Assert.assertEquals(JsonTargetHandler.jsonHeader, ((MockHttpServletResponse)os.getResponse()).getContentType());
-			
-			Assert.assertNull(((MockHttpServletResponse)os.getResponse()).getRedirectedUrl());
-			Assert.assertNull(((MockHttpServletResponse)os.getResponse()).getForwardedUrl());
-		}
+		Assert.assertEquals("url.jsp", ((MockHttpServletResponse)os.getResponse()).getRedirectedUrl());
+	}
+
+	@Test
+	public void testExecute_customizedTarget() throws Exception
+	{
+		WebObjectSource os=createWebObjectSource();
+		webExecutor.execute("exe2", os);
 		
-		{
-			WebObjectSource os=createWebObjectSource();
-			webExecutor.execute("test/aaa/1/bbb", os);
-			
-			Assert.assertEquals("test/aaa/1/bbb.jsp", ((MockHttpServletResponse)os.getResponse()).getForwardedUrl());
-		}
+		Assert.assertEquals(JsonTargetHandler.jsonHeader, ((MockHttpServletResponse)os.getResponse()).getContentType());
+		
+		Assert.assertNull(((MockHttpServletResponse)os.getResponse()).getRedirectedUrl());
+		Assert.assertNull(((MockHttpServletResponse)os.getResponse()).getForwardedUrl());
+	}
+
+	@Test
+	public void testExecute_targetTypeIgnoreCase() throws Exception
+	{
+		WebObjectSource os=createWebObjectSource();
+		webExecutor.execute("exe3", os);
+		
+		Assert.assertEquals("url.jsp", ((MockHttpServletResponse)os.getResponse()).getRedirectedUrl());
+	}
+	
+	@Test
+	public void testExecute_restful() throws Exception
+	{
+		WebObjectSource os=createWebObjectSource();
+		webExecutor.execute("test/aaa/1/bbb", os);
+		
+		Assert.assertEquals("aaa", os.getRequest().getAttribute("v0"));
+		Assert.assertEquals("bbb", os.getRequest().getAttribute("v1"));
+		Assert.assertEquals("test/aaa/1/bbb.jsp", ((MockHttpServletResponse)os.getResponse()).getForwardedUrl());
 	}
 	
 	protected WebObjectSource createWebObjectSource()
@@ -89,9 +104,6 @@ public class TestDefaultWebExecutor
 	public static class JsonTargetHandler extends AbstractTargetHandler
 	{
 		public static String jsonHeader="text/json";
-		public static String jsonResult="{}";
-		
-		public String jsonTarget;
 		
 		@Override
 		public void handleTarget(WebAction webAction,
@@ -99,8 +111,6 @@ public class TestDefaultWebExecutor
 				IOException
 		{
 			webObjectSource.getResponse().setContentType(jsonHeader);
-			
-			jsonTarget="{}";
 		}
 	}
 }

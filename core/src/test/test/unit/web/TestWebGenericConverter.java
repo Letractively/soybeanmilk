@@ -88,7 +88,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test(expected = GenericConvertException.class)
-	public void convertMap_toJavaBean_srcHasNotExistsSubPropertyContain() throws Exception
+	public void convertMap_toJavaBean_srcHasInexistentSubPropertyContain() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		src.put("javaBean.def", 356);
@@ -99,7 +99,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test(expected = GenericConvertException.class)
-	public void convertMap_toJavaBean_srcHasNotExistsPropertyContainInSubArrayProperty() throws Exception
+	public void convertMap_toJavaBean_srcHasInexistentPropertyContainInSubArrayProperty() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		String[] id=new String[]{"1"};
@@ -121,7 +121,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test(expected = GenericConvertException.class)
-	public void convertMap_toJavaBean_srcHasNotExistsPropertyContainInSubListProperty() throws Exception
+	public void convertMap_toJavaBean_srcHasInexistentPropertyContainInSubListProperty() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		String[] id=new String[]{"1"};
@@ -143,7 +143,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test(expected = GenericConvertException.class)
-	public void convertMap_toJavaBean_srcHasNotExistsPropertyContainInSubSetProperty() throws Exception
+	public void convertMap_toJavaBean_srcHasInexistentPropertyContainInSubSetProperty() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		String[] id=new String[]{"1"};
@@ -174,7 +174,6 @@ public class TestWebGenericConverter
 		src.put("id", id);
 		src.put("name", name);
 		
-		
 		FilterAwareMap<String, ?> fm=new ParamFilterAwareMap<String, Object>(src, "id", true);
 		
 		try
@@ -202,8 +201,6 @@ public class TestWebGenericConverter
 		src.put("filter.name", name);
 		
 		src.put("filter.simpleArray", simpleCollectionProperty);
-		
-		
 		
 		FilterAwareMap<String, ?> fm=new ParamFilterAwareMap<String, Object>(src, "filter.", false);
 		try

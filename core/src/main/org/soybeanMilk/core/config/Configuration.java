@@ -59,20 +59,37 @@ public class Configuration
 	public ResolverFactory getResolverFactory() {
 		return resolverFactory;
 	}
-	public void setResolverFactory(ResolverFactory resolverFactory) {
+	
+	public void setResolverFactory(ResolverFactory resolverFactory)
+	{
 		this.resolverFactory = resolverFactory;
+		
+		if(log.isDebugEnabled())
+			log.debug("set ResolverFactory to '"+resolverFactory+"'");
 	}
+	
 	public GenericConverter getGenericConverter() {
 		return genericConverter;
 	}
-	public void setGenericConverter(GenericConverter genericConverter) {
+	
+	public void setGenericConverter(GenericConverter genericConverter)
+	{
 		this.genericConverter = genericConverter;
+		
+		if(log.isDebugEnabled())
+			log.debug("set GenericConverter to '"+genericConverter+"'");
 	}
+	
 	public InterceptorInfo getInterceptorInfo() {
 		return interceptorInfo;
 	}
-	public void setInterceptorInfo(InterceptorInfo interceptorInfo) {
+	
+	public void setInterceptorInfo(InterceptorInfo interceptorInfo)
+	{
 		this.interceptorInfo = interceptorInfo;
+		
+		if(log.isDebugEnabled())
+			log.debug("set interceptor info to '"+interceptorInfo+"'");
 	}
 	
 	/**
@@ -139,7 +156,7 @@ public class Configuration
 		exeMap.put(executable.getName(), executable);
 		
 		if(log.isDebugEnabled())
-			log.debug("add '"+executable+"' to '"+this+"'");
+			log.debug("add an Executable '"+executable+"'");
 	}
 	
 	public Map<String, Executable> getExecutablesMap() {

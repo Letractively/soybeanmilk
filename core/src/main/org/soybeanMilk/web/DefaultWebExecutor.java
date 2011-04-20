@@ -19,6 +19,8 @@ import java.util.Collection;
 
 import javax.servlet.ServletException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.core.DefaultExecutor;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecutableNotFoundException;
@@ -41,6 +43,8 @@ import org.soybeanMilk.web.vp.VariablePathMatcher;
  */
 public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 {
+	private static Log log=LogFactory.getLog(DefaultWebExecutor.class);
+	
 	private WebConfiguration webConfiguration;
 	
 	private VariablePathMatcher variablePathMatcher;
@@ -129,6 +133,9 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 			
 			if(re != null)
 			{
+				if(log.isDebugEnabled())
+					log.debug("find '"+re+"' for name '"+executableName+"'");
+				
 				PathNode[] pathNodes=targetPath.getPathNodes();
 				for(int i=0;i<pathNodes.length;i++)
 				{

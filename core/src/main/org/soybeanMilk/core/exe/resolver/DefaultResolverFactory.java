@@ -86,5 +86,8 @@ public class DefaultResolverFactory implements ResolverFactory
 			log.warn("duplicate resolver id '"+id+"'");
 		
 		resolvers.put(id, resolver);
+		
+		if(log.isDebugEnabled())
+			log.debug("add a Resolver intance of class '"+resolver.getClass().getName()+"' with id '"+id+"'");
 	}
 }

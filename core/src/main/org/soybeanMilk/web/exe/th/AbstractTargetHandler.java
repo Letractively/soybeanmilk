@@ -64,13 +64,10 @@ public abstract class AbstractTargetHandler implements TargetHandler
 	 */
 	public String[] getAllInvokeResultKey(WebAction webAction, WebObjectSource webObjectSource)
 	{
-		String[] re=null;
 		List<String> reList=new ArrayList<String>();
 		findAllResultKey(reList, webAction);
 		
-		re=reList.toArray(re);
-		
-		return re;
+		return reList.toArray(new String[reList.size()]);
 	}
 	
 	private void findAllResultKey(List<String> re, WebAction webAction)

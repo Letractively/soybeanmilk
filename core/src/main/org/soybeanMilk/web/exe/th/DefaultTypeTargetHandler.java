@@ -93,7 +93,7 @@ public class DefaultTypeTargetHandler implements TypeTargetHandler
 		this.typeHandlers.put(consistentTargetType(type), targetHandler);
 		
 		if(log.isDebugEnabled())
-			log.debug("add "+targetHandler+" for handling '"+type+"' type target");
+			log.debug("add "+targetHandler+" for handling '"+consistentTargetType(type)+"' type target");
 	}
 	
 	/**

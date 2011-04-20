@@ -101,7 +101,7 @@ public class Action extends AbstractExecutable
 		exes.add(exe);
 		
 		if(log.isDebugEnabled())
-			log.debug("add '"+exe+"' to '"+this+"'");
+			log.debug("add an Executable '"+exe+"'");
 	}
 	
 	//@Override

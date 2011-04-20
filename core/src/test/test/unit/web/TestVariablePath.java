@@ -56,6 +56,12 @@ public class TestVariablePath
 			Assert.assertTrue( vp.isVariable() );
 			Assert.assertEquals(3, vp.getPathNodeLength());
 		}
+		
+		{
+			VariablePath vp=new VariablePath("///abc/{def}/////ghi/");
+			Assert.assertTrue( vp.isVariable() );
+			Assert.assertEquals(3, vp.getPathNodeLength());
+		}
 	}
 	
 	@Test

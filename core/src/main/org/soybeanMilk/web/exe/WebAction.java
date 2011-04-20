@@ -60,6 +60,12 @@ public class WebAction extends Action
 		this.target = target;
 	}
 	
+	@Override
+	public String toString()
+	{
+		return "WebAction [name=" + getName() + ", target=" + target + "]";
+	}
+
 	/**
 	 * 动作的目标，包括目标URL和类型（转向、重定向等）。
 	 * @author earthAngry@gmail.com

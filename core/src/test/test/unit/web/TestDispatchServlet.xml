@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soybean-milk>
+	
+	<resolvers>
+		<resolver id="testResolver" class="test.unit.web.TestDispatchServlet$TestResolver" />
+	</resolvers>
+	
+	<executables>
+		
+		<action name="/test/test">
+			<invoke>
+				result=testResolver.test();
+			</invoke>
+		</action>
+		
+		<action name="/test/test.do">
+			<invoke>
+				result=testResolver.test();
+			</invoke>
+		</action>
+	</executables>
+	
+</soybean-milk>

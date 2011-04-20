@@ -22,8 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
@@ -45,8 +43,6 @@ import org.w3c.dom.Element;
  */
 public class WebConfigurationParser extends ConfigurationParser
 {
-	private static Log log=LogFactory.getLog(WebConfigurationParser.class);
-	
 	protected static final String TAG_TARGET_HANDLER="target-handler";
 	protected static final String TAG_TARGET_HANDLER_ATTR_CLASS="class";
 	protected static final String TAG_HANDLER="handler";
@@ -175,9 +171,6 @@ public class WebConfigurationParser extends ConfigurationParser
 		
 		Target targetInfo=createTargetInstance();
 		setTargetInfoProperties(targetInfo,element);
-		
-		if(log.isDebugEnabled())
-			log.debug("parsed '"+targetInfo+"'");
 		
 		action.setTarget(targetInfo);
 	}

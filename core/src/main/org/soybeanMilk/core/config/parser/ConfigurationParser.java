@@ -330,9 +330,6 @@ public class ConfigurationParser
 				
 				Object resolver=createClassInstance(clazz);
 				
-				if(log.isDebugEnabled())
-					log.debug("parsed resolver instance of Class '"+resolver.getClass().getName()+"' with id '"+id+"'");
-				
 				drf.addResolver(id,resolver);
 			}
 		}
@@ -360,9 +357,6 @@ public class ConfigurationParser
 						setActionProperties((Action)executable,e);
 					else
 						setInvokeProperties((Invoke)executable,e, true);
-					
-					if(log.isDebugEnabled())
-						log.debug("parsed '"+executable+"'");
 					
 					configuration.addExecutable(executable);
 				}
@@ -452,9 +446,6 @@ public class ConfigurationParser
 		ii.setAfterHandler(new ExecutableRefProxy(after, getCurrentExecutablePrefix()));
 		ii.setExceptionHandler(new ExecutableRefProxy(exception, getCurrentExecutablePrefix()));
 		ii.setExecutionKey(executionKey);
-		
-		if(log.isDebugEnabled())
-			log.debug("parsed '"+ii+"'");
 		
 		getConfiguration().setInterceptorInfo(ii);
 	}
@@ -604,9 +595,6 @@ public class ConfigurationParser
 			Arg a=createArgInfoInstance();
 			a.setType(paramTypes[i]);
 			setArgProperties(a,e);
-			
-			if(log.isDebugEnabled())
-				log.debug("parsed '"+a+"'");
 			
 			args[i]=a;
 		}

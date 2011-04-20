@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,7 +15,6 @@ import org.junit.Test;
 import org.soybeanMilk.core.exe.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 import org.soybeanMilk.web.WebConstants;
-import org.soybeanMilk.web.bean.ParamConvertException;
 import org.soybeanMilk.web.exe.th.AbstractTargetHandler;
 import org.soybeanMilk.web.os.WebObjectSource;
 import org.soybeanMilk.web.os.WebObjectSourceFactory;
@@ -31,7 +29,7 @@ public class TestDispatchServlet
 	private static String myExternalResolverKey="myExternalResolver";
 	private static String myEncoding="GBK";
 	private static String myExecutorKey="myExecutorKey";
-	private static String mySoybeanMilkFile="test/unit/web/soybean-milk.cfg.xml";
+	private static String mySoybeanMilkFile="test/unit/web/TestDispatchServlet.xml";
 	private static String myWebObjectSourceFactoryClass="test.unit.web.TestDispatchServlet$MyWebObjectSourceFactory";
 	
 	private static String CONTEXT_PATH="/testContext";
@@ -48,7 +46,7 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initEncoding1()
+	public void initEncoding_userSet()
 	{
 		{
 			servletInitParameters.put(WebConstants.ServletInitParams.ENCODING, myEncoding);
@@ -61,7 +59,7 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initEncoding2()
+	public void initEncoding_userSetEmpty()
 	{
 		{
 			servletInitParameters.put(WebConstants.ServletInitParams.ENCODING, "");
@@ -74,7 +72,7 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initEncoding3()
+	public void initEncoding_userNotSet()
 	{
 		{
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
@@ -85,7 +83,7 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initAppExecutorKey1()
+	public void initAppExecutorKey_userSet()
 	{
 		{
 			servletInitParameters.put(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY, myExecutorKey);
@@ -98,7 +96,7 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initAppExecutorKey2()
+	public void initAppExecutorKey_userSetEmpty()
 	{
 		{
 			servletInitParameters.put(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY, "");
@@ -111,7 +109,7 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initAppExecutorKey3()
+	public void initAppExecutorKey_userNotSet()
 	{
 		{
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
@@ -122,7 +120,7 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initWebObjectSourceFactory1()
+	public void initWebObjectSourceFactory_userSet()
 	{
 		{
 			servletInitParameters.put(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY_CLASS, myWebObjectSourceFactoryClass);
@@ -135,7 +133,7 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initWebObjectSourceFactory2()
+	public void initWebObjectSourceFactory_userSetEmpty()
 	{
 		{
 			servletInitParameters.put(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY_CLASS, "");
@@ -148,7 +146,7 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initWebObjectSourceFactory3()
+	public void initWebObjectSourceFactory_userNotSet()
 	{
 		{
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
@@ -159,7 +157,7 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initExternalResolverFactory1()
+	public void initExternalResolverFactory_userSet()
 	{
 		{
 			servletContext.setAttribute(myExternalResolverKey, myExternalResolverFactory);
@@ -173,7 +171,7 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initExternalResolverFactory2()
+	public void initExternalResolverFactory_userSetNull()
 	{
 		{
 			servletContext.setAttribute(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY_KEY, null);
@@ -186,7 +184,7 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void initExternalResolverFactory3()
+	public void initExternalResolverFactory_userNotSet()
 	{
 		{
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
@@ -197,105 +195,102 @@ public class TestDispatchServlet
 	}
 	
 	@Test
-	public void clientRequestExecute() throws Exception
+	public void getRequestExecutableName_userRequest_urlPath() throws Exception
 	{
 		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 		initServlet(servlet);
 		
-		{
-			MockHttpServletRequest request=new MockHttpServletRequest();
-			MockHttpServletResponse response=new MockHttpServletResponse();
-			
-			request.setMethod("POST");
-			request.setContextPath(CONTEXT_PATH);
-			
-			request.setPathInfo("/user/edit.do");
-			request.setServletPath("");
-			
-			request.setParameter("userId", "35");
-			
-			servlet.service(request, response);
-			
-			Assert.assertEquals("edit(35)", (String)request.getAttribute("result"));
-			Assert.assertEquals(CONTEXT_PATH+"/user/view/35", response.getRedirectedUrl());
-		}
+		MockHttpServletRequest request=new MockHttpServletRequest();
+		MockHttpServletResponse response=new MockHttpServletResponse();
 		
-		{
-			MockHttpServletRequest request=new MockHttpServletRequest();
-			MockHttpServletResponse response=new MockHttpServletResponse();
-			
-			request.setMethod("POST");
-			request.setContextPath(CONTEXT_PATH);
-			
-			request.setPathInfo("/user/edit/35");
-			request.setServletPath("");
-			
-			servlet.service(request, response);
-			
-			Assert.assertEquals("edit(35)", (String)request.getAttribute("result"));
-			Assert.assertEquals(CONTEXT_PATH+"/user/view/35", response.getRedirectedUrl());
-		}
+		request.setMethod("POST");
+		request.setContextPath(CONTEXT_PATH);
 		
-		{
-			MockHttpServletRequest request=new MockHttpServletRequest();
-			MockHttpServletResponse response=new MockHttpServletResponse();
-			
-			request.setMethod("POST");
-			request.setContextPath(CONTEXT_PATH);
-			
-			request.setPathInfo("/user/view/35");
-			request.setServletPath("");
-			
-			servlet.service(request, response);
-			
-			Assert.assertEquals("view(35)", (String)request.getAttribute("result"));
-			Assert.assertEquals("/jsp/user/35/view.jsp", response.getForwardedUrl());
-		}
+		request.setPathInfo("/test/test");
+		request.setServletPath("");
 		
-		{
-			MockHttpServletRequest request=new MockHttpServletRequest();
-			MockHttpServletResponse response=new MockHttpServletResponse();
-			
-			request.setMethod("POST");
-			request.setContextPath(CONTEXT_PATH);
-			
-			request.setPathInfo("/product/35/edit/233");
-			request.setServletPath("");
-			
-			servlet.service(request, response);
-			
-			Assert.assertEquals("edit(35,233)", (String)request.getAttribute("result"));
-			Assert.assertEquals("/jsp/product/35/233/edit.jsp", response.getForwardedUrl());
-		}
+		servlet.service(request, response);
 		
-		{
-			MockHttpServletRequest request=new MockHttpServletRequest();
-			MockHttpServletResponse response=new MockHttpServletResponse();
-			
-			request.setMethod("POST");
-			request.setContextPath(CONTEXT_PATH);
-			
-			request.setPathInfo("/user/edit.do");
-			request.setServletPath("");
-			
-			request.setParameter("userId", "invalidValue");
-			
-			try
-			{
-				servlet.service(request, response);
-			}
-			catch(ServletException e)
-			{
-				ParamConvertException ce=(ParamConvertException)e.getCause().getCause();
-				
-				Assert.assertEquals("userId", ce.getParamName());
-				Assert.assertEquals("invalidValue", ce.getSourceObject());
-			}
-		}
+		Assert.assertEquals(TestResolver.RESULT, (String)request.getAttribute("result"));
 	}
 	
 	@Test
-	public void includeExecute() throws Exception
+	public void getRequestExecutableName_userRequest_urlSuffix() throws Exception
+	{
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		MockHttpServletRequest request=new MockHttpServletRequest();
+		MockHttpServletResponse response=new MockHttpServletResponse();
+		
+		request.setMethod("POST");
+		request.setContextPath(CONTEXT_PATH);
+		
+		request.setPathInfo("/test/test.do");
+		request.setServletPath("");
+		
+		servlet.service(request, response);
+		
+		Assert.assertEquals(TestResolver.RESULT, (String)request.getAttribute("result"));
+	}
+	
+	@Test
+	public void getRequestExecutableName_include_urlPath_noServletPath() throws Exception
+	{
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		MockHttpServletRequest request=new MockHttpServletRequest();
+		MockHttpServletResponse response=new MockHttpServletResponse();
+		
+		request.setMethod("POST");
+		request.setContextPath(CONTEXT_PATH);
+		request.setAttribute(AbstractTargetHandler.INCLUDE_PATH_INFO_ATTRIBUTE,"/test/test");
+		
+		servlet.service(request, response);
+		
+		Assert.assertEquals(TestResolver.RESULT, (String)request.getAttribute("result"));
+	}
+	
+	@Test
+	public void getRequestExecutableName_include_urlPath_withServletPath() throws Exception
+	{
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		MockHttpServletRequest request=new MockHttpServletRequest();
+		MockHttpServletResponse response=new MockHttpServletResponse();
+		
+		request.setMethod("POST");
+		request.setContextPath(CONTEXT_PATH);
+		request.setAttribute(AbstractTargetHandler.INCLUDE_PATH_INFO_ATTRIBUTE,"/test");
+		request.setAttribute(AbstractTargetHandler.INCLUDE_SERVLET_PATH_ATTRIBUTE,"/test");
+		
+		servlet.service(request, response);
+		
+		Assert.assertEquals(TestResolver.RESULT, (String)request.getAttribute("result"));
+	}
+	
+	@Test
+	public void getRequestExecutableName_endBackslash() throws Exception
+	{
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		MockHttpServletRequest request=new MockHttpServletRequest();
+		MockHttpServletResponse response=new MockHttpServletResponse();
+		
+		request.setMethod("POST");
+		request.setContextPath(CONTEXT_PATH);
+		request.setAttribute(AbstractTargetHandler.INCLUDE_PATH_INFO_ATTRIBUTE,"/test/test/");
+		
+		servlet.service(request, response);
+		
+		Assert.assertEquals(TestResolver.RESULT, (String)request.getAttribute("result"));
+	}
+	
+	@Test
+	public void getRequestExecutableName_include_urlSuffix() throws Exception
 	{
 		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 		initServlet(servlet);
@@ -306,44 +301,11 @@ public class TestDispatchServlet
 			
 			request.setMethod("POST");
 			request.setContextPath(CONTEXT_PATH);
-			request.setAttribute(AbstractTargetHandler.INCLUDE_PATH_INFO_ATTRIBUTE,"/product/35/edit/233");
+			request.setAttribute(AbstractTargetHandler.INCLUDE_SERVLET_PATH_ATTRIBUTE,"/test/test.do");
 			
 			servlet.service(request, response);
 			
-			Assert.assertEquals("edit(35,233)", (String)request.getAttribute("result"));
-			//Assert.assertEquals("/jsp/product/35/233/edit.jsp", response.getIncludedUrl());
-		}
-		
-		{
-			MockHttpServletRequest request=new MockHttpServletRequest();
-			MockHttpServletResponse response=new MockHttpServletResponse();
-			
-			request.setMethod("POST");
-			request.setContextPath(CONTEXT_PATH);
-			request.setAttribute(AbstractTargetHandler.INCLUDE_PATH_INFO_ATTRIBUTE,"/35/edit/233");
-			request.setAttribute(AbstractTargetHandler.INCLUDE_SERVLET_PATH_ATTRIBUTE,"/product");
-			
-			servlet.service(request, response);
-			
-			Assert.assertEquals("edit(35,233)", (String)request.getAttribute("result"));
-			//Assert.assertEquals("/jsp/product/35/233/edit.jsp", response.getIncludedUrl());
-		}
-		
-		{
-			MockHttpServletRequest request=new MockHttpServletRequest();
-			MockHttpServletResponse response=new MockHttpServletResponse();
-			
-			request.setMethod("POST");
-			request.setContextPath(CONTEXT_PATH);
-			request.setAttribute(AbstractTargetHandler.INCLUDE_SERVLET_PATH_ATTRIBUTE,"/product/edit.do");
-			
-			request.setParameter("userId", "35");
-			request.setParameter("id", "233");
-			
-			servlet.service(request, response);
-			
-			Assert.assertEquals("edit(35,233)", (String)request.getAttribute("result"));
-			//Assert.assertEquals("/jsp/product/35/233/edit.jsp", response.getIncludedUrl());
+			Assert.assertEquals(TestResolver.RESULT, (String)request.getAttribute("result"));
 		}
 	}
 	
@@ -389,19 +351,11 @@ public class TestDispatchServlet
 	
 	public static class TestResolver
 	{
-		public String view(int userId)
-		{
-			return "view("+userId+")";
-		}
+		public static final String RESULT="success";
 		
-		public String edit(int userId)
+		public String test()
 		{
-			return "edit("+userId+")";
-		}
-		
-		public String edit(int userId, int productId)
-		{
-			return "edit("+userId+","+productId+")";
+			return RESULT;
 		}
 	}
 }

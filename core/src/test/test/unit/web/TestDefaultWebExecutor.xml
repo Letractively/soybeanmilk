@@ -23,6 +23,10 @@
 			<target type="json" />
 		</action>
 		
+		<action name="exe3">
+			<target url="url.jsp" type="reDireCT" />
+		</action>
+		
 		<action name="test/{request.v0}/1/{request.v1}">
 			<target url="test/{request.v0}/1/{request.v1}.jsp" />
 		</action>

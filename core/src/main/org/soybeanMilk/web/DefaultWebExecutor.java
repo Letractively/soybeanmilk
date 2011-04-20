@@ -149,7 +149,7 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 	}
 	
 	/**
-	 * 初始化路径匹配器
+	 * 初始化变量路径匹配器
 	 * @date 2011-4-19
 	 */
 	protected void initVariablePathMatcher()

@@ -134,7 +134,7 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 			if(re != null)
 			{
 				if(log.isDebugEnabled())
-					log.debug("find '"+re+"' for name '"+executableName+"'");
+					log.debug("find '"+re+"' that matches name '"+executableName+"'");
 				
 				PathNode[] pathNodes=targetPath.getPathNodes();
 				for(int i=0;i<pathNodes.length;i++)

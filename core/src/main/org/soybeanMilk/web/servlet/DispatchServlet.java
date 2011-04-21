@@ -249,7 +249,7 @@ public class DispatchServlet extends HttpServlet
 			throws ServletException, IOException
 	{
 		//servlet规范规定这里要抛出FileNotFoundException异常
-		if(AbstractTargetHandler.isIncludeRequest(objSource.getRequest()))
+		if(AbstractTargetHandler.isJspIncludeRequest(objSource.getRequest()))
 			throw new FileNotFoundException(requestExeName);
 		
 		objSource.getResponse().sendError(HttpServletResponse.SC_NOT_FOUND, requestExeName);

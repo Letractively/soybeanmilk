@@ -211,7 +211,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		if(strKey==null)
 			throw new ObjectSourceException("[key] must not be null.");
 		
-		String[] scopedKey=splitByFirstAccessor(strKey);
+		String[] scopedKey=SoybeanMilkUtils.splitByFirstAccessor(strKey);
 		
 		String scope = scopedKey[0];
 		String subKey = scopedKey.length==1 ? null : scopedKey[1];
@@ -249,8 +249,15 @@ public class WebObjectSource extends ConvertableObjectSource
 						getGenericConverter(), WebObjectSource.class, expectType).convert(this, expectType);
 			}
 		}
+		else if(scopedKey.length == 1)//没有包含作用域标识并且关键字不是作用域本身，则从param中取
+		{
+			data=convertParameterMap(getRequest(), strKey, expectType);
+			
+			scope=WebConstants.WebObjectSourceScope.PARAM;
+			subKey=strKey;
+		}
 		else
-			data=getObjectForUnknownKey(strKey, expectType);
+			data=getObjectFromUnknownScope(scope, subKey, expectType);
 		
 		if(log.isDebugEnabled())
 			log.debug("get '"+data+"' from scope '"+scope+"' with key '"+subKey+"'");
@@ -267,12 +274,20 @@ public class WebObjectSource extends ConvertableObjectSource
 		if(strKey == null)
 			throw new IllegalArgumentException("[key] must not be null");
 		
-		String[] scopeSplit=splitByFirstAccessor(strKey);
+		String[] scopedKey=SoybeanMilkUtils.splitByFirstAccessor(strKey);
 		
-		String scope = scopeSplit[0];
-		String subKey = scopeSplit.length == 1 ? null : scopeSplit[1];
+		String scope = scopedKey[0];
+		String subKey = scopedKey.length==1 ? null : scopedKey[1];
 		
-		if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
+		//没有包含访问符，则保存到request中
+		if(scopedKey.length == 1)
+		{
+			setAttributeByKeyExpression(getRequest(), strKey, obj);
+			
+			scope=WebConstants.WebObjectSourceScope.REQUEST;
+			subKey=strKey;
+		}
+		else if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
 		{
 			setAttributeByKeyExpression(getRequest(), subKey, obj);
 		}
@@ -293,38 +308,35 @@ public class WebObjectSource extends ConvertableObjectSource
 			throw new ObjectSourceException("'"+key+"' is not valid, you can not save object into '"+WebConstants.WebObjectSourceScope.RESPONSE+"' scope");
 		}
 		else
-			setObjectForUnknownKey(strKey, obj);
+			setObjectToUnknownScope(scope, subKey, obj);
 		
 		if(log.isDebugEnabled())
 			log.debug("save '"+obj+"' into scope '"+scope+"' with key '"+subKey+"'");
 	}
 	
 	/**
-	 * 取得默认无法识别的关键字所对应的对象。
-	 * @param key
+	 * 从无法识别的作用域中获取对象。
+	 * @param scope 作用域
+	 * @param keyInScope 此作用域中的对象关键字
 	 * @param expectType
 	 * @return
 	 * @date 2011-2-22
 	 */
-	protected Object getObjectForUnknownKey(String key, Type expectType)
+	protected Object getObjectFromUnknownScope(String scope, String keyInScope, Type expectType)
 	{
-		if(!containAccessor(key))
-			return convertParameterMap(getRequest(), key, expectType);
-		else
-			throw new ObjectSourceException("key '"+key+"' is invalid, the 'get(Serializable key, Type expectType)' method can not recognize it");
+		throw new ObjectSourceException("key '"+(scope+ACCESSOR+keyInScope)+"' is invalid, get object from scope '"+scope+"' is not supported");
 	}
 	
 	/**
-	 * 保存默认无法识别关键字所对应的对象。
-	 * @param key 关键字
-	 * @param obj
+	 * 将对象保存到无法识别的作用域中。
+	 * @param scope 作用域
+	 * @param keyInScope 此作用域中的保存关键字
+	 * @param value
+	 * @date 2011-2-22
 	 */
-	protected void setObjectForUnknownKey(String key, Object obj)
+	protected void setObjectToUnknownScope(String scope, String keyInScope, Object value)
 	{
-		if(!containAccessor(key))
-			setAttributeByKeyExpression(getRequest(), key, obj);
-		else
-			throw new ObjectSourceException("key '"+key+"' is invalid, the 'set(Serializable key, Object obj)' method can not recognize it");
+		throw new ObjectSourceException("key '"+(scope+ACCESSOR+keyInScope)+"' is invalid, set object into scope '"+scope+"' is not supported");
 	}
 	
 	/**
@@ -353,7 +365,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		}
 		else
 		{
-			String[] keyWithProperty=splitByFirstAccessor(keyExpression);
+			String[] keyWithProperty=SoybeanMilkUtils.splitByFirstAccessor(keyExpression);
 			re=getServletObjAttribute(servletObj, keyWithProperty[0]);
 			
 			//关键字表达式不包访问符
@@ -381,7 +393,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	 */
 	protected void setAttributeByKeyExpression(Object servletObj, String keyExpression, Object obj)
 	{
-		String[] objKeyWithProperty=splitByFirstAccessor(keyExpression);
+		String[] objKeyWithProperty=SoybeanMilkUtils.splitByFirstAccessor(keyExpression);
 		
 		//只有包含了访问符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式
 		if(objKeyWithProperty.length == 2)
@@ -541,41 +553,6 @@ public class WebObjectSource extends ConvertableObjectSource
 					return false;
 			}
 		}
-	}
-	
-	/**
-	 * 将字符串从第一个'.'位置拆分为两部分，如果不包含'.'，则返回仅包含原字符串的长度为1的数组，否则返回长度为2的且元素为拆分后的字符串的数组。
-	 * @param str
-	 * @return
-	 * @date 2010-12-30
-	 */
-	protected String[] splitByFirstAccessor(String str)
-	{
-		String[] re=null;
-		
-		int idx=str.indexOf(ACCESSOR);
-		
-		if(idx<=0 || idx==str.length()-1)
-			re=new String[]{str};
-		else
-		{
-			re=new String[2];
-			re[0]=str.substring(0,idx);
-			re[1]=str.substring(idx+1);
-		}
-		
-		return re;
-	}
-	
-	/**
-	 * 字符串是否包含访问符'.'
-	 * @param str
-	 * @return
-	 * @date 2011-2-22
-	 */
-	protected boolean containAccessor(String str)
-	{
-		return str!=null && str.indexOf(ACCESSOR)>=0;
 	}
 	
 	/**

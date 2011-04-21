@@ -12,6 +12,7 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.web.bean.ParamConvertException;
@@ -330,6 +331,20 @@ public class TestWebObjectSource
 		String value="12345";
 		
 		{
+			webObjectSource.set("value", value);
+			Assert.assertEquals(request.getAttribute("value"), value);
+			
+			Object dest=webObjectSource.get("request.value", String.class);
+			Assert.assertEquals(value, dest);
+		}
+		{
+			webObjectSource.set("request", value);
+			Assert.assertEquals(request.getAttribute("request"), value);
+			
+			Object dest=webObjectSource.get("request.request", String.class);
+			Assert.assertEquals(value, dest);
+		}
+		{
 			webObjectSource.set("request.value", value);
 			Assert.assertEquals(request.getAttribute("value"), value);
 			
@@ -445,11 +460,11 @@ public class TestWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetFromUnknownScope()
+	public void setAndGetWithNotScopedKey()
 	{
 		String value="12345";
 		
-		//默认应该设置到request中
+		//默认应该保存到request中
 		{
 			webObjectSource.set("value", value);
 			Assert.assertEquals(value, request.getAttribute("value"));
@@ -464,6 +479,34 @@ public class TestWebObjectSource
 			
 			Object dest0=webObjectSource.get("value", String.class);
 			Assert.assertEquals(value, dest0);
+		}
+	}
+	
+	@Test
+	public void setAndGetForUnknownScope()
+	{
+		String value="12345";
+		
+		{
+			try
+			{
+				webObjectSource.get("unknown.value", null);
+			}
+			catch(ObjectSourceException e)
+			{
+				Assert.assertEquals("key 'unknown.value' is invalid, get object from scope 'unknown' is not supported", e.getMessage());
+			}
+		}
+		
+		{
+			try
+			{
+				webObjectSource.set("unknown.value", value);
+			}
+			catch(ObjectSourceException e)
+			{
+				Assert.assertEquals("key 'unknown.value' is invalid, set object into scope 'unknown' is not supported", e.getMessage());
+			}
 		}
 	}
 	

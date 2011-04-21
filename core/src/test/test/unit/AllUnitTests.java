@@ -10,6 +10,7 @@ import test.unit.core.TestDefaultGenericConverter;
 import test.unit.core.TestHashMapObjectSource;
 import test.unit.core.TestInvokeStatementParser;
 import test.unit.core.TestPropertyInfo;
+import test.unit.web.TestAbstractTargetHandler;
 import test.unit.web.TestDefaultWebExecutor;
 import test.unit.web.TestDispatchServlet;
 import test.unit.web.TestPathNode;
@@ -36,6 +37,7 @@ TestVariablePathMatcher.class,
 TestWebGenericConverter.class,
 TestWebObjectSource.class,
 TestDefaultWebExecutor.class,
-TestWebConfigurationParser.class
+TestWebConfigurationParser.class,
+TestAbstractTargetHandler.class
 })
 public class AllUnitTests{}

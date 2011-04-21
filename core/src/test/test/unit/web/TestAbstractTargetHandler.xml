@@ -1,29 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE soybean-milk PUBLIC "-//SoybeanMilk//DTD soybeanMilk web//EN" "http://soybeanmilk.googlecode.com/files/soybeanMilk-web-1.0.dtd">
 <soybean-milk>
-	<global-config>
-		
-		<type-target-handler>
-			<target-handler handle-type="JSON" class="test.unit.web.TestDefaultWebExecutor$JsonTargetHandler"/>
-		</type-target-handler>
-		
-	</global-config>
 	
 	<resolvers>
-		<resolver id="testResolver" class="test.unit.web.TestDefaultWebExecutor$TestResolver" />
+		<resolver id="testResolver" class="test.unit.web.TestAbstractTargetHandler$TestResolver" />
 	</resolvers>
 	
 	<executables>
 	
-		<action name="exe0">
-			<target url="url.jsp" type="forward" />
-		</action>
-		
 		<action name="exe1">
-			<target url="url.jsp" type="redirect" />
-		</action>
-		
-		<action name="exe2">
 			<invoke>
 				result0=testResolver.test();
 			</invoke>
@@ -42,16 +27,20 @@
 			<invoke>
 				testResolver.test();
 			</invoke>
-			
-			<target type="json" />
+			<ref name="exe2"/>
+			<invoke>
+				request.result4=testResolver.test();
+			</invoke>
+		</action>
+		
+		<action name="exe2">
+			<invoke>
+				request.result5=testResolver.test();
+			</invoke>
 		</action>
 		
 		<action name="exe3">
-			<target url="url.jsp" type="reDireCT" />
-		</action>
-		
-		<action name="test/{request.v0}/1/{request.v1}">
-			<target url="test/{request.v0}/1/{request.v1}.jsp" />
+			<target url="{request.v0}/{request.v1}/aaa/{param.v2}/bbb.jsp" />
 		</action>
 		
 	</executables>

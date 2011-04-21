@@ -17,6 +17,8 @@ package org.soybeanMilk;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import org.soybeanMilk.web.WebConstants;
+
 /**
  * 框架内部常用类。
  * @author earthAngry@gmail.com
@@ -194,5 +196,41 @@ public class SoybeanMilkUtils
 			throw new IllegalArgumentException("'"+type+"' is not supported type");
 		
 		return re;
+	}
+	
+	/**
+	 * 将字符串从第一个'.'位置拆分为两部分，如果不包含'.'，则返回仅包含原字符串的长度为1的数组，
+	 * 否则返回长度为2的且元素为拆分后的字符串的数组。
+	 * @param str
+	 * @return
+	 * @date 2010-12-30
+	 */
+	public static String[] splitByFirstAccessor(String str)
+	{
+		String[] re=null;
+		
+		int idx=str.indexOf(WebConstants.ACCESSOR);
+		
+		if(idx<=0 || idx==str.length()-1)
+			re=new String[]{str};
+		else
+		{
+			re=new String[2];
+			re[0]=str.substring(0,idx);
+			re[1]=str.substring(idx+1);
+		}
+		
+		return re;
+	}
+	
+	/**
+	 * 字符串是否包含访问符'.'
+	 * @param str
+	 * @return
+	 * @date 2011-2-22
+	 */
+	public static boolean containAccessor(String str)
+	{
+		return str!=null && str.indexOf(WebConstants.ACCESSOR)>=0;
 	}
 }

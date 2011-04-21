@@ -61,18 +61,10 @@ public class TestDefaultWebExecutor
 	@Test
 	public void testExecute_customizedTarget() throws Exception
 	{
-		String[] actualResultKeys=new String[]{"result0", "request.result1", "session.result2", "application.result3"};
-		
 		WebObjectSource os=createWebObjectSource();
 		webExecutor.execute("exe2", os);
 		
 		Assert.assertEquals(JsonTargetHandler.jsonHeader, ((MockHttpServletResponse)os.getResponse()).getContentType());
-		
-		for(int i=0;i<actualResultKeys.length;i++)
-		{
-			Assert.assertEquals(actualResultKeys[i], resultKeys[i]);
-		}
-		
 		Assert.assertNull(((MockHttpServletResponse)os.getResponse()).getRedirectedUrl());
 		Assert.assertNull(((MockHttpServletResponse)os.getResponse()).getForwardedUrl());
 	}
@@ -119,13 +111,8 @@ public class TestDefaultWebExecutor
 		{
 			webObjectSource.getResponse().setContentType(jsonHeader);
 			
-			String[] rks=getAllInvokeResultKey(webAction, webObjectSource);
-			
-			resultKeys=rks;
 		}
 	}
-	
-	private static String[] resultKeys=null;
 	
 	public static class TestResolver
 	{

@@ -21,6 +21,7 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 
+import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.exe.Invoke;
@@ -30,7 +31,7 @@ import org.soybeanMilk.web.exe.WebAction.Target;
 import org.soybeanMilk.web.os.WebObjectSource;
 
 /**
- * {@linkplain TargetHandler 目标处理器}的抽象类，实现一些常用的辅助方法。
+ * {@linkplain TargetHandler 目标处理器}的抽象类，提供一些常用的辅助方法。
  * @author earthAngry@gmail.com
  * @date 2011-4-19
  *
@@ -55,8 +56,41 @@ public abstract class AbstractTargetHandler implements TargetHandler
 			throws ServletException, IOException;
 	
 	/**
-	 * 获取{@linkplain WebAction Web动作}包含的所有{@linkplain Invoke 调用}对象的结果关键字，
-	 * 在{@linkplain WebObjectSource Web对象源}中保存着它们对应的对象。
+	 * 仅获取保存到{@linkplain WebConstants.WebObjectSourceScope#REQUEST request}作用域的{@linkplain Invoke 调用}结果关键字。
+	 * @param webAction
+	 * @param webObjectSource
+	 * @return 关键字数组，没有则返回<code>null</code>
+	 * @date 2011-4-21
+	 */
+	public String[] getRequestInvokeResultKey(WebAction webAction, WebObjectSource webObjectSource)
+	{
+		String[] re=null;
+		
+		String[] all=getAllInvokeResultKey(webAction, webObjectSource);
+		if(all!=null && all.length>0)
+		{
+			List<String> tmp=new ArrayList<String>();
+			
+			for(String s : all)
+			{
+				String[] scopedKey=SoybeanMilkUtils.splitByFirstAccessor(s);
+				
+				if(scopedKey.length==1
+						|| (scopedKey.length==2 && WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scopedKey[0])))
+				{
+					tmp.add(s);
+				}
+			}
+			
+			re=tmp.toArray(new String[tmp.size()]);
+		}
+		
+		return re;
+	}
+	
+	/**
+	 * 获取{@linkplain WebAction Web动作}包含的所有{@linkplain Invoke 调用}的结果关键字，
+	 * 在{@linkplain WebObjectSource Web对象源}中保存着这些关键字对应的对象。
 	 * @param webAction
 	 * @param webObjectSource
 	 * @return
@@ -159,11 +193,11 @@ public abstract class AbstractTargetHandler implements TargetHandler
 	}
 	
 	/**
-	 * 是否是"include"请求
+	 * 是否是JSP动态"include"请求
 	 * @param request
 	 * @return
 	 */
-	public static boolean isIncludeRequest(ServletRequest request)
+	public static boolean isJspIncludeRequest(ServletRequest request)
 	{
 		return (request.getAttribute(INCLUDE_REQUEST_URI_ATTRIBUTE) != null);
 	}

@@ -53,7 +53,7 @@ public class ForwardTargetHandler extends AbstractTargetHandler
 		HttpServletRequest request = webObjectSource.getRequest();
 		HttpServletResponse response=webObjectSource.getResponse();
 		
-		if(isIncludeRequest(request))
+		if(isJspIncludeRequest(request))
 		{
 			request.getRequestDispatcher(url).include(request, response);
 			

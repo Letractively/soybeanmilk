@@ -3,9 +3,9 @@
 <soybean-milk>
 	<global-config>
 		
-		<target-handler class="test.unit.web.TestWebConfigurationParser$MyTypeTargetHandler">
-			<handler target-type="JSON" class="test.unit.web.TestWebConfigurationParser$JsonTargetHandler"/>
-		</target-handler>
+		<type-target-handler class="test.unit.web.TestWebConfigurationParser$MyTypeTargetHandler">
+			<target-handler handle-type="JSON" class="test.unit.web.TestWebConfigurationParser$JsonTargetHandler"/>
+		</type-target-handler>
 		
 	</global-config>
 	

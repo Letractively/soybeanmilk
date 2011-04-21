@@ -27,7 +27,7 @@ import org.soybeanMilk.web.exe.WebAction.Target;
 import org.soybeanMilk.web.os.WebObjectSource;
 
 /**
- * 类型目标处理器默认实现。
+ * {@linkplain TypeTargetHandler 类型目标处理器}的默认实现。
  * @author earthAngry@gmail.com
  * @date 2011-4-19
  *
@@ -61,7 +61,7 @@ public class DefaultTypeTargetHandler implements TypeTargetHandler
 			return;
 		}
 		
-		TargetHandler th=getTypeHandlers().get(consistentTargetType(target.getType()));
+		TargetHandler th=getTargetHandler(target.getType());
 		if(th == null)
 			throw new NullPointerException("no TargetHandler found for handling Target of type '"+target.getType()+"'");
 		
@@ -82,7 +82,7 @@ public class DefaultTypeTargetHandler implements TypeTargetHandler
 	{
 		Map<String, TargetHandler> h=getTypeHandlers();
 		
-		return h==null ? null : h.get(type);
+		return h==null ? null : h.get(consistentTargetType(type));
 	}
 
 	public void addTargetHandler(String type, TargetHandler targetHandler)

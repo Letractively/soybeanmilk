@@ -3,10 +3,10 @@
 <soybean-milk>
 	<global-config>
 		
-		<target-handler>
-			<handler target-type="JSON" class="test.unit.web.TestWebConfigurationParser$JsonTargetHandler"/>
-			<handler target-type="forward" class="test.unit.web.TestWebConfigurationParser$JsonTargetHandler"/>
-		</target-handler>
+		<type-target-handler>
+			<target-handler handle-type="JSON" class="test.unit.web.TestWebConfigurationParser$JsonTargetHandler"/>
+			<target-handler handle-type="forward" class="test.unit.web.TestWebConfigurationParser$JsonTargetHandler"/>
+		</type-target-handler>
 		
 	</global-config>
 	

@@ -100,6 +100,18 @@
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										 Interceptor
 									</li>
+									<li>
+										<a href="#tag_type-target-handler"><span class="tag">&lt;type-target-handler&gt;</span></a>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										target handler by type
+										<ul>
+											<li>
+												<a href="#tag_target-handler"><span class="tag">&lt;target-handler&gt;</span></a>
+												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+												target handler
+											</li>
+										</ul>
+									</li>
 								</ul>
 							</li>
 							<li>
@@ -333,7 +345,7 @@
 						in your exception interceptor.
 					</li>
 					<li>
-						<span class="tagAttr">execution-key</span> (Optional) <br />
+						<span class="tagAttr">execution-key</span> (<span class="required">Required</span>) <br />
 						Saving keyword of the execution context object <a href="../../api/org/soybeanMilk/core/Execution.html">Execution</a>.
 						With this object, you can get the execution context information in your interceptor.
 					</li>
@@ -370,6 +382,63 @@ public void handleException(Execution execution)
 {
 	...
 }
+</pre>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_type-target-handler"></a>
+				<span class="tag bold">&lt;type-target-handler&gt;</span> (Optional) <br/>
+			</p>
+			<p>
+				Type target handler configuration.
+				It makes you can define your own target handler for handling action's target by its type(See <a class="tag" href="#tag_target">&lt;target&gt;</a> tag's <span class="tagAttr">type</span> attribute).
+			</p>
+			<p>
+				The framework has supplied a default implementation class <a href="../../api/org/soybeanMilk/web/exe/th/DefaultTypeTargetHandler.html">DefaultTypeTargetHandler</a>,
+				which can handle "<span class="tagValue">forward</span>" type and "<span class="tagValue">redirect</span>" type target.
+				And you can add more target handler through <span class="tag">&lt;target-handler&gt;</span> tag below,
+				or set the <span class="tagAttr">class</span> attribute of this tag for completely replacing the default type target handler.
+			</p>
+			<p>
+				It contains the following attributes:
+				<ul>
+					<li>
+						<span class="tagAttr">class</span> (Optional)<br />
+						Set your own type target handler class name, it must implement interface <a href="../../api/org/soybeanMilk/web/exe/th/TypeTargetHandler.html">TypeTargetHandler</a>.
+						The default <a href="../../api/org/soybeanMilk/web/exe/th/DefaultTypeTargetHandler.html">DefaultTypeTargetHandler</a> will be used if you do not set it.
+					</li>
+				</ul>
+			</p>
+			<div class="seprator"></div>
+			<p>
+				<a name="tag_target-handler"></a>
+				<span class="tag bold">&lt;target-handler&gt;</span> (Optional) <br/>
+			</p>
+			<p>
+				Target handler configuration. It is used for set spefific target handler.
+			</p>
+			<p>
+				It contains the following attributes:
+				<ul>
+					<li>
+						<span class="tagAttr">handle-type</span>（<span class="required">Required</span>） <br />
+						Set the target type this handler can handle, such as "<span class="tagValue">json</span>", "<span class="tagValue">pdf</span>".
+					</li>
+					<li>
+						<span class="tagAttr">class</span>（<span class="required">Required</span>） <br />
+						Set the class name of this target handler, it must implement the <a href="../../api/org/soybeanMilk/web/exe/th/TargetHandler.html">TargetHandler</a> interface.
+						You can also create extension class from <a href="../../api/org/soybeanMilk/web/exe/th/AbstractTargetHandler.html">AbstractTargetHandler</a>,
+						it supplies very useful methods.
+					</li>
+				</ul>
+			</p>
+			<p>
+				The following is an example of target handler configuration, the nest <span class="tagValue">redirect</span> target handler will be replaced:
+<pre class="code-xml">
+&lt;type-target-handler&gt;
+	&lt;target-handler handle-type="redirect" class="your.targetHandler.RedirectTargetHander" /&gt;
+	&lt;target-handler handle-type="json" class="your.targetHandler.JsonTargetHander" /&gt;
+&lt;/type-target-handler&gt;
 </pre>
 			</p>
 			<div class="seprator"></div>
@@ -881,16 +950,8 @@ public void handleException(Execution execution)
 					<li>
 						<span class="tagAttr">type</span> (Optional)<br />
 						The target type.
-						The framework can process only two values : "<span class="tagValue">forward</span>" or "<span class="tagValue">redirect</span>".
-						And it will treat it as "<span class="tagValue">forward</span>" type if you did not set it.<br />
-						You can also extend <a href="../../api/org/soybeanMilk/web/servlet/DispatchServlet.html">DispatchServlet</a> for customized type supporting,
-						such as JSON supporting as following:
-<pre class="code-xml">
-&lt;action name="/user/list"&gt;
-	&lt;invoke&gt; userList=userResolver.query() &lt;/invoke&gt;
-	&lt;target type="json" /&gt;
-&lt;/action&gt;
-</pre>
+						It tells the type target handler (see <a href="#tag_type-target-handler">&lt;type-target-handler&gt;</a> tag) which target handler must handle this target. <br />
+						It will be set to "<span class="tagValue">forward</span>" by the framework if you do not set it here.
 					</li>
 				</ul>
 			</p>

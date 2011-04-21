@@ -43,10 +43,10 @@ import org.w3c.dom.Element;
  */
 public class WebConfigurationParser extends ConfigurationParser
 {
-	protected static final String TAG_TARGET_HANDLER="target-handler";
+	protected static final String TAG_TARGET_HANDLER="type-target-handler";
 	protected static final String TAG_TARGET_HANDLER_ATTR_CLASS="class";
-	protected static final String TAG_HANDLER="handler";
-	protected static final String TAG_HANDLER_ATTR_TARGET_TYPE="target-type";
+	protected static final String TAG_HANDLER="target-handler";
+	protected static final String TAG_HANDLER_ATTR_TARGET_TYPE="handle-type";
 	protected static final String TAG_HANDLER_ATTR_CLASS=TAG_GENERIC_CONVERTER_ATTR_CLASS;
 	
 	protected static final String TAG_TARGET="target";

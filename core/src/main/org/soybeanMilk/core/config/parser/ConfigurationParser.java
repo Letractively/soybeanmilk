@@ -437,15 +437,17 @@ public class ConfigurationParser
 		String exception=getAttributeValueIngoreEmpty(el, TAG_INTERCEPROT_ATTR_EXCEPTION);
 		String executionKey=getAttributeValueIngoreEmpty(el, TAG_INTERCEPROT_ATTR_EXECUTION_KEY);
 		
-		if(before==null && after==null && exception==null && executionKey==null)
-			return;
+		assertNotEmpty(executionKey, "<"+TAG_INTERCEPROT+"> attribute ["+TAG_INTERCEPROT_ATTR_EXECUTION_KEY+"] must not be empty");
 		
 		InterceptorInfo ii=createInterceptorInfoInstance();
-		
-		ii.setBeforeHandler(new ExecutableRefProxy(before, getCurrentExecutablePrefix()));
-		ii.setAfterHandler(new ExecutableRefProxy(after, getCurrentExecutablePrefix()));
-		ii.setExceptionHandler(new ExecutableRefProxy(exception, getCurrentExecutablePrefix()));
 		ii.setExecutionKey(executionKey);
+		
+		if(before != null)
+			ii.setBeforeHandler(new ExecutableRefProxy(before, getCurrentExecutablePrefix()));
+		if(after != null)
+			ii.setAfterHandler(new ExecutableRefProxy(after, getCurrentExecutablePrefix()));
+		if(exception != null)
+			ii.setExceptionHandler(new ExecutableRefProxy(exception, getCurrentExecutablePrefix()));
 		
 		getConfiguration().setInterceptorInfo(ii);
 	}

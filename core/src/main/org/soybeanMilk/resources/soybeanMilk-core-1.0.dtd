@@ -88,7 +88,7 @@ exception 作为异常时拦截器的完整可执行对象名（包括前缀配�
 <!ATTLIST interceptor before CDATA #IMPLIED>
 <!ATTLIST interceptor after CDATA #IMPLIED>
 <!ATTLIST interceptor exception CDATA #IMPLIED>
-<!ATTLIST interceptor execution-key CDATA #IMPLIED>
+<!ATTLIST interceptor execution-key CDATA #REQUIRED>
 
 <!--
 解决对象配置属性

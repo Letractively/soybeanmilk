@@ -367,12 +367,12 @@ public void handleException(Execution execution)
 				<span class="tag bold">&lt;type-target-handler&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				类型目标处理器配置。<a href="../../api/org/soybeanMilk/web/exe/th/TypeTargetHandler.html">类型目标处理器</a>使你可以为特定类型的<span class="glossary">动作目标</span>自定义<a href="../../api/org/soybeanMilk/web/exe/th/TargetHandler.html" class="glossary">目标处理器</a>（参考<a class="tag" href="#tag_target">&lt;target&gt;</a>标签的<span class="tagAttr">type</span>属性）。
+				类型目标处理器配置。它使你可以为特定类型的<span class="glossary">动作目标</span>自定义<span class="glossary">目标处理器</span>（参考<a class="tag" href="#tag_target">&lt;target&gt;</a>标签的<span class="tagAttr">type</span>属性）。
 			</p>
 			<p>
-				框架本身已经提供了<span class="glossary">类型目标处理器</span>的一个简单实现<a href="../../api/org/soybeanMilk/web/exe/th/DefaultTypeTargetHandler.html">DefaultTypeTargetHandler</a>，
-				它可以处理<span class="tagValue">forward</span>和<span class="tagValue">redirect</span>类型的<span class="glossary">动作目标</span>。
-				你可以通过下面的<span class="tag">&lt;target-handler&gt;</span>为其添加<a href="../../api/org/soybeanMilk/web/exe/th/TargetHandler.html">目标处理器</a>以处理更多类型的<span class="glossary">动作目标</span>，
+				框架本身已经提供了<span class="glossary">类型目标处理器</span>的一个简单实现类<a href="../../api/org/soybeanMilk/web/exe/th/DefaultTypeTargetHandler.html">DefaultTypeTargetHandler</a>，
+				它可以处理“<span class="tagValue">forward</span>”和“<span class="tagValue">redirect</span>”类型的<span class="glossary">动作目标</span>。
+				你可以通过下面的<span class="tag">&lt;target-handler&gt;</span>为其添加<span class="glossary">目标处理器</span>以处理更多类型的<span class="glossary">动作目标</span>，
 				或者，设置下面它的<span class="tagAttr">class</span>属性，而完全替换掉默认的<span class="glossary">类型目标处理器</span>实现。
 			</p>
 			<p>
@@ -408,11 +408,11 @@ public void handleException(Execution execution)
 				</ul>
 			</p>
 			<p>
-				下面是一个自定义目标处理器的示例，框架内置的<span class="tagValue">redirect</span>目标处理器将被替换：
+				下面是一个自定义目标处理器的示例，框架内置的“<span class="tagValue">redirect</span>”目标处理器将被替换：
 <pre class="code-xml">
 &lt;type-target-handler&gt;
-	&lt;target-handler handle-type="redirect" class="your.targetHandler.RedirectTargetHander" /&gt;
-	&lt;target-handler handle-type="json" class="your.targetHandler.JsonTargetHander" /&gt;
+	&lt;target-handler handle-type="redirect" class="your.th.RedirectTargetHander" /&gt;
+	&lt;target-handler handle-type="json" class="your.th.JsonTargetHander" /&gt;
 &lt;/type-target-handler&gt;
 </pre>
 			</p>
@@ -873,7 +873,7 @@ public void handleException(Execution execution)
 					<li>
 						<span class="tagAttr">type</span>（可选） <br />
 						目标类型。它告诉<span class="glossary">类型目标处理器</span>（参考<a href="#tag_type-target-handler">&lt;type-target-handler&gt;</a>标签）此<span class="glossary">目标</span>应该被哪个<span class="glossary">目标处理器</span>处理。<br />
-						如果你没有定义，框架会将它设置为<span class="tagValue">forward</span>。
+						如果你没有定义，框架会将它设置为“<span class="tagValue">forward</span>”。
 					</li>
 				</ul>
 			</p>

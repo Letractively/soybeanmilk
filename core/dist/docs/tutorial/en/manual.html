@@ -433,11 +433,11 @@ public void handleException(Execution execution)
 				</ul>
 			</p>
 			<p>
-				The following is an example of target handler configuration, the nest <span class="tagValue">redirect</span> target handler will be replaced:
+				The following is an example of target handler configuration, the nest "<span class="tagValue">redirect</span>" target handler will be replaced:
 <pre class="code-xml">
 &lt;type-target-handler&gt;
-	&lt;target-handler handle-type="redirect" class="your.targetHandler.RedirectTargetHander" /&gt;
-	&lt;target-handler handle-type="json" class="your.targetHandler.JsonTargetHander" /&gt;
+	&lt;target-handler handle-type="redirect" class="your.th.RedirectTargetHander" /&gt;
+	&lt;target-handler handle-type="json" class="your.th.JsonTargetHander" /&gt;
 &lt;/type-target-handler&gt;
 </pre>
 			</p>

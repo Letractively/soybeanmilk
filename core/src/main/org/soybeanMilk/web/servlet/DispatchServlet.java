@@ -27,7 +27,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.core.ExecutableNotFoundException;
 import org.soybeanMilk.core.ExecuteException;
-import org.soybeanMilk.core.Executor;
 import org.soybeanMilk.core.exe.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 import org.soybeanMilk.web.DefaultWebExecutor;
@@ -40,7 +39,7 @@ import org.soybeanMilk.web.os.WebObjectSource;
 import org.soybeanMilk.web.os.WebObjectSourceFactory;
 
 /**
- * 框架整合servlet，它可以将WEB请求转给{@linkplain Executor 执行器}。
+ * 框架整合servlet，它可以将WEB请求转给{@linkplain WebExecutor Web执行器}。
  * @author earthAngry@gmail.com
  * @date 2010-12-28
  */

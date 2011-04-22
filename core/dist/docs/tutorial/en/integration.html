@@ -25,8 +25,8 @@
 		<div class="content">
 			<p>
 				This framework has a built-in servlet <a href="../../api/org/soybeanMilk/web/servlet/DispatchServlet.html">DispatchServlet</a> for integration.
-				It can construct an <a href="../../api/org/soybeanMilk/core/Executor.html">Executor</a> from its init parameters,
-				and dispatching all requests to this <span class="glossary">Executor</span> at runtime.
+				It can construct an <a href="../../api/org/soybeanMilk/web/WebExecutor.html">WebExecutor</a> from its init parameters,
+				and dispatching all requests to this <span class="glossary">WebExecutor</span> at runtime.
 			</p>
 			<p>
 				It also has some init parameters for extending, or intergrating with other frameworks (Such as Spring, Velocity, Freeemarker).
@@ -317,7 +317,7 @@ public class MyVelocityViewServlet extends HttpServlet
 				<span class="tag bold">application-executor-key</span> (Optional)
 			</p>
 			<p>
-				Set the <span class="glossary">Executor</span> object key in your application (ServletContext).
+				Set the <span class="glossary">WebExecutor</span> object key in your application (ServletContext).
 				It helps you getting all the information of this framework at runtime. 
 			</p>
 			<p>

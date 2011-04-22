@@ -6,6 +6,8 @@
 		<type-target-handler>
 			<target-handler handle-type="JSON" class="test.unit.web.TestWebConfigurationParser$JsonTargetHandler"/>
 			<target-handler handle-type="forward" class="test.unit.web.TestWebConfigurationParser$JsonTargetHandler"/>
+			
+			<target-handler handle-type="pdf, mp3 , jpeg" class="test.unit.web.TestWebConfigurationParser$JsonTargetHandler"/>
 		</type-target-handler>
 		
 	</global-config>

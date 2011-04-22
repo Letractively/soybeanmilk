@@ -16,6 +16,8 @@ package org.soybeanMilk;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.soybeanMilk.web.WebConstants;
 
@@ -232,5 +234,51 @@ public class SoybeanMilkUtils
 	public static boolean containAccessor(String str)
 	{
 		return str!=null && str.indexOf(WebConstants.ACCESSOR)>=0;
+	}
+	
+
+	/**
+	 * 拆分字符串，连续的分隔符将按一个分隔符处理。
+	 * @param str
+	 * @param separatorChar 分隔符
+	 * @return
+	 * @date 2011-4-20
+	 */
+	public static String[] split(String str, char separatorChar)
+	{
+		boolean preserveAllTokens=false;
+		
+		//以下内容修改自org.apache.commons.lang.StringUtils.splitWorker(String, char, boolean)
+		
+		if (str == null) {
+            return null;
+        }
+        int len = str.length();
+        if (len == 0) {
+            return null;//return ArrayUtils.EMPTY_STRING_ARRAY;
+        }
+        List<String> list = new ArrayList<String>();//List list = new ArrayList();
+        int i = 0, start = 0;
+        boolean match = false;
+        boolean lastMatch = false;
+        while (i < len) {
+            if (str.charAt(i) == separatorChar) {
+                if (match || preserveAllTokens) {
+                    list.add(str.substring(start, i));
+                    match = false;
+                    lastMatch = true;
+                }
+                start = ++i;
+                continue;
+            }
+            lastMatch = false;
+            match = true;
+            i++;
+        }
+        if (match || (preserveAllTokens && lastMatch)) {
+            list.add(str.substring(start, i));
+        }
+        
+        return list.toArray(new String[list.size()]);//return (String[]) list.toArray(new String[list.size()]);
 	}
 }

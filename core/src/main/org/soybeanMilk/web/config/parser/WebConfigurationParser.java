@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
@@ -141,13 +142,17 @@ public class WebConfigurationParser extends ConfigurationParser
 		
 		for(Element e : children)
 		{
-			String targetType = getAttributeValueIngoreEmpty(e, TAG_HANDLER_ATTR_TARGET_TYPE);
+			String targetTypes = getAttributeValueIngoreEmpty(e, TAG_HANDLER_ATTR_TARGET_TYPE);
 			String clazz = getAttributeValueIngoreEmpty(e, TAG_HANDLER_ATTR_CLASS);
 			
-			assertNotEmpty(targetType, "<"+TAG_HANDLER+"> attribute ["+TAG_HANDLER_ATTR_TARGET_TYPE+"] must not be empty");
+			assertNotEmpty(targetTypes, "<"+TAG_HANDLER+"> attribute ["+TAG_HANDLER_ATTR_TARGET_TYPE+"] must not be empty");
 			assertNotEmpty(clazz, "<"+TAG_HANDLER+"> attribute ["+TAG_HANDLER_ATTR_CLASS+"] must not be empty");
 			
-			typeTargetHandler.addTargetHandler(targetType, (TargetHandler)createClassInstance(clazz));
+			TargetHandler handler=(TargetHandler)createClassInstance(clazz);
+			String[] ttps=SoybeanMilkUtils.split(targetTypes, ',');
+			
+			for(String tt : ttps)
+				typeTargetHandler.addTargetHandler(tt.trim(), handler);
 		}
 	}
 	

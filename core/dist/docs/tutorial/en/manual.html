@@ -43,23 +43,25 @@
 				</ul>
 			</p>
 			<p>
-				<a href="../../api/org/soybeanMilk/core/ObjectSource.html" class="glossary">ObjectSource</a> is the core interface of this framework, for getting and saving objects.
+				<a href="../../api/org/soybeanMilk/core/ObjectSource.html" class="glossary">ObjectSource</a> is the core interface of this framework, for getting and setting objects.
 				The most work you are doing is to tell this framework how to get object from <span class="glossary">ObjectSource</span>, and save object into <span class="glossary">ObjectSource</span>. 
 			</p>
 			<p>
 				<a href="../../api/org/soybeanMilk/core/Executable.html" class="glossary">Executable</a> is another core interface.
 				It can be executed only with an <span class="glossary">ObjectSource</span>.There are two implementations of this interface, one is
 				<a href="../../api/org/soybeanMilk/core/exe/Invoke.html" class="glossary">Invoke</a>, and another is <a href="../../api/org/soybeanMilk/core/exe/Action.html" class="glossary">Action</a>.
-				They both are advanced encapsulation of Java <span class="glossary">Method</span> object, an <span class="glossary">Action</span> can have one or more <span class="glossary">Invoke</span>s,
-				and an <span class="glossary">Invoke</span> are conresponding to a <span class="glossary">Method</span>.
+				They both are advanced encapsulation of <span class="glossary">java.lang.reflect.Method</span> object, an <span class="glossary">Action</span> can have one or more <span class="glossary">Invoke</span>s,
+				and an <span class="glossary">Invoke</span> are corresponding to a <span class="glossary">java.lang.reflect.Method</span> object.
 			</p>
 			<p>
 				<a href="javascript:void(0);" class="glossary">Resolver</a> is an important concept, it is the target of <span class="glossary">Invoke</span>'s method.
 				But there is no interface defined for it, because it is writing by you. You may call it "Business object".
 			</p>
 			<p>
-				<a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">Converter</a> helps <span class="glossary">ObjectSource</span> converting the object it stored to the <span class="glossary">Invoke</span>'s method argument type.
-				
+				<a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">Converter</a> can convert any object stored in <span class="glossary">ObjectSource</span> to object that match <span class="glossary">Invoke</span>'s method argument type.
+			</p>
+			<p>
+				<a href="../../api/org/soybeanMilk/web/th/TargetHandler.html" class="glossary">TargetHandler</a> handles the target URL and controls the view type of an <span class="glossary">Action</span>。
 			</p>
 			<p>
 				The detail structure of <span class="mainTitle">SoybeanMilk</span> configuration file is listing bellow:
@@ -103,12 +105,12 @@
 									<li>
 										<a href="#tag_type-target-handler"><span class="tag">&lt;type-target-handler&gt;</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										target handler by type
+										Target handler by type
 										<ul>
 											<li>
 												<a href="#tag_target-handler"><span class="tag">&lt;target-handler&gt;</span></a>
 												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-												target handler
+												Target handler
 											</li>
 										</ul>
 									</li>
@@ -422,7 +424,7 @@ public void handleException(Execution execution)
 				<ul>
 					<li>
 						<span class="tagAttr">handle-type</span>（<span class="required">Required</span>） <br />
-						Set the target type this handler can handle, such as "<span class="tagValue">json</span>", "<span class="tagValue">pdf</span>".
+						Set the target type this handler can handle, such as "<span class="tagValue">json</span>", "<span class="tagValue">pdf</span>" or "<span class="tagValue">json, pdf, forward</span>".
 					</li>
 					<li>
 						<span class="tagAttr">class</span>（<span class="required">Required</span>） <br />

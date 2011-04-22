@@ -18,6 +18,7 @@ import org.soybeanMilk.web.exe.th.AbstractTargetHandler;
 import org.soybeanMilk.web.exe.th.DefaultTypeTargetHandler;
 import org.soybeanMilk.web.exe.th.ForwardTargetHandler;
 import org.soybeanMilk.web.exe.th.RedirectTargetHandler;
+import org.soybeanMilk.web.exe.th.TargetHandler;
 import org.soybeanMilk.web.os.WebObjectSource;
 
 public class TestWebConfigurationParser
@@ -48,6 +49,12 @@ public class TestWebConfigurationParser
 			
 			Assert.assertEquals(RedirectTargetHandler.class,
 					webConfiguration.getTypeTargetHandler().getTargetHandler("redirect").getClass());
+			
+			
+			TargetHandler multi= webConfiguration.getTypeTargetHandler().getTargetHandler("pdf");
+			Assert.assertEquals(JsonTargetHandler.class, multi.getClass());
+			Assert.assertTrue( multi ==  webConfiguration.getTypeTargetHandler().getTargetHandler("mp3"));
+			Assert.assertTrue( multi ==  webConfiguration.getTypeTargetHandler().getTargetHandler("JPEG"));
 		}
 		
 		{

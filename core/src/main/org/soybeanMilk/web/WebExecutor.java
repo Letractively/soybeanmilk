@@ -23,6 +23,8 @@ import org.soybeanMilk.core.ExecutableNotFoundException;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.Executor;
 import org.soybeanMilk.web.config.WebConfiguration;
+import org.soybeanMilk.web.exe.WebAction;
+import org.soybeanMilk.web.exe.WebAction.Target;
 import org.soybeanMilk.web.os.WebObjectSource;
 
 /**
@@ -41,7 +43,7 @@ public interface WebExecutor extends Executor
 	WebConfiguration getWebConfiguration();
 	
 	/**
-	 * 执行。
+	 * 执行，如果要执行的{@linkplain Executable 可执行对象}是{@linkplain WebAction Web动作}，此方法还要处理其{@linkplain Target 目标}。
 	 * @param executableName {@linkplain Executable 可执行对象}名，通常是请求URL。
 	 * @param webObjSource {@linkplain WebObjectSource Web对象源}
 	 * @throws ExecuteException

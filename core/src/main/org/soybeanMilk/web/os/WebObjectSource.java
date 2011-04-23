@@ -556,7 +556,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	}
 	
 	/**
-	 * 请求参数过滤映射表。它只是作为一个标识类型，不做任何重写。
+	 * 请求参数过滤映射表。它只是作为一个标识类型，没有任何特殊实现。
 	 * @author earthAngry@gmail.com
 	 * @date 2011-4-12
 	 *

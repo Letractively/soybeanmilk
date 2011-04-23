@@ -80,7 +80,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 				&& !SoybeanMilkUtils.isClassTypeArray(targetType))
 		{
 			if(log.isDebugEnabled())
-				log.debug("the src '"+getStringDesc(sourceObj)+"' is array with length 1, while the target type not, so it's first element will be used for converting");
+				log.debug("the src '"+getStringDesc(sourceObj)+"' is an array with length 1, it's first element will be used for converting");
 			
 			sourceObj=Array.get(sourceObj, 0);
 			

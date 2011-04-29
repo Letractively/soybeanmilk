@@ -648,7 +648,7 @@ public class ConfigurationParser
 						Executable targetExe=getTargetRefExecutable((ExecutableRefProxy)e);
 						
 						if(targetExe == null)
-							throw new ParseException("can not find Executable named '"+proxy.getName()+"' referenced in Action '"+action.getName()+"'");
+							throw new ParseException("can not find Executable named '"+proxy.getRefName()+"' referenced in Action '"+action.getName()+"'");
 						
 						actionExes.set(i, targetExe);
 					}

@@ -70,7 +70,7 @@ public class FilterAwareMap<K, V> implements Map<String, V>
 			
 			if(originalMap instanceof FilterAwareMap)
 			{
-				String pf=((FilterAwareMap)originalMap).getFilterFromRoot();
+				String pf=((FilterAwareMap<?, ?>)originalMap).getFilterFromRoot();
 				if(pf != null)
 					setFilterFromRoot(pf+this.filter);
 				else

@@ -544,7 +544,7 @@ public class TestWebGenericConverter
 		convertMap_toJavaBeanList(Stack.class);
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void convertMap_toJavaBeanList(Class<? extends List> listClass) throws Exception
 	{
 		//使用List接口
@@ -604,7 +604,7 @@ public class TestWebGenericConverter
 		convertMap_toJavaBeanSet(LinkedHashSet.class);
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void convertMap_toJavaBeanSet(Class<? extends Set> setClass) throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();

@@ -204,6 +204,42 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 &lt;/action&gt; 
 </pre>
 			</p>
+			<p>
+				还有一种非常简便的方法，即是重写<span class="glossary">DispatchServlet</span>的<span class="tagValue">getInitExternalResolverFactory()</span>方法：
+			</p>
+<pre class="code-java">
+public class DispatchServlet extends org.soybeanMilk.web.servlet.DispatchServlet
+{
+	private static final long serialVersionUID = 1L;
+	
+	@Override
+	protected ResolverFactory getInitExternalResolverFactory()
+			throws ServletException
+	{
+		final BeanFactory beanFactory=
+			WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+		
+		return new ResolverFactory()
+		{
+			@Override
+			public Object getResolver(Serializable key)
+			{
+				if(beanFactory == null)
+					return null;
+				
+				try
+				{
+					return beanFactory.getBean(key.toString());
+				}
+				catch(Exception e)
+				{
+					return null;
+				}
+			}
+		};
+	}
+}
+</pre>
 			<div class="seprator"></div>
 			<p>
 				<a name="init_webObjectSoruce-factory-class"></a>

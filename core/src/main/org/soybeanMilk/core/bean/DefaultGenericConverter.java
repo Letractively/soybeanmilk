@@ -206,7 +206,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2011-1-5
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
 	{
 		Object re=null;
@@ -281,7 +281,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2011-1-5
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected Object convertArrayToList(Object array, Class<?> listClass)
 	{
 		List re=(List)instance(listClass, -1);
@@ -299,7 +299,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2011-1-5
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected Object convertArrayToSet(Object array, Class<?> setClass)
 	{
 		Set re=(Set)instance(setClass, -1);
@@ -456,7 +456,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2010-12-29
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	protected Object instance(Class<?> objectType, int arrayLength)
 	{
 		if(java.util.List.class.equals(objectType))

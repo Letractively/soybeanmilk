@@ -183,7 +183,7 @@ public class TestWebObjectSource
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void getRawRequestParameterMap()
 	{

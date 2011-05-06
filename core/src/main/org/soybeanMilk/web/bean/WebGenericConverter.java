@@ -32,7 +32,7 @@ import org.soybeanMilk.core.bean.PropertyInfo;
 import org.soybeanMilk.web.os.WebObjectSource.ParamFilterAwareMap;
 
 /**
- * WEB通用转换器，除了继承的转换支持，它还支持将{@link Map Map&lt;String, Object&gt;}转换为JavaBean对象、JavaBean数组以及JavaBean集合（List、Set）。<br>
+ * WEB通用转换器，除了继承的转换支持，它还支持将{@link Map Map&lt;String, ?&gt;}转换为JavaBean对象、JavaBean数组以及JavaBean集合（List、Set）。<br>
  * 比如可以将下面的映射表：
  * <pre>
  * "id"                 -&gt;  "1" 或 ["1"]
@@ -105,7 +105,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	protected Object convertMap(FilterAwareMap<String, ?> sourceMap, Type targetType)
 	{
 		if(log.isDebugEnabled())
-			log.debug("start converting 'Map<String, Object>' object to type '"+targetType+"'");
+			log.debug("start converting 'Map<String, ?>' object to type '"+targetType+"'");
 		
 		Object result = null;
 		
@@ -156,7 +156,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			}
 			else if(SoybeanMilkUtils.isAncestorClass(Collection.class, actualTypes[0]))//不支持的集合类
 			{
-				throw new GenericConvertException("converting 'Map<String,Object>' to '"+targetType+"' is not supported");
+				throw new GenericConvertException("converting 'Map<String,?>' to '"+targetType+"' is not supported");
 			}
 			else//JavaBean
 			{

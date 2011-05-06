@@ -249,20 +249,20 @@ public class MyWebObjectSourceFactory implements WebObjectSourceFactory
 			this.velocityContext = velocityContext;
 		}
 		@Override
-		protected Object getWithUnknownScope(String scope, String keyInScope, Class&lt;?&gt; objectType)
+		protected Object getObjectFromUnknownScope(String scope, String keyInScope, Type expectType)
 		{
 			<span class="highlight">if("vm".equals(scope))
 				return velocityContext.get(keyInScope);</span>
 			else
-				return super.getWithUnknownScope(scope, keyInScope, objectType);
+				return super.getObjectFromUnknownScope(scope, keyInScope, expectType);
 		}
 		@Override
-		protected void setWithUnknownScope(String scope, String keyInScope, Object obj)
+		protected void setObjectToUnknownScope(String scope, String keyInScope, Object value)
 		{
 			<span class="highlight">if("vm".equals(scope))
-				velocityContext.put(keyInScope, obj);</span>
+				velocityContext.put(keyInScope, value);</span>
 			else
-				super.setWithUnknownScope(scope, keyInScope, obj);
+				super.setObjectToUnknownScope(scope, keyInScope, value);
 		}
 		
 		//...

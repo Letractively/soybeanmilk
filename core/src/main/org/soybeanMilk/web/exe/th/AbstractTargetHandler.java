@@ -16,7 +16,9 @@ package org.soybeanMilk.web.exe.th;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -56,33 +58,30 @@ public abstract class AbstractTargetHandler implements TargetHandler
 			throws ServletException, IOException;
 	
 	/**
-	 * 仅获取保存到{@linkplain WebConstants.WebObjectSourceScope#REQUEST request}作用域的{@linkplain Invoke 调用}结果关键字。
+	 * 获取动作<code>webAction</code>保存到<code>scope</code>作用域内的所有对象。
 	 * @param webAction
 	 * @param webObjectSource
-	 * @return 关键字数组，没有则返回<code>null</code>
-	 * @date 2011-4-21
+	 * @param scope
+	 * @return 对象映射表，它关键字的<code>scope</code>作用域前缀已被去除。
+	 * @date 2011-5-8
 	 */
-	public String[] getRequestInvokeResultKey(WebAction webAction, WebObjectSource webObjectSource)
+	public Map<String, Object> getResultInScope(WebAction webAction, WebObjectSource webObjectSource, String scope)
 	{
-		String[] re=null;
+		Map<String, Object> re=new HashMap<String, Object>();
 		
 		String[] all=getAllInvokeResultKey(webAction, webObjectSource);
 		if(all!=null && all.length>0)
 		{
-			List<String> tmp=new ArrayList<String>();
-			
 			for(String s : all)
 			{
 				String[] scopedKey=SoybeanMilkUtils.splitByFirstAccessor(s);
 				
-				if(scopedKey.length==1
-						|| (scopedKey.length==2 && WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scopedKey[0])))
+				if(scopedKey[0].equalsIgnoreCase(scope))
 				{
-					tmp.add(s);
+					Object obj=webObjectSource.get(s, null);
+					re.put(scopedKey[1], obj);
 				}
 			}
-			
-			re=tmp.toArray(new String[tmp.size()]);
 		}
 		
 		return re;
@@ -93,7 +92,7 @@ public abstract class AbstractTargetHandler implements TargetHandler
 	 * 在{@linkplain WebObjectSource Web对象源}中保存着这些关键字对应的对象。
 	 * @param webAction
 	 * @param webObjectSource
-	 * @return
+	 * @return 结果关键字，每个关键字都会包含作用域前缀。
 	 * @date 2011-4-19
 	 */
 	public String[] getAllInvokeResultKey(WebAction webAction, WebObjectSource webObjectSource)
@@ -114,9 +113,14 @@ public abstract class AbstractTargetHandler implements TargetHandler
 		{
 			if(exe instanceof Invoke)
 			{
-				Invoke invoke=(Invoke)exe;
-				if(invoke.getResultKey() != null)
-					re.add((String)invoke.getResultKey());
+				String resultKey=(String)((Invoke)exe).getResultKey();
+				if(resultKey != null)
+				{
+					if(SoybeanMilkUtils.splitByFirstAccessor(resultKey).length == 1)
+						resultKey=WebConstants.WebObjectSourceScope.REQUEST+WebConstants.ACCESSOR+resultKey;
+					
+					re.add(resultKey);
+				}
 			}
 			else if(exe instanceof WebAction)
 			{

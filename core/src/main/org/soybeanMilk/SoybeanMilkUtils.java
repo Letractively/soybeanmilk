@@ -213,30 +213,18 @@ public class SoybeanMilkUtils
 		
 		int idx=str.indexOf(WebConstants.ACCESSOR);
 		
-		if(idx<=0 || idx==str.length()-1)
+		if(idx < 0)
 			re=new String[]{str};
+		else if(idx == 0)
+			re=new String[]{"", str};
+		else if(idx == str.length()-1)
+			re=new String[]{str, ""};
 		else
-		{
-			re=new String[2];
-			re[0]=str.substring(0,idx);
-			re[1]=str.substring(idx+1);
-		}
+			re=new String[]{str.substring(0,idx), str.substring(idx+1)};
 		
 		return re;
 	}
 	
-	/**
-	 * 字符串是否包含访问符'.'
-	 * @param str
-	 * @return
-	 * @date 2011-2-22
-	 */
-	public static boolean containAccessor(String str)
-	{
-		return str!=null && str.indexOf(WebConstants.ACCESSOR)>=0;
-	}
-	
-
 	/**
 	 * 拆分字符串，连续的分隔符将按一个分隔符处理。
 	 * @param str

@@ -275,19 +275,11 @@ public class WebObjectSource extends ConvertableObjectSource
 			throw new IllegalArgumentException("[key] must not be null");
 		
 		String[] scopedKey=SoybeanMilkUtils.splitByFirstAccessor(strKey);
-		
-		String scope = scopedKey[0];
-		String subKey = scopedKey.length==1 ? null : scopedKey[1];
-		
 		//没有包含访问符，则保存到request中
-		if(scopedKey.length == 1)
-		{
-			setAttributeByKeyExpression(getRequest(), strKey, obj);
-			
-			scope=WebConstants.WebObjectSourceScope.REQUEST;
-			subKey=strKey;
-		}
-		else if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
+		String scope = scopedKey.length==1 ? WebConstants.WebObjectSourceScope.REQUEST : scopedKey[0];
+		String subKey = scopedKey.length==1 ? scopedKey[0] : scopedKey[1];
+		
+		if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
 		{
 			setAttributeByKeyExpression(getRequest(), subKey, obj);
 		}

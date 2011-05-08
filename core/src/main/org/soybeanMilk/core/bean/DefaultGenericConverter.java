@@ -118,7 +118,8 @@ public class DefaultGenericConverter implements GenericConverter
 	public Object convert(Object sourceObj, Type targetType)
 	{
 		if(log.isDebugEnabled())
-			log.debug("start converting '"+getStringDesc(sourceObj)+"' of type '"+sourceObj+"' to type '"+targetType+"'");
+			log.debug("start converting '"+getStringDesc(sourceObj)
+					+"' of type '"+(sourceObj==null ? null : sourceObj.getClass())+"' to type '"+targetType+"'");
 		
 		if(targetType == null)
 			return sourceObj;

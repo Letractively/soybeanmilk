@@ -2,6 +2,9 @@ package test.unit.web;
 
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 
@@ -10,6 +13,7 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.config.parser.WebConfigurationParser;
@@ -46,21 +50,34 @@ public class TestAbstractTargetHandler
 	@Test
 	public void getRequestInvokeResultKey() throws Exception
 	{
-		String[] expected={"result0", "request.result1", "request.result5", "request.result4"};
+		String[] expected={"result0", "result1", "result5", "result4"};
 		WebAction webAction=(WebAction)webConfiguration.getExecutable("exe1");
 		
-		String[] re=abstractTargetHandler.getRequestInvokeResultKey(webAction, null);
+		MockHttpServletRequest request=new MockHttpServletRequest();
+		MockHttpServletResponse response=new MockHttpServletResponse();
+		MockServletContext application=new MockServletContext();
 		
-		for(int i=0;i<expected.length;i++)
-		{
-			Assert.assertEquals(expected[i], re[i]);
-		}
+		WebObjectSource webObjectSource=new WebObjectSource(request, response, application, new WebGenericConverter());
+		
+		webAction.execute(webObjectSource);
+		
+		Map<String, Object> re=abstractTargetHandler.getResultInScope(webAction, webObjectSource, WebConstants.WebObjectSourceScope.REQUEST);
+		Set<String> reKeys=re.keySet();
+		
+		Set<String> expectedSet=new HashSet<String>();
+		for(String s : expected)
+			expectedSet.add(s);
+		
+		Set<String> actualSet=new HashSet<String>();
+		actualSet.addAll(reKeys);
+		
+		Assert.assertEquals(expectedSet, actualSet);
 	}
 	
 	@Test
 	public void getAllInvokeResultKey() throws Exception
 	{
-		String[] expected={"result0", "request.result1", "session.result2", "application.result3", "request.result5", "request.result4"};
+		String[] expected={"request.result0", "request.result1", "session.result2", "application.result3", "request.result5", "request.result4"};
 		WebAction webAction=(WebAction)webConfiguration.getExecutable("exe1");
 		
 		String[] re=abstractTargetHandler.getAllInvokeResultKey(webAction, null);

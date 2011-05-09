@@ -67,7 +67,7 @@ public class DefaultResolverFactory implements ResolverFactory
 	}
 	
 	/**
-	 * 添加一个解决对象，不能与已添加的<code>id</code>重复，但是可以与<i>外部解决对象工厂</i>中的重复
+	 * 添加一个解决对象
 	 * @param id 解决对象标识
 	 * @param resolver 解决对象
 	 */
@@ -88,6 +88,6 @@ public class DefaultResolverFactory implements ResolverFactory
 		resolvers.put(id, resolver);
 		
 		if(log.isDebugEnabled())
-			log.debug("add a Resolver intance of class '"+resolver.getClass().getName()+"' with id '"+id+"'");
+			log.debug("add a Resolver instance of class '"+resolver.getClass().getName()+"' with id '"+id+"'");
 	}
 }

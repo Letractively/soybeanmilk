@@ -60,12 +60,12 @@ public abstract class AbstractTargetHandler implements TargetHandler
 	/**
 	 * 获取动作<code>webAction</code>保存到<code>scope</code>作用域内的所有对象。
 	 * @param webAction
+	 * @param scope 作用域，参考{@linkplain WebConstants.Scope}类
 	 * @param webObjectSource
-	 * @param scope
 	 * @return 对象映射表，它关键字的<code>scope</code>作用域前缀已被去除。
 	 * @date 2011-5-8
 	 */
-	public Map<String, Object> getResultInScope(WebAction webAction, WebObjectSource webObjectSource, String scope)
+	public Map<String, Object> getResultInScope(WebAction webAction, String scope, WebObjectSource webObjectSource)
 	{
 		Map<String, Object> re=new HashMap<String, Object>();
 		
@@ -117,7 +117,7 @@ public abstract class AbstractTargetHandler implements TargetHandler
 				if(resultKey != null)
 				{
 					if(SoybeanMilkUtils.splitByFirstAccessor(resultKey).length == 1)
-						resultKey=WebConstants.WebObjectSourceScope.REQUEST+WebConstants.ACCESSOR+resultKey;
+						resultKey=WebConstants.Scope.REQUEST+WebConstants.ACCESSOR+resultKey;
 					
 					re.add(resultKey);
 				}

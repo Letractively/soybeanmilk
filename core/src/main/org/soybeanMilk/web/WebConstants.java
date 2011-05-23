@@ -75,7 +75,7 @@ public class WebConstants extends Constants
 	 * @author earthAngry@gmail.com
 	 * @date 2010-10-7
 	 */
-	public static class WebObjectSourceScope
+	public static class Scope
 	{
 		/**
 		 * 请求参数映射表，它是一个Map对象

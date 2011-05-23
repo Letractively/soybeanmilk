@@ -216,30 +216,30 @@ public class WebObjectSource extends ConvertableObjectSource
 		String scope = scopedKey[0];
 		String subKey = scopedKey.length==1 ? null : scopedKey[1];
 		
-		if(WebConstants.WebObjectSourceScope.PARAM.equalsIgnoreCase(scope))
+		if(WebConstants.Scope.PARAM.equalsIgnoreCase(scope))
 		{
 			data=convertParameterMap(getRequest(), subKey, expectType);
 		}
-		else if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scope))
 		{
 			data=convertServletObjectAttribute(getRequest(), subKey, expectType);
 		}
-		else if(WebConstants.WebObjectSourceScope.SESSION.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.SESSION.equalsIgnoreCase(scope))
 		{
 			data=convertServletObjectAttribute(getRequest().getSession(), subKey, expectType);
 		}
-		else if(WebConstants.WebObjectSourceScope.APPLICATION.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.APPLICATION.equalsIgnoreCase(scope))
 		{
 			data=convertServletObjectAttribute(getApplication(), subKey, expectType);
 		}
-		else if(WebConstants.WebObjectSourceScope.RESPONSE.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scope))
 		{
 			data=convertServletObjectAttribute(getResponse(), subKey, expectType);
 		}
-		else if(WebConstants.WebObjectSourceScope.OBJECT_SOURCE.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.OBJECT_SOURCE.equalsIgnoreCase(scope))
 		{
 			if(subKey != null)
-				throw new ObjectSourceException("invalide key '"+strKey+"', get object from '"+WebConstants.WebObjectSourceScope.OBJECT_SOURCE+"' scope is not supported");
+				throw new ObjectSourceException("invalide key '"+strKey+"', get object from '"+WebConstants.Scope.OBJECT_SOURCE+"' scope is not supported");
 			
 			if(expectType==null || SoybeanMilkUtils.isInstanceOf(this, expectType))
 				data=this;
@@ -253,7 +253,7 @@ public class WebObjectSource extends ConvertableObjectSource
 		{
 			data=convertParameterMap(getRequest(), strKey, expectType);
 			
-			scope=WebConstants.WebObjectSourceScope.PARAM;
+			scope=WebConstants.Scope.PARAM;
 			subKey=strKey;
 		}
 		else
@@ -276,28 +276,28 @@ public class WebObjectSource extends ConvertableObjectSource
 		
 		String[] scopedKey=SoybeanMilkUtils.splitByFirstAccessor(strKey);
 		//没有包含访问符，则保存到request中
-		String scope = scopedKey.length==1 ? WebConstants.WebObjectSourceScope.REQUEST : scopedKey[0];
+		String scope = scopedKey.length==1 ? WebConstants.Scope.REQUEST : scopedKey[0];
 		String subKey = scopedKey.length==1 ? scopedKey[0] : scopedKey[1];
 		
-		if(WebConstants.WebObjectSourceScope.REQUEST.equalsIgnoreCase(scope))
+		if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scope))
 		{
 			setAttributeByKeyExpression(getRequest(), subKey, obj);
 		}
-		else if(WebConstants.WebObjectSourceScope.SESSION.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.SESSION.equalsIgnoreCase(scope))
 		{
 			setAttributeByKeyExpression(getRequest().getSession(), subKey, obj);
 		}
-		else if(WebConstants.WebObjectSourceScope.APPLICATION.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.APPLICATION.equalsIgnoreCase(scope))
 		{
 			setAttributeByKeyExpression(getApplication(), subKey, obj);
 		}
-		else if(WebConstants.WebObjectSourceScope.PARAM.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.PARAM.equalsIgnoreCase(scope))
 		{
-			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.WebObjectSourceScope.PARAM+"' scope");
+			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.PARAM+"' scope");
 		}
-		else if(WebConstants.WebObjectSourceScope.RESPONSE.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scope))
 		{
-			throw new ObjectSourceException("'"+key+"' is not valid, you can not save object into '"+WebConstants.WebObjectSourceScope.RESPONSE+"' scope");
+			throw new ObjectSourceException("'"+key+"' is not valid, you can not save object into '"+WebConstants.Scope.RESPONSE+"' scope");
 		}
 		else
 			setObjectToUnknownScope(scope, subKey, obj);

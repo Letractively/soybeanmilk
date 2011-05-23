@@ -61,7 +61,7 @@ public class TestAbstractTargetHandler
 		
 		webAction.execute(webObjectSource);
 		
-		Map<String, Object> re=abstractTargetHandler.getResultInScope(webAction, webObjectSource, WebConstants.WebObjectSourceScope.REQUEST);
+		Map<String, Object> re=abstractTargetHandler.getResultInScope(webAction, WebConstants.Scope.REQUEST, webObjectSource);
 		Set<String> reKeys=re.keySet();
 		
 		Set<String> expectedSet=new HashSet<String>();

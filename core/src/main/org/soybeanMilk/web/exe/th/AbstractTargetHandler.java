@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 
 import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.exe.Invoke;
@@ -117,7 +118,7 @@ public abstract class AbstractTargetHandler implements TargetHandler
 				if(resultKey != null)
 				{
 					if(SoybeanMilkUtils.splitByFirstAccessor(resultKey).length == 1)
-						resultKey=WebConstants.Scope.REQUEST+WebConstants.ACCESSOR+resultKey;
+						resultKey=WebConstants.Scope.REQUEST+Constants.ACCESSOR+resultKey;
 					
 					re.add(resultKey);
 				}

@@ -25,6 +25,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
@@ -211,7 +212,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 								if(isParamMap)
 								{
 									FilterAwareMap<String, ?> collectionPropertyValueMap=new ParamFilterAwareMap<String, Object>(
-											sourceMap, collectionPropertyExp+ACCESSOR, false);
+											sourceMap, collectionPropertyExp+Constants.ACCESSOR, false);
 									try
 									{
 										setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
@@ -224,7 +225,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 								else
 								{
 									FilterAwareMap<String, ?> collectionPropertyValueMap=new FilterAwareMap<String, Object>(
-											sourceMap, collectionPropertyExp+ACCESSOR, false);
+											sourceMap, collectionPropertyExp+Constants.ACCESSOR, false);
 									setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
 								}
 								

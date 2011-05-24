@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.bean.converters.BigDecimalConverter;
 import org.soybeanMilk.core.bean.converters.BigIntegerConverter;
 import org.soybeanMilk.core.bean.converters.BooleanConverter;
@@ -42,7 +43,6 @@ import org.soybeanMilk.core.bean.converters.ShortConverter;
 import org.soybeanMilk.core.bean.converters.SqlDateConverter;
 import org.soybeanMilk.core.bean.converters.SqlTimeConverter;
 import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
-import org.soybeanMilk.web.WebConstants;
 
 /**
  * 通用转换器的默认实现。<br>
@@ -77,10 +77,6 @@ public class DefaultGenericConverter implements GenericConverter
 	private static Log log = LogFactory.getLog(DefaultGenericConverter.class);
 	
 	protected static final Object[] EMPTY_ARGS={};
-	
-	protected static final char ACCESSOR=WebConstants.ACCESSOR;
-	
-	protected static final String ACCESSOR_REGEX="\\"+WebConstants.ACCESSOR;
 	
 	protected static final String SEPRATOR="->";
 	
@@ -553,7 +549,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 */
 	protected String[] splitPropertyExpression(String propertyExpression)
 	{
-		String[] propertyArray=propertyExpression.split(ACCESSOR_REGEX);
+		String[] propertyArray=SoybeanMilkUtils.split(propertyExpression, Constants.ACCESSOR);
 		if(propertyArray==null || propertyArray.length==0)
 			propertyArray=new String[]{propertyExpression};
 		
@@ -577,7 +573,7 @@ public class DefaultGenericConverter implements GenericConverter
 			re.append(propExpressionAry[i]);
 			
 			if(i<end-1)
-				re.append(ACCESSOR);
+				re.append(Constants.ACCESSOR);
 		}
 		
 		return re.toString();

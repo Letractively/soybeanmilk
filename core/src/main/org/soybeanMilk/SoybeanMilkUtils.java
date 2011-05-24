@@ -19,7 +19,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.soybeanMilk.web.WebConstants;
+import org.soybeanMilk.core.Constants;
 
 /**
  * 框架内部常用类。
@@ -211,7 +211,7 @@ public class SoybeanMilkUtils
 	{
 		String[] re=null;
 		
-		int idx=str.indexOf(WebConstants.ACCESSOR);
+		int idx=str.indexOf(Constants.ACCESSOR);
 		
 		if(idx < 0)
 			re=new String[]{str};

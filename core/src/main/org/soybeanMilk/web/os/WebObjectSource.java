@@ -28,6 +28,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
@@ -135,8 +136,6 @@ import org.soybeanMilk.web.bean.FilterAwareMap;
 public class WebObjectSource extends ConvertableObjectSource
 {
 	private static Log log = LogFactory.getLog(WebObjectSource.class);
-	
-	private static final char ACCESSOR=WebConstants.ACCESSOR;
 	
 	private HttpServletRequest request;
 	private HttpServletResponse response;
@@ -316,7 +315,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	 */
 	protected Object getObjectFromUnknownScope(String scope, String keyInScope, Type expectType)
 	{
-		throw new ObjectSourceException("key '"+(scope+ACCESSOR+keyInScope)+"' is invalid, get object from scope '"+scope+"' is not supported");
+		throw new ObjectSourceException("key '"+(scope+Constants.ACCESSOR+keyInScope)+"' is invalid, get object from scope '"+scope+"' is not supported");
 	}
 	
 	/**
@@ -328,7 +327,7 @@ public class WebObjectSource extends ConvertableObjectSource
 	 */
 	protected void setObjectToUnknownScope(String scope, String keyInScope, Object value)
 	{
-		throw new ObjectSourceException("key '"+(scope+ACCESSOR+keyInScope)+"' is invalid, set object into scope '"+scope+"' is not supported");
+		throw new ObjectSourceException("key '"+(scope+Constants.ACCESSOR+keyInScope)+"' is invalid, set object into scope '"+scope+"' is not supported");
 	}
 	
 	/**
@@ -472,7 +471,7 @@ public class WebObjectSource extends ConvertableObjectSource
 			else
 			{
 				explicitKey=false;
-				paramKeyFilter=paramKeyFilter+ACCESSOR;
+				paramKeyFilter=paramKeyFilter+Constants.ACCESSOR;
 			}
 			
 			src=new ParamFilterAwareMap<String, Object>(paramMap, paramKeyFilter, explicitKey);

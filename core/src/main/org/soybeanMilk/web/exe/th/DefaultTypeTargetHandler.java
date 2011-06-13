@@ -56,7 +56,7 @@ public class DefaultTypeTargetHandler implements TypeTargetHandler
 		if(target == null)
 		{
 			if(log.isDebugEnabled())
-				log.debug("the action "+webAction+" has not Target defined, handling is not needed.");
+				log.debug("the action "+webAction+" has no Target defined, handling is not needed.");
 			
 			return;
 		}

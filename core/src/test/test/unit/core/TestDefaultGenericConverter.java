@@ -601,6 +601,12 @@ public class TestDefaultGenericConverter
 		}
 	}
 	
+	@Test
+	public void getProperty_nullInput()
+	{
+		converter.getProperty(null, "age.size", null);
+	}
+	
 	@Test(expected = GenericConvertException.class)
 	public void getProperty_notExistProperty()
 	{

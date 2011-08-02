@@ -144,7 +144,8 @@ public class DefaultGenericConverter implements GenericConverter
 	public Object getProperty(Object srcObj, String propertyExpression, Type expectType)
 	{
 		if(srcObj == null)
-			throw new IllegalArgumentException("[srcObj] must not be null");
+			return null;
+		
 		if(propertyExpression==null || propertyExpression.length()==0)
 			throw new IllegalArgumentException("[propertyExpression] must not be empty");
 		
@@ -397,7 +398,7 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	/**
-	 * 获取属性值，中间属性不能为null。<br>
+	 * 获取属性值，如果中间属性为<code>null</code>，将直接返回<code>null</code>。<br>
 	 * 目前不支持中间属性是数组或集合类。
 	 * @param bean JavaBean对象
 	 * @param beanInfo 此对象的属性信息
@@ -412,7 +413,7 @@ public class DefaultGenericConverter implements GenericConverter
 		for(int i=0;i<propertyExpression.length;i++)
 		{
 			if(bean == null)
-				throw new GenericConvertException("can not get property '"+propertyExpression[i]+"' from null object");
+				break;
 			
 			tmpPropInfo = beanInfo.getSubPropertyInfo(propertyExpression[i]);
 			if(tmpPropInfo == null)

@@ -133,8 +133,8 @@ public abstract class AbstractTargetHandler implements TargetHandler
 	}
 	
 	/**
-	 * 获取目标的实际URL（URL中的变量已被取值），
-	 * 通常在{@linkplain #handleTarget(WebAction, WebObjectSource)}中你需要先调用此方法来获取实际的目标URL。
+	 * 获取目标的实际URL（URL中的变量已被具体值替换），
+	 * 在{@linkplain #handleTarget(WebAction, WebObjectSource)}中你通常需要先调用此方法来获取实际的目标URL。
 	 * @param webAction
 	 * @param objectSource
 	 * @return 目标URL，没有则返回<code>null</code>

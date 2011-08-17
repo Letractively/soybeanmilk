@@ -15,6 +15,7 @@
 package org.soybeanMilk.web;
 
 import org.soybeanMilk.core.Constants;
+import org.soybeanMilk.web.os.WebObjectSource;
 
 /**
  * WEB常量类。
@@ -68,7 +69,7 @@ public class WebConstants extends Constants
 	}
 	
 	/**
-	 * 框架的Web对象源支持的对象源作用域
+	 * 框架的{@linkplain WebObjectSource Web对象源}支持的作用域
 	 * @author earthAngry@gmail.com
 	 * @date 2010-10-7
 	 */

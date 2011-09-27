@@ -89,6 +89,26 @@ public class TestDefaultWebExecutor
 		Assert.assertEquals("test/aaa/1/bbb.jsp", ((MockHttpServletResponse)os.getResponse()).getForwardedUrl());
 	}
 	
+	@Test
+	public void testExecute_typeVariable() throws Exception
+	{
+		WebObjectSource os=createWebObjectSource();
+		MockHttpServletRequest request=(MockHttpServletRequest)os.getRequest();
+		
+		request.setParameter("typeVariable.id", "id");
+		request.setParameter("typeVariable.name", "name");
+		
+		try
+		{
+			webExecutor.execute("typeVariableTest", os);
+			//TestBean result=(TestBean)os.get("request.testResult", null);
+		}
+		catch(Exception e)
+		{
+			Assert.assertTrue( e.getMessage().endsWith("is not supported type") );
+		}
+	}
+	
 	protected WebObjectSource createWebObjectSource()
 	{
 		MockHttpServletRequest request=new MockHttpServletRequest();
@@ -114,13 +134,57 @@ public class TestDefaultWebExecutor
 		}
 	}
 	
-	public static class TestResolver
+	public static interface ResolverForTestInterface<T extends TestBean>
+	{
+		T typeVariableTest(T param);
+	}
+	
+	public static abstract class AbstractResolverForTest<T extends TestBean> implements ResolverForTestInterface<T>
+	{
+		public T typeVariableTest(T param)
+		{
+			return param;
+		}
+	}
+	
+	public static class TestResolver extends AbstractResolverForTest<TestBean>
 	{
 		public static final String RESULT="success";
 		
 		public String test()
 		{
 			return RESULT;
+		}
+	}
+	
+	public static class TestBean
+	{
+		private String id;
+		private String name;
+		
+		public TestBean()
+		{
+			super();
+		}
+		
+		public TestBean(String id, String name)
+		{
+			super();
+			this.id = id;
+			this.name = name;
+		}
+		
+		public String getId() {
+			return id;
+		}
+		public void setId(String id) {
+			this.id = id;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
 		}
 	}
 }

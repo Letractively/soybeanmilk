@@ -49,6 +49,9 @@ public class Invoke extends AbstractExecutable
 	/**调用方法，如果为静态方法，则调用源可以为null*/
 	private transient Method method;
 	
+	/**此调用方法所属的类*/
+	private Class<?> resolverClass;
+	
 	/**调用方法的参数*/
 	private Arg[] args;
 	
@@ -163,6 +166,19 @@ public class Invoke extends AbstractExecutable
 	}
 	
 	/**
+	 * 获取此调用方法所属的类
+	 * @return
+	 * @date 2011-9-29
+	 */
+	public Class<?> getResolverClass() {
+		return resolverClass;
+	}
+
+	public void setResolverClass(Class<?> resolverClass) {
+		this.resolverClass = resolverClass;
+	}
+
+	/**
 	 * 获取调用方法某个位置的{@linkplain Arg 参数}。
 	 * @param index
 	 * @return
@@ -188,6 +204,7 @@ public class Invoke extends AbstractExecutable
 		this.args = args;
 		this.resultKey = resultKey;
 		this.resolverProvider = resolverProvider;
+		this.resolverClass=(this.resolverProvider==null ? method.getDeclaringClass() : this.resolverProvider.getResolver().getClass()); 
 		
 		Class<?>[] mtdArgs=method.getParameterTypes();
 		if(mtdArgs!=null && mtdArgs.length!=0)

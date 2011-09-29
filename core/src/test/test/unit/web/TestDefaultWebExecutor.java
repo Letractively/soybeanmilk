@@ -2,6 +2,7 @@ package test.unit.web;
 
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 import javax.servlet.ServletException;
 
@@ -92,6 +93,11 @@ public class TestDefaultWebExecutor
 	@Test
 	public void testExecute_typeVariable() throws Exception
 	{
+		
+		Class<TestResolver> tc=TestResolver.class;
+		Type[] GenericInterfaces=tc.getGenericInterfaces();
+		Type GenericSuperclass=tc.getGenericSuperclass();
+		
 		WebObjectSource os=createWebObjectSource();
 		MockHttpServletRequest request=(MockHttpServletRequest)os.getRequest();
 		
@@ -147,7 +153,7 @@ public class TestDefaultWebExecutor
 		}
 	}
 	
-	public static class TestResolver extends AbstractResolverForTest<TestBean>
+	public static class TestResolver extends AbstractResolverForTest<TestBeanSub>
 	{
 		public static final String RESULT="success";
 		
@@ -187,4 +193,6 @@ public class TestDefaultWebExecutor
 			this.name = name;
 		}
 	}
+	
+	public static class TestBeanSub extends TestBean{}
 }

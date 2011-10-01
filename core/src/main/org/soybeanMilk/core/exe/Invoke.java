@@ -121,6 +121,25 @@ public class Invoke extends AbstractExecutable
 	{
 		init(name, method, args, resultKey, resolverProvider);
 	}
+	
+	/**
+	 * 初始化
+	 * @param name
+	 * @param method
+	 * @param args
+	 * @param resultKey
+	 * @param resolverProvider
+	 */
+	private void init(String name, Method method, Arg[] args, Serializable resultKey, ResolverProvider resolverProvider)
+	{
+		super.setName(name);
+		setMethod(method);
+		setResolverProvider(resolverProvider);
+		setResolverClass((this.resolverProvider==null ? method.getDeclaringClass() : this.resolverProvider.getResolver().getClass()));
+		setResultKey(resultKey);
+		setArgs(args);
+	}
+	
 
 	public ResolverProvider getResolverProvider() {
 		return resolverProvider;
@@ -140,17 +159,34 @@ public class Invoke extends AbstractExecutable
 	public void setMethod(Method method) {
 		this.method = method;
 	}
-
+	
 	/**
-	 * 获取此调用的方法{@linkplain Arg 参数}数组。
+	 * 获取此调用方法{@linkplain Arg 参数}数组。
 	 * @return
 	 * @date 2011-1-13
 	 */
 	public Arg[] getArgs() {
 		return args;
 	}
-	public void setArgs(Arg[] args) {
+	
+	/**
+	 * 设置调用方法{@linkplain Arg 参数}数组，它会自动查找并设置参数类型。
+	 * @param args
+	 * @date 2011-10-1
+	 */
+	public void setArgs(Arg[] args)
+	{
 		this.args = args;
+		
+		Type[] mtdArgs=method.getGenericParameterTypes();
+		if(mtdArgs!=null && mtdArgs.length!=0)
+		{
+			if(args==null || args.length!=mtdArgs.length)
+				throw new IllegalArgumentException("[args] length is not match with the [method] arguments length");
+			
+			for(int i=0;i<mtdArgs.length;i++)
+				args[i].setType(mtdArgs[i]);
+		}
 	}
 
 	/**
@@ -187,34 +223,6 @@ public class Invoke extends AbstractExecutable
 	public Arg getArg(int index)
 	{
 		return this.args[index];
-	}
-	
-	/**
-	 * 初始化
-	 * @param name
-	 * @param method
-	 * @param args
-	 * @param resultKey
-	 * @param resolverProvider
-	 */
-	private void init(String name, Method method, Arg[] args, Serializable resultKey, ResolverProvider resolverProvider)
-	{
-		super.setName(name);
-		this.method = method;
-		this.args = args;
-		this.resultKey = resultKey;
-		this.resolverProvider = resolverProvider;
-		this.resolverClass=(this.resolverProvider==null ? method.getDeclaringClass() : this.resolverProvider.getResolver().getClass()); 
-		
-		Class<?>[] mtdArgs=method.getParameterTypes();
-		if(mtdArgs!=null && mtdArgs.length!=0)
-		{
-			if(args==null || args.length!=mtdArgs.length)
-				throw new IllegalArgumentException("[args] length is not match with the [method] arguments length");
-			
-			for(int i=0;i<mtdArgs.length;i++)
-				args[i].setType(mtdArgs[i]);
-		}
 	}
 	
 	//@Override

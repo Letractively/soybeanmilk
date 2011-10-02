@@ -23,11 +23,13 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.ConvertExecuteException;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.InvocationExecuteException;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.bean.ConvertException;
+import org.soybeanMilk.core.bean.GenericType;
 
 /**
  * 调用，它包含执行方法（{@linkplain Method}对象）、方法的{@linkplain Arg 参数信息}、{@linkplain ResolverProvider 解决对象提供者}
@@ -77,7 +79,7 @@ public class Invoke extends AbstractExecutable
 	{
 		Object resObj=resolverProvider.getResolver();
 		if(resObj == null)
-			throw new NullPointerException("resolver object must not be null");
+			throw new IllegalArgumentException("resolver object must not be null");
 		
 		int argNums= args==null ? 0 : args.length;
 		
@@ -313,9 +315,14 @@ public class Invoke extends AbstractExecutable
 	{
 		Object re=null;
 		
+		//如果参数类型不是Class类，则需要转换为GenericType类，以使转换器能正确识别类型
+		Type argType=args[argIdx].getType();
+		if(!SoybeanMilkUtils.isClassType(argType))
+			argType=GenericType.getGenerictType(argType, this.resolverClass);
+		
 		try
 		{
-			re=objectSource.get(args[argIdx].getKey(), args[argIdx].getType());
+			re=objectSource.get(args[argIdx].getKey(), argType);
 		}
 		catch(ConvertException e)
 		{

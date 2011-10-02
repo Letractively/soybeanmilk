@@ -15,6 +15,7 @@
 package org.soybeanMilk.core.bean;
 
 import java.lang.reflect.Type;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 泛型类型元信息。<br>
@@ -36,7 +37,7 @@ public class GenericType implements Type
 	 * @param type 泛型类型
 	 * @param ownerClass 此泛型类型的拥有类
 	 */
-	public GenericType(Type type, Class<?> ownerClass)
+	private GenericType(Type type, Class<?> ownerClass)
 	{
 		super();
 		this.type = type;
@@ -145,5 +146,33 @@ public class GenericType implements Type
 		} else if (!type.equals(other.type))
 			return false;
 		return true;
+	}
+	
+	private static ConcurrentHashMap<Integer, GenericType> genericTypeCache=new ConcurrentHashMap<Integer, GenericType>();
+	
+	/**
+	 * 获取泛型类型对象
+	 * @param type 类型
+	 * @param ownerClass 所属类
+	 * @return
+	 * @date 2011-10-2
+	 */
+	public static GenericType getGenerictType(Type type, Class<?> ownerClass)
+	{
+		GenericType re=null;
+		
+		Integer key=1;
+		//修改自上面的hashCode方法
+		key = 31*key + ((ownerClass == null) ? 0 : ownerClass.hashCode());
+		key = 31*key + ((type == null) ? 0 : type.hashCode());
+		
+		re=genericTypeCache.get(key);
+		if(re == null)
+		{
+			re=new GenericType(type, ownerClass);
+			genericTypeCache.putIfAbsent(key, re);
+		}
+		
+		return re;
 	}
 }

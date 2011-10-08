@@ -142,7 +142,6 @@ public class Invoke extends AbstractExecutable
 		setArgs(args);
 	}
 	
-
 	public ResolverProvider getResolverProvider() {
 		return resolverProvider;
 	}

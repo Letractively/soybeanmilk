@@ -134,6 +134,8 @@ public class InvokeStatementParser
 			}
 		}
 		
+		invoke.setResolverClass(resolverClass);
+		
 		//移到'.'
 		setCurrentIdx(methodLeftDotIdx+1);
 		

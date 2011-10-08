@@ -78,7 +78,9 @@ public class DefaultGenericConverter implements GenericConverter
 	
 	protected static final Object[] EMPTY_ARGS={};
 	
-	private Map<Integer,Converter> converters;
+	protected static final String SEPRATOR="->";
+	
+	private Map<Object,Converter> converters;
 	
 	/**
 	 * 创建通用转换器，默认的辅助转换器将被添加
@@ -171,7 +173,7 @@ public class DefaultGenericConverter implements GenericConverter
 	public void addConverter(Type sourceType,Type targetType,Converter converter)
 	{
 		if(getConverters() == null)
-			setConverters(new HashMap<Integer, Converter>());
+			setConverters(new HashMap<Object, Converter>());
 		
 		getConverters().put(generateConverterKey(sourceType, targetType), converter);
 		
@@ -183,7 +185,7 @@ public class DefaultGenericConverter implements GenericConverter
 	public Converter getConverter(Type sourceType, Type targetType)
 	{
 		Converter re=null;
-		Map<Integer,Converter> converters=getConverters();
+		Map<Object,Converter> converters=getConverters();
 		
 		if(converters != null)
 		{
@@ -438,14 +440,9 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @param targetClass
 	 * @return
 	 */
-	protected Integer generateConverterKey(Type sourceType, Type targetType)
+	protected Object generateConverterKey(Type sourceType, Type targetType)
 	{
-		Integer key=1;
-		//修改自上面的hashCode方法
-		key = 31*key + ((sourceType == null) ? 0 : sourceType.hashCode());
-		key = 31*key + ((targetType == null) ? 0 : targetType.hashCode());
-		
-		return key;
+		return sourceType.toString()+SEPRATOR+targetType.toString();
 	}
 	
 	/**
@@ -482,11 +479,11 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 	}
 
-	protected Map<Integer, Converter> getConverters() {
+	protected Map<Object, Converter> getConverters() {
 		return converters;
 	}
 
-	protected void setConverters(Map<Integer, Converter> converters) {
+	protected void setConverters(Map<Object, Converter> converters) {
 		this.converters = converters;
 	}
 	

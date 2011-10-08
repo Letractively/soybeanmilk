@@ -563,6 +563,8 @@ public class ConfigurationParser
 			invoke.setResolverProvider(new FactoryResolverProvider(configuration.getResolverFactory(), resolverId));
 		}
 		
+		invoke.setResolverClass(resolverClass);
+		
 		Method method=Invoke.findMethodThrow(resolverClass, methodName, argNums);
 		
 		invoke.setName(name);

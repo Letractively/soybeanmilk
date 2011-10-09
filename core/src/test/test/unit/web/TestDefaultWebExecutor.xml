@@ -60,6 +60,14 @@
 			</invoke>
 		</action>
 		
+		<invoke name="genericArrayTest">
+			request.testResult=testResolver.genericArrayTest(param.genericArray);
+		</invoke>
+	
+		<invoke name="parameterizedTypeTest">
+			request.testResult=testResolver.parameterizedTypeTest(param.parameterizedType);
+		</invoke>
+		
 	</executables>
 	
 </soybean-milk>

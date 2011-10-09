@@ -675,6 +675,28 @@ public class TestWebGenericConverter
 		}
 	}
 	
+	@Test
+	public void convertMap_toGenericJavaBean()
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] id={"11"};
+		String[] property={"12", "13"};
+		
+		src.put("id", id);
+		src.put("property", property);
+		
+		GenericJavaBeanSub dest=(GenericJavaBeanSub)converter.convert(src, GenericJavaBeanSub.class);
+		
+		Assert.assertEquals(new Integer(id[0]), dest.getId());
+		
+		for(int i=0; i<property.length; i++)
+		{
+			Assert.assertEquals(new Double(property[i]), dest.getProperty().get(i));
+			Assert.assertEquals(new Double(property[i]), dest.getProperty().get(i));
+		}
+	}
+	
 	public static class JavaBean implements Comparable<JavaBean>
 	{
 		private String name;
@@ -862,4 +884,25 @@ public class TestWebGenericConverter
 			return re;
 		}
 	}
+	
+	public static class GenericJavaBean<T>
+	{
+		private Integer id;
+		private List<T> property;
+		
+		public Integer getId() {
+			return id;
+		}
+		public void setId(Integer id) {
+			this.id = id;
+		}
+		public List<T> getProperty() {
+			return property;
+		}
+		public void setProperty(List<T> property) {
+			this.property = property;
+		}
+	}
+	
+	public static class GenericJavaBeanSub extends GenericJavaBean<Double>{}
 }

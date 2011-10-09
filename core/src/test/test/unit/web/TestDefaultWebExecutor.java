@@ -2,6 +2,7 @@ package test.unit.web;
 
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.ServletException;
 
@@ -90,30 +91,80 @@ public class TestDefaultWebExecutor
 	}
 	
 	@Test
-	public void testExecute_typeVariable() throws Exception
+	public void testExecute_resolverClass_typeVariable() throws Exception
 	{
-		/*
-		Class<TestResolver> tc=TestResolver.class;
-		Type[] GenericInterfaces=tc.getGenericInterfaces();
-		Type GenericSuperclass=tc.getGenericSuperclass();
-		*/
-		
 		WebObjectSource os=createWebObjectSource();
 		MockHttpServletRequest request=(MockHttpServletRequest)os.getRequest();
 		
-		request.setParameter("typeVariable.id", "id");
-		request.setParameter("typeVariable.name", "name");
+		String id="my id";
+		String name="my name";
 		
-		try
+		request.setParameter("typeVariable.id", id);
+		request.setParameter("typeVariable.name", name);
+		
+		webExecutor.execute("typeVariableTest", os);
+		
+		TestBeanSub result=(TestBeanSub)os.get("request.testResult", null);
+		
+		Assert.assertEquals(result.getId(), id);
+		Assert.assertEquals(result.getName(), name);
+	}
+	
+	@Test
+	public void testExecute_resolverClass_genericArray() throws Exception
+	{
+		WebObjectSource os=createWebObjectSource();
+		MockHttpServletRequest request=(MockHttpServletRequest)os.getRequest();
+		
+		String[] id={"id-0", "id-1","id-2"};
+		String[] name={"name-0", "name-1", "name-2"};
+		
+		request.setParameter("genericArray.id", id);
+		request.setParameter("genericArray.name", name);
+		
+		webExecutor.execute("genericArrayTest", os);
+		
+		TestBeanSub[] result=(TestBeanSub[])os.get("request.testResult", null);
+		
+		Assert.assertEquals(id.length, result.length);
+		
+		for(int i=0; i<result.length; i++)
 		{
-			webExecutor.execute("typeVariableTest", os);
-			//TestBean result=(TestBean)os.get("request.testResult", null);
-		}
-		catch(Exception e)
-		{
-			Assert.assertTrue( e.getMessage().endsWith("is not supported type") );
+			TestBeanSub tbs=result[i];
+			
+			Assert.assertEquals(id[i], tbs.getId());
+			Assert.assertEquals(name[i], tbs.getName());
 		}
 	}
+	
+	@Test
+	public void testExecute_resolverClass_parameterizedType() throws Exception
+	{
+		WebObjectSource os=createWebObjectSource();
+		MockHttpServletRequest request=(MockHttpServletRequest)os.getRequest();
+		
+		String[] id={"id-0", "id-1","id-2"};
+		String[] name={"name-0", "name-1", "name-2"};
+		
+		request.setParameter("parameterizedType.id", id);
+		request.setParameter("parameterizedType.name", name);
+		
+		webExecutor.execute("parameterizedTypeTest", os);
+		
+		@SuppressWarnings("unchecked")
+		List<TestBeanSub> result=(List<TestBeanSub>)os.get("request.testResult", null);
+		
+		Assert.assertEquals(id.length, result.size());
+		
+		for(int i=0; i<result.size(); i++)
+		{
+			TestBeanSub tbs=result.get(i);
+			
+			Assert.assertEquals(id[i], tbs.getId());
+			Assert.assertEquals(name[i], tbs.getName());
+		}
+	}
+	
 	
 	protected WebObjectSource createWebObjectSource()
 	{
@@ -136,18 +187,31 @@ public class TestDefaultWebExecutor
 				IOException
 		{
 			webObjectSource.getResponse().setContentType(jsonHeader);
-			
 		}
 	}
 	
 	public static interface ResolverForTestInterface<T extends TestBean>
 	{
 		T typeVariableTest(T param);
+		
+		T[] genericArrayTest(T[] param);
+		
+		List<T> parameterizedTypeTest(List<T> param);
 	}
 	
 	public static abstract class AbstractResolverForTest<T extends TestBean> implements ResolverForTestInterface<T>
 	{
 		public T typeVariableTest(T param)
+		{
+			return param;
+		}
+
+		public T[] genericArrayTest(T[] param)
+		{
+			return param;
+		}
+
+		public List<T> parameterizedTypeTest(List<T> param)
 		{
 			return param;
 		}

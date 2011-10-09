@@ -20,6 +20,7 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.bean.GenericConvertException;
+import org.soybeanMilk.core.bean.GenericType;
 import org.soybeanMilk.web.bean.FilterAwareMap;
 import org.soybeanMilk.web.bean.ParamConvertException;
 import org.soybeanMilk.web.bean.WebGenericConverter;
@@ -433,7 +434,7 @@ public class TestWebGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertEquals("'"+List.class+"' is invalid, only generic List converting is supported", e.getMessage());
+			Assert.assertTrue( e.getMessage().endsWith("it has no javaBean property") );
 		}
 	}
 	
@@ -458,7 +459,7 @@ public class TestWebGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertEquals("'"+Set.class+"' is invalid, only generic Set converting is supported", e.getMessage());
+			Assert.assertTrue( e.getMessage().endsWith("it has no javaBean property") );
 		}
 	}
 	
@@ -484,7 +485,7 @@ public class TestWebGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertEquals("'"+type+"' is not valid, its raw type must be Class type", e.getMessage());
+			Assert.assertTrue( e.getMessage().startsWith("converting 'Map<String,?>' to") );
 		}
 	}
 	
@@ -510,7 +511,7 @@ public class TestWebGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertEquals("'"+type+"' is not valid, its actual type must be Class type", e.getMessage());
+			Assert.assertTrue( e.getMessage().startsWith("converting 'Map<String,?>' to") );
 		}
 	}
 	
@@ -559,7 +560,8 @@ public class TestWebGenericConverter
 			src.put("age", ages);
 			src.put("birth", births);
 			
-			List<JavaBean> dest=(List<JavaBean>)converter.convert(src, new MockParameterizedType(listClass, new Type[]{JavaBean.class}));
+			GenericType genericType=GenericType.getGenericType(new MockParameterizedType(listClass, new Type[]{JavaBean.class}), null);
+			List<JavaBean> dest=(List<JavaBean>)converter.convert(src, genericType);
 			
 			Assert.assertTrue( dest.size() == names.length);
 			
@@ -617,7 +619,9 @@ public class TestWebGenericConverter
 		src.put("age", ages);
 		src.put("birth", births);
 		
-		Set<JavaBean> dest=(Set<JavaBean>)converter.convert(src, new MockParameterizedType(setClass, new Type[]{JavaBean.class}));
+		GenericType genericType=GenericType.getGenericType(new MockParameterizedType(setClass, new Type[]{JavaBean.class}), null);
+		
+		Set<JavaBean> dest=(Set<JavaBean>)converter.convert(src, genericType);
 		
 		Assert.assertTrue( dest.size() == names.length);
 		

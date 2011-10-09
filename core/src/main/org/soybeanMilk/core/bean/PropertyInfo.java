@@ -36,6 +36,9 @@ public class PropertyInfo
 {
 	private static Log log = LogFactory.getLog(PropertyInfo.class);
 	
+	/**此属性的持有类*/
+	private Class<?> ownerClass;
+	
 	/**属性类型*/
 	private Class<?> type;
 	/**属性的泛型类型*/
@@ -49,18 +52,19 @@ public class PropertyInfo
 	
 	/**此属性的写方法*/
 	private Method writeMethod;
-
+	
 	/**此属性名*/
 	private String name;
 	
 	protected PropertyInfo(Class<?> propertyType)
 	{
-		this(propertyType, null, null, null);
+		this(null, propertyType, null, null, null);
 	}
 	
-	protected PropertyInfo(Class<?> type, String name, Method readMethod, Method writeMethod)
+	protected PropertyInfo(Class<?> ownerClass, Class<?> type, String name, Method readMethod, Method writeMethod)
 	{
 		super();
+		this.ownerClass=ownerClass;
 		this.type = type;
 		this.name=name;
 		this.readMethod = readMethod;
@@ -70,7 +74,19 @@ public class PropertyInfo
 			this.genericType=writeMethod.getGenericParameterTypes()[0];
 		else
 			this.genericType=type;
-		
+	}
+	
+	/**
+	 * 获取此属性的持有类
+	 * @return
+	 * @date 2011-10-9
+	 */
+	public Class<?> getOwnerClass() {
+		return ownerClass;
+	}
+
+	public void setOwnerClass(Class<?> ownerClass) {
+		this.ownerClass = ownerClass;
 	}
 	
 	/**
@@ -85,7 +101,7 @@ public class PropertyInfo
 	protected void setType(Class<?> type) {
 		this.type = type;
 	}
-
+	
 	/**
 	 * 获取属性的类型。它可能包含更多的信息，比如参数化类型。
 	 * @return
@@ -236,7 +252,6 @@ public class PropertyInfo
 			log.debug(getSpace(depth)+"start  anatomizing '"+beanClass.getName()+"' property information");
 		
 		PropertyInfo beanInfo=new PropertyInfo(beanClass);
-		beanInfo.setGenericType(beanClass);
 		
 		localExists.put(beanInfo.getType(), beanInfo);
 		
@@ -274,7 +289,7 @@ public class PropertyInfo
 					exist=getPropertyInfoAnatomized(propertyClazz, localExists, depth+1);
 				
 				//拷贝已缓存的并设置特有的读写方法和名称
-				PropertyInfo copied=new PropertyInfo(propertyClazz, name, rm, wm);
+				PropertyInfo copied=new PropertyInfo(beanClass, propertyClazz, name, rm, wm);
 				copied.setSubPropertyInfos(exist.getSubPropertyInfos());
 				
 				beanInfo.addSubPropertyInfo(copied);

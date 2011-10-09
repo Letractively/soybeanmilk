@@ -1,5 +1,6 @@
 package test.unit.core;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
@@ -14,6 +15,7 @@ import org.junit.Test;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
+import org.soybeanMilk.core.bean.GenericType;
 
 import test.unit.web.MockParameterizedType;
 
@@ -486,7 +488,8 @@ public class TestDefaultGenericConverter
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
-		List<Integer> dest=(List<Integer>)converter.convert(src, new MockParameterizedType(List.class, Integer.class));
+		Type targetType=GenericType.getGenericType(new MockParameterizedType(List.class, Integer.class), null);
+		List<Integer> dest=(List<Integer>)converter.convert(src, targetType);
 		
 		for(int i=0;i<src.length;i++)
 		{
@@ -507,7 +510,7 @@ public class TestDefaultGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertTrue( e.getMessage().endsWith("only generic List converting is supported") );
+			Assert.assertTrue( e.getMessage().startsWith("can not find Converter for converting") );
 		}
 	}
 	
@@ -517,7 +520,8 @@ public class TestDefaultGenericConverter
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
-		Set<Integer> dest=(Set<Integer>)converter.convert(src, new MockParameterizedType(Set.class, Integer.class));
+		Type targetType=GenericType.getGenericType(new MockParameterizedType(Set.class, Integer.class), null);
+		Set<Integer> dest=(Set<Integer>)converter.convert(src, targetType);
 		
 		Assert.assertTrue( dest.size() == src.length );
 	}
@@ -535,7 +539,7 @@ public class TestDefaultGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertTrue( e.getMessage().endsWith("only generic Set converting is supported") );
+			Assert.assertTrue( e.getMessage().startsWith("can not find Converter for converting") );
 		}
 	}
 	

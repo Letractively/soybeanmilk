@@ -317,7 +317,7 @@ public class Invoke extends AbstractExecutable
 		//如果参数类型不是Class类，则需要转换为GenericType类，以使转换器能正确识别类型
 		Type argType=args[argIdx].getType();
 		if(!SoybeanMilkUtils.isClassType(argType))
-			argType=GenericType.getGenerictType(argType, this.resolverClass);
+			argType=GenericType.getGenericType(argType, this.resolverClass);
 		
 		try
 		{

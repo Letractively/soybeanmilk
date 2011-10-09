@@ -29,6 +29,7 @@ import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
+import org.soybeanMilk.core.bean.GenericType;
 import org.soybeanMilk.core.bean.PropertyInfo;
 import org.soybeanMilk.web.os.WebObjectSource.ParamFilterAwareMap;
 
@@ -76,12 +77,14 @@ public class WebGenericConverter extends DefaultGenericConverter
 	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
 	{
 		//如果源对象是数组并且长度为1，而目标类型不是，则使用数组的第一个元素转换
-		if(sourceObj.getClass().isArray()
+		if(SoybeanMilkUtils.isArray(sourceObj.getClass())
 				&& Array.getLength(sourceObj)==1
-				&& !SoybeanMilkUtils.isClassTypeArray(targetType))
+				&& SoybeanMilkUtils.isClassType(targetType)
+				&& !SoybeanMilkUtils.isArray((Class<?>)targetType))
 		{
 			if(log.isDebugEnabled())
-				log.debug("the src '"+getStringDesc(sourceObj)+"' is an array with length 1, it's first element will be used for converting");
+				log.debug("the src '"+getStringDesc(sourceObj)
+						+"' is an array with length 1 and the target type is not array, so it's first element will be used for converting");
 			
 			sourceObj=Array.get(sourceObj, 0);
 			
@@ -110,10 +113,12 @@ public class WebGenericConverter extends DefaultGenericConverter
 		
 		Object result = null;
 		
+		boolean canConvert=true;
 		//是否是参数映射表，只有参数映射表才需要特殊异常处理
 		boolean isParamMap= (sourceMap instanceof ParamFilterAwareMap<?, ?>);
 		
-		if(sourceMap==null || sourceMap.isEmpty())//空元素的映射表作为null处理
+		//空的映射表作为null处理
+		if(sourceMap==null || sourceMap.isEmpty())
 		{
 			result=convert(null, targetType);
 		}
@@ -133,38 +138,63 @@ public class WebGenericConverter extends DefaultGenericConverter
 			else
 				result=convert(sourceMap.get(FilterAwareMap.EXPLICIT_KEY), targetType);
 		}
-		else
+		else if(targetType instanceof GenericType)
 		{
-			Class<?>[] actualTypes=SoybeanMilkUtils.getActualClassTypeInfo(targetType);
+			GenericType genericType=(GenericType)targetType;
 			
-			if(SoybeanMilkUtils.isArray(actualTypes[0]))//array
+			if(genericType.isParameterizedType())
 			{
-				result=convertMapToJavaBeanArray(sourceMap, actualTypes[0].getComponentType());
-			}
-			else if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))//List
-			{
-				if(actualTypes.length != 2)
-					throw new GenericConvertException("'"+targetType+"' is invalid, only generic List converting is supported");
+				Class<?> actualClass=genericType.getActualClass();
+				Class<?>[] argClasses=genericType.getParamClasses();
 				
-				result=convertArrayToList(convertMapToJavaBeanArray(sourceMap, actualTypes[1]), actualTypes[0]);
+				//List<T>
+				if(SoybeanMilkUtils.isAncestorClass(List.class, actualClass))
+				{
+					result=convertArrayToList(convertMapToJavaBeanArray(sourceMap, argClasses[0]), actualClass);
+				}
+				//Set<T>
+				else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualClass))
+				{
+					result=convertArrayToSet(convertMapToJavaBeanArray(sourceMap, argClasses[0]), actualClass);
+				}
+				else
+					canConvert=false;
 			}
-			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualTypes[0]))//Set
+			//T[]
+			else if(genericType.isGenericArrayType())
 			{
-				if(actualTypes.length != 2)
-					throw new GenericConvertException("'"+targetType+"' is invalid, only generic Set converting is supported");
-				
-				result=convertArrayToSet(convertMapToJavaBeanArray(sourceMap, actualTypes[1]), actualTypes[0]);
+				Class<?> componentClass=genericType.getComponentClass();
+				result=convertMapToJavaBeanArray(sourceMap, componentClass);
 			}
-			else if(SoybeanMilkUtils.isAncestorClass(Collection.class, actualTypes[0]))//不支持的集合类
+			//T
+			else if(genericType.isTypeVariable())
 			{
-				throw new GenericConvertException("converting 'Map<String,?>' to '"+targetType+"' is not supported");
+				Class<?> actualClass=genericType.getActualClass();
+				result=convert(sourceMap, actualClass);
 			}
-			else//JavaBean
+			//? extends SomeType
+			else if(genericType.isWildcardType())
 			{
-				PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(actualTypes[0]);
+				Class<?> actualClass=genericType.getActualClass();
+				result=convert(sourceMap, actualClass);
+			}
+			else
+				canConvert=false;
+		}
+		else if(targetType instanceof Class<?>)
+		{
+			Class<?> targetClass=(Class<?>)targetType;
+			
+			//数组
+			if(SoybeanMilkUtils.isArray(targetClass))
+				result=convertMapToJavaBeanArray(sourceMap, targetClass.getComponentType());
+			//JavaBean
+			else
+			{
+				PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(targetClass);
 				
 				if(!beanInfo.hasSubPropertyInfo())
-					throw new GenericConvertException("the target javaBean Class '"+actualTypes[0]+"' is not valid, it has no javaBean property");
+					throw new GenericConvertException("the target javaBean Class '"+targetClass+"' is not valid, it has no javaBean property");
 				
 				Map<String, Boolean> collectionPropertyProcessed=new HashMap<String, Boolean>();
 				
@@ -237,6 +267,11 @@ public class WebGenericConverter extends DefaultGenericConverter
 				}
 			}
 		}
+		else
+			canConvert=false;
+		
+		if(!canConvert)
+			throw new GenericConvertException("converting 'Map<String,?>' to '"+targetType+"' is not supported");
 		
 		return result;
 	}

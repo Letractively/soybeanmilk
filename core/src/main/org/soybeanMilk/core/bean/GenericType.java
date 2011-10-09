@@ -14,6 +14,7 @@
 
 package org.soybeanMilk.core.bean;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -25,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 泛型类型元信息。<br>
- * 它封装泛型类型的持有类信息，使用者仅通过此类即可解析任何泛型对象。
+ * 它同时封装泛型类型的持有类信息，使用者仅通过此类即可解析任何泛型对象。
  * @author earthAngry@gmail.com
  * @date 2011-9-29
  *
@@ -50,10 +51,12 @@ public class GenericType implements Type
 	private Class<?> actualClass;
 	
 	/**参数类型*/
-	private Type[] paramTypes;
+	private Class<?>[] paramClasses;
 	
 	/**数组元素类型*/
-	private Type componentType;
+	private Class<?> componentClass;
+	
+	private Map<TypeVariable<?>, Type> ownerClassTypeVariables;
 	
 	/**
 	 * 创建泛型类型元信息对象
@@ -66,29 +69,35 @@ public class GenericType implements Type
 		this.type = type;
 		this.ownerClass = ownerClass;
 		
+		this.ownerClassTypeVariables=new HashMap<TypeVariable<?>, Type>();
+		extractTypeVariablesInType(this.ownerClass, this.ownerClassTypeVariables);
+		
 		if(this.type instanceof TypeVariable<?>)
 		{
 			this.typeFlag=TYPE_TypeVariable;
-			
-			TypeVariable<?> tv=(TypeVariable<?>)this.type;
+			this.actualClass=getTypeVariableActualClass((TypeVariable<?>)this.type);
 		}
 		else if(this.type instanceof ParameterizedType)
 		{
 			this.typeFlag=TYPE_ParameterizedType;
 			
 			ParameterizedType pt=(ParameterizedType)this.type;
+			
+			this.actualClass=getParameterizedTypeActualRawClass(pt);
+			this.paramClasses=getParameterizedTypeActualParamClasses(pt);
 		}
 		else if(this.type instanceof GenericArrayType)
 		{
 			this.typeFlag=TYPE_GenericArrayType;
 			
-			GenericArrayType ga=(GenericArrayType)this.type;
+			this.actualClass=evaluateGenericTypeAcualClass(this.type);
+			this.componentClass=getGenericArrayTypeActualComponentClass((GenericArrayType)this.type);
 		}
 		else if(this.type instanceof WildcardType)
 		{
 			this.typeFlag=TYPE_WildcardType;
 			
-			WildcardType wt=(WildcardType)this.type;
+			this.actualClass=getWildcardTypeActualClass((WildcardType)this.type);
 		}
 		else
 			throw new IllegalArgumentException("unknown type '"+type+"'");
@@ -131,7 +140,7 @@ public class GenericType implements Type
 	 */
 	public Class<?> getActualClass()
 	{
-		return null;
+		return this.actualClass;
 	}
 	
 	/**
@@ -139,9 +148,9 @@ public class GenericType implements Type
 	 * @return
 	 * @date 2011-10-1
 	 */
-	public Type[] getParamTypes()
+	public Class<?>[] getParamClasses()
 	{
-		return null;
+		return this.paramClasses;
 	}
 	
 	/**
@@ -149,19 +158,9 @@ public class GenericType implements Type
 	 * @return
 	 * @date 2011-10-1
 	 */
-	public Type getActualComponentType()
+	public Class<?> getComponentClass()
 	{
-		return null;
-	}
-	
-	/**
-	 * 此泛型类型是否为数组
-	 * @return
-	 * @date 2011-10-1
-	 */
-	public boolean isArray()
-	{
-		return false;
+		return this.componentClass;
 	}
 	
 	/**
@@ -204,50 +203,166 @@ public class GenericType implements Type
 		return TYPE_WildcardType == this.typeFlag;
 	}
 	
-	@Override
-	public int hashCode()
+	protected Class<?> getTypeVariableActualClass(TypeVariable<?> typeVariable)
 	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((ownerClass == null) ? 0 : ownerClass.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		return result;
-	}
-	
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		GenericType other = (GenericType) obj;
-		if (ownerClass == null) {
-			if (other.ownerClass != null)
-				return false;
-		} else if (!ownerClass.equals(other.ownerClass))
-			return false;
-		if (type == null) {
-			if (other.type != null)
-				return false;
-		} else if (!type.equals(other.type))
-			return false;
-		return true;
-	}
-	
-	protected Map<TypeVariable<?>, Type> extractTypeVariableInClass(Class<?> clazz)
-	{
-		Map<TypeVariable<?>, Type> re=new HashMap<TypeVariable<?>, Type>();
+		Class<?> re=null;
 		
+		Type tp=ownerClassTypeVariables.get(typeVariable);
 		
+		//找不到，则使用上限类型再次解析
+		if(tp == null)
+		{
+			Type[] upperBounds=typeVariable.getBounds();
+			if(upperBounds!=null && upperBounds.length>=1)
+				tp=upperBounds[0];
+		}
+		
+		re=evaluateGenericTypeAcualClass(tp);
 		
 		return re;
 	}
 	
-	private static ConcurrentHashMap<String, GenericType> genericTypeCache=new ConcurrentHashMap<String, GenericType>();
+	protected Class<?> getGenericArrayTypeActualComponentClass(GenericArrayType gat)
+	{
+		Class<?> re=null;
+		
+		Type tp=gat.getGenericComponentType();
+		re=evaluateGenericTypeAcualClass(tp);
+		
+		return re;
+	}
+	
+	protected Class<?>[] getParameterizedTypeActualParamClasses(ParameterizedType pt)
+	{
+		Class<?>[] re=null;
+		
+		Type[] tps=pt.getActualTypeArguments();
+		if(tps!=null)
+		{
+			re=new Class<?>[tps.length];
+			for(int i=0; i<tps.length; i++)
+				re[i]=evaluateGenericTypeAcualClass(tps[i]);
+		}
+		
+		return re;
+	}
+	
+	protected Class<?> getParameterizedTypeActualRawClass(ParameterizedType pt)
+	{
+		Type tp=pt.getRawType();
+		
+		return evaluateGenericTypeAcualClass(tp);
+	}
+	
+	protected Class<?> getWildcardTypeActualClass(WildcardType pt)
+	{
+		Class<?> re=null;
+		
+		//通配符只能使用上限类型
+		Type tp=null;
+		Type[] upperBounds=pt.getUpperBounds();
+		if(upperBounds!=null && upperBounds.length>=1)
+			tp=upperBounds[0];
+		
+		re=evaluateGenericTypeAcualClass(tp);
+		
+		return re;
+	}
+	
+	protected Class<?> evaluateGenericTypeAcualClass(Type type)
+	{
+		Class<?> re=null;
+		
+		//找不到对应类型，设置为Object.class
+		if(type == null)
+		{
+			re=Object.class;
+		}
+		else if(type instanceof Class<?>)
+		{
+			re=(Class<?>)type;
+		}
+		else if(type instanceof WildcardType)
+		{
+			re=getWildcardTypeActualClass((WildcardType)type);
+		}
+		else if(type instanceof TypeVariable<?>)
+		{
+			re=getTypeVariableActualClass((TypeVariable<?>)type);
+		}
+		else if(type instanceof ParameterizedType)
+		{
+			re=getParameterizedTypeActualRawClass((ParameterizedType)type);
+		}
+		else if(type instanceof GenericArrayType)
+		{
+			re=getGenericArrayTypeActualComponentClass((GenericArrayType)type);
+			re=Array.newInstance(re, 0).getClass();
+		}
+		else
+			throw new IllegalArgumentException("unknown generic type '"+type+"'");
+		
+		return re;
+	}
+	
+	protected void extractTypeVariablesInType(Type source, Map<TypeVariable<?>, Type> container)
+	{
+		if(source == null)
+			return;
+		else if(source instanceof Class<?>)
+		{
+			Class<?> clazz=(Class<?>)source;
+			
+			//实现的接口
+			Type[] genericInterfaces=clazz.getGenericInterfaces();
+			if(genericInterfaces != null)
+			{
+				for(Type t : genericInterfaces)
+					extractTypeVariablesInType(t, container);
+			}
+			
+			//父类
+			Type genericSuperType=clazz.getGenericSuperclass();
+			Class<?> superClass = clazz.getSuperclass();
+			while(superClass != null && !Object.class.equals(superClass))
+			{
+				extractTypeVariablesInType(genericSuperType, container);
+				
+				genericSuperType = superClass.getGenericSuperclass();
+				superClass = superClass.getSuperclass();
+			}
+			
+			//外部类
+			Class<?> outerClass=clazz;
+			while(outerClass.isMemberClass())
+			{
+				Type genericOuterType=outerClass.getGenericSuperclass();
+				extractTypeVariablesInType(genericOuterType, container);
+				
+				outerClass=outerClass.getEnclosingClass();
+			}
+		}
+		else if(source instanceof ParameterizedType)
+		{
+			ParameterizedType pt=(ParameterizedType)source;
+			
+			if(pt.getRawType() instanceof Class<?>)
+			{
+				Type[] actualArgTypes=pt.getActualTypeArguments();
+				TypeVariable<?>[] typeVariables=((Class<?>)pt.getRawType()).getTypeParameters();
+				
+				for(int i=0; i<actualArgTypes.length;i++)
+				{
+					TypeVariable<?> tv=typeVariables[i];
+					Type tvType=actualArgTypes[i];
+					
+					container.put(tv, tvType);
+				}
+			}
+		}
+	}
+	
+	private static ConcurrentHashMap<GenericTypeKey, GenericType> genericTypeCache=new ConcurrentHashMap<GenericTypeKey, GenericType>();
 	
 	/**
 	 * 获取泛型类型对象
@@ -256,14 +371,14 @@ public class GenericType implements Type
 	 * @return
 	 * @date 2011-10-2
 	 */
-	public static GenericType getGenerictType(Type type, Class<?> ownerClass)
+	public static GenericType getGenericType(Type type, Class<?> ownerClass)
 	{
 		if(type instanceof Class<?>)
 			throw new IllegalArgumentException("'"+type.toString()+"' is Class type, no generic type info");
 		
 		GenericType re=null;
 		
-		String key=type.toString()+"->"+ownerClass.toString();
+		GenericTypeKey key=new GenericTypeKey(type, ownerClass);
 		
 		re=genericTypeCache.get(key);
 		if(re == null)
@@ -273,5 +388,57 @@ public class GenericType implements Type
 		}
 		
 		return re;
+	}
+	
+	/**
+	 * 用于泛型类型映射表中主键的类
+	 * @author earthAngry@gmail.com
+	 * @date 2011-10-8
+	 */
+	protected static class GenericTypeKey
+	{
+		private Type type;
+		private Class<?> ownerClass;
+		
+		public GenericTypeKey(Type type, Class<?> ownerClass)
+		{
+			super();
+			this.type = type;
+			this.ownerClass = ownerClass;
+		}
+		
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((ownerClass == null) ? 0 : ownerClass.hashCode());
+			result = prime * result + ((type == null) ? 0 : type.hashCode());
+			return result;
+		}
+		
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			GenericTypeKey other = (GenericTypeKey) obj;
+			if (ownerClass == null) {
+				if (other.ownerClass != null)
+					return false;
+			} else if (!ownerClass.equals(other.ownerClass))
+				return false;
+			if (type == null) {
+				if (other.type != null)
+					return false;
+			} else if (!type.equals(other.type))
+				return false;
+			return true;
+		}
 	}
 }

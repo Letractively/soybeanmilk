@@ -14,11 +14,7 @@
 
 package org.soybeanMilk;
 
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -160,72 +156,6 @@ public class SoybeanMilkUtils
             return Character.class;
         else
             return type;
-	}
-	
-	/**
-	 * 获取类型实际的{@linkplain java.lang.Class Class}类型。<br>
-	 * <ul>
-	 * 	<li>
-	 * 		如果<code>type</code>是{@linkplain java.lang.Class Class}类型，则结果是包含仅包含它一个元素的数组
-	 * 	</li>
-	 * 	<li>
-	 * 		如果是{@linkplain java.lang.reflect.ParameterizedType ParameterizedType}类型，
-	 * 		则返回数组的第一个元素是它的原始类型，而后续的元素则是参数类型
-	 * 	</li>
-	 * 	<li>
-	 * 		如果是{@linkplain java.lang.reflect.TypeVariable TypeVariable}类型，则返回仅包含其实际类型一个元素的数组
-	 * 	</li>
-	 * 	<li>
-	 * 		如果是无法识别的类型，则会抛出异常
-	 * 	</li>
-	 * </ul>
-	 * @param type
-	 * @return
-	 * @date 2011-1-3
-	 */
-	public static Class<?>[] getActualClassTypeInfo(Type type)
-	{
-		Class<?>[] re=null;
-		
-		if(isInstanceOf(type, Class.class))
-			re=new Class<?>[]{ narrowToClassType(type) };
-		else if(isInstanceOf(type, ParameterizedType.class))
-		{
-			ParameterizedType paramType=(ParameterizedType)type;
-			Type[] ats=paramType.getActualTypeArguments();
-			
-			if(!SoybeanMilkUtils.isClassType(paramType.getRawType()))
-				throw new IllegalArgumentException("'"+type+"' is not valid, its raw type must be Class type");
-			
-			re=new Class<?>[1+ats.length];
-			re[0]=SoybeanMilkUtils.narrowToClassType(paramType.getRawType());
-			
-			for(int i=0;i<ats.length;i++)
-			{
-				if(!isClassType(ats[i]))
-					throw new IllegalArgumentException("'"+type+"' is not valid, its actual type must be Class type");
-				
-				re[i+1]=narrowToClassType(ats[i]);
-			}
-		}
-		else if(isInstanceOf(type, TypeVariable.class))
-		{
-			// TODO 添加此类型支持
-			throw new IllegalArgumentException("'"+type+"' is not supported type");
-		}
-		else if(isInstanceOf(type, GenericArrayType.class))
-		{
-			// TODO 添加此类型支持
-			throw new IllegalArgumentException("'"+type+"' is not supported type");
-		}
-		else if(isInstanceOf(type, WildcardType.class))
-		{
-			throw new IllegalArgumentException("'"+type+"' is not supported type");
-		}
-		else
-			throw new IllegalArgumentException("'"+type+"' is not supported type");
-		
-		return re;
 	}
 	
 	/**

@@ -78,9 +78,7 @@ public class DefaultGenericConverter implements GenericConverter
 	
 	protected static final Object[] EMPTY_ARGS={};
 	
-	protected static final String SEPRATOR="->";
-	
-	private Map<Object,Converter> converters;
+	private Map<ConverterKey,Converter> converters;
 	
 	/**
 	 * 创建通用转换器，默认的辅助转换器将被添加
@@ -173,7 +171,7 @@ public class DefaultGenericConverter implements GenericConverter
 	public void addConverter(Type sourceType,Type targetType,Converter converter)
 	{
 		if(getConverters() == null)
-			setConverters(new HashMap<Object, Converter>());
+			setConverters(new HashMap<ConverterKey, Converter>());
 		
 		getConverters().put(generateConverterKey(sourceType, targetType), converter);
 		
@@ -185,7 +183,7 @@ public class DefaultGenericConverter implements GenericConverter
 	public Converter getConverter(Type sourceType, Type targetType)
 	{
 		Converter re=null;
-		Map<Object,Converter> converters=getConverters();
+		Map<ConverterKey,Converter> converters=getConverters();
 		
 		if(converters != null)
 		{
@@ -218,38 +216,73 @@ public class DefaultGenericConverter implements GenericConverter
 			re= (sourceObj instanceof String) ?
 					Enum.valueOf(enumClass, (String)sourceObj) : Enum.valueOf(enumClass, sourceObj.toString());
 		}
-		else if(sourceObj.getClass().isArray())
+		else
 		{
-			Class<?>[] actualTypes=SoybeanMilkUtils.getActualClassTypeInfo(targetType);
-			
-			if(SoybeanMilkUtils.isArray(actualTypes[0]))
+			if(SoybeanMilkUtils.isArray(sourceObj.getClass()))
 			{
-				re=convertArrayToArray(sourceObj, actualTypes[0].getComponentType());
-			}
-			else if(SoybeanMilkUtils.isAncestorClass(List.class, actualTypes[0]))
-			{
-				if(actualTypes.length != 2)
-					throw new GenericConvertException("'"+targetType+"' is invalid, only generic List converting is supported");
-				
-				re=convertArrayToList(convertArrayToArray(sourceObj, actualTypes[1]), actualTypes[0]);
-			}
-			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualTypes[0]))
-			{
-				if(actualTypes.length != 2)
-					throw new GenericConvertException("'"+targetType+"' is invalid, only generic Set converting is supported");
-				
-				re=convertArrayToSet(convertArrayToArray(sourceObj, actualTypes[1]), actualTypes[0]);
+				if(targetType instanceof GenericType)
+				{
+					GenericType genericType=(GenericType)targetType;
+					
+					if(genericType.isParameterizedType())
+					{
+						Class<?> actualClass=genericType.getActualClass();
+						Class<?>[] argClasses=genericType.getParamClasses();
+						
+						//List<T>
+						if(SoybeanMilkUtils.isAncestorClass(List.class, actualClass))
+						{
+							re=convertArrayToList(convertArrayToArray(sourceObj, argClasses[0]), actualClass);
+						}
+						//Set<T>
+						else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualClass))
+						{
+							re=convertArrayToSet(convertArrayToArray(sourceObj, argClasses[0]), actualClass);
+						}
+						else
+							canConvert=false;
+					}
+					//T[]
+					else if(genericType.isGenericArrayType())
+					{
+						Class<?> componentClass=genericType.getComponentClass();
+						re=convertArrayToArray(sourceObj, componentClass);
+					}
+					//T
+					else if(genericType.isTypeVariable())
+					{
+						Class<?> actualClass=genericType.getActualClass();
+						re=convert(sourceObj, actualClass);
+					}
+					//? extends SomeType
+					else if(genericType.isWildcardType())
+					{
+						Class<?> actualClass=genericType.getActualClass();
+						re=convert(sourceObj, actualClass);
+					}
+					else
+						canConvert=false;
+				}
+				else if(targetType instanceof Class<?>)
+				{
+					Class<?> targetClass=(Class<?>)targetType;
+					
+					if(SoybeanMilkUtils.isArray(targetClass))
+						re=convertArrayToArray(sourceObj, targetClass.getComponentType());
+					else
+						canConvert=false;
+				}
+				else
+					canConvert=false;
 			}
 			else
 				canConvert=false;
 		}
-		else
-			canConvert=false;
 		
-		if(canConvert)
-			return re;
-		else
+		if(!canConvert)
 			throw new GenericConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetType+"'");
+		
+		return re;
 	}
 	
 	/**
@@ -347,7 +380,11 @@ public class DefaultGenericConverter implements GenericConverter
 		//自上而下递归，到达末尾时初始化和写入
 		if(index == propertyExpressionArray.length-1)
 		{
-			Object destValue=convert(value, propertyInfo.getGenericType());
+			Type targetType=propertyInfo.getGenericType();
+			if(!SoybeanMilkUtils.isClassType(targetType))
+				targetType=GenericType.getGenericType(targetType, propertyInfo.getOwnerClass());
+			
+			Object destValue=convert(value, targetType);
 			try
 			{
 				propertyInfo.getWriteMethod().invoke(bean, new Object[]{destValue});
@@ -440,9 +477,9 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @param targetClass
 	 * @return
 	 */
-	protected Object generateConverterKey(Type sourceType, Type targetType)
+	protected ConverterKey generateConverterKey(Type sourceType, Type targetType)
 	{
-		return sourceType.toString()+SEPRATOR+targetType.toString();
+		return new ConverterKey(sourceType, targetType);
 	}
 	
 	/**
@@ -479,11 +516,11 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 	}
 
-	protected Map<Object, Converter> getConverters() {
+	protected Map<ConverterKey, Converter> getConverters() {
 		return converters;
 	}
 
-	protected void setConverters(Map<Object, Converter> converters) {
+	protected void setConverters(Map<ConverterKey, Converter> converters) {
 		this.converters = converters;
 	}
 	
@@ -578,6 +615,59 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 		
 		return re.toString();
+	}
+	
+	/**
+	 * 用于转换器映射表中主键的类
+	 * @author earthAngry@gmail.com
+	 * @date 2011-10-8
+	 */
+	protected static class ConverterKey
+	{
+		private Type sourceType;
+		private Type targetType;
+		
+		public ConverterKey(Type sourceType, Type targetType)
+		{
+			super();
+			this.sourceType = sourceType;
+			this.targetType = targetType;
+		}
+		
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((sourceType == null) ? 0 : sourceType.hashCode());
+			result = prime * result
+					+ ((targetType == null) ? 0 : targetType.hashCode());
+			return result;
+		}
+		
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ConverterKey other = (ConverterKey) obj;
+			if (sourceType == null) {
+				if (other.sourceType != null)
+					return false;
+			} else if (!sourceType.equals(other.sourceType))
+				return false;
+			if (targetType == null) {
+				if (other.targetType != null)
+					return false;
+			} else if (!targetType.equals(other.targetType))
+				return false;
+			return true;
+		}
 	}
 	
 	/**

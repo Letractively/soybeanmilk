@@ -205,17 +205,17 @@ public class TestDefaultExecutor
 			HashMapObjectSource os=new HashMapObjectSource();
 			os.set("list", new ArrayList<String>());
 			
-			Exception e=null;
+			Exception re=null;
 			try
 			{
 				executor.execute("helloParameterized", os);
 			}
 			catch(Exception e1)
 			{
-				e=e1;
+				re=e1;
 			}
 			
-			Assert.assertTrue( e.getMessage().startsWith("can not find Converter for converting '") );
+			Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting '") );
 		}
 	}
 	

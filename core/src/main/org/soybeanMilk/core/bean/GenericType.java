@@ -75,6 +75,7 @@ public class GenericType implements Type
 		if(this.type instanceof TypeVariable<?>)
 		{
 			this.typeFlag=TYPE_TypeVariable;
+			
 			this.actualClass=getTypeVariableActualClass((TypeVariable<?>)this.type);
 		}
 		else if(this.type instanceof ParameterizedType)

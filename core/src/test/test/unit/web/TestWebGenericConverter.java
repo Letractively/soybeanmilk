@@ -26,6 +26,8 @@ import org.soybeanMilk.web.bean.ParamConvertException;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 import org.soybeanMilk.web.os.WebObjectSource.ParamFilterAwareMap;
 
+import test.unit.core.MockParameterizedType;
+
 public class TestWebGenericConverter
 {
 	private WebGenericConverter converter;
@@ -309,6 +311,7 @@ public class TestWebGenericConverter
 		src.put("age", age);
 		src.put("birth", birth);
 		
+		Exception re=null;
 		try
 		{
 			JavaBean dest=(JavaBean)converter.convert(src, JavaBean.class);
@@ -316,8 +319,10 @@ public class TestWebGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertTrue( e.getMessage().startsWith("can not find Converter for converting") );
+			re=e;
 		}
+		
+		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
 	}
 	
 	@Test
@@ -427,6 +432,7 @@ public class TestWebGenericConverter
 		src.put("age", ages);
 		src.put("birth", births);
 		
+		Exception re=null;
 		try
 		{
 			List<JavaBean> dest=(List<JavaBean>)converter.convert(src, List.class);
@@ -434,8 +440,10 @@ public class TestWebGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertTrue( e.getMessage().endsWith("it has no javaBean property") );
+			re=e;
 		}
+		
+		Assert.assertTrue( re.getMessage().endsWith("it has no javaBean property") );
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -452,6 +460,7 @@ public class TestWebGenericConverter
 		src.put("age", ages);
 		src.put("birth", births);
 		
+		Exception re=null;
 		try
 		{
 			Set<JavaBean> dest=(Set<JavaBean>)converter.convert(src, Set.class);
@@ -459,13 +468,14 @@ public class TestWebGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertTrue( e.getMessage().endsWith("it has no javaBean property") );
+			re=e;
 		}
+		
+		Assert.assertTrue( re.getMessage().endsWith("it has no javaBean property") );
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
-	public void convertMap_toUnSupportedGenericCollection_1()
+	public void convertMap_toUnSupportedParameterizedType()
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -477,42 +487,18 @@ public class TestWebGenericConverter
 		src.put("age", ages);
 		src.put("birth", births);
 		
-		Type type=new MockParameterizedType(new MockParameterizedType(null), JavaBean.class);
+		Exception re=null;
 		try
 		{
-			List<JavaBean> dest=(List<JavaBean>)converter.convert(src, type);
-			dest.size();
+			Type type=GenericType.getGenericType(new MockParameterizedType(JavaBean.class, JavaBean.class), null);
+			converter.convert(src, type);
 		}
 		catch(Exception e)
 		{
-			Assert.assertTrue( e.getMessage().startsWith("converting 'Map<String,?>' to") );
+			re=e;
 		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test
-	public void convertMap_toUnSupportedGenericCollection_2()
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
 		
-		String[] names=new String[]{"aa", "bb", "cc"};
-		String[] ages=new String[]{"11", "22", "33"};
-		String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
-		
-		src.put("name", names);
-		src.put("age", ages);
-		src.put("birth", births);
-		
-		Type type=new MockParameterizedType(JavaBean.class, JavaBean.class, new MockParameterizedType(null));
-		try
-		{
-			List<JavaBean> dest=(List<JavaBean>)converter.convert(src, type);
-			dest.size();
-		}
-		catch(Exception e)
-		{
-			Assert.assertTrue( e.getMessage().startsWith("converting 'Map<String,?>' to") );
-		}
+		Assert.assertTrue( re.getMessage().startsWith("converting 'Map<String,?>' to") );
 	}
 	
 	@Test

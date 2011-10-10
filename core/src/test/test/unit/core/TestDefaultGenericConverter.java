@@ -17,7 +17,6 @@ import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.GenericType;
 
-import test.unit.web.MockParameterizedType;
 
 
 public class TestDefaultGenericConverter
@@ -503,6 +502,7 @@ public class TestDefaultGenericConverter
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
+		Exception re=null;
 		try
 		{
 			List<Integer> dest=(List<Integer>)converter.convert(src, List.class);
@@ -510,8 +510,10 @@ public class TestDefaultGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertTrue( e.getMessage().startsWith("can not find Converter for converting") );
+			re=e;
 		}
+		
+		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -532,6 +534,7 @@ public class TestDefaultGenericConverter
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
+		Exception re=null;
 		try
 		{
 			Set<Integer> dest=(Set<Integer>)converter.convert(src, Set.class);
@@ -539,8 +542,22 @@ public class TestDefaultGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertTrue( e.getMessage().startsWith("can not find Converter for converting") );
+			re=e;
 		}
+		
+		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
+	}
+	
+	@Test
+	public void convertStringArray_toGenericArray()
+	{
+		String[] src=new String[]{"123", "456", "789"};
+		
+		Type targetType=GenericType.getGenericType(new MockGenericArrayType(Integer.class), null);
+		Integer[] dest=(Integer[])converter.convert(src, targetType);
+		
+		for(int i=0; i<src.length; i++)
+			Assert.assertEquals(new Integer(src[i]), dest[i]);
 	}
 	
 	@Test
@@ -548,6 +565,7 @@ public class TestDefaultGenericConverter
 	{
 		int src=3355;
 		
+		Exception re=null;
 		try
 		{
 			Byte dest=(Byte)converter.convert(src, byte.class);
@@ -555,8 +573,10 @@ public class TestDefaultGenericConverter
 		}
 		catch(Exception e)
 		{
-			Assert.assertTrue( e.getMessage().startsWith("can not find Converter for converting") );
+			re=e;
 		}
+		
+		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
 	}
 	
 	@Test

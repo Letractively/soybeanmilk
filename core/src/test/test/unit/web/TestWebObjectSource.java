@@ -142,44 +142,60 @@ public class TestWebObjectSource
 		String exceptionPrefix="no Converter defined for converting";
 		
 		{
+			Exception re=null;
+			
 			try
 			{
 				webObjectSource.get("request", JavaBean.class);
 			}
 			catch(Exception e)
 			{
-				Assert.assertTrue( e.getMessage().startsWith(exceptionPrefix) );
+				re=e;
 			}
+			
+			Assert.assertTrue( re.getMessage().startsWith(exceptionPrefix) );
 		}
 		{
+			Exception re=null;
+			
 			try
 			{
 				webObjectSource.get("session", JavaBean.class);
 			}
 			catch(Exception e)
 			{
-				Assert.assertTrue( e.getMessage().startsWith(exceptionPrefix) );
+				re=e;
 			}
+			
+			Assert.assertTrue( re.getMessage().startsWith(exceptionPrefix) );
 		}
 		{
+			Exception re=null;
+			
 			try
 			{
 				webObjectSource.get("response", JavaBean.class);
 			}
 			catch(Exception e)
 			{
-				Assert.assertTrue( e.getMessage().startsWith(exceptionPrefix) );
+				re=e;
 			}
+			
+			Assert.assertTrue( re.getMessage().startsWith(exceptionPrefix) );
 		}
 		{
+			Exception re=null;
+			
 			try
 			{
 				webObjectSource.get("application", JavaBean.class);
 			}
 			catch(Exception e)
 			{
-				Assert.assertTrue( e.getMessage().startsWith(exceptionPrefix) );
+				re=e;
 			}
+			
+			Assert.assertTrue( re.getMessage().startsWith(exceptionPrefix) );
 		}
 	}
 	
@@ -488,25 +504,33 @@ public class TestWebObjectSource
 		String value="12345";
 		
 		{
+			Exception re=null;
+			
 			try
 			{
 				webObjectSource.get("unknown.value", null);
 			}
 			catch(ObjectSourceException e)
 			{
-				Assert.assertEquals("key 'unknown.value' is invalid, get object from scope 'unknown' is not supported", e.getMessage());
+				re=e;
 			}
+			
+			Assert.assertEquals("key 'unknown.value' is invalid, get object from scope 'unknown' is not supported", re.getMessage());
 		}
 		
 		{
+			Exception re=null;
+			
 			try
 			{
 				webObjectSource.set("unknown.value", value);
 			}
 			catch(ObjectSourceException e)
 			{
-				Assert.assertEquals("key 'unknown.value' is invalid, set object into scope 'unknown' is not supported", e.getMessage());
+				re=e;
 			}
+			
+			Assert.assertEquals("key 'unknown.value' is invalid, set object into scope 'unknown' is not supported", re.getMessage());
 		}
 	}
 	

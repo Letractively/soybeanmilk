@@ -1,4 +1,4 @@
-package test.unit.web;
+package test.unit.core;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

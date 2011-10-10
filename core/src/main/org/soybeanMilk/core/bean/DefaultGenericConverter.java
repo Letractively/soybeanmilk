@@ -342,7 +342,7 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	/**
-	 * 由一种数组转换到为另一个对象数组。
+	 * 由一种数组转换到为另一个类型的数组。
 	 * @param sourceObj 源对象
 	 * @param targetElementType 目标数组的元素类型
 	 * @return

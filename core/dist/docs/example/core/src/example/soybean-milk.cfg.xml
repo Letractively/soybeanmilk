@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE soybean-milk PUBLIC "-//SoybeanMilk//DTD soybeanMilk web//EN" "http://soybeanmilk.googlecode.com/files/soybeanMilk-web-1.0.dtd">
+<!DOCTYPE soybean-milk PUBLIC "-//SoybeanMilk//DTD soybeanMilk core//EN" "http://soybeanmilk.googlecode.com/files/soybeanMilk-core-1.0.dtd">
 
 <soybean-milk>
 	<global-config>

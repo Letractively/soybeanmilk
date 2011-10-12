@@ -57,6 +57,8 @@ public class ExampleMain
 		
 		printDiv();
 		executor.execute("genericArray", os);
+		
+		System.in.read();
 	}
 	
 	static void printDiv()

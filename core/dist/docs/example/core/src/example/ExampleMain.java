@@ -8,7 +8,7 @@ import org.soybeanMilk.core.config.parser.ConfigurationParser;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.core.os.HashMapObjectSource;
 
-public class ExampleConfigFile
+public class ExampleMain
 {
 	public static void main(String[] args) throws Exception
 	{
@@ -21,6 +21,9 @@ public class ExampleConfigFile
 		
 		os.set("helloTo", "mars");
 		os.set("helloRepeat", 3);
+		
+		os.set("genericStringInput", "11");
+		os.set("genericStringArrayInput", new String[]{"11", "22", "33"});
 		
 		printDiv();
 		executor.execute("helloActionXml", os);
@@ -42,6 +45,18 @@ public class ExampleConfigFile
 		
 		printDiv();
 		executor.execute("testRefToEmptyNameAction", os);
+
+		printDiv();
+		executor.execute("genericSimple", os);
+		
+		printDiv();
+		executor.execute("genericList", os);
+		
+		printDiv();
+		executor.execute("genericSet", os);
+		
+		printDiv();
+		executor.execute("genericArray", os);
 	}
 	
 	static void printDiv()

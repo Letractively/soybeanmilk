@@ -143,7 +143,7 @@ public class SoybeanMilkUtils
 		Method[] ms=clazz.getMethods();
 		for(Method m : ms)
 		{
-			if(Modifier.isVolatile(m.getModifiers()))
+			if(m.isSynthetic())
 				continue;
 			
 			if(m.getName().equals(methodName)

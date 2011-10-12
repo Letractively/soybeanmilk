@@ -17,7 +17,6 @@ package org.soybeanMilk.core.exe;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
@@ -83,7 +82,7 @@ public class Invoke extends AbstractExecutable
 		
 		int argNums= args==null ? 0 : args.length;
 		
-		init(name, findMethodThrow(resolverProvider.getResolver().getClass(), methodName, argNums), args, resultKey, resolverProvider);
+		init(name, SoybeanMilkUtils.findMethodThrow(resolverProvider.getResolver().getClass(), methodName, argNums), args, resultKey, resolverProvider);
 	}
 	
 	/**
@@ -99,7 +98,7 @@ public class Invoke extends AbstractExecutable
 	{
 		int argNums= args==null ? 0 : args.length;
 		
-		init(name, findMethodThrow(resolverClass, methodName, argNums), args, resultKey, null);
+		init(name, SoybeanMilkUtils.findMethodThrow(resolverClass, methodName, argNums), args, resultKey, null);
 	}
 	
 	/**
@@ -347,40 +346,6 @@ public class Invoke extends AbstractExecutable
 	protected Object getResolver(ObjectSource objectSource)
 	{
 		return resolverProvider==null ? null : resolverProvider.getResolver();
-	}
-	
-	/**
-	 * 根据方法名称及方法参数数目查找类的公开方法，找不到则会抛出异常
-	 * @param clazz 查找目标类
-	 * @param methodName 方法名
-	 * @param argNums 参数数目
-	 * @return
-	 */
-	public static Method findMethodThrow(Class<?> clazz,String methodName,int argNums)
-	{
-		Method result=null;
-		
-		Method[] ms=clazz.getMethods();
-		for(Method m : ms)
-		{
-			if(m.getName().equals(methodName)
-					&& Modifier.isPublic(m.getModifiers()))
-			{
-				Class<?>[] types=m.getParameterTypes();
-				int mParamNums= types == null ? 0 : types.length;
-				
-				if(mParamNums == argNums)
-				{
-					result=m;
-					break;
-				}
-			}
-		}
-		
-		if(result == null)
-			throw new NullPointerException("can not find Method named '"+methodName+"' with "+argNums+" arguments in Class '"+clazz.getName()+"'");
-		
-		return result;
 	}
 	
 	/**

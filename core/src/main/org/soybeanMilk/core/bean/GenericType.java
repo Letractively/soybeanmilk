@@ -26,7 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 泛型类型元信息。<br>
- * 它同时封装泛型类型的持有类信息，使用者仅通过此类即可解析任何泛型对象。
+ * 它同时封装泛型类型的持有类信息，使用者仅通过此类即可解析任何泛型对象。<br>
+ * {@linkplain DefaultGenericConverter 默认通用转换器}即是靠它来支持泛型类型转换的。
  * @author earthAngry@gmail.com
  * @date 2011-9-29
  *
@@ -155,7 +156,7 @@ public class GenericType implements Type
 	}
 	
 	/**
-	 * 如果此泛型类型是数组，则返回它的元素类型；否则，则返回<code>null</code>
+	 * 如果此泛型类型是泛型数组，则返回它的元素类型；否则，则返回<code>null</code>
 	 * @return
 	 * @date 2011-10-1
 	 */
@@ -368,7 +369,7 @@ public class GenericType implements Type
 	/**
 	 * 获取泛型类型对象
 	 * @param type 类型
-	 * @param ownerClass 持有类
+	 * @param ownerClass <code>type</code>类型的持有类，如果为<code>null</code>，<code>type</code>中的类型变量将被解析为其边界类。
 	 * @return
 	 * @date 2011-10-2
 	 */

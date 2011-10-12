@@ -17,8 +17,6 @@ import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.GenericType;
 
-
-
 public class TestDefaultGenericConverter
 {
 	private DefaultGenericConverter converter;
@@ -439,13 +437,95 @@ public class TestDefaultGenericConverter
 		Assert.assertNull(re);
 	}
 	
+	@Test
+	public void convertString_toGeneric_TypeVariable()
+	{
+		String src="33";
+		
+		@SuppressWarnings("rawtypes")
+		Type type=new MockTypeVariable("T", new Type[]{Integer.class});
+		
+		Integer re=(Integer)converter.convert(src, type);
+		
+		Assert.assertEquals(new Integer(src), re);
+	}
+	
+	@Test
+	public void convertString_toGeneric_ParameterizedType()
+	{
+		String src="33";
+		
+		Type type=new MockParameterizedType(Integer.class, new Type[]{Double.class});
+		
+		Exception re=null;
+		
+		try
+		{
+			converter.convert(src, type);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
+	}
+	
+	@Test
+	public void convertString_toGeneric_GenericArrayType()
+	{
+		String src="33";
+		
+		Type type=new MockGenericArrayType(Integer.class);
+		
+		Exception re=null;
+		
+		try
+		{
+			converter.convert(src, type);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
+	}
+	
+	@Test
+	public void convertString_toGeneric_WildCardType()
+	{
+		String src="33";
+		
+		MockWildcardType type=new MockWildcardType();
+		type.setUpperBounds(new Type[]{Integer.class});
+		
+		Integer re=(Integer)converter.convert(src, type);
+		
+		Assert.assertEquals(new Integer(src), re);
+	}
+	
+	@Test
+	public void convertString_toGeneric_GenericType()
+	{
+		String src="33";
+		
+		MockWildcardType type=new MockWildcardType();
+		type.setUpperBounds(new Type[]{Integer.class});
+		Type tp=GenericType.getGenericType(type,null);
+		
+		Integer re=(Integer)converter.convert(src, tp);
+		
+		Assert.assertEquals(new Integer(src), re);
+	}
+	
 	@Test(expected = GenericConvertException.class)
 	public void convertNull_toPrimitive()
 	{
 		Object src = null;
 		converter.convert(src, int.class);
 	}
-
+	
 	@Test
 	public void convertStringArray_toStringArray()
 	{
@@ -481,19 +561,104 @@ public class TestDefaultGenericConverter
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
-	public void convertStringArray_toGenericList()
+	public void convertStringArray_toGeneric_TypeVariable()
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
-		Type targetType=GenericType.getGenericType(new MockParameterizedType(List.class, Integer.class), null);
+		@SuppressWarnings("rawtypes")
+		Type type=new MockTypeVariable("T", new Type[]{Integer[].class});
+		
+		Integer[] dest=(Integer[])converter.convert(src, type);
+		
+		for(int i=0; i<src.length; i++)
+			Assert.assertEquals(new Integer(src[i]), dest[i]);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void convertStringArray_toGeneric_ParameterizedType_List()
+	{
+		String[] src=new String[]{"123", "456", "789"};
+		
+		Type targetType=new MockParameterizedType(List.class, Integer.class);
 		List<Integer> dest=(List<Integer>)converter.convert(src, targetType);
 		
 		for(int i=0;i<src.length;i++)
 		{
 			Assert.assertEquals(new Integer(src[i]), dest.get(i));
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void convertStringArray_toGeneric_ParameterizedType_Set()
+	{
+		String[] src=new String[]{"123", "456", "789"};
+		
+		Type targetType=new MockParameterizedType(Set.class, Integer.class);
+		Set<Integer> dest=(Set<Integer>)converter.convert(src, targetType);
+		
+		Assert.assertTrue( dest.size() == src.length );
+	}
+
+	@Test
+	public void convertStringArray_toGeneric_ParameterizedType_notSupported()
+	{
+		String[] src=new String[]{"123", "456", "789"};
+		
+		Type type=new MockParameterizedType(Integer.class, new Type[]{Double.class});
+		
+		Exception re=null;
+		
+		try
+		{
+			converter.convert(src, type);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
+	}
+	
+	@Test
+	public void convertStringArray_toGeneric_GenericArrayType()
+	{
+		String[] src=new String[]{"123", "456", "789"};
+		
+		Type targetType=new MockGenericArrayType(Integer.class);
+		Integer[] dest=(Integer[])converter.convert(src, targetType);
+		
+		for(int i=0; i<src.length; i++)
+			Assert.assertEquals(new Integer(src[i]), dest[i]);
+	}
+	
+	@Test
+	public void convertStringArray_toGeneric_WildCardType()
+	{
+		String[] src=new String[]{"123", "456", "789"};
+		
+		MockWildcardType type=new MockWildcardType();
+		type.setUpperBounds(new Type[]{Integer[].class});
+		
+		Integer[] dest=(Integer[])converter.convert(src, type);
+		
+		for(int i=0; i<src.length; i++)
+			Assert.assertEquals(new Integer(src[i]), dest[i]);
+	}
+	
+	@Test
+	public void convertStringArray_toGeneric_GenericType()
+	{
+		String[] src=new String[]{"123", "456", "789"};
+		
+		Type targetType=GenericType.getGenericType(new MockGenericArrayType(Integer.class), null);
+		Integer[] dest=(Integer[])converter.convert(src, targetType);
+		
+		for(int i=0; i<src.length; i++)
+			Assert.assertEquals(new Integer(src[i]), dest[i]);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -518,18 +683,6 @@ public class TestDefaultGenericConverter
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void convertStringArray_toGenericSet()
-	{
-		String[] src=new String[]{"123", "456", "789"};
-		
-		Type targetType=GenericType.getGenericType(new MockParameterizedType(Set.class, Integer.class), null);
-		Set<Integer> dest=(Set<Integer>)converter.convert(src, targetType);
-		
-		Assert.assertTrue( dest.size() == src.length );
-	}
-	
-	@SuppressWarnings("unchecked")
-	@Test
 	public void convertStringArray_toNormalSet()
 	{
 		String[] src=new String[]{"123", "456", "789"};
@@ -546,18 +699,6 @@ public class TestDefaultGenericConverter
 		}
 		
 		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
-	}
-	
-	@Test
-	public void convertStringArray_toGenericArray()
-	{
-		String[] src=new String[]{"123", "456", "789"};
-		
-		Type targetType=GenericType.getGenericType(new MockGenericArrayType(Integer.class), null);
-		Integer[] dest=(Integer[])converter.convert(src, targetType);
-		
-		for(int i=0; i<src.length; i++)
-			Assert.assertEquals(new Integer(src[i]), dest[i]);
 	}
 	
 	@Test

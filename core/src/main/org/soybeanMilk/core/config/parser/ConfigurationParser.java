@@ -29,6 +29,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecuteException;
@@ -565,7 +566,7 @@ public class ConfigurationParser
 		
 		invoke.setResolverClass(resolverClass);
 		
-		Method method=Invoke.findMethodThrow(resolverClass, methodName, argNums);
+		Method method=SoybeanMilkUtils.findMethodThrow(resolverClass, methodName, argNums);
 		
 		invoke.setName(name);
 		invoke.setMethod(method);

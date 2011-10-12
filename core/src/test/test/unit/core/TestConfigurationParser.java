@@ -10,6 +10,7 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
@@ -54,7 +55,7 @@ public class TestConfigurationParser
 		{
 			Invoke exe=(Invoke)config.getExecutable("global_before");
 			Assert.assertEquals( rf.getResolver("tr"), exe.getResolverProvider().getResolver());
-			Assert.assertEquals(Invoke.findMethodThrow(TestResolver.class, "test0", 0), exe.getMethod());
+			Assert.assertEquals(SoybeanMilkUtils.findMethodThrow(TestResolver.class, "test0", 0), exe.getMethod());
 			Assert.assertNull(exe.getArgs());
 		}
 		
@@ -79,7 +80,7 @@ public class TestConfigurationParser
 			
 			Invoke ivk0=(Invoke)children.get(0);
 			Assert.assertNull(ivk0.getName());
-			Assert.assertEquals(Invoke.findMethodThrow(TestResolver.class, "test0", 0), ivk0.getMethod());
+			Assert.assertEquals(SoybeanMilkUtils.findMethodThrow(TestResolver.class, "test0", 0), ivk0.getMethod());
 			Assert.assertEquals( rf.getResolver("tr"), ivk0.getResolverProvider().getResolver());
 			Assert.assertNull(ivk0.getArgs());
 			Assert.assertNull(ivk0.getResultKey());
@@ -93,7 +94,7 @@ public class TestConfigurationParser
 			
 			Invoke ivk0=(Invoke)children.get(0);
 			Assert.assertEquals("test2", ivk0.getName());
-			Assert.assertEquals(Invoke.findMethodThrow(TestResolver.class, "test2", 2), ivk0.getMethod());
+			Assert.assertEquals(SoybeanMilkUtils.findMethodThrow(TestResolver.class, "test2", 2), ivk0.getMethod());
 			Assert.assertEquals( rf.getResolver("tr"), ivk0.getResolverProvider().getResolver());
 			Arg[] args=ivk0.getArgs();
 			Assert.assertEquals(2, args.length);
@@ -113,7 +114,7 @@ public class TestConfigurationParser
 			
 			Invoke ivk0=(Invoke)children.get(0);
 			Assert.assertEquals("staticTest", ivk0.getName());
-			Assert.assertEquals(Invoke.findMethodThrow(TestResolver.class, "staticTest", 2), ivk0.getMethod());
+			Assert.assertEquals(SoybeanMilkUtils.findMethodThrow(TestResolver.class, "staticTest", 2), ivk0.getMethod());
 			Assert.assertNull( ivk0.getResolverProvider());
 			Arg[] args=ivk0.getArgs();
 			Assert.assertEquals(2, args.length);
@@ -133,7 +134,7 @@ public class TestConfigurationParser
 			
 			Invoke ivk0=(Invoke)children.get(0);
 			Assert.assertNull(ivk0.getName());
-			Assert.assertEquals(Invoke.findMethodThrow(TestResolver.class, "staticTest", 2), ivk0.getMethod());
+			Assert.assertEquals(SoybeanMilkUtils.findMethodThrow(TestResolver.class, "staticTest", 2), ivk0.getMethod());
 			Assert.assertNull( ivk0.getResolverProvider());
 			Arg[] args=ivk0.getArgs();
 			Assert.assertEquals(2, args.length);
@@ -149,7 +150,7 @@ public class TestConfigurationParser
 		{
 			Invoke exe=(Invoke)config.getExecutable("m2_exe1");
 			
-			Assert.assertEquals(Invoke.findMethodThrow(TestResolver.class, "test0", 0), exe.getMethod());
+			Assert.assertEquals(SoybeanMilkUtils.findMethodThrow(TestResolver.class, "test0", 0), exe.getMethod());
 			Assert.assertEquals( rf.getResolver("tr2"), exe.getResolverProvider().getResolver());
 			Arg[] args=exe.getArgs();
 			Assert.assertNull(args);

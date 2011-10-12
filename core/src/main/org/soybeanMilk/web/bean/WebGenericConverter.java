@@ -15,7 +15,11 @@
 package org.soybeanMilk.web.bean;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -78,8 +82,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	{
 		//如果源对象是数组并且长度为1，而目标类型不是，则使用数组的第一个元素转换
 		if(SoybeanMilkUtils.isArray(sourceObj.getClass())
-				&& Array.getLength(sourceObj)==1
-				&& SoybeanMilkUtils.isClassType(targetType)
+				&& Array.getLength(sourceObj)==1 && SoybeanMilkUtils.isClassType(targetType)
 				&& !SoybeanMilkUtils.isArray((Class<?>)targetType))
 		{
 			if(log.isDebugEnabled())
@@ -114,8 +117,6 @@ public class WebGenericConverter extends DefaultGenericConverter
 		Object result = null;
 		
 		boolean canConvert=true;
-		//是否是参数映射表，只有参数映射表才需要特殊异常处理
-		boolean isParamMap= (sourceMap instanceof ParamFilterAwareMap<?, ?>);
 		
 		//空的映射表作为null处理
 		if(sourceMap==null || sourceMap.isEmpty())
@@ -124,7 +125,8 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		else if(sourceMap.isExplicitKey())
 		{
-			if(isParamMap)
+			//参数映射表才需要特殊异常处理
+			if(sourceMap instanceof ParamFilterAwareMap<?, ?>)
 			{
 				try
 				{
@@ -138,140 +140,183 @@ public class WebGenericConverter extends DefaultGenericConverter
 			else
 				result=convert(sourceMap.get(FilterAwareMap.EXPLICIT_KEY), targetType);
 		}
-		else if(targetType instanceof GenericType)
-		{
-			GenericType genericType=(GenericType)targetType;
-			
-			if(genericType.isParameterizedType())
-			{
-				Class<?> actualClass=genericType.getActualClass();
-				Class<?>[] argClasses=genericType.getParamClasses();
-				
-				//List<T>
-				if(SoybeanMilkUtils.isAncestorClass(List.class, actualClass))
-				{
-					result=convertArrayToList(convertMapToJavaBeanArray(sourceMap, argClasses[0]), actualClass);
-				}
-				//Set<T>
-				else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualClass))
-				{
-					result=convertArrayToSet(convertMapToJavaBeanArray(sourceMap, argClasses[0]), actualClass);
-				}
-				else
-					canConvert=false;
-			}
-			//T[]
-			else if(genericType.isGenericArrayType())
-			{
-				Class<?> componentClass=genericType.getComponentClass();
-				result=convertMapToJavaBeanArray(sourceMap, componentClass);
-			}
-			//T
-			else if(genericType.isTypeVariable())
-			{
-				Class<?> actualClass=genericType.getActualClass();
-				result=convert(sourceMap, actualClass);
-			}
-			//? extends SomeType
-			else if(genericType.isWildcardType())
-			{
-				Class<?> actualClass=genericType.getActualClass();
-				result=convert(sourceMap, actualClass);
-			}
-			else
-				canConvert=false;
-		}
 		else if(targetType instanceof Class<?>)
 		{
-			Class<?> targetClass=(Class<?>)targetType;
-			
-			//数组
-			if(SoybeanMilkUtils.isArray(targetClass))
-				result=convertMapToJavaBeanArray(sourceMap, targetClass.getComponentType());
-			//JavaBean
-			else
-			{
-				PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(targetClass);
-				
-				if(!beanInfo.hasSubPropertyInfo())
-					throw new GenericConvertException("the target javaBean Class '"+targetClass+"' is not valid, it has no javaBean property");
-				
-				Map<String, Boolean> collectionPropertyProcessed=new HashMap<String, Boolean>();
-				
-				Set<String> keys=sourceMap.keySet();
-				for(String propertyKey : keys)
-				{
-					String[] propExpressionArray=splitPropertyExpression(propertyKey);
-					
-					//忽略无关属性
-					if(beanInfo.getSubPropertyInfo(propExpressionArray[0])==null)
-					{
-						//如果被过滤过，则属性必须存在
-						if(sourceMap.isFiltered())
-							throw new GenericConvertException("can not find property '"+propExpressionArray[0]+"' in class '"+beanInfo.getType().getName()+"'");
-					}
-					else
-					{
-						//延迟初始化
-						if(result == null)
-							result = instance(beanInfo.getType(), -1);
-						
-						String collectionPropertyExp=detectCollectionProperty(beanInfo, propExpressionArray);
-						
-						if(collectionPropertyExp == null)
-						{
-							if(isParamMap)
-							{
-								try
-								{
-									setProperty(result, beanInfo, propExpressionArray, 0, sourceMap.get(propertyKey));
-								}
-								catch(ConvertException e)
-								{
-									handleParamConvertException((ParamFilterAwareMap<String, ?>)sourceMap, propertyKey, e);
-								}
-							}
-							else
-								setProperty(result, beanInfo, propExpressionArray, 0, sourceMap.get(propertyKey));
-						}
-						//集合属性需要特殊处理
-						else
-						{
-							if(collectionPropertyProcessed.get(collectionPropertyExp) == null)
-							{
-								if(isParamMap)
-								{
-									FilterAwareMap<String, ?> collectionPropertyValueMap=new ParamFilterAwareMap<String, Object>(
-											sourceMap, collectionPropertyExp+Constants.ACCESSOR, false);
-									try
-									{
-										setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
-									}
-									catch(ConvertException e)
-									{
-										handleParamConvertException((ParamFilterAwareMap<String, ?>)sourceMap, collectionPropertyExp, e);
-									}
-								}
-								else
-								{
-									FilterAwareMap<String, ?> collectionPropertyValueMap=new FilterAwareMap<String, Object>(
-											sourceMap, collectionPropertyExp+Constants.ACCESSOR, false);
-									setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
-								}
-								
-								//标记此集合属性已经处理过
-								collectionPropertyProcessed.put(collectionPropertyExp, true);
-							}
-						}
-					}
-				}
-			}
+			result=convertMapToClass(sourceMap, (Class<?>)targetType);
+		}
+		else if(targetType instanceof GenericType)
+		{
+			result=convertMapToGenericType(sourceMap, (GenericType)targetType);
+		}
+		else if(targetType instanceof ParameterizedType
+				|| targetType instanceof GenericArrayType
+				|| targetType instanceof TypeVariable<?>
+				|| targetType instanceof WildcardType)
+		{
+			result=convertMapToGenericType(sourceMap, GenericType.getGenericType(targetType, null));
 		}
 		else
 			canConvert=false;
 		
 		if(!canConvert)
 			throw new GenericConvertException("converting 'Map<String,?>' to '"+targetType+"' is not supported");
+		
+		return result;
+	}
+	
+	/**
+	 * 将映射表转换为Class类型
+	 * @param sourceMap
+	 * @param targetClass
+	 * @return
+	 * @date 2011-10-12
+	 */
+	protected Object convertMapToClass(FilterAwareMap<String, ?> sourceMap, Class<?> targetClass)
+	{
+		Object result=null;
+		
+		//是否是参数映射表，只有参数映射表才需要特殊异常处理
+		boolean isParamMap= (sourceMap instanceof ParamFilterAwareMap<?, ?>);
+		
+		//数组
+		if(SoybeanMilkUtils.isArray(targetClass))
+			result=convertMapToJavaBeanArray(sourceMap, targetClass.getComponentType());
+		//JavaBean
+		else
+		{
+			PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(targetClass);
+			
+			if(!beanInfo.hasSubPropertyInfo())
+				throw new GenericConvertException("the target javaBean Class '"+targetClass+"' is not valid, it has no javaBean property");
+			
+			Map<String, Boolean> collectionPropertyProcessed=new HashMap<String, Boolean>();
+			
+			Set<String> keys=sourceMap.keySet();
+			for(String propertyKey : keys)
+			{
+				String[] propExpressionArray=splitPropertyExpression(propertyKey);
+				
+				//忽略无关属性
+				if(beanInfo.getSubPropertyInfo(propExpressionArray[0])==null)
+				{
+					//如果被过滤过，则属性必须存在
+					if(sourceMap.isFiltered())
+						throw new GenericConvertException("can not find property '"+propExpressionArray[0]+"' in class '"+beanInfo.getType().getName()+"'");
+				}
+				else
+				{
+					//延迟初始化
+					if(result == null)
+						result = instance(beanInfo.getType(), -1);
+					
+					String collectionPropertyExp=detectCollectionProperty(beanInfo, propExpressionArray);
+					
+					if(collectionPropertyExp == null)
+					{
+						if(isParamMap)
+						{
+							try
+							{
+								setProperty(result, beanInfo, propExpressionArray, 0, sourceMap.get(propertyKey));
+							}
+							catch(ConvertException e)
+							{
+								handleParamConvertException((ParamFilterAwareMap<String, ?>)sourceMap, propertyKey, e);
+							}
+						}
+						else
+							setProperty(result, beanInfo, propExpressionArray, 0, sourceMap.get(propertyKey));
+					}
+					//集合属性需要特殊处理
+					else
+					{
+						if(collectionPropertyProcessed.get(collectionPropertyExp) == null)
+						{
+							if(isParamMap)
+							{
+								FilterAwareMap<String, ?> collectionPropertyValueMap=new ParamFilterAwareMap<String, Object>(
+										sourceMap, collectionPropertyExp+Constants.ACCESSOR, false);
+								try
+								{
+									setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
+								}
+								catch(ConvertException e)
+								{
+									handleParamConvertException((ParamFilterAwareMap<String, ?>)sourceMap, collectionPropertyExp, e);
+								}
+							}
+							else
+							{
+								FilterAwareMap<String, ?> collectionPropertyValueMap=new FilterAwareMap<String, Object>(
+										sourceMap, collectionPropertyExp+Constants.ACCESSOR, false);
+								setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
+							}
+							
+							//标记此集合属性已经处理过
+							collectionPropertyProcessed.put(collectionPropertyExp, true);
+						}
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 将映射表转换为泛型类型
+	 * @param sourceMap
+	 * @param genericType
+	 * @return
+	 * @date 2011-10-12
+	 */
+	protected Object convertMapToGenericType(FilterAwareMap<String, ?> sourceMap, GenericType genericType)
+	{
+		Object result=null;
+		
+		boolean canConvert=true;
+		
+		if(genericType.isParameterizedType())
+		{
+			Class<?> actualClass=genericType.getActualClass();
+			Class<?>[] argClasses=genericType.getParamClasses();
+			
+			//List<T>
+			if(SoybeanMilkUtils.isAncestorClass(List.class, actualClass))
+			{
+				result=convertArrayToList(convertMapToJavaBeanArray(sourceMap, argClasses[0]), actualClass);
+			}
+			//Set<T>
+			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualClass))
+			{
+				result=convertArrayToSet(convertMapToJavaBeanArray(sourceMap, argClasses[0]), actualClass);
+			}
+			else
+				canConvert=false;
+		}
+		//T[]
+		else if(genericType.isGenericArrayType())
+		{
+			Class<?> componentClass=genericType.getComponentClass();
+			result=convertMapToJavaBeanArray(sourceMap, componentClass);
+		}
+		//T
+		else if(genericType.isTypeVariable())
+		{
+			Class<?> actualClass=genericType.getActualClass();
+			result=convert(sourceMap, actualClass);
+		}
+		//? extends SomeType
+		else if(genericType.isWildcardType())
+		{
+			Class<?> actualClass=genericType.getActualClass();
+			result=convert(sourceMap, actualClass);
+		}
+		else
+			canConvert=false;
+		
+		if(!canConvert)
+			throw new GenericConvertException("converting 'Map<String,?>' to '"+genericType.getType()+"' is not supported");
 		
 		return result;
 	}

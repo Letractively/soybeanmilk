@@ -15,7 +15,11 @@
 package org.soybeanMilk.core.bean;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -206,9 +210,10 @@ public class DefaultGenericConverter implements GenericConverter
 	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
 	{
 		Object re=null;
+		
 		boolean canConvert=true;
 		
-		if(targetType.equals(String.class))
+		if(String.class.equals(targetType))
 			re=sourceObj.toString();
 		else if(SoybeanMilkUtils.isEnum(targetType))
 		{
@@ -216,68 +221,28 @@ public class DefaultGenericConverter implements GenericConverter
 			re= (sourceObj instanceof String) ?
 					Enum.valueOf(enumClass, (String)sourceObj) : Enum.valueOf(enumClass, sourceObj.toString());
 		}
-		else
+		else if(targetType instanceof Class<?>)
 		{
-			if(SoybeanMilkUtils.isArray(sourceObj.getClass()))
-			{
-				if(targetType instanceof GenericType)
-				{
-					GenericType genericType=(GenericType)targetType;
-					
-					if(genericType.isParameterizedType())
-					{
-						Class<?> actualClass=genericType.getActualClass();
-						Class<?>[] argClasses=genericType.getParamClasses();
-						
-						//List<T>
-						if(SoybeanMilkUtils.isAncestorClass(List.class, actualClass))
-						{
-							re=convertArrayToList(convertArrayToArray(sourceObj, argClasses[0]), actualClass);
-						}
-						//Set<T>
-						else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualClass))
-						{
-							re=convertArrayToSet(convertArrayToArray(sourceObj, argClasses[0]), actualClass);
-						}
-						else
-							canConvert=false;
-					}
-					//T[]
-					else if(genericType.isGenericArrayType())
-					{
-						Class<?> componentClass=genericType.getComponentClass();
-						re=convertArrayToArray(sourceObj, componentClass);
-					}
-					//T
-					else if(genericType.isTypeVariable())
-					{
-						Class<?> actualClass=genericType.getActualClass();
-						re=convert(sourceObj, actualClass);
-					}
-					//? extends SomeType
-					else if(genericType.isWildcardType())
-					{
-						Class<?> actualClass=genericType.getActualClass();
-						re=convert(sourceObj, actualClass);
-					}
-					else
-						canConvert=false;
-				}
-				else if(targetType instanceof Class<?>)
-				{
-					Class<?> targetClass=(Class<?>)targetType;
-					
-					if(SoybeanMilkUtils.isArray(targetClass))
-						re=convertArrayToArray(sourceObj, targetClass.getComponentType());
-					else
-						canConvert=false;
-				}
-				else
-					canConvert=false;
-			}
+			Class<?> targetClass=(Class<?>)targetType;
+			
+			if(SoybeanMilkUtils.isArray(sourceObj.getClass()) && SoybeanMilkUtils.isArray(targetClass))
+				re=convertArrayToArray(sourceObj, targetClass.getComponentType());
 			else
 				canConvert=false;
 		}
+		else if(targetType instanceof GenericType)
+		{
+			re=convertToGenericType(sourceObj, (GenericType)targetType);
+		}
+		else if(targetType instanceof ParameterizedType
+				|| targetType instanceof GenericArrayType
+				|| targetType instanceof TypeVariable<?>
+				|| targetType instanceof WildcardType)
+		{
+			re=convertToGenericType(sourceObj, GenericType.getGenericType(targetType, null));
+		}
+		else
+			canConvert=false;
 		
 		if(!canConvert)
 			throw new GenericConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetType+"'");
@@ -303,6 +268,65 @@ public class DefaultGenericConverter implements GenericConverter
 		{
 			throw new ConvertException(sourceObj, targetType, e);
 		}
+	}
+	
+	/**
+	 * 将对象转换为泛型类型
+	 * @param sourceObj
+	 * @param genericType
+	 * @return
+	 * @date 2011-10-12
+	 */
+	protected Object convertToGenericType(Object sourceObj, GenericType genericType)
+	{
+		Object re=null;
+		
+		boolean isSrcArray=SoybeanMilkUtils.isArray(sourceObj.getClass());
+		boolean canConvert=true;
+		
+		if(genericType.isParameterizedType())
+		{
+			Class<?> actualClass=genericType.getActualClass();
+			Class<?>[] argClasses=genericType.getParamClasses();
+			
+			//List<T>
+			if(isSrcArray && SoybeanMilkUtils.isAncestorClass(List.class, actualClass))
+			{
+				re=convertArrayToList(convertArrayToArray(sourceObj, argClasses[0]), actualClass);
+			}
+			//Set<T>
+			else if(isSrcArray && SoybeanMilkUtils.isAncestorClass(Set.class, actualClass))
+			{
+				re=convertArrayToSet(convertArrayToArray(sourceObj, argClasses[0]), actualClass);
+			}
+			else
+				canConvert=false;
+		}
+		//T[]
+		else if(isSrcArray && genericType.isGenericArrayType())
+		{
+			Class<?> componentClass=genericType.getComponentClass();
+			re=convertArrayToArray(sourceObj, componentClass);
+		}
+		//T
+		else if(genericType.isTypeVariable())
+		{
+			Class<?> actualClass=genericType.getActualClass();
+			re=convert(sourceObj, actualClass);
+		}
+		//? extends SomeType
+		else if(genericType.isWildcardType())
+		{
+			Class<?> actualClass=genericType.getActualClass();
+			re=convert(sourceObj, actualClass);
+		}
+		else
+			canConvert=false;
+		
+		if(!canConvert)
+			throw new GenericConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+genericType.getType()+"'");
+		
+		return re;
 	}
 	
 	/**
@@ -351,7 +375,7 @@ public class DefaultGenericConverter implements GenericConverter
 	protected Object convertArrayToArray(Object sourceObj, Class<?> targetElementType)
 	{
 		if(!sourceObj.getClass().isArray())
-			throw new GenericConvertException("the source object must be an array");
+			throw new GenericConvertException("the source object '"+sourceObj+"' must be an array");
 		
 		int len=Array.getLength(sourceObj);
 		Object re=Array.newInstance(targetElementType, len);

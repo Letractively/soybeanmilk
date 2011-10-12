@@ -196,7 +196,7 @@ public class InvokeStatementParser
 			}
 		}
 		
-		Method method=Invoke.findMethodThrow(resolverClass, methodName, argStrList.size());
+		Method method=SoybeanMilkUtils.findMethodThrow(resolverClass, methodName, argStrList.size());
 		invoke.setMethod(method);
 		
 		if(!argStrList.isEmpty())

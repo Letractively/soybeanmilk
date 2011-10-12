@@ -14,6 +14,8 @@
 
 package org.soybeanMilk;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -125,6 +127,43 @@ public class SoybeanMilkUtils
 			return narrowToClassType(type).isArray();
 		else
 			return false;
+	}
+	
+	/**
+	 * 根据方法名称及方法参数数目查找类的公开方法，找不到则会抛出异常
+	 * @param clazz 查找目标类
+	 * @param methodName 方法名
+	 * @param argNums 参数数目
+	 * @return
+	 */
+	public static Method findMethodThrow(Class<?> clazz,String methodName,int argNums)
+	{
+		Method result=null;
+		
+		Method[] ms=clazz.getMethods();
+		for(Method m : ms)
+		{
+			if(Modifier.isVolatile(m.getModifiers()))
+				continue;
+			
+			if(m.getName().equals(methodName)
+					&& Modifier.isPublic(m.getModifiers()))
+			{
+				Class<?>[] types=m.getParameterTypes();
+				int mParamNums= types == null ? 0 : types.length;
+				
+				if(mParamNums == argNums)
+				{
+					result=m;
+					break;
+				}
+			}
+		}
+		
+		if(result == null)
+			throw new NullPointerException("can not find Method named '"+methodName+"' with "+argNums+" arguments in Class '"+clazz.getName()+"'");
+		
+		return result;
 	}
 	
 	/**

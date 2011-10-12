@@ -61,6 +61,6 @@ public class ExampleMain
 	
 	static void printDiv()
 	{
-		System.out.println("\n---------------------------------------\n");
+		System.out.println("\n------------------------------------------------\n");
 	}
 }

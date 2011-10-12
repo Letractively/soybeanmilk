@@ -16,12 +16,12 @@ public class InterceptorResolver
 	
 	public void before()
 	{
-		HelloResolver.printObject("before handler");
+		HelloResolver.printObject("before execute");
 	}
 	
 	public void after()
 	{
-		HelloResolver.printObject("after handler");
+		HelloResolver.printObject("after execute");
 	}
 	
 	public void exception(Execution execution)

@@ -73,8 +73,23 @@
 		<copydir dest="${distDir}/docs/api" src="${tmpDir}/api" />
 	</target>
 	
+	<!--将core example打jar包-->
+	<target name="jarCoreExamples" depends="copyApiToDocs">
+		<delete file="${distDir}/docs/example/core/example.jar" />
+		<jar destfile="${distDir}/docs/example/core/example.jar">
+			
+			<fileset dir="${classDir}"
+				includes="example/**/*.class, example/**/*.xml" />
+			
+			<manifest>
+				<attribute name="Main-Class" value="example.ExampleMain"/>
+				<attribute name="Class-Path" value="../../../${appName}.jar ../../../lib/required/commons-logging-1.0.4.jar ../../../lib/required/commons-logging-api-1.1.jar ../../../lib/required/commons-beanutils-1.8.2.jar"/>
+			</manifest>
+		</jar>
+	</target>
+	
 	<!--将整个dist打成zip文件并放到versions录下-->
-	<target name="zipDist" depends="copyApiToDocs">
+	<target name="zipDist" depends="jarCoreExamples">
 		<delete file="${versionDir}/${appName}.zip" />
 		<zip destfile="${versionDir}/${appName}.zip">
 			<!--<zipfileset dir="${distDir}/src" prefix="src" />-->

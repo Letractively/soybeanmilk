@@ -34,19 +34,19 @@
 			</p>
 			<p>
 				<a href="../../api/org/soybeanMilk/core/ObjectSource.html" class="glossary">对象源</a>是框架的核心接口，用于获取和保存对象。
-				你使用此框架要做的大部分工作就是告诉框架如何从<span class="glossary">对象源</span>中取得参数值，以及如何保存方法的结果。
+				你使用此框架要做的大部分工作就是告诉框架如何从<span class="glossary">对象源</span>中取得你要调用的Java方法的参数值，以及如何将此Java方法的调用结果保存到<span class="glossary">对象源</span>。
 			</p>
 			<p>
 				<a href="../../api/org/soybeanMilk/core/Executable.html" class="glossary">可执行对象</a>是框架的另一核心接口，
 				它仅依赖<span class="glossary">对象源</span>就可以自我执行。它在框架中有两个实现，一是<a href="../../api/org/soybeanMilk/core/exe/Invoke.html" class="glossary">调用</a>、一是<a href="../../api/org/soybeanMilk/core/exe/Action.html" class="glossary">动作</a>，
-				它们都是对方法（java.lang.reflect.Method）的高级封装，一个<span class="glossary">动作</span>可以包含多个<span class="glossary">调用</span>，一个<span class="glossary">调用</span>对应一个方法。
+				它们都是对Java方法的高级封装，一个<span class="glossary">动作</span>可以包含多个<span class="glossary">调用</span>，一个<span class="glossary">调用</span>对应一个Java方法（下面我们将称为<span class="glossary">调用方法</span>）。
 			</p>
 			<p>
-				<a href="javascript:void(0);" class="glossary">解决对象</a>是框架的一个重要概念，方法的调用目标即是它。
+				<a href="javascript:void(0);" class="glossary">解决对象</a>是框架的一个重要概念，<span class="glossary">调用方法</span>的调用目标即是它。
 				它在框架中并没有明确的接口体现，因为它完全是由框架使用者定义的，你可以把它理解为你应用中的业务对象。
 			</p>
 			<p>
-				<a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">转换器</a>能够将<span class="glossary">对象源</span>存储的任意对象转换为符合<span class="glossary">调用</span>方法参数类型的对象，它是框架正确执行<span class="glossary">调用</span>方法的保证。
+				<a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">转换器</a>能够将<span class="glossary">对象源</span>存储的任意对象转换为符合<span class="glossary">调用方法</span>参数类型的对象，它是框架正确执行<span class="glossary">调用方法</span>的保证。
 			</p>
 			<p>
 				<a href="../../api/org/soybeanMilk/web/th/TargetHandler.html" class="glossary">目标处理器</a>用于处理<span class="glossary">动作</span>的目标URL并控制视图展现方式。
@@ -153,7 +153,7 @@
 												<a href="#tag_arg"><span class="tag">&lt;arg&gt;</span></a>
 												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 												&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-												调用的方法参数配置
+												调用方法参数配置
 											</li>
 										</ul>
 									</li>
@@ -174,7 +174,7 @@
 														<a href="#tag_arg"><span class="tag">&lt;arg&gt;</span></a>
 														&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 														&nbsp;&nbsp;&nbsp;
-														调用的方法参数配置
+														调用方法参数配置
 													</li>
 												</ul>
 											</li>
@@ -216,7 +216,7 @@
 				框架会尝试进行类型转换（参考<a href="../../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">通用转换器</a>接口）。
 			</p>
 			<p>
-				特别是在WEB环境下，请求参数值都是字符串，而<span class="glossary">调用</span>的方法参数可能是任何类型的，类型转换尤为重要。
+				特别是在WEB环境下，请求参数值都是字符串，而<span class="glossary">调用方法</span>参数可能是任何类型的，类型转换尤为重要。
 			</p>
 			<p>
 				它包含如下属性：
@@ -229,6 +229,10 @@
 					</li>
 				</ul>
 			</p>
+			<p>
+				默认的<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>已经添加了大部分常用的辅助转换器（参考<a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a>类说明），
+				它还支持将“<span class="var">java.util.Map&lt;String, Object&gt;</span>”转换为JavaBean对象、JavaBean数组以及JavaBean集合（List、Set）。
+			</p>
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_converter"></a>
@@ -236,10 +240,6 @@
 			</p>
 			<p>
 				辅助转换器配置。你可以配置多个辅助转换器，来为通用转换器添加更多的类型转换支持，或者替换旧的辅助转换器（后添加的将替换掉先前添加的）。
-			</p>
-			<p>
-				默认的<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>已经添加了大部分常用的辅助转换器（参考<a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a>类说明），
-				它还支持将“<span class="var">java.util.Map&lt;String, Object&gt;</span>”转换为JavaBean对象、JavaBean数组以及JavaBean集合（List、Set）。
 			</p>
 			<p>
 				它包含如下属性：
@@ -328,7 +328,7 @@
 					</li>
 					<li>
 						<span class="tagAttr">execution-key</span>（<span class="required">必须</span>） <br />
-						<a href="../../api/org/soybeanMilk/core/Execution.html">执行语境信息</a>对象的存储关键字。你可以在作为拦截器的<span class="glossary">可执行对象</span>中使用这个关键字取得它。
+						<a href="../../api/org/soybeanMilk/core/Execution.html">执行语境信息</a>对象的存储关键字。你可以在作为拦截器的<span class="glossary">可执行对象</span>中使用这个关键字来获取当前的<span class="glossary">执行语境信息</span>。
 					</li>
 				</ul>
 			</p>
@@ -534,23 +534,23 @@ public void handleException(Execution execution)
 					</li>
 					<li>
 						<span class="tagAttr">method</span>（<span class="required">必须</span>） <br />
-						定义<span class="glossary">调用</span>的方法名称，这个方法必须在<span class="tagAttr">resolver-class</span>或者<span class="tagAttr">resolver</span>类中存在。
-						配置解析器会在解析时根据这个名称查找对应的方法对象，如果你定义了<span class="tagAttr">resolver-class</span>属性，解析器会优先使用它来查找；
+						定义<span class="glossary">调用方法</span>的名称，这个方法必须在<span class="tagAttr">resolver-class</span>或者<span class="tagAttr">resolver</span>类中存在。
+						配置解析器会在解析时根据这个名称查找对应的方法，如果你定义了<span class="tagAttr">resolver-class</span>属性，解析器会优先使用它来查找；
 						否则，使用<span class="tagAttr">resolver</span>定义的<span class="glossary">解决对象</span>来查找。
 					</li>
 					<li>
 						<span class="tagAttr">resolver-class</span>（<span class="required">二选一</span>） <br />
-						定义<span class="glossary">解决对象</span>类名，如果方法是类方法，你仅需要定义这个属性即可，而不需定义下面的<span class="tagAttr">resolver</span>属性，
+						定义<span class="glossary">解决对象</span>类名，如果<span class="glossary">调用方法</span>是类方法，你仅需要定义这个属性即可，而不需定义下面的<span class="tagAttr">resolver</span>属性，
 						因为类方法执行时不需要<span class="glossary">解决对象</span>实例。
 					</li>
 					<li>
 						<span class="tagAttr">resolver</span>（<span class="required">二选一</span>） <br />
 						定义<span class="glossary">解决对象</span>引用ID，这个ID可以是该文件域内的<span class="glossary">解决对象</span>ID，也可以是任何包含模块文件中的<span class="glossary">解决对象</span>ID。
-						如果该<span class="glossary">调用</span>方法不是类方法，这个属性必须被定义。
+						如果该<span class="glossary">调用方法</span>不是类方法，这个属性必须被定义。
 					</li>
 					<li>
 						<span class="tagAttr">result-key</span>（可选） <br />
-						<span class="glossary">调用</span>方法结果在对象源中的保存关键字。无论方法是否有返回结果，只要你定义了<span class="tagAttr">result-key</span>，
+						<span class="glossary">调用方法</span>结果在对象源中的保存关键字。无论方法是否有返回结果，只要你定义了<span class="tagAttr">result-key</span>，
 						框架总会执行保存操作，只不过无返回结果的话是以null值保存的；反之，则不会保存。<br />
 						下面是合法的结果关键字：
 						<ul>
@@ -636,9 +636,9 @@ public void handleException(Execution execution)
 				<span class="tag bold">&lt;arg&gt;</span>（<span class="required">不定</span>） <br/>
 			</p>
 			<p>
-				<span class="glossary">调用</span>方法的参数配置。只有在你是以XML方式配置<span class="tag">&lt;invoke&gt;</span>时，才需要定义此标签。<span class="tag">&lt;arg&gt;</span>的个数是由<span class="glossary">调用</span>方法决定的，
-				方法有几个参数，你就需要配置几个<span class="tag">&lt;arg&gt;</span>，
-				如果方法没有参数，你就不必要配置它。
+				<span class="glossary">调用方法</span>的参数配置。只有在你是以XML方式配置<span class="tag">&lt;invoke&gt;</span>时，才需要定义此标签。<span class="tag">&lt;arg&gt;</span>的个数是由<span class="glossary">调用方法</span>决定的，
+				<span class="glossary">调用方法</span>有几个参数，你就需要配置几个<span class="tag">&lt;arg&gt;</span>，
+				如果<span class="glossary">调用方法</span>没有参数，你就不必要配置它。
 			</p>
 			<p>
 				它没有属性，只有标签内容。标签内容可以分为两大类，一是参数关键字、一是参数值，框架会自动识别它们。
@@ -651,15 +651,15 @@ public void handleException(Execution execution)
 						<ul>
 							<li>
 								<span class="tagValue">param</span> <br/>
-								整个请求参数映射表。如果<span class="glossary">调用</span>方法参数是<span class="var">java.util.Map</span>类型，
-								那么这个请求参数映射表会原封不动地传递给方法；如果是其他类型，框架会首先将此映射表转换为这个类型的对象，然后传递给方法。
+								整个请求参数映射表。如果<span class="glossary">调用方法</span>参数是<span class="var">java.util.Map</span>类型，
+								那么这个请求参数映射表会原封不动地传递给方法；如果是其他类型，框架会首先使用<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>将此映射表转换为这个类型的对象，然后传递给方法。
 							</li>
 							<li>
 								<span class="tagValue">yourArgKey</span> <br/>
 								请求参数映射表中以“<span class="var">yourArgKey</span>”开头的请求参数。
 								如果这个参数有明确的值，框架会将这个值进行类型转换（需要的话）后传递给方法；否则，就根据“<span class="var">yourArgKey</span>”来对参数映射表进行过滤，
 								产生一个新的映射表（它的主键是原始关键字“<span class="var">yourArgKey.</span>”之后的部分，比如由“<span class="var">beanName.propertyName</span>”变为“<span class="var">propertyName</span>”），
-								然后，与上面提到的一样，根据<span class="glossary">调用</span>方法参数的类型直接传递这个新映射表或者传递转换后的对象。
+								然后，与上面提到的一样，根据<span class="glossary">调用方法</span>参数的类型直接传递这个新映射表或者传递转换后的对象。
 							</li>
 							<li>
 								<span class="tagValue">param.yourArgKey</span> <br/>
@@ -667,44 +667,46 @@ public void handleException(Execution execution)
 							</li>
 							<li>
 								<span class="tagValue">request</span> <br/>
-								请求HttpServletRequest对象。框架本身并没有提供它的转换器，如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">HttpServletRequest</span>”，
+								请求HttpServletRequest对象。框架本身并没有提供它的转换器，如果<span class="glossary">调用方法</span>的参数类型不是“<span class="var">HttpServletRequest</span>”，
 								那么你需要自定义“<span class="var">javax.servlet.http.HttpServletRequest</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
 							<li>
 								<span class="tagValue">request.yourArgKey</span> <br/>
-								请求属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。如果<span class="glossary">调用</span>方法的参数类型与此对象不一致，框架将尝试执行类型转换。
+								请求属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。如果<span class="glossary">调用方法</span>的参数类型与此对象不一致，框架将尝试执行类型转换。
 							</li>
 							<li>
 								<span class="tagValue">session</span> <br/>
-								会话HttpSession对象。框架本身并没有提供它的转换器，如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">HttpSession</span>”，
+								会话HttpSession对象。框架本身并没有提供它的转换器，如果<span class="glossary">调用方法</span>的参数类型不是“<span class="var">HttpSession</span>”，
 								那么你需要自定义“<span class="var">javax.servlet.http.HttpSession</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
 							<li>
 								<span class="tagValue">session.yourArgKey</span> <br/>
-								会话属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。如果<span class="glossary">调用</span>方法的参数类型与此对象不一致，框架将尝试执行类型转换。
+								会话属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。如果<span class="glossary">调用方法</span>的参数类型与此对象不一致，框架将尝试执行类型转换。
 							</li>
 							<li>
 								<span class="tagValue">application</span> <br/>
-								应用ServletContext对象。如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">ServletContext</span>”，
+								应用ServletContext对象。如果<span class="glossary">调用方法</span>的参数类型不是“<span class="var">ServletContext</span>”，
 								那么你需要自定义“<span class="var">javax.servlet.ServletContext</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
 							<li>
 								<span class="tagValue">application.yourArgKey</span> <br/>
-								应用属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。如果<span class="glossary">调用</span>方法的参数类型与此对象不一致，框架将尝试执行类型转换。
+								应用属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。如果<span class="glossary">调用方法</span>的参数类型与此对象不一致，框架将尝试执行类型转换。
 							</li>
 							<li>
 								<span class="tagValue">response</span> <br/>
-								回应HttpServletResponse对象。如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">HttpServletResponse</span>”，
+								回应HttpServletResponse对象。如果<span class="glossary">调用方法</span>的参数类型不是“<span class="var">HttpServletResponse</span>”，
 								那么你需要自定义“<span class="var">javax.servlet.http.HttpServletResponse</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 							</li>
 							<li>
 						  		<span class="tagValue">objectSource</span> <br/>
-						  		当前的<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>对象，你可以使用它来获取所有servlet对象。如果<span class="glossary">调用</span>方法的参数类型不是“<span class="var">WebObjectSource</span>”，
+						  		当前的<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>对象，你可以使用它来获取所有servlet对象。如果<span class="glossary">调用方法</span>的参数类型不是“<span class="var">WebObjectSource</span>”，
 						  		那么你需要自定义“<span class="var">org.soybeanMilk.web.os.WebObjectSource</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
 						  	</li>
 						</ul>
-						实际上，这里的关键字格式是由<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>类决定的，
-						因为它们会被直接传递给它的<span class="var">get(...)</span>方法。<br>
+						<p>
+							实际上，这里的关键字格式是由<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>类决定的，
+							因为它们会被直接传递给它的<span class="var">get(...)</span>方法。
+						</p>
 					</li>
 					<li>
 						参数值 <br>
@@ -712,44 +714,44 @@ public void handleException(Execution execution)
 						<ul>
 							<li>
 								<span class="tagValue">boolean</span> <br>
-								布尔值“<span class="var">true</span>”或者“<span class="var">false</span>”。对应的方法类型应该为“<span class="var">boolean</span>”或者“<span class="var">Boolean</span>”。
+								布尔值“<span class="var">true</span>”或者“<span class="var">false</span>”。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">boolean</span>”或者“<span class="var">Boolean</span>”。
 							</li>
 							<li>
 								<span class="tagValue">byte</span> <br>
-								字节值。对应的方法类型应该为“<span class="var">byte</span>”或者“<span class="var">Byte</span>”。
+								字节值。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">byte</span>”或者“<span class="var">Byte</span>”。
 							</li>
 							<li>
 								<span class="tagValue">char</span> <br>
 								字符。可以是普通字符（'a'、'b'、'c'、'1'、'5'）、Java转义字符（'\n'、'\r'、'\t'、'\''、'\\'、'\"'），或者unicode字符（'\uxxxx'）。
-								对应的方法类型应该为“<span class="var">char</span>”或者“<span class="var">Char</span>”。
+								对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">char</span>”或者“<span class="var">Char</span>”。
 							</li>
 							<li>
 								<span class="tagValue">double</span> <br>
-								双精度小数。对应的方法类型应该为“<span class="var">double</span>”或者“<span class="var">Double</span>”。
+								双精度小数。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">double</span>”或者“<span class="var">Double</span>”。
 							</li>
 							<li>
 								<span class="tagValue">float</span> <br>
-								单精度小数。对应的方法类型应该为“<span class="var">float</span>”或者“<span class="var">Float</span>”。
+								单精度小数。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">float</span>”或者“<span class="var">Float</span>”。
 							</li>
 							<li>
 								<span class="tagValue">int</span> <br>
-								整型值。对应的方法类型应该为“<span class="var">int</span>”或者“<span class="var">Integer</span>”。
+								整型值。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">int</span>”或者“<span class="var">Integer</span>”。
 							</li>
 							<li>
 								<span class="tagValue">long</span> <br>
-								长整型值。对应的方法类型应该为“<span class="var">long</span>”或者“<span class="var">Long</span>”。
+								长整型值。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">long</span>”或者“<span class="var">Long</span>”。
 							</li>
 							<li>
 								<span class="tagValue">short</span> <br>
-								短整型值。对应的方法类型应该为“<span class="var">short</span>”或者“<span class="var">Short</span>”。
+								短整型值。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">short</span>”或者“<span class="var">Short</span>”。
 							</li>
 							<li>
 								<span class="tagValue">String</span> <br>
-								字符串。它可以包含<span class="tagValue">char</span>中定义的字符。对应的方法类型应该为“<span class="var">String</span>”。
+								字符串。它可以包含<span class="tagValue">char</span>中定义的字符。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">String</span>”。
 							</li>
 							<li>
 								<span class="tagValue">null</span> <br>
-								空。对应的方法类型可以是除基本类型外的任何类型。
+								空。对应的<span class="glossary">调用方法</span>类型可以是除基本类型外的任何类型。
 							</li>
 						</ul>
 					</li>

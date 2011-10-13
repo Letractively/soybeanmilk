@@ -689,7 +689,8 @@ public void handleException(Execution execution)
 								The entire request parameter map.
 								If the <span class="glossary">Invoke</span> method argument is <span class="var">java.util.Map</span> type,
 								then this entire map will be directly passed to the method.
-								And if the argument is other type, the framework will first convert it to the target type, then pass it to the method. 
+								And if the argument is other type, the framework will first convert it to the target type,
+								by <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a>, then pass it to the method. 
 							</li>
 							<li>
 								<span class="tagValue">yourArgKey</span> <br/>

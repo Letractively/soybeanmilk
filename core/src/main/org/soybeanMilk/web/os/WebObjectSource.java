@@ -29,7 +29,6 @@ import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.Converter;
-import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.web.WebConstants;
@@ -242,8 +241,7 @@ public class WebObjectSource extends ConvertableObjectSource
 				data=this;
 			else
 			{
-				data=DefaultGenericConverter.getConverterNotNull(
-						getGenericConverter(), WebObjectSource.class, expectType).convert(this, expectType);
+				data=getConverterNotNull(WebObjectSource.class, expectType).convert(this, expectType);
 			}
 		}
 		else if(scopedKey.length == 1)//没有包含作用域标识并且关键字不是作用域本身，则从param中取
@@ -348,8 +346,7 @@ public class WebObjectSource extends ConvertableObjectSource
 			{
 				Type srcType=getServletObjectType(servletObj);
 				
-				re=DefaultGenericConverter.getConverterNotNull(
-						getGenericConverter(), srcType, targetType).convert(servletObj, targetType);
+				re=getConverterNotNull(srcType, targetType).convert(servletObj, targetType);
 			}
 		}
 		else
@@ -505,6 +502,24 @@ public class WebObjectSource extends ConvertableObjectSource
 			throw new ObjectSourceException("unknown servlet object '"+servletObject.getClass().getName()+"'");
 		
 		return type;
+	}
+	
+	/**
+	 * 查找转换器，返回结果不会为<code>null</code>
+	 * @param sourceType
+	 * @param targetType
+	 * @return
+	 * @date 2011-4-14
+	 */
+	protected Converter getConverterNotNull(Type sourceType, Type targetType)
+	{
+		GenericConverter genericConverter=getGenericConverter();
+		
+		Converter cvt=(genericConverter == null ? null : genericConverter.getConverter(sourceType, targetType));
+		if(cvt == null)
+			throw new NullPointerException("no Converter defined for converting '"+sourceType+"' to '"+targetType+"'");
+		
+		return cvt;
 	}
 	
 	/**

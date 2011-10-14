@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 泛型类型元信息。<br>
- * 它同时封装泛型类型的持有类信息，使用者仅通过此类即可解析任何泛型对象。<br>
+ * 它同时封装泛型类型的持有类信息，并提供了获取泛型类型的具体类型的方法。<br>
  * {@linkplain DefaultGenericConverter 默认通用转换器}即是靠它来支持泛型类型转换的。
  * @author earthAngry@gmail.com
  * @date 2011-9-29

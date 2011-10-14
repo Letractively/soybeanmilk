@@ -58,7 +58,7 @@ public class UserManager
 
         &lt;executables&gt;
                 &lt;action name="/user/add.do"&gt;
-                        &lt;invoke&gt; <span class="var">userManager.save(param)</span> &lt;/invoke&gt;
+                        &lt;invoke&gt; <span class="var">userManager.save(param.user)</span> &lt;/invoke&gt;
                         &lt;target url="/user/list.do" type="redirect" /&gt;
                 &lt;/action&gt;
                 
@@ -100,7 +100,7 @@ commons-logging-api-1.1.jar
 			</p>
 			<p>
 			  	That's OK!<br/>
-			  	Now, start the web server, and type "<span class="var">http://[yourApp]/user/add.do?id=1&name=jack</span>" in your internet explorer,
+			  	Now, start the web server, and type "<span class="var">http://[yourApp]/user/add.do?user.id=1&user.name=jack</span>" in your internet explorer,
 			  	user "<span class="var">jack</span>" will be saved and displayed in "<span class="var">/user/list.jsp</span>" page.
 			</p>
 		</div>

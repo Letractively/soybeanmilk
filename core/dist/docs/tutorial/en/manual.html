@@ -242,6 +242,12 @@
 					</li>
 				</ul>
 			</p>
+			<p>
+				The nested generic converter implementation <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a>
+				has add most common support converters
+				(see <a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a> class),
+				and it can also convert "<span class="var">java.util.Map&lt;String, Object&gt;</span>"  to JavaBean object, JavaBean array and JavaBean collection(List, Set).
+			</p>
 			<div class="seprator"></div>
 			<p>
 				<a name="tag_converter"></a>
@@ -250,12 +256,6 @@
 			<p>
 				Support <a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">Converter</a> object.
 				You can add new support converters or replace old converters to enhance the generic converter.<br />
-			</p>
-			<p>
-				The nested generic converter implementation <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a>
-				has add most common support converters
-				(see <a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a> class),
-				and it can also convert "<span class="var">java.util.Map&lt;String, Object&gt;</span>"  to JavaBean object, JavaBean array and JavaBean collection(List, Set).
 			</p>
 			<p>
 				It contains the following attributes:
@@ -312,10 +312,13 @@
 <pre class="code-xml">
 &lt;generic-converter&gt;
 	&lt;converter src="String" target="Date" class="your.converter.DateConverter" /&gt;
-	&lt;converter src="String[]" target="Date[]" class="your.converter.DateArrayConverter" /&gt;
 	&lt;converter src="request" target="java.io.File" class="your.converter.FileConverter" /&gt;
 &lt;/generic-converter&gt;
 </pre>
+			</p>
+			<p>
+				Normally, you only need to replace or define support converters for atomic types mentioned above, the <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a> will
+				automatically decompose JavaBean convertion or array convertion to these atomic type convertions.
 			</p>
 			<div class="seprator"></div>
 			<p>
@@ -698,7 +701,7 @@ public void handleException(Execution execution)
 								The framework will simplely convert it to the <span class="glossary">Invoke</span> method type and then pass it,
 								if it is explicitly (only one value).
 								Otherwise, the framework will first creat a new map who contains parameters only start with "<span class="var">yourArgKey</span>",
-								and it's key will also be truncated from "<span class="var">beanName.propertyName</span>" to "<span class="var">propertyName</span>".
+								and it's key will also be truncated from "<span class="var">beanName.propertyName.subPropertyName</span>" to "<span class="var">propertyName.subPropertyName</span>".
 								Then, it will directly pass this new map or pass the converted object mentioned as above.
 							</li>
 							<li>
@@ -846,18 +849,51 @@ public void handleException(Execution execution)
 			</p>
 			<p>
 <pre class="code-xml">
-&lt;invoke name="/multiply.do" method="multiply" resolver="calculator" result-key="multiplyResult"&gt;
-	&lt;arg&gt;a&lt;arg/&gt;
-	&lt;arg&gt;param.b&lt;arg/&gt;
+&lt;invoke name="/multiply.do"&gt;
+	multiplyResult = calculator.multiply(a, param.b);
 &lt;/invoke&gt;
 </pre>
 			<p>
 			<p>
 <pre class="code-xml">
-&lt;invoke name="/doMultiply.do" method="doMultiply" resolver="calculator"&gt;
-	&lt;arg&gt;request&lt;/arg&gt;
-	&lt;arg&gt;response&lt;arg/&gt;
+&lt;invoke name="/doMultiply.do"&gt;
+	calculator.doMultiply(request, response);
 &lt;/invoke&gt;
+</pre>
+			</p>
+			<p>
+				<a name="tag_arg_generic"></a>
+				The <span class="glossary">Invoke</span> method argument can be any type, but the framework default can only convert request parameters to these types:
+				primitive and their wrapper types, BigInteger and BigDecimal, java.util.Date and its sub types, JavaBean, and array type of the above;
+				or generic types, such as :<br>
+<pre class="code-java">
+void genericMethod(List&lt;Integer&gt; list);
+
+void genericMethod(List&lt;JavaBeanClass&gt; list, Set&lt;JavaBeanClass&gt; set);
+
+void genericMethod(List&lt;T&gt; list, Set&lt;G&gt; set);
+
+void genericMethod(T t, G g);
+
+void genericMethod(T[] array);
+</pre>
+			</p>
+			<p>
+				Note that for type variable "<span class="var">T</span>" or "<span class="var">G</span>", will be thought as Object type,
+				if there is no actual type for it in its class context.
+			</p>
+			<p>
+				If the framework can not recognize your <span class="glossary">Invoke</span> method argument type, one solution is to define a <a href="#tag_converter">support convert</a>,
+				or, another simple solution is to add a <span class="glossary">Invoke</span> for type convertion before this <span class="glossary">Invoke</span>:
+<pre class="code-xml">
+&lt;action name="/complexArgMethod.do"&gt;
+	&lt;invoke&gt;
+		request.myArg = myResolver.paramToMyArg(param);
+	&lt;/invoke&gt;
+	&lt;invoke&gt;
+		myResolver.complexArgMethod(request.myArg);
+	&lt;/invoke&gt;
+&lt;/action&gt;
 </pre>
 			</p>
 			<div class="seprator"></div>

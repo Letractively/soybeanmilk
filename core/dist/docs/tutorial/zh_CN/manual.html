@@ -293,10 +293,12 @@
 <pre class="code-xml">
 &lt;generic-converter&gt;
 	&lt;converter src="String" target="Date" class="your.converter.DateConverter" /&gt;
-	&lt;converter src="String[]" target="Date[]" class="your.converter.DateArrayConverter" /&gt;
 	&lt;converter src="request" target="java.io.File" class="your.converter.FileConverter" /&gt;
 &lt;/generic-converter&gt;
 </pre>
+			</p>
+			<p>
+				通常，你只需要替换或定义上面提到的这些原子类型的辅助转换器即可，<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>会自动将JavaBean转换或者数组转换分解为这些原子类型的转换操作。
 			</p>
 			<div class="seprator"></div>
 			<p>
@@ -305,9 +307,6 @@
 			</p>
 			<p>
 				拦截器配置。你可以通过该配置来为<a href="../../api/org/soybeanMilk/core/Executor.html">执行器</a>添加执行前、执行后、异常时的拦截器。
-			</p>
-			<p>
-				
 			</p>
 			<p>
 				它包含如下属性：
@@ -657,9 +656,9 @@ public void handleException(Execution execution)
 							<li>
 								<span class="tagValue">yourArgKey</span> <br/>
 								请求参数映射表中以“<span class="var">yourArgKey</span>”开头的请求参数。
-								如果这个参数有明确的值，框架会将这个值进行类型转换（需要的话）后传递给方法；否则，就根据“<span class="var">yourArgKey</span>”来对参数映射表进行过滤，
-								产生一个新的映射表（它的主键是原始关键字“<span class="var">yourArgKey.</span>”之后的部分，比如由“<span class="var">beanName.propertyName</span>”变为“<span class="var">propertyName</span>”），
-								然后，与上面提到的一样，根据<span class="glossary">调用方法</span>参数的类型直接传递这个新映射表或者传递转换后的对象。
+								如果这个参数有明确的值，框架会将这个值进行类型转换（需要的话）后传递给<span class="glossary">调用方法</span>；否则，就根据“<span class="var">yourArgKey</span>”来对参数映射表进行过滤，
+								产生一个新的参数映射表（它的主键是原始参数名“<span class="var">yourArgKey.</span>”之后的部分，比如把参数名“<span class="var">beanName.propertyName.subPropertyName</span>”变为“<span class="var">propertyName.subPropertyName</span>”），
+								然后，与上面提到的一样，根据<span class="glossary">调用方法</span>参数的类型直接传递这个新映射表或者使用<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>传递转换后的对象。
 							</li>
 							<li>
 								<span class="tagValue">param.yourArgKey</span> <br/>
@@ -777,18 +776,49 @@ public void handleException(Execution execution)
 			</p>
 			<p>
 <pre class="code-xml">
-&lt;invoke name="/multiply.do" method="multiply" resolver="calculator" result-key="multiplyResult"&gt;
-	&lt;arg&gt;a&lt;arg/&gt;
-	&lt;arg&gt;param.b&lt;arg/&gt;
+&lt;invoke name="/multiply.do"&gt;
+	multiplyResult = calculator.multiply(a, param.b);
 &lt;/invoke&gt;
 </pre>
 			<p>
 			<p>
 <pre class="code-xml">
-&lt;invoke name="/doMultiply.do" method="doMultiply" resolver="calculator"&gt;
-	&lt;arg&gt;request&lt;/arg&gt;
-	&lt;arg&gt;response&lt;arg/&gt;
+&lt;invoke name="/doMultiply.do"&gt;
+	calculator.doMultiply(request, response);
 &lt;/invoke&gt;
+</pre>
+			</p>
+			<p>
+				<a name="tag_arg_generic"></a>
+				<span class="glossary">调用方法</span>的参数可以是任意类型，不过框架默认只能自动将请求参数转换为下面这些具体类型：基本类型及其包装类型、BigInteger和BigDecimal类型、java.util.Date及其子类型、JavaBean，以及它们的数组类型；
+				或者是泛型类型，比如：<br>
+<pre class="code-java">
+void genericMethod(List&lt;Integer&gt; list);
+
+void genericMethod(List&lt;JavaBeanClass&gt; list, Set&lt;JavaBeanClass&gt; set);
+
+void genericMethod(List&lt;T&gt; list, Set&lt;G&gt; set);
+
+void genericMethod(T t, G g);
+
+void genericMethod(T[] array);
+</pre>
+			</p>
+			<p>
+				注意，对于参数化类型“<span class="var">T</span>”和“<span class="var">G</span>”，如果在方法的类语境中找不到它们对应的具体类型，那么它们将被当做是Object类型。
+			</p>
+			<p>
+				如果框架无法识别你的<span class="glossary">调用方法</span>参数类型，一个解决办法是定义<a href="#tag_converter">辅助转换器</a>，
+				或者，更简便的办法是直接在此<span class="glossary">调用</span>之前添加一个用于执行类型转换的<span class="glossary">调用</span>：
+<pre class="code-xml">
+&lt;action name="/complexArgMethod.do"&gt;
+	&lt;invoke&gt;
+		request.myArg = myResolver.paramToMyArg(param);
+	&lt;/invoke&gt;
+	&lt;invoke&gt;
+		myResolver.complexArgMethod(request.myArg);
+	&lt;/invoke&gt;
+&lt;/action&gt;
 </pre>
 			</p>
 			<div class="seprator"></div>

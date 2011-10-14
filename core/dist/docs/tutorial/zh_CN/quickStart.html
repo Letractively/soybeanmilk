@@ -57,7 +57,7 @@ public class UserManager
 
         &lt;executables&gt;
                 &lt;action name="/user/add.do"&gt;
-                        &lt;invoke&gt; <span class="var">userManager.save(param)</span> &lt;/invoke&gt;
+                        &lt;invoke&gt; <span class="var">userManager.save(param.user)</span> &lt;/invoke&gt;
                         &lt;target url="/user/list.do" type="redirect" /&gt;
                 &lt;/action&gt;
                 
@@ -98,7 +98,7 @@ commons-logging-api-1.1.jar
 			  	放入/WEB-INF/lib目录下。
 			</p>
 			<p>
-			  	最后，启动服务器，在浏览器中输入“<span class="var">http://[yourApp]/user/add.do?id=1&name=jack</span>”，用户“<span class="var">jack</span>”将被保存，并显示在“<span class="var">/user/list.jsp</span>”页面上。
+			  	最后，启动服务器，在浏览器中输入“<span class="var">http://[yourApp]/user/add.do?user.id=1&user.name=jack</span>”，用户“<span class="var">jack</span>”将被保存，并显示在“<span class="var">/user/list.jsp</span>”页面上。
 			</p>
 		</div>
 	</div>

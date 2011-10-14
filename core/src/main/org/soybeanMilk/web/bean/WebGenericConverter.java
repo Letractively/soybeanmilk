@@ -61,9 +61,20 @@ import org.soybeanMilk.web.os.WebObjectSource.ParamFilterAwareMap;
  * 	private User[] arrayChildren;
  * 	...
  * }
- * 
- * 类型的对象。
  * </pre>
+ * 类型的对象。<br>
+ * 或者将：
+ * <pre>
+ * "id"                 -&gt;  ["1","2","3"]
+ * "name"               -&gt;  ["jack","tom","cherry"]
+ * </pre>
+ * 转换为：
+ * <pre>
+ * List&lt;User&gt;
+ * Set&lt;User&gt;
+ * User[]
+ * </pre>
+ * 类型的对象。
  * @author earthAngry@gmail.com
  * @date 2010-10-8
  */

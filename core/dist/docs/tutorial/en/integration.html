@@ -207,10 +207,11 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 </pre>
 			</p>
 			<p>
-				There is also a very simple way,
+				<span style="font-size:x-large;font-weight:bold;">There is</span> also a very simple way,
 				by overriding the <span class="tagValue">getInitExternalResolverFactory()</span> method of <span class="glossary">DispatchServlet</span> class:
 			</p>
 <pre class="code-java">
+package my.web;
 public class DispatchServlet extends org.soybeanMilk.web.servlet.DispatchServlet
 {
 	private static final long serialVersionUID = 1L;
@@ -242,6 +243,16 @@ public class DispatchServlet extends org.soybeanMilk.web.servlet.DispatchServlet
 		};
 	}
 }
+</pre>
+			<p>
+				Then, you just need to use this DispatchServlet instead:
+			</p>
+<pre class="code-xml">
+&lt;servlet&gt;
+	&lt;servlet-name&gt;dispatchServlet&lt;/servlet-name&gt;
+	&lt;servlet-class&gt;my.web.DispatchServlet&lt;/servlet-class&gt;
+	&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+&lt;/servlet&gt;
 </pre>
 			<div class="seprator"></div>
 			<p>

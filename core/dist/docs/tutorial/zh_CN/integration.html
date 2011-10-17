@@ -205,9 +205,10 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 </pre>
 			</p>
 			<p>
-				还有一种非常简便的方法，即是重写<span class="glossary">DispatchServlet</span>的<span class="tagValue">getInitExternalResolverFactory()</span>方法：
+				<span style="font-size:x-large;font-weight:bold;">还有</span>一种非常简便的整合方法，即是重写<span class="glossary">DispatchServlet</span>的<span class="tagValue">getInitExternalResolverFactory()</span>方法：
 			</p>
 <pre class="code-java">
+package my.web;
 public class DispatchServlet extends org.soybeanMilk.web.servlet.DispatchServlet
 {
 	private static final long serialVersionUID = 1L;
@@ -239,6 +240,16 @@ public class DispatchServlet extends org.soybeanMilk.web.servlet.DispatchServlet
 		};
 	}
 }
+</pre>
+			<p>
+				然后，使用这个重写后的DispatchServlet即可：
+			</p>
+<pre class="code-xml">
+&lt;servlet&gt;
+	&lt;servlet-name&gt;dispatchServlet&lt;/servlet-name&gt;
+	&lt;servlet-class&gt;my.web.DispatchServlet&lt;/servlet-class&gt;
+	&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+&lt;/servlet&gt;
 </pre>
 			<div class="seprator"></div>
 			<p>

@@ -139,3 +139,8 @@ resolver 解决对象ID，如果方法是非静态的，你应该设置它的值
 无论方法是否有返回结果，只要你定义了“result-key”，框架总会执行保存操作，只不过无返回结果的话是以null值保存的。
 -->
 <!ATTLIST invoke result-key CDATA #IMPLIED>
+
+<!--
+调用方法打断器，如果对象源中此打断器的值为false，调用方法将不会被执行；如果为true或者null，则执行。
+-->
+<!ATTLIST invoke breaker CDATA #IMPLIED>

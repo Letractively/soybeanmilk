@@ -97,6 +97,7 @@ public class ConfigurationParser
 	protected static final String TAG_INVOKE_ATTR_RESOLVER_OBJECT="resolver";
 	protected static final String TAG_INVOKE_ATTR_RESOLVER_CLASS="resolver-class";
 	protected static final String TAG_INVOKE_ATTR_RESULT_KEY="result-key";
+	protected static final String TAG_INVOKE_ATTR_BREAKER="breaker";
 	
 	protected static final String TAG_ARG="arg";
 	
@@ -497,6 +498,10 @@ public class ConfigurationParser
 	protected void setInvokeProperties(Invoke invoke, Element element, boolean global)
 	{
 		String methodName=getAttributeValueIngoreEmpty(element, TAG_INVOKE_ATTR_METHOD);
+		String breaker=getAttributeValueIngoreEmpty(element, TAG_INVOKE_ATTR_BREAKER);
+		
+		if(breaker != null)
+			invoke.setBreakerKey(breaker);
 		
 		if(methodName == null)
 			setInvokePropertiesStatement(invoke, element, global);

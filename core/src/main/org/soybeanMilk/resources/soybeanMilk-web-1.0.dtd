@@ -174,6 +174,11 @@ resolver 解决对象ID，如果方法是非静态的，你应该设置它的值
 <!ATTLIST invoke result-key CDATA #IMPLIED>
 
 <!--
+调用方法打断器，如果对象源中此打断器的值为false，调用方法将不会被执行；如果为true或者null，则执行。
+-->
+<!ATTLIST invoke breaker CDATA #IMPLIED>
+
+<!--
 动作目标配置属性
 url 目标URL
 type 目标类型（转向或者重定向）

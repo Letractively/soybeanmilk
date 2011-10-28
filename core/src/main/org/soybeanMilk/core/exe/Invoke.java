@@ -59,6 +59,9 @@ public class Invoke extends AbstractExecutable
 	/**调用结果存放到对象源中的关键字*/
 	private Serializable resultKey;
 	
+	/**此调用的打断器在对象源中的关键字，打断器可以控制调用方法是否执行*/
+	private Serializable breakerKey;
+	
 	/**
 	 * 创建空的调用对象
 	 */
@@ -153,10 +156,12 @@ public class Invoke extends AbstractExecutable
 	 * @return
 	 * @date 2011-1-13
 	 */
-	public Method getMethod() {
+	public Method getMethod()
+	{
 		return method;
 	}
-	public void setMethod(Method method) {
+	public void setMethod(Method method)
+	{
 		this.method = method;
 	}
 	
@@ -165,7 +170,8 @@ public class Invoke extends AbstractExecutable
 	 * @return
 	 * @date 2011-1-13
 	 */
-	public Arg[] getArgs() {
+	public Arg[] getArgs()
+	{
 		return args;
 	}
 	
@@ -194,10 +200,12 @@ public class Invoke extends AbstractExecutable
 	 * @return
 	 * @date 2011-1-13
 	 */
-	public Serializable getResultKey() {
+	public Serializable getResultKey()
+	{
 		return resultKey;
 	}
-	public void setResultKey(Serializable resultKey) {
+	public void setResultKey(Serializable resultKey)
+	{
 		this.resultKey = resultKey;
 	}
 	
@@ -206,12 +214,28 @@ public class Invoke extends AbstractExecutable
 	 * @return
 	 * @date 2011-9-29
 	 */
-	public Class<?> getResolverClass() {
+	public Class<?> getResolverClass()
+	{
 		return resolverClass;
 	}
-
-	public void setResolverClass(Class<?> resolverClass) {
+	public void setResolverClass(Class<?> resolverClass)
+	{
 		this.resolverClass = resolverClass;
+	}
+	
+	/**
+	 * 获取此调用的打断器关键字
+	 * @return
+	 * @date 2011-10-28
+	 */
+	public Serializable getBreakerKey()
+	{
+		return breakerKey;
+	}
+
+	public void setBreakerKey(Serializable breakerKey)
+	{
+		this.breakerKey = breakerKey;
 	}
 
 	/**
@@ -231,10 +255,38 @@ public class Invoke extends AbstractExecutable
 		if(log.isDebugEnabled())
 			log.debug("start  execute '"+this+"'");
 		
-		executeMethod(objectSource);
+		boolean breaked=isBreaked(objectSource);
+		
+		if(!breaked)
+			executeMethod(objectSource);
+		else
+		{
+			if(log.isDebugEnabled())
+				log.debug("Invoke method not executed, it is breaked by the value of key '"+this.breakerKey+"' in current object source");
+		}
 		
 		if(log.isDebugEnabled())
 			log.debug("finish execute '"+this+"'");
+	}
+	
+	/**
+	 * 此调用是否会在给定对象源上执行时被打断
+	 * @param objectSource
+	 * @return
+	 * @date 2011-10-28
+	 */
+	public boolean isBreaked(ObjectSource objectSource)
+	{
+		boolean breaked=false;
+		
+		if(this.breakerKey != null)
+		{
+			Object brkObj=objectSource.get(this.breakerKey, null);
+			if(brkObj!=null && Boolean.FALSE.equals(brkObj))
+				breaked=true;
+		}
+		
+		return breaked;
 	}
 	
 	/**
@@ -334,7 +386,7 @@ public class Invoke extends AbstractExecutable
 	public String toString()
 	{
 		return getClass().getSimpleName()+" [name=" + getName() + ", method=" + method
-				+ ", resultKey=" + resultKey + ", resolverProvider="
+				+ ", resultKey=" + resultKey + ", breakerKey="+ breakerKey+", resolverProvider="
 				+ resolverProvider + ", args=" + Arrays.toString(args) + "]";
 	}
 	

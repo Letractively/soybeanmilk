@@ -9,6 +9,7 @@ import test.unit.core.TestDefaultExecutor;
 import test.unit.core.TestDefaultGenericConverter;
 import test.unit.core.TestGenericType;
 import test.unit.core.TestHashMapObjectSource;
+import test.unit.core.TestInvoke;
 import test.unit.core.TestInvokeStatementParser;
 import test.unit.core.TestPropertyInfo;
 import test.unit.web.TestAbstractTargetHandler;
@@ -25,6 +26,7 @@ import test.unit.web.TestWebObjectSource;
 @Suite.SuiteClasses({
 TestClassShortName.class,
 TestDefaultExecutor.class,
+TestInvoke.class,
 TestDefaultGenericConverter.class,
 TestHashMapObjectSource.class,
 TestInvokeStatementParser.class,

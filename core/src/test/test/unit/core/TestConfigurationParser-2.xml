@@ -15,7 +15,7 @@
 			<ref name="m1_exe0" />
 		</action>
 		
-		<invoke name="exe1">
+		<invoke name="exe1" breaker="breakerKey">
 			tr2.test0();
 		</invoke>
 		

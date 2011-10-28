@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE soybean-milk PUBLIC "-//SoybeanMilk//DTD soybeanMilk web//EN" "http://soybeanmilk.googlecode.com/files/soybeanMilk-web-1.0.dtd">
+<soybean-milk>
+
+	<resolvers>
+		<resolver id="resolver" class="test.unit.core.TestInvoke$TestResolver" />
+	</resolvers>
+	
+	<executables>
+		
+		<invoke name="testBreaker_0">
+			testResult=resolver.test();
+		</invoke>
+		
+		<invoke name="testBreaker_1" breaker="breakerKey">
+			testResult=resolver.test();
+		</invoke>
+		
+	</executables>
+	
+</soybean-milk>

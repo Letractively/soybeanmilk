@@ -281,9 +281,16 @@ public class Invoke extends AbstractExecutable
 		
 		if(this.breakerKey != null)
 		{
-			Object brkObj=objectSource.get(this.breakerKey, null);
-			if(brkObj!=null && Boolean.FALSE.equals(brkObj))
+			if("true".equals(this.breakerKey))
 				breaked=true;
+			else if("false".equals(this.breakerKey))
+				breaked=false;
+			else
+			{
+				Object brkObj=objectSource.get(this.breakerKey, null);
+				if(brkObj!=null && Boolean.TRUE.equals(brkObj))
+					breaked=true;
+			}
 		}
 		
 		return breaked;

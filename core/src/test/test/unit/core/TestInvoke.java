@@ -53,7 +53,7 @@ public class TestInvoke
 			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
 		}
 		
-		//breaker的值为null
+		//breaker关键字的值为null
 		{
 			ObjectSource objSource=new HashMapObjectSource();
 			executor.execute("testBreaker_1", objSource);
@@ -61,22 +61,38 @@ public class TestInvoke
 			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
 		}
 		
-		//breaker的值为true
-		{
-			ObjectSource objSource=new HashMapObjectSource();
-			objSource.set("breakerKey", true);
-			executor.execute("testBreaker_1", objSource);
-			
-			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
-		}
-
-		//breaker的值为false
+		//breaker关键字的值为false
 		{
 			ObjectSource objSource=new HashMapObjectSource();
 			objSource.set("breakerKey", false);
 			executor.execute("testBreaker_1", objSource);
 			
+			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
+		}
+
+		//breaker关键字的值为true
+		{
+			ObjectSource objSource=new HashMapObjectSource();
+			objSource.set("breakerKey", true);
+			executor.execute("testBreaker_1", objSource);
+			
 			Assert.assertNull(objSource.get(RESULT_KEY, null));
+		}
+		
+		//breaker为"true"
+		{
+			ObjectSource objSource=new HashMapObjectSource();
+			executor.execute("testBreaker_2", objSource);
+			
+			Assert.assertNull(objSource.get(RESULT_KEY, null));
+		}
+
+		//breaker为"false"
+		{
+			ObjectSource objSource=new HashMapObjectSource();
+			executor.execute("testBreaker_3", objSource);
+			
+			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
 		}
 	}
 

@@ -501,7 +501,7 @@ public class ConfigurationParser
 		String breaker=getAttributeValueIngoreEmpty(element, TAG_INVOKE_ATTR_BREAKER);
 		
 		if(breaker != null)
-			invoke.setBreakerKey(breaker);
+			invoke.setBreaker(breaker);
 		
 		if(methodName == null)
 			setInvokePropertiesStatement(invoke, element, global);

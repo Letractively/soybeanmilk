@@ -573,6 +573,26 @@ public void handleException(Execution execution)
 						实际上，这里的关键字格式是由<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>类决定的，
 						因为它们会被直接传递给它的<span class="var">set(...)</span>方法。<br>
 					</li>
+					<li>
+						<a name="tag_invoke_breaker"></a>
+						<span class="tagAttr">breaker</span>（可选） <br />
+						<span class="glossary">调用方法</span>的打断器配置，用以控制<span class="glossary">调用方法</span>是否执行，
+						它有两种语义值：
+						<ul>
+							<li>
+								“<span class="var">true</span>”或者“<span class="var">false</span>” <br/>
+								如果为“<span class="var">true</span>”，<span class="glossary">调用方法</span>将不会被执行；
+								如果为“<span class="var">false</span>”，则会被执行；
+							</li>
+							<li>
+								任何其他字符串 <br/>
+								这个字符串将被认为是<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>中的一个关键字，如果这关键字的值为是<span class="var">Boolean.TRUE</span>对象，
+								<span class="glossary">调用方法</span>将不会被执行，而如果为<span class="var">null</span>或者任意其他对象，
+								<span class="glossary">调用方法</span>即会被执行。
+							</li>
+						</ul>
+						它的默认值为“<span class="var">false</span>”。
+					</li>
 				</ul>
 			</p>
 			<p>
@@ -628,6 +648,9 @@ public void handleException(Execution execution)
 		param.arg1, true, 'a', '\u00EF', "hello\t hello", 100 )
 &lt;/invoke&gt;
 </pre>
+			</p>
+			<p>
+				注意，在Java方式中，<span class="tagAttr">name</span>和<span class="tagAttr">breaker</span>这两项仍然只能配置在<span class="tag">&lt;invoke&gt;</span>的属性内。
 			</p>
 			<div class="seprator"></div>
 			<p>

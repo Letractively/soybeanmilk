@@ -60,7 +60,7 @@ public class Invoke extends AbstractExecutable
 	private Serializable resultKey;
 	
 	/**此调用的打断器在对象源中的关键字，打断器可以控制调用方法是否执行*/
-	private Serializable breakerKey;
+	private Serializable breaker;
 	
 	/**
 	 * 创建空的调用对象
@@ -228,14 +228,14 @@ public class Invoke extends AbstractExecutable
 	 * @return
 	 * @date 2011-10-28
 	 */
-	public Serializable getBreakerKey()
+	public Serializable getBreaker()
 	{
-		return breakerKey;
+		return breaker;
 	}
 
-	public void setBreakerKey(Serializable breakerKey)
+	public void setBreaker(Serializable breaker)
 	{
-		this.breakerKey = breakerKey;
+		this.breaker = breaker;
 	}
 
 	/**
@@ -262,7 +262,7 @@ public class Invoke extends AbstractExecutable
 		else
 		{
 			if(log.isDebugEnabled())
-				log.debug("Invoke method not executed, it is breaked by the value of key '"+this.breakerKey+"' in current object source");
+				log.debug("Invoke method not executed, it is breaked in current object source");
 		}
 		
 		if(log.isDebugEnabled())
@@ -279,15 +279,15 @@ public class Invoke extends AbstractExecutable
 	{
 		boolean breaked=false;
 		
-		if(this.breakerKey != null)
+		if(this.breaker != null)
 		{
-			if("true".equals(this.breakerKey))
+			if("true".equals(this.breaker))
 				breaked=true;
-			else if("false".equals(this.breakerKey))
+			else if("false".equals(this.breaker))
 				breaked=false;
 			else
 			{
-				Object brkObj=objectSource.get(this.breakerKey, null);
+				Object brkObj=objectSource.get(this.breaker, null);
 				if(brkObj!=null && Boolean.TRUE.equals(brkObj))
 					breaked=true;
 			}
@@ -393,7 +393,7 @@ public class Invoke extends AbstractExecutable
 	public String toString()
 	{
 		return getClass().getSimpleName()+" [name=" + getName() + ", method=" + method
-				+ ", resultKey=" + resultKey + ", breakerKey="+ breakerKey+", resolverProvider="
+				+ ", resultKey=" + resultKey + ", breaker="+ breaker+", resolverProvider="
 				+ resolverProvider + ", args=" + Arrays.toString(args) + "]";
 	}
 	

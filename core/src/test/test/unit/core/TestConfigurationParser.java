@@ -150,7 +150,7 @@ public class TestConfigurationParser
 		{
 			Invoke exe=(Invoke)config.getExecutable("m2_exe1");
 			
-			Assert.assertEquals("breakerKey", exe.getBreakerKey());
+			Assert.assertEquals("breakerKey", exe.getBreaker());
 			Assert.assertEquals(SoybeanMilkUtils.findMethodThrow(TestResolver.class, "test0", 0), exe.getMethod());
 			Assert.assertEquals( rf.getResolver("tr2"), exe.getResolverProvider().getResolver());
 			Arg[] args=exe.getArgs();

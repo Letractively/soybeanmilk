@@ -610,6 +610,26 @@ public void handleException(Execution execution)
 						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
 						because they will be directly passed to its <span class="var">set(...)</span> method.<br>
 					</li>
+					<li>
+						<a name="tag_invoke_breaker"></a>
+						<span class="tagAttr">breaker</span> (Optional) <br />
+						The breaker of this <span class="glossary">Invoke</span> method, for controlling the executing of this <span class="glossary">Invoke</span> method.
+						It has two means :
+						<ul>
+							<li>
+								"<span class="var">true</span>" or "<span class="var">false</span>" <br/>
+								If "<span class="var">true</span>", this <span class="glossary">Invoke</span> method will not be executed,
+								and will be executed if "<span class="var">false</span>".
+							</li>
+							<li>
+								Any other string <br/>
+								This string will be treated as a key in the current <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a>,
+								and if the value of this key is <span class="var">Boolean.TRUE</span> object, this <span class="glossary">Invoke</span> method will not be executed,
+								if it is <span class="var">null</span> or any other object, this <span class="glossary">Invoke</span> method will be executed.
+							</li>
+						</ul>
+						Its default value is "<span class="var">false</span>".
+					</li>
 				</ul>
 			</p>
 			<p>
@@ -666,6 +686,9 @@ public void handleException(Execution execution)
 		param.arg1, true, 'a', '\u00EF', "hello\t hello", 100 )
 &lt;/invoke&gt;
 </pre>
+			</p>
+			<p>
+				Notice that in Java mode, the <span class="tagAttr">name</span> and <span class="tagAttr">breaker</span> still have to be written in <span class="tag">&lt;invoke&gt;</span> tag's attribute.
 			</p>
 			<div class="seprator"></div>
 			<p>

@@ -5,5 +5,6 @@
 
 * “docs”文件夹下有详细的使用指南和说明文档，其中：
 
+	“docs/tutorial/”下是中文和英文使用指南
 	“docs/example/core/”是一些示例程序和源代码，点击“run.bat”即可运行此示例程序
 	“docs/example/web/soybeanMilkExample.zip”是一个eclipse-jee示例工程，导入后设置应用服务器（比如tomcat6）后即可运行

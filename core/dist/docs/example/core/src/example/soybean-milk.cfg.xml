@@ -18,13 +18,17 @@
 	</resolvers>
 	
 	<executables>
-		<invoke name="beforeHandler" method="before" resolver="interceptor" />
-		<invoke name="afterHandler" method="after" resolver="interceptor" />
-		<invoke name="exceptionHandler" method="exception" resolver="interceptor">
-			<arg>executionKey</arg>
+		<invoke name="beforeHandler">
+			interceptor.before(executionKey);
+		</invoke>
+		<invoke name="afterHandler">
+			interceptor.after(executionKey);
+		</invoke>
+		<invoke name="exceptionHandler">
+			interceptor.exception(executionKey);
 		</invoke>
 		
-		<action name="helloActionXml">
+		<action name="helloXml">
 			<invoke method="hello" resolver="helloResolver" result-key="helloResult">
 				<arg>helloTo</arg>
 				<arg>helloRepeat</arg>
@@ -35,12 +39,12 @@
 			</invoke>
 		</action>
 		
-		<action name="helloActionStatement">
+		<action name="helloStatement">
 			<invoke> statement.helloResult = helloResolver.hello(helloTo, 3) </invoke>
 			<invoke> example . resolver. HelloResolver . printObject ( statement.helloResult ); </invoke>
 		</action>
 		
-		<action name="testJavaSyntax">
+		<action name="javaSyntax">
 			<invoke>
 				example.resolver.HelloResolver.testJavaSyntax(
 					'a',
@@ -56,24 +60,24 @@
 			</invoke>
 		</action>
 		
-		<action name="testAfterBefore">
+		<action name="reference">
+			<ref name="refTarget"/>
+		</action>
+		
+		<invoke name="refTarget">
+			helloResolver.printObject("i am the reference target");
+		</invoke>
+		
+		<action name="interceptorBeforeAfter">
 			<invoke>
 				interceptor.invokeNormal()
 			</invoke>
 		</action>
 		
-		<action name="testException">
+		<action name="interceptorException">
 			<invoke>
 				interceptor.invokeThrow()
 			</invoke>
-		</action>
-		
-		<action name="">
-			<ref name="testJavaSyntax" />
-		</action>
-		
-		<action name="testRefToEmptyNameAction">
-			<ref name="" />
 		</action>
 		
 		<invoke name="genericSimple">

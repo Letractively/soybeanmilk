@@ -19,33 +19,30 @@ public class ExampleMain
 		
 		ConvertableObjectSource os = new HashMapObjectSource();
 		
-		os.set("helloTo", "mars");
+		os.set("helloTo", "friend");
 		os.set("helloRepeat", 3);
 		
 		os.set("genericStringInput", "11");
 		os.set("genericStringArrayInput", new String[]{"11", "22", "33"});
 		
 		printDiv();
-		executor.execute("helloActionXml", os);
+		executor.execute("helloXml", os);
 		
 		printDiv();
-		executor.execute("helloActionStatement", os);
+		executor.execute("helloStatement", os);
 		
 		printDiv();
-		executor.execute("testJavaSyntax", os);
-		
-		printDiv();
-		executor.execute("testAfterBefore", os);
-		
-		printDiv();
-		executor.execute("testException", os);
-		
-		printDiv();
-		executor.execute("", os);
-		
-		printDiv();
-		executor.execute("testRefToEmptyNameAction", os);
+		executor.execute("javaSyntax", os);
 
+		printDiv();
+		executor.execute("reference", os);
+		
+		printDiv();
+		executor.execute("interceptorBeforeAfter", os);
+		
+		printDiv();
+		executor.execute("interceptorException", os);
+		
 		printDiv();
 		executor.execute("genericSimple", os);
 		

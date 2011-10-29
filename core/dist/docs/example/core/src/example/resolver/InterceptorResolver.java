@@ -14,18 +14,18 @@ public class InterceptorResolver
 		throw new NullPointerException("invoke throw");
 	}
 	
-	public void before()
+	public void before(Execution execution)
 	{
-		HelloResolver.printObject("before execute");
+		HelloResolver.printObject("before execute: "+execution.getExecutable().getName());
 	}
 	
-	public void after()
+	public void after(Execution execution)
 	{
-		HelloResolver.printObject("after execute");
+		HelloResolver.printObject("after  execute: "+execution.getExecutable().getName());
 	}
 	
 	public void exception(Execution execution)
 	{
-		HelloResolver.printObject("exception handler: "+execution);
+		HelloResolver.printObject("exception handler: "+execution.getExecuteException());
 	}
 }

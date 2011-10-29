@@ -224,7 +224,7 @@ public class Invoke extends AbstractExecutable
 	}
 	
 	/**
-	 * 获取此调用的打断器关键字
+	 * 获取此调用的打断器
 	 * @return
 	 * @date 2011-10-28
 	 */
@@ -281,9 +281,9 @@ public class Invoke extends AbstractExecutable
 		
 		if(this.breaker != null)
 		{
-			if("true".equals(this.breaker))
+			if(Boolean.toString(true).equals(this.breaker))
 				breaked=true;
-			else if("false".equals(this.breaker))
+			else if(Boolean.toString(false).equals(this.breaker))
 				breaked=false;
 			else
 			{

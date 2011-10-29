@@ -688,7 +688,7 @@ public void handleException(Execution execution)
 </pre>
 			</p>
 			<p>
-				Notice that in Java mode, the <span class="tagAttr">name</span> and <span class="tagAttr">breaker</span> still have to be written in <span class="tag">&lt;invoke&gt;</span> tag's attribute.
+				Note that in Java mode, the <span class="tagAttr">name</span> and <span class="tagAttr">breaker</span> still have to be written in <span class="tag">&lt;invoke&gt;</span> tag's attribute.
 			</p>
 			<div class="seprator"></div>
 			<p>
@@ -725,7 +725,7 @@ public void handleException(Execution execution)
 								if it is explicitly (only one value).
 								Otherwise, the framework will first creat a new map who contains parameters only start with "<span class="var">yourArgKey</span>",
 								and it's key will also be truncated from "<span class="var">beanName.propertyName.subPropertyName</span>" to "<span class="var">propertyName.subPropertyName</span>".
-								Then, it will directly pass this new map or pass the converted object mentioned as above.
+								Then, it will directly pass this new map or pass the converted object by <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a> mentioned as above.
 							</li>
 							<li>
 								<span class="tagValue">param.yourArgKey</span> <br/>

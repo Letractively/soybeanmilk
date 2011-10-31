@@ -12,3 +12,8 @@
 		然后将此版本包上传到服务器下载列表中，并将之前的版本设置为“Deprecated”
 		
 	4.	修改“build_version.xml”中的属性“appVersion_old”的值为当前版本号，修改“appVersion”的值为下一个版本号。
+	
+	5.	在dist\docs\tutorial\zh_CN\index.html和dist\docs\tutorial\en\index.html两个文件
+		内的版本更新历史添加新版本标题
+		
+	6.	运行“build_version.xml”生成新版本的初始文件并提交

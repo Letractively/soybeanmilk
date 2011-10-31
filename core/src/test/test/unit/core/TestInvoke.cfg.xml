@@ -24,6 +24,13 @@
 			testResult=resolver.test();
 		</invoke>
 		
+		<invoke name="testBreaker_4" breaker="TRUE">
+			testResult=resolver.test();
+		</invoke>
+		
+		<invoke name="testBreaker_5" breaker="FALSE">
+			testResult=resolver.test();
+		</invoke>
 	</executables>
 	
 </soybean-milk>

@@ -94,6 +94,22 @@ public class TestInvoke
 			
 			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
 		}
+
+		//breaker为"TRUE"
+		{
+			ObjectSource objSource=new HashMapObjectSource();
+			executor.execute("testBreaker_4", objSource);
+			
+			Assert.assertNull(objSource.get(RESULT_KEY, null));
+		}
+
+		//breaker为"FALSE"
+		{
+			ObjectSource objSource=new HashMapObjectSource();
+			executor.execute("testBreaker_5", objSource);
+			
+			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
+		}
 	}
 
 	public static class TestResolver

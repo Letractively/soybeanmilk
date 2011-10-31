@@ -277,15 +277,21 @@ public class Invoke extends AbstractExecutable
 	 */
 	public boolean isBreaked(ObjectSource objectSource)
 	{
-		boolean breaked=false;
+		Boolean breaked=null;
 		
 		if(this.breaker != null)
 		{
-			if(Boolean.toString(true).equals(this.breaker))
-				breaked=true;
-			else if(Boolean.toString(false).equals(this.breaker))
-				breaked=false;
-			else
+			if(this.breaker instanceof String)
+			{
+				String brkString=(String)this.breaker;
+				
+				if(Boolean.toString(true).equalsIgnoreCase(brkString))
+					breaked=true;
+				else if(Boolean.toString(false).equalsIgnoreCase(brkString))
+					breaked=false;
+			}
+			
+			if(breaked == null)
 			{
 				Object brkObj=objectSource.get(this.breaker, null);
 				if(brkObj!=null && Boolean.TRUE.equals(brkObj))
@@ -293,7 +299,7 @@ public class Invoke extends AbstractExecutable
 			}
 		}
 		
-		return breaked;
+		return breaked == null ? false : breaked;
 	}
 	
 	/**

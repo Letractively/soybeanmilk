@@ -1,0 +1,5 @@
+SoybeanMilk Java MVC framework
+http://code.google.com/p/soybeanmilk/
+
+This product includes software developed by
+earthangry@gmail.com

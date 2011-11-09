@@ -97,7 +97,7 @@
 			<zipfileset dir="${distDir}/docs" prefix="docs" />
 			<zipfileset dir="${distDir}/lib/optional" prefix="lib/optional" />
 			<zipfileset dir="${distDir}/lib/required" prefix="lib/required" />
-			<fileset dir="${distDir}" includes="${appName}.jar,README.txt" />
+			<fileset dir="${distDir}" includes="${appName}.jar,README.txt,LICENSE.txt,NOTICE.txt" />
 		</zip>
 	</target>
 	

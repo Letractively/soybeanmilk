@@ -48,7 +48,7 @@ public class ForwardTargetHandler extends AbstractTargetHandler
 		String url=getActualTargetUrl(webAction, webObjectSource);
 		
 		if(url==null)
-			throw new NullPointerException("the url must not be null in '"+Target.REDIRECT+"' type target");
+			throw new NullPointerException("the url must not be null in '"+Target.FORWARD+"' type target");
 		
 		HttpServletRequest request = webObjectSource.getRequest();
 		HttpServletResponse response=webObjectSource.getResponse();

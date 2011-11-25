@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.logging.Log;
@@ -748,13 +747,15 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 从输入流解析xml文档对象
+	 * 从输入流解析xml文档对象，此方法同时负责关闭输入流
 	 * @param in
 	 * @return
 	 * @throws ParseException
 	 */
 	protected Document parseDocument(InputStream in)
 	{
+		Document doc=null;
+		
 		try
 		{
 			DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
@@ -765,9 +766,11 @@ public class ConfigurationParser
 			dbf.setValidating(false);
 			dbf.setAttribute("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
 			
-			DocumentBuilder db=dbf.newDocumentBuilder();
+			doc=dbf.newDocumentBuilder().parse(in);
 			
-			return db.parse(in);
+			in.close();
+			
+			return doc;
 		}
 		catch(Exception e)
 		{

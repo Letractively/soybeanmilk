@@ -30,12 +30,16 @@ public abstract class ConvertableObjectSource implements ObjectSource
 {
 	private GenericConverter genericConverter;
 	
+	/**
+	 * 获取用于转换此对象源中对象类型的{@linkplain GenericConverter 通用转换器}
+	 * @return
+	 */
 	public GenericConverter getGenericConverter() {
 		return genericConverter;
 	}
 	
 	/**
-	 * 设置通用转换器
+	 * 设置用于转换此对象源中对象类型的{@linkplain GenericConverter 通用转换器}
 	 * @param genericConverter
 	 */
 	public void setGenericConverter(GenericConverter genericConverter) {

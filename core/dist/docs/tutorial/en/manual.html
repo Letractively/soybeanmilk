@@ -610,7 +610,7 @@ public void handleException(Execution execution)
 								The result will be saved in "<span class="var">application</span>" scope with keyword "<span class="var">yourResultKey</span>".
 							</li>
 						</ul>
-						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
+						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/DefaultWebObjectSource.html">DefaultWebObjectSource</a> class,
 						because they will be directly passed to its <span class="var">set(...)</span> method.<br>
 					</li>
 					<li>
@@ -626,7 +626,7 @@ public void handleException(Execution execution)
 							</li>
 							<li>
 								Any other string <br/>
-								This string will be treated as a key in the current <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a>,
+								This string will be treated as a key in the current <a href="../../api/org/soybeanMilk/web/WebObjectSource.html">WebObjectSource</a>,
 								and if the value of this key is <span class="var">Boolean.TRUE</span> object, this <span class="glossary">Invoke</span> method will not be executed,
 								if it is <span class="var">null</span> or any other object, this <span class="glossary">Invoke</span> method will be executed.
 							</li>
@@ -783,14 +783,14 @@ public void handleException(Execution execution)
 							</li>
 							<li>
 						  		<span class="tagValue">objectSource</span> <br/>
-						  		The current <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> object, you can get all the servlet objects from it.
+						  		The current <a href="../../api/org/soybeanMilk/web/WebObjectSource.html">WebObjectSource</a> object, you can get all the servlet objects from it.
 						  		The framework can not convert it by default.
 								So, you must define your own <a href="#tag_converter">support converter</a>
-								who converting "<span class="var">org.soybeanMilk.web.os.WebObjectSource</span>" source to your destination type
+								who converting "<span class="var">org.soybeanMilk.web.WebObjectSource</span>" source to your destination type
 								if the <span class="glossary">Invoke</span> method argument is not <span class="var">WebObjectSource</span>.
 						  	</li>
 						</ul>
-						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> class,
+						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/DefaultWebObjectSource.html">DefaultWebObjectSource</a> class,
 						because they will be directly passed to its <span class="var">get(...)</span> method.<br>
 					</li>
 					<li>

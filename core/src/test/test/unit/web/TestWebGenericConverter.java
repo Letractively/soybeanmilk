@@ -24,7 +24,7 @@ import org.soybeanMilk.core.bean.GenericType;
 import org.soybeanMilk.web.bean.FilterAwareMap;
 import org.soybeanMilk.web.bean.ParamConvertException;
 import org.soybeanMilk.web.bean.WebGenericConverter;
-import org.soybeanMilk.web.os.WebObjectSource.ParamFilterAwareMap;
+import org.soybeanMilk.web.os.DefaultWebObjectSource.ParamFilterAwareMap;
 
 import test.unit.core.MockGenericArrayType;
 import test.unit.core.MockParameterizedType;

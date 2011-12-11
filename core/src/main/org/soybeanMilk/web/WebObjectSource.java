@@ -12,27 +12,38 @@
  * limitations under the License. 
  */
 
-package org.soybeanMilk.web.os;
+package org.soybeanMilk.web;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.soybeanMilk.web.servlet.DispatchServlet;
+import org.soybeanMilk.core.ObjectSource;
 
 /**
- * {@linkplain WebObjectSource WEB对象源}工厂，{@linkplain DispatchServlet}使用它来为请求创建WEB对象源。
+ * WEB对象源，它实例的生命周期应该与一次请求的生命周期相同
  * @author earthAngry@gmail.com
- * @date 2010-12-9
+ * @date 2011-12-11
  */
-public interface WebObjectSourceFactory
+public interface WebObjectSource extends ObjectSource
 {
 	/**
-	 * 为请求创建WEB对象源
-	 * @param request
-	 * @param response
-	 * @param application
+	 * 获取当前{@linkplain HttpServletRequest 请求}对象
 	 * @return
+	 * @date 2011-12-11
 	 */
-	WebObjectSource create(HttpServletRequest request, HttpServletResponse response, ServletContext application);
+	HttpServletRequest getRequest();
+	
+	/**
+	 * 获取当前{@linkplain HttpServletResponse 回应}对象
+	 * @return
+	 * @date 2011-12-11
+	 */
+	HttpServletResponse getResponse();
+	
+	/**
+	 * 获取{@linkplain ServletContext Servlet语境}对象
+	 * @return
+	 * @date 2011-12-11
+	 */
+	ServletContext getApplication();
 }

@@ -30,7 +30,6 @@ import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
-import org.soybeanMilk.web.os.WebObjectSource;
 import org.soybeanMilk.web.vp.PathNode;
 import org.soybeanMilk.web.vp.VariablePath;
 import org.soybeanMilk.web.vp.VariablePathMatcher;

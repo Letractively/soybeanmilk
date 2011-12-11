@@ -22,9 +22,9 @@ import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
-import org.soybeanMilk.web.os.WebObjectSource;
 
 /**
  * {@linkplain TypeTargetHandler 类型目标处理器}的默认实现。

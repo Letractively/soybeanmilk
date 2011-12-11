@@ -29,9 +29,9 @@ import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.web.WebConstants;
+import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
-import org.soybeanMilk.web.os.WebObjectSource;
 
 /**
  * {@linkplain TargetHandler 目标处理器}的抽象类，提供一些常用的辅助方法。

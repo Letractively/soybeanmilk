@@ -22,9 +22,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
-import org.soybeanMilk.web.os.WebObjectSource;
 
 /**
  * "forward"类型目标处理器。

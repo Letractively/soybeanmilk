@@ -32,10 +32,11 @@ import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.web.WebConstants;
+import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.bean.FilterAwareMap;
 
 /**
- * 用于WEB应用的对象源，它的实例的生命周期与一次请求的生命周期相同。
+ * 默认的{@linkplain WebObjectSource WEB对象源}实现。
  * <br>
  * 传递给它的关键字会被理解为由两个部分组成：“[scope].[keyInScope]”，其中
  * “[scope]”表示作用域，“[keyInScope]”则是真正的该作用域下的关键字。
@@ -116,7 +117,7 @@ import org.soybeanMilk.web.bean.FilterAwareMap;
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">objectSource</span> <br/>
- *  		当前的{@linkplain WebObjectSource}对象，你可以使用它来获取所有servlet对象。如果目标类型不是“<span class="var">WebObjectSource</span>”，
+ *  		当前的{@linkplain DefaultWebObjectSource}对象，你可以使用它来获取所有servlet对象。如果目标类型不是“<span class="var">WebObjectSource</span>”，
  *  		那么你需要为此对象源的{@linkplain GenericConverter 通用转换器}添加“<span class="var">org.soybeanMilk.web.os.WebObjectSource</span>”到目标类型辅助{@linkplain Converter 转换器}。
  *  	</li>
  *   </ul>
@@ -130,26 +131,26 @@ import org.soybeanMilk.web.bean.FilterAwareMap;
  * @author earthAngry@gmail.com
  * @date 2010-7-19
  */
-public class WebObjectSource extends ConvertableObjectSource
+public class DefaultWebObjectSource extends ConvertableObjectSource implements WebObjectSource
 {
-	private static Log log = LogFactory.getLog(WebObjectSource.class);
+	private static Log log = LogFactory.getLog(DefaultWebObjectSource.class);
 	
 	private HttpServletRequest request;
 	private HttpServletResponse response;
 	private ServletContext application;
 	
-	public WebObjectSource()
+	public DefaultWebObjectSource()
 	{
 		super();
 	}
 
-	public WebObjectSource(HttpServletRequest request,
+	public DefaultWebObjectSource(HttpServletRequest request,
 			HttpServletResponse response, ServletContext application)
 	{
 		this(request, response, application, null);
 	}
 	
-	public WebObjectSource(HttpServletRequest request,
+	public DefaultWebObjectSource(HttpServletRequest request,
 			HttpServletResponse response, ServletContext application,
 			GenericConverter genericConverter)
 	{
@@ -160,42 +161,45 @@ public class WebObjectSource extends ConvertableObjectSource
 		super.setGenericConverter(genericConverter);
 	}
 	
-	/**
-	 * 获得当前请求对象。
-	 * @return
-	 * @date 2010-7-19
-	 */
 	public HttpServletRequest getRequest() {
 		return request;
 	}
+
+	/**
+	 * 设置当前{@linkplain HttpServletRequest 请求}对象
+	 * @param request
+	 * @date 2011-12-11
+	 */
 	public void setRequest(HttpServletRequest request) {
 		this.request = request;
 	}
-	
-	/**
-	 * 获得当前回应对象。
-	 * @return
-	 * @date 2010-7-19
-	 */
+
 	public HttpServletResponse getResponse() {
 		return response;
 	}
+
+	/**
+	 * 设置当前{@linkplain HttpServletResponse 回应}对象
+	 * @param response
+	 * @date 2011-12-11
+	 */
 	public void setResponse(HttpServletResponse response) {
 		this.response = response;
 	}
-	
-	/**
-	 * 获得当前应用对象。
-	 * @return
-	 * @date 2010-7-19
-	 */
+
 	public ServletContext getApplication() {
 		return application;
 	}
+	
+	/**
+	 * 设置{@linkplain ServletContext Servlet语境}对象
+	 * @param application
+	 * @date 2011-12-11
+	 */
 	public void setApplication(ServletContext application) {
 		this.application = application;
 	}
-	
+
 	//@Override
 	public Object get(Serializable key, Type expectType)
 	{
@@ -241,7 +245,7 @@ public class WebObjectSource extends ConvertableObjectSource
 				data=this;
 			else
 			{
-				data=getConverterNotNull(WebObjectSource.class, expectType).convert(this, expectType);
+				data=getConverterNotNull(DefaultWebObjectSource.class, expectType).convert(this, expectType);
 			}
 		}
 		else if(scopedKey.length == 1)//没有包含作用域标识并且关键字不是作用域本身，则从param中取

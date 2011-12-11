@@ -15,9 +15,10 @@ import org.junit.Test;
 import org.soybeanMilk.core.exe.resolver.DefaultResolverFactory;
 import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 import org.soybeanMilk.web.WebConstants;
+import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.exe.th.AbstractTargetHandler;
-import org.soybeanMilk.web.os.WebObjectSource;
-import org.soybeanMilk.web.os.WebObjectSourceFactory;
+import org.soybeanMilk.web.os.DefaultWebObjectSource;
+import org.soybeanMilk.web.servlet.WebObjectSourceFactory;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -141,7 +142,7 @@ public class TestDispatchServlet
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
 			
-			Assert.assertEquals(WebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
+			Assert.assertEquals(DefaultWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
 		}
 	}
 	
@@ -152,7 +153,7 @@ public class TestDispatchServlet
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
 			
-			Assert.assertEquals(WebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
+			Assert.assertEquals(DefaultWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
 		}
 	}
 	
@@ -340,7 +341,7 @@ public class TestDispatchServlet
 		}
 	}
 	
-	protected static class MyWebObjectSource extends WebObjectSource
+	protected static class MyWebObjectSource extends DefaultWebObjectSource
 	{
 		public MyWebObjectSource(HttpServletRequest request,
 				HttpServletResponse response, ServletContext application)

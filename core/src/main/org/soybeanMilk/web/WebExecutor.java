@@ -25,7 +25,6 @@ import org.soybeanMilk.core.Executor;
 import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
-import org.soybeanMilk.web.os.WebObjectSource;
 
 /**
  * Web执行器。

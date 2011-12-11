@@ -32,11 +32,11 @@ import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 import org.soybeanMilk.web.DefaultWebExecutor;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.WebExecutor;
+import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.config.parser.WebConfigurationParser;
 import org.soybeanMilk.web.exe.th.AbstractTargetHandler;
-import org.soybeanMilk.web.os.WebObjectSource;
-import org.soybeanMilk.web.os.WebObjectSourceFactory;
+import org.soybeanMilk.web.os.DefaultWebObjectSource;
 
 /**
  * 框架整合servlet，它可以将WEB请求转给{@linkplain WebExecutor Web执行器}。
@@ -145,7 +145,7 @@ public class DispatchServlet extends HttpServlet
 				//@Override
 				public WebObjectSource create(HttpServletRequest request, HttpServletResponse response, ServletContext application)
 				{
-					return new WebObjectSource(request, response, application);
+					return new DefaultWebObjectSource(request, response, application);
 				}
 			};
 		}

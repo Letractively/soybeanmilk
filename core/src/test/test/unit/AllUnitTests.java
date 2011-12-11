@@ -20,7 +20,7 @@ import test.unit.web.TestVariablePath;
 import test.unit.web.TestVariablePathMatcher;
 import test.unit.web.TestWebConfigurationParser;
 import test.unit.web.TestWebGenericConverter;
-import test.unit.web.TestWebObjectSource;
+import test.unit.web.TestDefaultWebObjectSource;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -39,7 +39,7 @@ TestPathNode.class,
 TestVariablePath.class,
 TestVariablePathMatcher.class,
 TestWebGenericConverter.class,
-TestWebObjectSource.class,
+TestDefaultWebObjectSource.class,
 TestDefaultWebExecutor.class,
 TestWebConfigurationParser.class,
 TestAbstractTargetHandler.class

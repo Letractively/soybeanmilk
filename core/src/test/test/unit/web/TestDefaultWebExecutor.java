@@ -11,11 +11,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.web.DefaultWebExecutor;
+import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.config.parser.WebConfigurationParser;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.th.AbstractTargetHandler;
-import org.soybeanMilk.web.os.WebObjectSource;
+import org.soybeanMilk.web.os.DefaultWebObjectSource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -172,7 +173,7 @@ public class TestDefaultWebExecutor
 		MockHttpServletResponse response=new MockHttpServletResponse();
 		MockServletContext application=new MockServletContext();
 		
-		WebObjectSource os=new WebObjectSource(request, response, application);
+		WebObjectSource os=new DefaultWebObjectSource(request, response, application);
 		
 		return os;
 	}

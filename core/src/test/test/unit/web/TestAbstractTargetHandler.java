@@ -14,12 +14,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.web.WebConstants;
+import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.config.parser.WebConfigurationParser;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.th.AbstractTargetHandler;
-import org.soybeanMilk.web.os.WebObjectSource;
+import org.soybeanMilk.web.os.DefaultWebObjectSource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -57,7 +58,7 @@ public class TestAbstractTargetHandler
 		MockHttpServletResponse response=new MockHttpServletResponse();
 		MockServletContext application=new MockServletContext();
 		
-		WebObjectSource webObjectSource=new WebObjectSource(request, response, application, new WebGenericConverter());
+		WebObjectSource webObjectSource=new DefaultWebObjectSource(request, response, application, new WebGenericConverter());
 		
 		webAction.execute(webObjectSource);
 		
@@ -110,7 +111,7 @@ public class TestAbstractTargetHandler
 		MockHttpServletResponse response=new MockHttpServletResponse();
 		MockServletContext application=new MockServletContext();
 		
-		WebObjectSource os=new WebObjectSource(request, response, application, new WebGenericConverter());
+		WebObjectSource os=new DefaultWebObjectSource(request, response, application, new WebGenericConverter());
 		
 		return os;
 	}

@@ -10,6 +10,7 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.config.WebConfiguration;
 import org.soybeanMilk.web.config.parser.WebConfigurationParser;
 import org.soybeanMilk.web.exe.WebAction;
@@ -19,7 +20,6 @@ import org.soybeanMilk.web.exe.th.DefaultTypeTargetHandler;
 import org.soybeanMilk.web.exe.th.ForwardTargetHandler;
 import org.soybeanMilk.web.exe.th.RedirectTargetHandler;
 import org.soybeanMilk.web.exe.th.TargetHandler;
-import org.soybeanMilk.web.os.WebObjectSource;
 
 public class TestWebConfigurationParser
 {

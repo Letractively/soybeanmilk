@@ -15,7 +15,6 @@
 package org.soybeanMilk.web;
 
 import org.soybeanMilk.core.Constants;
-import org.soybeanMilk.web.os.WebObjectSource;
 
 /**
  * WEB常量类。

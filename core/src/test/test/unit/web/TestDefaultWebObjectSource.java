@@ -15,21 +15,22 @@ import org.junit.Test;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
+import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.bean.ParamConvertException;
 import org.soybeanMilk.web.bean.WebGenericConverter;
-import org.soybeanMilk.web.os.WebObjectSource;
+import org.soybeanMilk.web.os.DefaultWebObjectSource;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 
 import test.unit.web.TestWebGenericConverter.JavaBean;
 
-public class TestWebObjectSource
+public class TestDefaultWebObjectSource
 {
 	private MockHttpServletRequest request;
 	private MockHttpServletResponse response;
 	private MockServletContext application;
-	private WebObjectSource webObjectSource;
+	private DefaultWebObjectSource webObjectSource;
 	
 	@Before
 	public void setUp()
@@ -38,7 +39,7 @@ public class TestWebObjectSource
 		response=new MockHttpServletResponse();
 		application=new MockServletContext();
 		
-		webObjectSource=new WebObjectSource(request, response, application, new WebGenericConverter());
+		webObjectSource=new DefaultWebObjectSource(request, response, application, new WebGenericConverter());
 	}
 	
 	@Test

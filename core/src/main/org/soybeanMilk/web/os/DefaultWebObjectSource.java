@@ -245,7 +245,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 				data=this;
 			else
 			{
-				data=getConverterNotNull(WebObjectSource.class, expectType).convert(this, expectType);
+				data=getConverterNotNull(DefaultWebObjectSource.class, expectType).convert(this, expectType);
 			}
 		}
 		else if(scopedKey.length == 1)//没有包含作用域标识并且关键字不是作用域本身，则从param中取

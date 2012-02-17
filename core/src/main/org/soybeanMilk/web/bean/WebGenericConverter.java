@@ -91,14 +91,12 @@ public class WebGenericConverter extends DefaultGenericConverter
 	//@Override
 	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
 	{
-		//如果源对象是数组并且长度为1，而目标类型不是，则使用数组的第一个元素转换
-		if(SoybeanMilkUtils.isArray(sourceObj.getClass())
-				&& Array.getLength(sourceObj)==1 && SoybeanMilkUtils.isClassType(targetType)
+		//如果源对象是数组而目标类型不是，则使用数组的第一个元素转换，与request.getParameter(...)规则相同
+		if(SoybeanMilkUtils.isArray(sourceObj.getClass()) && SoybeanMilkUtils.isClassType(targetType)
 				&& !SoybeanMilkUtils.isArray((Class<?>)targetType))
 		{
 			if(log.isDebugEnabled())
-				log.debug("the src '"+getStringDesc(sourceObj)
-						+"' is an array with length 1 and the target type is not array, so it's first element will be used for converting");
+				log.debug("the src '"+getStringDesc(sourceObj)+"' is an array while the target not, so it's first element will be used for converting");
 			
 			sourceObj=Array.get(sourceObj, 0);
 			

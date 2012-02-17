@@ -225,18 +225,11 @@ public class TestWebGenericConverter
 		src.put("age", age);
 		src.put("birth", birth);
 		
-		Exception re=null;
-		try
-		{
-			JavaBean dest=(JavaBean)converter.convert(src, JavaBean.class);
-			dest.toString();
-		}
-		catch(Exception e)
-		{
-			re=e;
-		}
+		JavaBean dest=(JavaBean)converter.convert(src, JavaBean.class);
 		
-		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
+		Assert.assertEquals("jack", dest.getName());
+		Assert.assertEquals(age[0], dest.getAge().toString());
+		Assert.assertEquals(birth[0], new SimpleDateFormat("yyyy-MM-dd").format(dest.getBirth()));
 	}
 
 	@Test

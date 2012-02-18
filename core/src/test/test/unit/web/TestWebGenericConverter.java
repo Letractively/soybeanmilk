@@ -21,10 +21,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.GenericType;
-import org.soybeanMilk.web.bean.FilterAwareMap;
+import org.soybeanMilk.web.bean.FilterAwareHashMap;
 import org.soybeanMilk.web.bean.ParamConvertException;
 import org.soybeanMilk.web.bean.WebGenericConverter;
-import org.soybeanMilk.web.os.DefaultWebObjectSource.ParamFilterAwareMap;
 
 import test.unit.core.MockGenericArrayType;
 import test.unit.core.MockParameterizedType;
@@ -362,7 +361,8 @@ public class TestWebGenericConverter
 		src.put("id", id);
 		src.put("name", name);
 		
-		FilterAwareMap<String, ?> fm=new ParamFilterAwareMap<String, Object>(src, "id", true);
+		FilterAwareHashMap<?> fm=new FilterAwareHashMap<Object>(src, "id", true);
+		fm.filter();
 		
 		try
 		{
@@ -390,7 +390,9 @@ public class TestWebGenericConverter
 		
 		src.put("filter.simpleArray", simpleCollectionProperty);
 		
-		FilterAwareMap<String, ?> fm=new ParamFilterAwareMap<String, Object>(src, "filter.", false);
+		FilterAwareHashMap<?> fm=new FilterAwareHashMap<Object>(src, "filter.", false);
+		fm.filter();
+		
 		try
 		{
 			converter.convert(fm, ComplexJavaBean.class);
@@ -427,7 +429,8 @@ public class TestWebGenericConverter
 		
 		
 		
-		FilterAwareMap<String, ?> fm=new ParamFilterAwareMap<String, Object>(src, "filter.", false);
+		FilterAwareHashMap<Object> fm=new FilterAwareHashMap<Object>(src, "filter.", false);
+		fm.filter();
 		
 		try
 		{

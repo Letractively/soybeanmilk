@@ -35,14 +35,13 @@ import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.GenericType;
 import org.soybeanMilk.core.bean.PropertyInfo;
-import org.soybeanMilk.web.os.DefaultWebObjectSource.ParamFilterAwareMap;
 
 /**
- * WEB通用转换器，除了继承的转换支持，它还支持将{@link Map Map&lt;String, ?&gt;}转换为JavaBean对象、JavaBean数组以及JavaBean集合（List、Set）。<br>
- * 比如可以将下面的映射表：
+ * WEB通用转换器，除了继承的转换支持，它还支持将请求参数映射表（{@link Map Map&lt;String, String[]&gt;}）对象转换为JavaBean对象、JavaBean数组以及JavaBean集合（List、Set）。<br>
+ * 比如可以将下面的请求参数映射表：
  * <pre>
- * "id"                 -&gt;  "1" 或 ["1"]
- * "name"               -&gt;  "jack" 或 ["jack"]
+ * "id"                 -&gt;  "1" 或者 ["1"] 或者 ["1", "2"]（第一个元素"1"将被使用）
+ * "name"               -&gt;  "jack" 或者 ["jack"] 或者 ["jack", "lily"]（第一个元素"jack"将被使用）
  * "listChildren.id"    -&gt;  ["11", "12"]
  * "listChildren.name"  -&gt;  ["tom", "mary"]
  * "setChildren.id"     -&gt;  ["11", "12"]
@@ -104,7 +103,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, Map.class))
 		{
-			return convertMap(FilterAwareMap.wrap((Map<String, ?>)sourceObj), targetType);
+			return convertMap(FilterAwareHashMap.wrap((Map<String, Object>)sourceObj), targetType);
 		}
 		else
 		{
@@ -118,7 +117,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @param targetType
 	 * @return
 	 */
-	protected Object convertMap(FilterAwareMap<String, ?> sourceMap, Type targetType)
+	protected Object convertMap(FilterAwareHashMap<?> sourceMap, Type targetType)
 	{
 		if(log.isDebugEnabled())
 			log.debug("start converting 'Map<String, ?>' object to type '"+targetType+"'");
@@ -132,22 +131,16 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			result=convert(null, targetType);
 		}
-		else if(sourceMap.isExplicitKey())
+		else if(sourceMap.isExplictFilter())
 		{
-			//参数映射表才需要特殊异常处理
-			if(sourceMap instanceof ParamFilterAwareMap<?, ?>)
+			try
 			{
-				try
-				{
-					result=convert(sourceMap.get(FilterAwareMap.EXPLICIT_KEY), targetType);
-				}
-				catch(ConvertException e)
-				{
-					handleParamConvertException((ParamFilterAwareMap<String, ?>)sourceMap, FilterAwareMap.EXPLICIT_KEY, e);
-				}
+				result=convert(sourceMap.getExplictValue(), targetType);
 			}
-			else
-				result=convert(sourceMap.get(FilterAwareMap.EXPLICIT_KEY), targetType);
+			catch(ConvertException e)
+			{
+				handleMapConvertException(sourceMap, null, e);
+			}
 		}
 		else if(targetType instanceof Class<?>)
 		{
@@ -174,18 +167,16 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 将映射表转换为Class类型
+	 * 将映射表转换为Class类型的对象，<code>targetClass</code>只可能为JavaBean或者JavaBean数组
 	 * @param sourceMap
 	 * @param targetClass
 	 * @return
 	 * @date 2011-10-12
 	 */
-	protected Object convertMapToClass(FilterAwareMap<String, ?> sourceMap, Class<?> targetClass)
+	@SuppressWarnings("unchecked")
+	protected Object convertMapToClass(FilterAwareHashMap<?> sourceMap, Class<?> targetClass)
 	{
 		Object result=null;
-		
-		//是否是参数映射表，只有参数映射表才需要特殊异常处理
-		boolean isParamMap= (sourceMap instanceof ParamFilterAwareMap<?, ?>);
 		
 		//数组
 		if(SoybeanMilkUtils.isArray(targetClass))
@@ -198,19 +189,20 @@ public class WebGenericConverter extends DefaultGenericConverter
 			if(!beanInfo.hasSubPropertyInfo())
 				throw new GenericConvertException("the target javaBean Class '"+targetClass+"' is not valid, it has no javaBean property");
 			
-			Map<String, Boolean> collectionPropertyProcessed=new HashMap<String, Boolean>();
+			//集合类属性全部抽取后，再统一构建
+			Map<String, FilterAwareHashMap<Object>> collectionProperties=null;
 			
 			Set<String> keys=sourceMap.keySet();
-			for(String propertyKey : keys)
+			for(String propKey : keys)
 			{
-				String[] propExpressionArray=splitPropertyExpression(propertyKey);
+				String[] propArray=splitPropertyExpression(propKey);
 				
 				//忽略无关属性
-				if(beanInfo.getSubPropertyInfo(propExpressionArray[0])==null)
+				if(beanInfo.getSubPropertyInfo(propArray[0])==null)
 				{
 					//如果被过滤过，则属性必须存在
 					if(sourceMap.isFiltered())
-						throw new GenericConvertException("can not find property '"+propExpressionArray[0]+"' in class '"+beanInfo.getType().getName()+"'");
+						throw new GenericConvertException("can not find property '"+propArray[0]+"' in class '"+beanInfo.getType().getName()+"'");
 				}
 				else
 				{
@@ -218,52 +210,52 @@ public class WebGenericConverter extends DefaultGenericConverter
 					if(result == null)
 						result = instance(beanInfo.getType(), -1);
 					
-					String collectionPropertyExp=detectCollectionProperty(beanInfo, propExpressionArray);
+					String[] collProp=splitByCollectionProperty(beanInfo, propArray);
 					
-					if(collectionPropertyExp == null)
+					//非集合类属性直接构建
+					if(collProp == null)
 					{
-						if(isParamMap)
+						try
 						{
-							try
-							{
-								setProperty(result, beanInfo, propExpressionArray, 0, sourceMap.get(propertyKey));
-							}
-							catch(ConvertException e)
-							{
-								handleParamConvertException((ParamFilterAwareMap<String, ?>)sourceMap, propertyKey, e);
-							}
+							setProperty(result, beanInfo, propArray, 0, sourceMap.get(propKey));
 						}
-						else
-							setProperty(result, beanInfo, propExpressionArray, 0, sourceMap.get(propertyKey));
+						catch(ConvertException e)
+						{
+							handleMapConvertException(sourceMap, propKey, e);
+						}
 					}
-					//集合属性需要特殊处理
 					else
 					{
-						if(collectionPropertyProcessed.get(collectionPropertyExp) == null)
+						if(collectionProperties == null)
+							collectionProperties=new HashMap<String, FilterAwareHashMap<Object>>();
+						
+						FilterAwareHashMap<Object> specCollProps=collectionProperties.get(collProp[0]);
+						if(specCollProps == null)
 						{
-							if(isParamMap)
-							{
-								FilterAwareMap<String, ?> collectionPropertyValueMap=new ParamFilterAwareMap<String, Object>(
-										sourceMap, collectionPropertyExp+Constants.ACCESSOR, false);
-								try
-								{
-									setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
-								}
-								catch(ConvertException e)
-								{
-									handleParamConvertException((ParamFilterAwareMap<String, ?>)sourceMap, collectionPropertyExp, e);
-								}
-							}
-							else
-							{
-								FilterAwareMap<String, ?> collectionPropertyValueMap=new FilterAwareMap<String, Object>(
-										sourceMap, collectionPropertyExp+Constants.ACCESSOR, false);
-								setProperty(result, collectionPropertyExp, collectionPropertyValueMap);
-							}
-							
-							//标记此集合属性已经处理过
-							collectionPropertyProcessed.put(collectionPropertyExp, true);
+							specCollProps=new FilterAwareHashMap<Object>((FilterAwareHashMap<Object>)sourceMap, collProp[0]+Constants.ACCESSOR);
+							collectionProperties.put(collProp[0], specCollProps);
 						}
+						
+						specCollProps.put(collProp[1], sourceMap.get(propKey));
+					}
+				}
+			}
+			
+			//构建集合类属性
+			if(collectionProperties!=null && !collectionProperties.isEmpty())
+			{
+				Set<String> subPropKeys=collectionProperties.keySet();
+				for(String prop : subPropKeys)
+				{
+					Object value=collectionProperties.get(prop);
+					
+					try
+					{
+						setProperty(result, prop, value);
+					}
+					catch(ConvertException e)
+					{
+						handleMapConvertException(sourceMap, prop, e);
 					}
 				}
 			}
@@ -279,7 +271,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * @return
 	 * @date 2011-10-12
 	 */
-	protected Object convertMapToGenericType(FilterAwareMap<String, ?> sourceMap, GenericType genericType)
+	protected Object convertMapToGenericType(FilterAwareHashMap<?> sourceMap, GenericType genericType)
 	{
 		Object result=null;
 		
@@ -331,16 +323,16 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 查询<code>propExpressionArray</code>属性表达式中是否包含集合类属性。<br>
-	 * 如果表达式没有包含集合类属性或者末尾节点是集合类，则返回<code>null</code>；否则，返回原表达式中到集合类属性为止（包括）的字符串。
+	 * 以集合类属性为分界拆分JavaBean属性表达式，比如<code>property0.beanListProperty.beanName</code>将被拆分为["property0.beanListProperty", "beanName"]，
+	 * 如果不包含集合类属性，则返回<code>null</code>
 	 * @param beanInfo
 	 * @param propExpressionArray
-	 * @return 集合类属性的类型
-	 * @date 2011-1-4
+	 * @return
+	 * @date 2012-2-16
 	 */
-	protected String detectCollectionProperty(PropertyInfo beanInfo, String[] propExpressionArray)
+	protected String[] splitByCollectionProperty(PropertyInfo beanInfo, String[] propExpressionArray)
 	{
-		String re=null;
+		String[] re=null;
 		
 		int i=0;
 		PropertyInfo tmpPropInfo=null;
@@ -357,30 +349,31 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		
 		if(i < propExpressionArray.length-1)
-			re=assemblePropertyExpression(propExpressionArray, 0, i+1);
+		{
+			re=new String[2];
+			
+			re[0]=assemblePropertyExpression(propExpressionArray, 0, i+1);
+			re[1]=assemblePropertyExpression(propExpressionArray, i+1, propExpressionArray.length);
+		}
 		
 		return re;
 	}
 	
 	/**
 	 * 由映射表转换为JavaBean数组，<code>valueMap</code>中值为<code>null</code>和关键字不是<code>javaBeanClass</code>类属性的元素将被忽略，
-	 * 其他元素必须是数组并且长度一致。<br>
-	 * 此方法不支持嵌套数组和集合（即<code>elementClass</code>不能包含数组和集合类属性）。
+	 * 其他元素必须是数组并且长度一致。此方法不支持嵌套数组和集合（即<code>elementClass</code>不能包含数组和集合类属性）。
 	 * @param sourceMap
 	 * @param javaBeanClass
 	 * @return 元素为<code>javaBeanClass</code>类型且长度为<code>valueMap</code>值元素长度的数组
 	 * @date 2010-12-31
 	 */
-	protected Object[] convertMapToJavaBeanArray(FilterAwareMap<String, ?> sourceMap, Class<?> javaBeanClass)
+	protected Object[] convertMapToJavaBeanArray(FilterAwareHashMap<?> sourceMap, Class<?> javaBeanClass)
 	{
 		if(sourceMap==null || sourceMap.size()==0)
 			return null;
 		
 		Object[] re=null;
 		int len=-1;
-		
-		//是否是参数映射表
-		boolean isParamMap= (sourceMap instanceof ParamFilterAwareMap<?, ?>);
 		
 		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(javaBeanClass);
 		if(!beanInfo.hasSubPropertyInfo())
@@ -424,19 +417,14 @@ public class WebGenericConverter extends DefaultGenericConverter
 				
 				for(int i=0;i<len;i++)
 				{
-					if(isParamMap)
+					try
 					{
-						try
-						{
-							setProperty(re[i], beanInfo, propertyExpArray, 0, Array.get(value, i));
-						}
-						catch(ConvertException e)
-						{
-							handleParamConvertException((ParamFilterAwareMap<String, ?>)sourceMap, propertyKey, e);
-						}
-					}
-					else
 						setProperty(re[i], beanInfo, propertyExpArray, 0, Array.get(value, i));
+					}
+					catch(ConvertException e)
+					{
+						handleMapConvertException(sourceMap, propertyKey, e);
+					}
 				}
 			}
 		}
@@ -445,18 +433,18 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 处理请求参数映射表转换中出现的转换异常。
-	 * @param paramMap 当前处理的请求参数映射表
+	 * 处理映射表转换中出现的转换异常
+	 * @param map 当前处理的映射表
 	 * @param key 当前处理的映射表关键字
 	 * @param e 当前的转换异常
 	 * @date 2011-4-12
 	 */
-	protected void handleParamConvertException(ParamFilterAwareMap<String, ?> paramMap, String key, ConvertException e)
+	protected void handleMapConvertException(FilterAwareHashMap<?> map, String key, ConvertException e)
 	{
 		if(e instanceof ParamConvertException)
 			throw e;
 		else
-			throw new ParamConvertException(paramMap.getKeyInRoot(key), e.getSourceObject(), e.getTargetType(), e.getCause());
+			throw new ParamConvertException(map.getKeyInRoot(key), e.getSourceObject(), e.getTargetType(), e.getCause());
 	}
 	
 	/**

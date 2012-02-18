@@ -38,7 +38,7 @@ public class ParamConvertException extends ConvertException
 	private String paramName;
 	
 	/**
-	 * 创建参数转换异常对象。
+	 * 创建参数转换异常对象
 	 * @param paramName 参数名
 	 * @param sourceObject 转换异常时的源对象
 	 * @param targetType 转换目标类型
@@ -51,7 +51,7 @@ public class ParamConvertException extends ConvertException
 	}
 	
 	/**
-	 * 获取出现转换异常时的请求参数名，转换异常即是由于此参数的值不合法导致的。
+	 * 获取出现转换异常时的请求参数名，转换异常即是由于此参数的值不合法导致的
 	 * @return
 	 * @date 2011-4-12
 	 */

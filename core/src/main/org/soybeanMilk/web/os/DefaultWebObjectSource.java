@@ -33,7 +33,7 @@ import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.WebObjectSource;
-import org.soybeanMilk.web.bean.FilterAwareMap;
+import org.soybeanMilk.web.bean.FilterAwareHashMap;
 
 /**
  * 默认的{@linkplain WebObjectSource WEB对象源}实现。
@@ -451,15 +451,14 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	@SuppressWarnings("unchecked")
 	protected Object convertParameterMap(HttpServletRequest request, String paramKeyFilter, Type targetType)
 	{
-		Map<String, ?> paramMap=request.getParameterMap();
-		
-		ParamFilterAwareMap<String, ?> src=null;
+		FilterAwareHashMap<Object> src=null;
+		Map<String, Object> paramMap=request.getParameterMap();
 		
 		//是否设置过滤器
 		boolean hasFilter= (paramKeyFilter!=null && paramKeyFilter.length()>0);
 		if(!hasFilter)
 		{
-			src=new ParamFilterAwareMap<String, Object>(paramMap, null, false);
+			src=new FilterAwareHashMap<Object>(paramMap, null, false);
 		}
 		else
 		{
@@ -474,7 +473,8 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 				paramKeyFilter=paramKeyFilter+Constants.ACCESSOR;
 			}
 			
-			src=new ParamFilterAwareMap<String, Object>(paramMap, paramKeyFilter, explicitKey);
+			src=new FilterAwareHashMap<Object>(paramMap, paramKeyFilter, explicitKey);
+			src.filter();
 		}
 		
 		//设置为null，减少转换开销
@@ -524,28 +524,5 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 			throw new NullPointerException("no Converter defined for converting '"+sourceType+"' to '"+targetType+"'");
 		
 		return cvt;
-	}
-	
-	/**
-	 * 请求参数过滤映射表。它只是作为一个标识类型，没有任何特殊实现。
-	 * @author earthAngry@gmail.com
-	 * @date 2011-4-12
-	 *
-	 * @param <K>
-	 * @param <V>
-	 */
-	public static class ParamFilterAwareMap<K, V> extends FilterAwareMap<String, V>
-	{
-		/**
-		 * 创建请求参数过滤器映射表。
-		 * @param originalMap
-		 * @param filter
-		 * @param explicitValue
-		 */
-		public ParamFilterAwareMap(Map<String, ?> originalMap, String filter,
-				boolean explicitValue)
-		{
-			super(originalMap, filter, explicitValue);
-		}
 	}
 }

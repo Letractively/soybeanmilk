@@ -282,6 +282,7 @@ public class FilterAwareHashMap<V> implements Map<String, V>
 	{
 		if(originalMap instanceof FilterAwareHashMap<?>)
 			return (FilterAwareHashMap<T>) originalMap;
-		return new FilterAwareHashMap<T>(originalMap, null, false);
+		else
+			return new FilterAwareHashMap<T>(originalMap, null);
 	}
 }

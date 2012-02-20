@@ -116,8 +116,7 @@ public class DefaultGenericConverter implements GenericConverter
 	public Object convert(Object sourceObj, Type targetType)
 	{
 		if(log.isDebugEnabled())
-			log.debug("start converting '"+getStringDesc(sourceObj)
-					+"' of type '"+(sourceObj==null ? null : sourceObj.getClass())+"' to type '"+targetType+"'");
+			log.debug("start converting '"+sourceObj+"' of type '"+(sourceObj==null ? null : sourceObj.getClass())+"' to type '"+targetType+"'");
 		
 		if(targetType == null)
 			return sourceObj;
@@ -152,9 +151,30 @@ public class DefaultGenericConverter implements GenericConverter
 			throw new IllegalArgumentException("[propertyExpression] must not be empty");
 		
 		if(log.isDebugEnabled())
-			log.debug("start getting '"+srcObj+"' property '"+propertyExpression+"'");
+			log.debug("start getting  property '"+propertyExpression+"' from '"+srcObj+"'");
 		
-		return getProperty(srcObj, PropertyInfo.getPropertyInfo(srcObj.getClass()), splitPropertyExpression(propertyExpression), expectType);
+		Object result=null;
+		
+		Object parent=srcObj;
+		PropertyInfo parentBeanInfo=PropertyInfo.getPropertyInfo(srcObj.getClass());
+		String[] properties=splitPropertyExpression(propertyExpression);
+		
+		for(int i=0, len=properties.length; i<len; i++)
+		{
+			if(parent == null)
+				break;
+			
+			PropertyInfo propInfo=parentBeanInfo.getSubPropertyInfo(properties[i]);
+			if(propInfo == null)
+				throw new GenericConvertException("can not find property '"+properties[i]+"' in class '"+parentBeanInfo.getType().getName()+"'");
+			
+			parent=getProperty(parent, propInfo, null);
+			parentBeanInfo=propInfo;
+		}
+		
+		result=(expectType == null ? parent : convert(parent, expectType));
+		
+		return result;
 	}
 	
 	//@Override
@@ -166,9 +186,36 @@ public class DefaultGenericConverter implements GenericConverter
 			throw new IllegalArgumentException("[propertyExpression] must not be empty");
 		
 		if(log.isDebugEnabled())
-			log.debug("start setting '"+srcObj+"' property '"+propertyExpression+"' to value '"+value+"'");
+			log.debug("start setting '"+value+"' to '"+srcObj+"' property '"+propertyExpression+"'");
 		
-		setProperty(srcObj, PropertyInfo.getPropertyInfo(srcObj.getClass()), splitPropertyExpression(propertyExpression), 0, value);
+		Object parent=srcObj;
+		PropertyInfo parentBeanInfo=PropertyInfo.getPropertyInfo(srcObj.getClass());
+		String[] properties=splitPropertyExpression(propertyExpression);
+		
+		for(int i=0, len=properties.length; i<len; i++)
+		{
+			PropertyInfo propInfo=parentBeanInfo.getSubPropertyInfo(properties[i]);
+			
+			if(i == len-1)
+			{
+				if(propInfo == null)
+					throw new GenericConvertException("can not find property '"+properties[i]+"' in class '"+parentBeanInfo.getType().getName()+"'");
+				
+				setProperty(parent, propInfo, value);
+			}
+			else
+			{
+				Object tmp=getProperty(parent, propInfo, null);
+				if(tmp == null)
+				{
+					tmp=instance(propInfo.getType(), -1);
+					setProperty(parent, propInfo, tmp);
+				}
+				
+				parent=tmp;
+				parentBeanInfo=propInfo;
+			}
+		}
 	}
 	
 	//@Override
@@ -226,7 +273,9 @@ public class DefaultGenericConverter implements GenericConverter
 			Class<?> targetClass=(Class<?>)targetType;
 			
 			if(SoybeanMilkUtils.isArray(sourceObj.getClass()) && SoybeanMilkUtils.isArray(targetClass))
+			{
 				re=convertArrayToArray(sourceObj, targetClass.getComponentType());
+			}
 			else
 				canConvert=false;
 		}
@@ -289,15 +338,21 @@ public class DefaultGenericConverter implements GenericConverter
 			Class<?> actualClass=genericType.getActualClass();
 			Class<?>[] argClasses=genericType.getParamClasses();
 			
-			//List<T>
-			if(isSrcArray && SoybeanMilkUtils.isAncestorClass(List.class, actualClass))
+			if(isSrcArray)
 			{
-				re=convertArrayToList(convertArrayToArray(sourceObj, argClasses[0]), actualClass);
-			}
-			//Set<T>
-			else if(isSrcArray && SoybeanMilkUtils.isAncestorClass(Set.class, actualClass))
-			{
-				re=convertArrayToSet(convertArrayToArray(sourceObj, argClasses[0]), actualClass);
+				//List<T>
+				if(SoybeanMilkUtils.isAncestorClass(List.class, actualClass))
+				{
+					re=convertArrayToList(sourceObj, actualClass, argClasses[0]);
+				}
+				//Set<T>
+				else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualClass))
+				{
+					List<Object> list=convertArrayToList(sourceObj, List.class, argClasses[0]);
+					re=listToSet(list, actualClass);
+				}
+				else
+					canConvert=false;
 			}
 			else
 				canConvert=false;
@@ -330,169 +385,147 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	/**
-	 * 由数组转换为{@linkplain java.util.List List}，它不会对数组元素执行类型转换。
+	 * 由数组转换为{@linkplain java.util.List List}对象，它不会对数组元素执行类型转换。
 	 * @param array
 	 * @param listClass
 	 * @return
 	 * @date 2011-1-5
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected Object convertArrayToList(Object array, Class<?> listClass)
+	@SuppressWarnings("unchecked")
+	protected List<Object> convertArrayToList(Object array, Class<?> listClass, Class<?> elementClass)
 	{
-		List re=(List)instance(listClass, -1);
+		List<Object> result=null;
 		
-		for(int i=0,len=Array.getLength(array);i<len;i++)
-			re.add(Array.get(array, i));
+		if(array != null)
+		{
+			result=(List<Object>)instance(listClass, -1);
+			
+			for(int i=0,len=Array.getLength(array); i<len; i++)
+				result.add(convert(Array.get(array, i), elementClass));
+		}
 		
-		return re;
+		return result;
 	}
 	
 	/**
-	 * 由数组转换为{@linkplain java.util.Set Set}，它不会对数组元素执行类型转换。
+	 * 由一个数组对象转换为另一数组对象
 	 * @param array
+	 * @param elementClass
+	 * @return
+	 * @date 2012-2-20
+	 */
+	protected Object convertArrayToArray(Object array, Class<?> elementClass)
+	{
+		Object result=null;
+		
+		if(array != null)
+		{
+			int len=Array.getLength(array);
+			
+			result=instance(elementClass, len);
+			
+			for(int i=0; i<len; i++)
+			{
+				Object v=convert(Array.get(array, i), elementClass);
+				Array.set(result, i, v);
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 由列表对象转换为{@linkplain java.util.Set Set}对象，它不会对列表对象的元素执行类型转换
+	 * @param list
 	 * @param setClass
 	 * @return
-	 * @date 2011-1-5
+	 * @date 2012-2-19
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected Object convertArrayToSet(Object array, Class<?> setClass)
+	@SuppressWarnings("unchecked")
+	protected Set<Object> listToSet(List<?> list, Class<?> setClass)
 	{
-		Set re=(Set)instance(setClass, -1);
+		Set<Object> result=null;
 		
-		for(int i=0,len=Array.getLength(array);i<len;i++)
-			re.add(Array.get(array, i));
+		if(list != null)
+		{
+			result=(Set<Object>)instance(setClass, -1);
+			
+			for(int i=0,len=list.size(); i<len; i++)
+				result.add(list.get(i));
+		}
 		
-		return re;
+		return result;
 	}
 	
 	/**
-	 * 由一种数组转换到为另一个类型的数组。
-	 * @param sourceObj 源对象
+	 * 由列表对象转换为数组对象，它不会对列表对象的元素执行类型转换
+	 * @param list 列表对象
 	 * @param targetElementType 目标数组的元素类型
 	 * @return
-	 * @date 2011-1-5
+	 * @date 2012-2-19
 	 */
-	protected Object convertArrayToArray(Object sourceObj, Class<?> targetElementType)
+	protected Object[] listToArray(List<?> list)
 	{
-		if(!sourceObj.getClass().isArray())
-			throw new GenericConvertException("the source object '"+sourceObj+"' must be an array");
+		Object[] result=null;
 		
-		int len=Array.getLength(sourceObj);
-		Object re=Array.newInstance(targetElementType, len);
+		if(list!=null)
+		{
+			result=new Object[list.size()];
+			list.toArray(result);
+		}
 		
-		for(int i=0;i<len;i++)
-			Array.set(re, i, convert(Array.get(sourceObj, i), targetElementType));
-		
-		return re;
+		return result;
 	}
 	
 	/**
-	 * 设置JavaBean某个属性的值，如果中间属性对象不存在，这个方法将会尝试创建它，如果<code>value</code>与对象属性不一致，它将尝试执行类型转换。<br>
-	 * 目前不支持中间属性是数组或集合类。
-	 * @param bean JavaBean对象
-	 * @param beanInfo 此对象的属性信息
-	 * @param propertyExpressionArray 属性层级数组，比如["address","home"]表示此对象的address属性的home属性
-	 * @param index 当前正在处理的属性层级数组的索引
-	 * @param value 属性对应的值
+	 * 设置对象的某个属性值，如果值类型与属性类型不匹配，值对象将被转换
+	 * @param obj 要设置属性的对象
+	 * @param propertyInfo 要设置的属性信息
+	 * @param value 属性值
+	 * @date 2012-2-20
 	 */
-	protected void setProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpressionArray, int index, Object value)
+	protected void setProperty(Object obj, PropertyInfo propertyInfo, Object value)
 	{
-		PropertyInfo propertyInfo=beanInfo.getSubPropertyInfo(propertyExpressionArray[index]);
-		if(propertyInfo == null)
-			throw new GenericConvertException("can not find property '"+propertyExpressionArray[index]+"' in class '"+beanInfo.getType().getName()+"'");
+		Type targetType=propertyInfo.getGenericType();
+		if(!SoybeanMilkUtils.isClassType(targetType))
+			targetType=GenericType.getGenericType(targetType, propertyInfo.getOwnerClass());
 		
-		//自上而下递归，到达末尾时初始化和写入
-		if(index == propertyExpressionArray.length-1)
+		Object destValue=convert(value, targetType);
+		try
 		{
-			Type targetType=propertyInfo.getGenericType();
-			if(!SoybeanMilkUtils.isClassType(targetType))
-				targetType=GenericType.getGenericType(targetType, propertyInfo.getOwnerClass());
-			
-			Object destValue=convert(value, targetType);
-			try
-			{
-				propertyInfo.getWriteMethod().invoke(bean, new Object[]{destValue});
-			}
-			catch(Exception e)
-			{
-				throw new GenericConvertException("exception occur while calling write method '"+propertyInfo.getWriteMethod()+"'",e);
-			}
+			propertyInfo.getWriteMethod().invoke(obj, new Object[]{destValue});
 		}
-		else
+		catch(Exception e)
 		{
-			Object propertyInstance=null;
-			boolean toWrite=false;
-			
-			//查看对象是否已经初始化
-			try
-			{
-				propertyInstance=propertyInfo.getReadMethod().invoke(bean, EMPTY_ARGS);
-			}
-			catch(Exception e)
-			{
-				throw new GenericConvertException("exception occur while calling read method '"+propertyInfo.getReadMethod().getName()+"'",e);
-			}
-			
-			//初始化
-			if(propertyInstance == null)
-			{
-				propertyInstance=instance(propertyInfo.getType(), -1);
-				toWrite=true;
-			}
-			
-			//先将对象构建完成，再写入
-			setProperty(propertyInstance, propertyInfo, propertyExpressionArray, index+1, value);
-			
-			//如果之前已经写入了该对象，则不需要再写一次
-			if(toWrite)
-			{
-				try
-				{
-					propertyInfo.getWriteMethod().invoke(bean, new Object[]{propertyInstance});
-				}
-				catch(Exception e)
-				{
-					throw new GenericConvertException("exception occur while calling write method '"+propertyInfo.getWriteMethod().getName()+"'",e);
-				}
-			}
+			throw new GenericConvertException("exception occur while calling write method '"+propertyInfo.getWriteMethod()+"'",e);
 		}
 	}
 	
 	/**
-	 * 获取属性值，如果中间属性为<code>null</code>，将直接返回<code>null</code>。<br>
-	 * 目前不支持中间属性是数组或集合类。
-	 * @param bean JavaBean对象
-	 * @param beanInfo 此对象的属性信息
-	 * @param propertyExpression 属性层级数组，比如["address","home"]表示此对象的address属性的home属性
-	 * @param targetType 期望转换的目标类型，为<code>null</code>则表示不转换
+	 * 获取对象属性值，如果属性值类型与期望的目标类型不相符，属性值对象将被转换
+	 * @param obj
+	 * @param propertyInfo
+	 * @param targetType
 	 * @return
-	 * @date 2010-12-30
+	 * @date 2012-2-20
 	 */
-	protected Object getProperty(Object bean, PropertyInfo beanInfo, String[] propertyExpression, Type targetType)
+	protected Object getProperty(Object obj, PropertyInfo propertyInfo, Type targetType)
 	{
-		PropertyInfo tmpPropInfo=null;
-		for(int i=0;i<propertyExpression.length;i++)
+		Object result=null;
+		
+		try
 		{
-			if(bean == null)
-				break;
+			result=propertyInfo.getReadMethod().invoke(obj, EMPTY_ARGS);
 			
-			tmpPropInfo = beanInfo.getSubPropertyInfo(propertyExpression[i]);
-			if(tmpPropInfo == null)
-				throw new GenericConvertException("can not find property '"+propertyExpression[i]+"' in class '"+beanInfo.getType().getName()+"'");
-			else
-				beanInfo=tmpPropInfo;
-			
-			try
-			{
-				bean=beanInfo.getReadMethod().invoke(bean, EMPTY_ARGS);
-			}
-			catch(Exception e)
-			{
-				throw new GenericConvertException("exception occur while calling read method '"+tmpPropInfo.getReadMethod().getName()+"'",e);
-			}
+			if(targetType != null)
+				result=convert(result, targetType);
+		}
+		catch(Exception e)
+		{
+			throw new GenericConvertException("exception occur while calling read method '"+propertyInfo.getReadMethod().getName()+"'",e);
 		}
 		
-		return convert(bean, targetType);
+		return result;
 	}
 	
 	/**
@@ -573,37 +606,6 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	/**
-	 * 取得对象的字符串描述
-	 * @param o
-	 * @return
-	 */
-	protected String getStringDesc(Object o)
-	{
-		if(o == null)
-			return "null";
-		else if(o.getClass().isArray())
-		{
-			StringBuffer cache = new StringBuffer();
-			cache.append('[');
-			
-			for(int i=0,len=Array.getLength(o); i < len; i++)
-			{
-				Object e = Array.get(o, i);
-				cache.append(getStringDesc(e));
-				
-				if(i < len-1)
-					cache.append(',');
-			}
-			
-			cache.append(']');
-			
-			return cache.toString();
-		}
-		else
-			return o.toString();
-	}
-	
-	/**
 	 * 拆分属性表达式
 	 * @param propertyExpression
 	 * @return
@@ -616,29 +618,6 @@ public class DefaultGenericConverter implements GenericConverter
 			propertyArray=new String[]{propertyExpression};
 		
 		return propertyArray;
-	}
-	
-	/**
-	 * 组装属性表达式数组为字符串
-	 * @param propExpressionAry
-	 * @param start
-	 * @param end
-	 * @return
-	 * @date 2011-1-4
-	 */
-	protected String assemblePropertyExpression(String[] propExpressionAry, int start, int end)
-	{
-		StringBuffer re=new StringBuffer();
-		
-		for(int i=start;i<end;i++)
-		{
-			re.append(propExpressionAry[i]);
-			
-			if(i<end-1)
-				re.append(Constants.ACCESSOR);
-		}
-		
-		return re.toString();
 	}
 	
 	/**

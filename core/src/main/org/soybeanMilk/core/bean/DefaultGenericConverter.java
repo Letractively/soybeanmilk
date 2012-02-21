@@ -32,7 +32,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
-import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.bean.converters.BigDecimalConverter;
 import org.soybeanMilk.core.bean.converters.BigIntegerConverter;
 import org.soybeanMilk.core.bean.converters.BooleanConverter;
@@ -157,7 +156,7 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		Object parent=srcObj;
 		PropertyInfo parentBeanInfo=PropertyInfo.getPropertyInfo(srcObj.getClass());
-		String[] properties=splitPropertyExpression(propertyExpression);
+		String[] properties=SoybeanMilkUtils.splitPropertyExpression(propertyExpression);
 		
 		for(int i=0, len=properties.length; i<len; i++)
 		{
@@ -190,7 +189,7 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		Object parent=srcObj;
 		PropertyInfo parentBeanInfo=PropertyInfo.getPropertyInfo(srcObj.getClass());
-		String[] properties=splitPropertyExpression(propertyExpression);
+		String[] properties=SoybeanMilkUtils.splitPropertyExpression(propertyExpression);
 		
 		for(int i=0, len=properties.length; i<len; i++)
 		{
@@ -460,18 +459,22 @@ public class DefaultGenericConverter implements GenericConverter
 	/**
 	 * 由列表对象转换为数组对象，它不会对列表对象的元素执行类型转换
 	 * @param list 列表对象
-	 * @param targetElementType 目标数组的元素类型
+	 * @param elementClass 目标数组的元素类型
 	 * @return
 	 * @date 2012-2-19
 	 */
-	protected Object[] listToArray(List<?> list)
+	protected Object listToArray(List<?> list, Class<?> elementClass)
 	{
-		Object[] result=null;
+		Object result=null;
 		
 		if(list!=null)
 		{
-			result=new Object[list.size()];
-			list.toArray(result);
+			int size=list.size();
+			
+			result=Array.newInstance(elementClass, size);
+			
+			for(int i=0; i<size; i++)
+				Array.set(result, i, list.get(i));
 		}
 		
 		return result;
@@ -603,21 +606,6 @@ public class DefaultGenericConverter implements GenericConverter
 		addConverter(String.class, java.sql.Date.class, new SqlDateConverter());
 		addConverter(String.class, java.sql.Time.class, new SqlTimeConverter());
 		addConverter(String.class, java.sql.Timestamp.class, new SqlTimestampConverter());
-	}
-	
-	/**
-	 * 拆分属性表达式
-	 * @param propertyExpression
-	 * @return
-	 * @date 2010-12-30
-	 */
-	protected String[] splitPropertyExpression(String propertyExpression)
-	{
-		String[] propertyArray=SoybeanMilkUtils.split(propertyExpression, Constants.ACCESSOR);
-		if(propertyArray==null || propertyArray.length==0)
-			propertyArray=new String[]{propertyExpression};
-		
-		return propertyArray;
 	}
 	
 	/**

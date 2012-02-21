@@ -71,6 +71,6 @@ public class ConvertException extends RuntimeException
 	@Override
 	public String toString()
 	{
-		return "ConvertException [targetType=" + targetType + "]";
+		return "ConvertException [sourceObject=" + sourceObject + ", targetType=" + targetType + "]";
 	}
 }

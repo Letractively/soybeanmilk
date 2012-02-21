@@ -20,8 +20,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +27,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
-import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
@@ -86,101 +83,121 @@ public class WebGenericConverter extends DefaultGenericConverter
 		super();
 	}
 	
-	@SuppressWarnings("unchecked")
+	public WebGenericConverter(boolean initDefaultSupportConverter)
+	{
+		super(initDefaultSupportConverter);
+	}
+	
 	//@Override
+	@SuppressWarnings("unchecked")
 	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
 	{
+		Object result=null;
+		
 		//如果源对象是数组而目标类型不是，则使用数组的第一个元素转换，与request.getParameter(...)规则相同
 		if(SoybeanMilkUtils.isArray(sourceObj.getClass()) && SoybeanMilkUtils.isClassType(targetType)
 				&& !SoybeanMilkUtils.isArray((Class<?>)targetType))
 		{
 			if(log.isDebugEnabled())
-				log.debug("the src '"+getStringDesc(sourceObj)+"' is an array while the target not, so it's first element will be used for converting");
+				log.debug("'"+sourceObj+"' is an array while the target not, so it's first element will be used for converting");
 			
 			sourceObj=Array.get(sourceObj, 0);
 			
-			return convert(sourceObj, targetType);
+			result=convert(sourceObj, targetType);
 		}
-		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, Map.class))
+		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, ParamValue.class))
 		{
-			return convertMap(FilterAwareHashMap.wrap((Map<String, Object>)sourceObj), targetType);
-		}
-		else
-		{
-			return super.convertWhenNoSupportConverter(sourceObj, targetType);
-		}
-	}
-	
-	/**
-	 * 将映射表转换成<code>targetType</code>类型的对象
-	 * @param sourceMap 值映射表，它也可能包含与<code>targetType</code>类属性无关的关键字
-	 * @param targetType
-	 * @return
-	 */
-	protected Object convertMap(FilterAwareHashMap<?> sourceMap, Type targetType)
-	{
-		if(log.isDebugEnabled())
-			log.debug("start converting 'Map<String, ?>' object to type '"+targetType+"'");
-		
-		Object result = null;
-		
-		boolean canConvert=true;
-		
-		//空的映射表作为null处理
-		if(sourceMap==null || sourceMap.isEmpty())
-		{
-			result=convert(null, targetType);
-		}
-		else if(sourceMap.isExplictFilter())
-		{
+			ParamValue pv=(ParamValue)sourceObj;
+			
 			try
 			{
-				result=convert(sourceMap.getExplictValue(), targetType);
+				result=convert(pv.getValue(), targetType);
 			}
 			catch(ConvertException e)
 			{
-				handleMapConvertException(sourceMap, null, e);
+				handleParamValueConvertException(pv, e);
 			}
 		}
-		else if(targetType instanceof Class<?>)
+		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, ParamPropertyMap.class))
 		{
-			result=convertMapToClass(sourceMap, (Class<?>)targetType);
+			result=convertParamPropertyMap((ParamPropertyMap)sourceObj, targetType);
 		}
-		else if(targetType instanceof GenericType)
+		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, Map.class))
 		{
-			result=convertMapToGenericType(sourceMap, (GenericType)targetType);
-		}
-		else if(targetType instanceof ParameterizedType
-				|| targetType instanceof GenericArrayType
-				|| targetType instanceof TypeVariable<?>
-				|| targetType instanceof WildcardType)
-		{
-			result=convertMapToGenericType(sourceMap, GenericType.getGenericType(targetType, null));
+			ParamPropertyMap ppm=new ParamPropertyMap();
+			ppm.filterWithProperty((Map<String, Object>)sourceObj);
+			
+			result=convertParamPropertyMap(ppm, targetType);
 		}
 		else
-			canConvert=false;
-		
-		if(!canConvert)
-			throw new GenericConvertException("converting 'Map<String,?>' to '"+targetType+"' is not supported");
+		{
+			result=super.convertWhenNoSupportConverter(sourceObj, targetType);
+		}
 		
 		return result;
 	}
 	
 	/**
-	 * 将映射表转换为Class类型的对象，<code>targetClass</code>只可能为JavaBean或者JavaBean数组
-	 * @param sourceMap
+	 * 将映射表转换成目标类型的对象
+	 * @param paramPropMap 源映射表
+	 * @param targetType
+	 * @return
+	 */
+	protected Object convertParamPropertyMap(ParamPropertyMap paramPropMap, Type targetType)
+	{
+		if(log.isDebugEnabled())
+			log.debug("start converting Map '"+paramPropMap+"' to type '"+targetType+"'");
+		
+		Object result = null;
+		
+		//空的映射表作为null处理
+		if(paramPropMap==null || paramPropMap.isEmpty())
+		{
+			result=convert(null, targetType);
+		}
+		else
+		{
+			if(targetType instanceof Class<?>)
+			{
+				result=convertPropertyMapToClass(paramPropMap, (Class<?>)targetType);
+			}
+			else if(targetType instanceof GenericType)
+			{
+				result=convertPropertyMapToGenericType(paramPropMap, (GenericType)targetType);
+			}
+			else if(targetType instanceof ParameterizedType
+					|| targetType instanceof GenericArrayType
+					|| targetType instanceof TypeVariable<?>
+					|| targetType instanceof WildcardType)
+			{
+				result=convertPropertyMapToGenericType(paramPropMap, GenericType.getGenericType(targetType, null));
+			}
+			else
+				throw new GenericConvertException("converting '"+paramPropMap+"' to '"+targetType+"' is not supported");
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 将属性映射表转换为目标类型为<code>Class&lt?&gt;</code>的对象，目标类型只可能为JavaBean或者JavaBean数组
+	 * @param propertyMap 属性映射表
 	 * @param targetClass
 	 * @return
 	 * @date 2011-10-12
 	 */
-	@SuppressWarnings("unchecked")
-	protected Object convertMapToClass(FilterAwareHashMap<?> sourceMap, Class<?> targetClass)
+	protected Object convertPropertyMapToClass(ParamPropertyMap propertyMap, Class<?> targetClass)
 	{
 		Object result=null;
 		
 		//数组
 		if(SoybeanMilkUtils.isArray(targetClass))
-			result=convertMapToJavaBeanArray(sourceMap, targetClass.getComponentType());
+		{
+			Class<?> eleClass=targetClass.getComponentType();
+			
+			result=convertPropertyMapToList(propertyMap, List.class, eleClass);
+			result=listToArray((List<?>)result, eleClass);
+		}
 		//JavaBean
 		else
 		{
@@ -189,74 +206,28 @@ public class WebGenericConverter extends DefaultGenericConverter
 			if(!beanInfo.hasSubPropertyInfo())
 				throw new GenericConvertException("the target javaBean Class '"+targetClass+"' is not valid, it has no javaBean property");
 			
-			//集合类属性全部抽取后，再统一构建
-			Map<String, FilterAwareHashMap<Object>> collectionProperties=null;
-			
-			Set<String> keys=sourceMap.keySet();
-			for(String propKey : keys)
+			Set<String> propertyKeys=propertyMap.keySet();
+			for(String property : propertyKeys)
 			{
-				String[] propArray=splitPropertyExpression(propKey);
-				
-				//忽略无关属性
-				if(beanInfo.getSubPropertyInfo(propArray[0])==null)
+				if(beanInfo.getSubPropertyInfo(property)==null)
 				{
-					//如果被过滤过，则属性必须存在
-					if(sourceMap.isFiltered())
-						throw new GenericConvertException("can not find property '"+propArray[0]+"' in class '"+beanInfo.getType().getName()+"'");
-				}
-				else
-				{
-					//延迟初始化
-					if(result == null)
-						result = instance(beanInfo.getType(), -1);
-					
-					String[] collProp=splitByCollectionProperty(beanInfo, propArray);
-					
-					//非集合类属性直接构建
-					if(collProp == null)
-					{
-						try
-						{
-							setProperty(result, beanInfo, propArray, 0, sourceMap.get(propKey));
-						}
-						catch(ConvertException e)
-						{
-							handleMapConvertException(sourceMap, propKey, e);
-						}
-					}
+					if(!propertyMap.isRootPropertyMap())
+						throw new GenericConvertException("can not find property '"+property+"' in class '"+beanInfo.getType().getName()+"'");
 					else
-					{
-						if(collectionProperties == null)
-							collectionProperties=new HashMap<String, FilterAwareHashMap<Object>>();
-						
-						FilterAwareHashMap<Object> specCollProps=collectionProperties.get(collProp[0]);
-						if(specCollProps == null)
-						{
-							specCollProps=new FilterAwareHashMap<Object>((FilterAwareHashMap<Object>)sourceMap, collProp[0]+Constants.ACCESSOR);
-							collectionProperties.put(collProp[0], specCollProps);
-						}
-						
-						specCollProps.put(collProp[1], sourceMap.get(propKey));
-					}
+						continue;
 				}
-			}
-			
-			//构建集合类属性
-			if(collectionProperties!=null && !collectionProperties.isEmpty())
-			{
-				Set<String> subPropKeys=collectionProperties.keySet();
-				for(String prop : subPropKeys)
+				
+				//延迟初始化
+				if(result == null)
+					result = instance(beanInfo.getType(), -1);
+				
+				try
 				{
-					Object value=collectionProperties.get(prop);
-					
-					try
-					{
-						setProperty(result, prop, value);
-					}
-					catch(ConvertException e)
-					{
-						handleMapConvertException(sourceMap, prop, e);
-					}
+					setProperty(result, property, propertyMap.get(property));
+				}
+				catch(ConvertException e)
+				{
+					handleParamPropertyMapConvertException(propertyMap, property, e);
 				}
 			}
 		}
@@ -265,13 +236,13 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 将映射表转换为泛型类型
+	 * 将属性映射表转换为泛型类型的对象
 	 * @param sourceMap
 	 * @param genericType
 	 * @return
 	 * @date 2011-10-12
 	 */
-	protected Object convertMapToGenericType(FilterAwareHashMap<?> sourceMap, GenericType genericType)
+	protected Object convertPropertyMapToGenericType(ParamPropertyMap sourceMap, GenericType genericType)
 	{
 		Object result=null;
 		
@@ -285,12 +256,13 @@ public class WebGenericConverter extends DefaultGenericConverter
 			//List<T>
 			if(SoybeanMilkUtils.isAncestorClass(List.class, actualClass))
 			{
-				result=convertArrayToList(convertMapToJavaBeanArray(sourceMap, argClasses[0]), actualClass);
+				result=convertPropertyMapToList(sourceMap, actualClass, argClasses[0]);
 			}
 			//Set<T>
 			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualClass))
 			{
-				result=convertArrayToSet(convertMapToJavaBeanArray(sourceMap, argClasses[0]), actualClass);
+				result=convertPropertyMapToList(sourceMap, List.class, argClasses[0]);
+				result=listToSet((List<?>)result, actualClass);
 			}
 			else
 				canConvert=false;
@@ -299,7 +271,9 @@ public class WebGenericConverter extends DefaultGenericConverter
 		else if(genericType.isGenericArrayType())
 		{
 			Class<?> componentClass=genericType.getComponentClass();
-			result=convertMapToJavaBeanArray(sourceMap, componentClass);
+			
+			result=convertPropertyMapToList(sourceMap, List.class, componentClass);
+			result=listToArray((List<?>)result, componentClass);
 		}
 		//T
 		else if(genericType.isTypeVariable())
@@ -323,143 +297,173 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 以集合类属性为分界拆分JavaBean属性表达式，比如<code>property0.beanListProperty.beanName</code>将被拆分为["property0.beanListProperty", "beanName"]，
-	 * 如果不包含集合类属性，则返回<code>null</code>
-	 * @param beanInfo
-	 * @param propExpressionArray
+	 * 将属性映射表转换为列表对象，属性映射表的字符串关键字可以是两种内容：<br>
+	 * <ol>
+	 * 	<li>
+	 * 		数字，比如：“0”、“1”，表示属性值在列表中的索引
+	 * 	</li>
+	 * 	<li>
+	 * 		字符，比如："property1"、“property2”，表示列表元素对象对应的属性名
+	 * 	</li>
+	 * </ol>
+	 * @param propertyMap
+	 * @param listClass
+	 * @param elementClass
 	 * @return
-	 * @date 2012-2-16
+	 * @date 2012-2-19
 	 */
-	protected String[] splitByCollectionProperty(PropertyInfo beanInfo, String[] propExpressionArray)
+	protected List<Object> convertPropertyMapToList(ParamPropertyMap propertyMap, Class<?> listClass, Class<?> elementClass)
 	{
-		String[] re=null;
-		
-		int i=0;
-		PropertyInfo tmpPropInfo=null;
-		for(;i<propExpressionArray.length;i++)
-		{
-			tmpPropInfo=beanInfo.getSubPropertyInfo(propExpressionArray[i]);
-			if(tmpPropInfo == null)
-				throw new GenericConvertException("can not find property '"+propExpressionArray[i]+"' in class '"+beanInfo.getType().getName()+"'");
-			else
-				beanInfo=tmpPropInfo;
-			
-			if(isArrayOrCollection(beanInfo.getType()))
-				break;
-		}
-		
-		if(i < propExpressionArray.length-1)
-		{
-			re=new String[2];
-			
-			re[0]=assemblePropertyExpression(propExpressionArray, 0, i+1);
-			re[1]=assemblePropertyExpression(propExpressionArray, i+1, propExpressionArray.length);
-		}
-		
-		return re;
-	}
-	
-	/**
-	 * 由映射表转换为JavaBean数组，<code>valueMap</code>中值为<code>null</code>和关键字不是<code>javaBeanClass</code>类属性的元素将被忽略，
-	 * 其他元素必须是数组并且长度一致。此方法不支持嵌套数组和集合（即<code>elementClass</code>不能包含数组和集合类属性）。
-	 * @param sourceMap
-	 * @param javaBeanClass
-	 * @return 元素为<code>javaBeanClass</code>类型且长度为<code>valueMap</code>值元素长度的数组
-	 * @date 2010-12-31
-	 */
-	protected Object[] convertMapToJavaBeanArray(FilterAwareHashMap<?> sourceMap, Class<?> javaBeanClass)
-	{
-		if(sourceMap==null || sourceMap.size()==0)
+		if(propertyMap==null || propertyMap.isEmpty())
 			return null;
 		
-		Object[] re=null;
-		int len=-1;
+		@SuppressWarnings("unchecked")
+		List<Object> result=(List<Object>)instance(listClass, -1);
 		
-		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(javaBeanClass);
-		if(!beanInfo.hasSubPropertyInfo())
-			throw new GenericConvertException("the target javaBean Class '"+javaBeanClass+"' is not valid, it has no javaBean property");
-		
-		Set<String> keys=sourceMap.keySet();
-		for(String propertyKey : keys)
+		int arrayValueLen=-1;
+		Set<String> propertyKeyes=propertyMap.keySet();
+		for(String property : propertyKeyes)
 		{
-			Object value=sourceMap.get(propertyKey);
-			if(value == null)
-				continue;
+			Object value=propertyMap.get(property);
 			
-			if(!value.getClass().isArray())
-				throw new GenericConvertException("the element in the source map must be array");
-			
-			int l=Array.getLength(value);
-			if(len == -1)
-				len=l;
-			else
-				if(l != len)
-					throw new GenericConvertException("the array element in the source map must be the same length");
-			
-			String[] propertyExpArray=splitPropertyExpression(propertyKey);
-			
-			//忽略无关属性
-			if(beanInfo.getSubPropertyInfo(propertyExpArray[0])==null)
+			//优先处理索引属性
+			if(isIndexOfProperty(property))
 			{
-				//如果被过滤过，则属性必须存在
-				if(sourceMap.isFiltered())
-					throw new GenericConvertException("can not find property '"+propertyExpArray[0]+"' in class '"+beanInfo.getType().getName()+"'");
+				int idx=-1;
+				try
+				{
+					idx=Integer.parseInt(property);
+				}
+				catch(Exception e)
+				{
+					throw new GenericConvertException("illegal index value '"+property+"' in property expression '"+propertyMap.getParamFullKey(property)+"'", e);
+				}
+				
+				Object element=null;
+				try
+				{
+					element=convert(value, elementClass);
+				}
+				catch(ConvertException e)
+				{
+					handleParamPropertyMapConvertException(propertyMap, property, e);
+				}
+				
+				result.set(idx, element);
 			}
 			else
 			{
-				//延迟初始化
-				if(re == null)
+				if(value == null)
+					continue;
+				else if(SoybeanMilkUtils.isArray(value.getClass()))
 				{
-					re=(Object[])instance(javaBeanClass, len);
-					for(int i=0;i<len;i++)
-						re[i]=instance(javaBeanClass, -1);
+					int len=Array.getLength(value);
+					if(arrayValueLen == -1)
+						arrayValueLen=len;
+					else if(len != arrayValueLen)
+						throw new GenericConvertException("all the array elements in the source Map must be the same length for converting them to JavaBean List");
+					
+					while(result.size() < len)
+						result.add(null);
+					
+					for(int i=0; i<arrayValueLen; i++)
+					{
+						Object element=result.get(i);
+						if(element ==null)
+						{
+							element=instance(elementClass, -1);
+							result.set(i, element);
+						}
+						
+						try
+						{
+							setProperty(element, property, Array.get(value, i));
+						}
+						catch(ConvertException e)
+						{
+							handleParamPropertyMapConvertException(propertyMap, property, e);
+						}
+					}
 				}
-				
-				for(int i=0;i<len;i++)
+				else
 				{
+					while(result.size() < 1)
+						result.add(null);
+					
+					Object element=result.get(0);
+					if(element ==null)
+					{
+						element=instance(elementClass, -1);
+						result.set(0, element);
+					}
+					
 					try
 					{
-						setProperty(re[i], beanInfo, propertyExpArray, 0, Array.get(value, i));
+						setProperty(element, property, value);
 					}
 					catch(ConvertException e)
 					{
-						handleMapConvertException(sourceMap, propertyKey, e);
+						handleParamPropertyMapConvertException(propertyMap, property, e);
 					}
 				}
 			}
 		}
 		
-		return re;
+		return result;
 	}
 	
 	/**
-	 * 处理映射表转换中出现的转换异常
-	 * @param map 当前处理的映射表
-	 * @param key 当前处理的映射表关键字
-	 * @param e 当前的转换异常
-	 * @date 2011-4-12
+	 * 给定的字符串是否是索引值而非属性名（全部由数字组成）
+	 * @param str
+	 * @return
+	 * @date 2012-2-19
 	 */
-	protected void handleMapConvertException(FilterAwareHashMap<?> map, String key, ConvertException e)
+	protected boolean isIndexOfProperty(String str)
+	{
+		if(str==null || str.length()==0)
+			return false;
+		
+		boolean digit=true;
+		
+		for(int i=0; i<str.length(); i++)
+		{
+			char c=str.charAt(i);
+			if(c<'0' || c>'9')
+			{
+				digit=false;
+				break;
+			}
+		}
+		
+		return digit;
+	}
+	
+	/**
+	 * 处理参数值转换异常
+	 * @param pv
+	 * @param e
+	 * @date 2012-2-22
+	 */
+	protected void handleParamValueConvertException(ParamValue pv, ConvertException e)
 	{
 		if(e instanceof ParamConvertException)
 			throw e;
 		else
-			throw new ParamConvertException(map.getKeyInRoot(key), e.getSourceObject(), e.getTargetType(), e.getCause());
+			throw new ParamConvertException(pv.getParamName(), e.getSourceObject(), e.getTargetType(), e.getCause());
 	}
 	
 	/**
-	 * 是否是数组或者集合类型
-	 * @param clazz
-	 * @return
-	 * @date 2011-1-3
+	 * 处理参数属性映射表异常
+	 * @param paramPropertyMap
+	 * @param key
+	 * @param e
+	 * @date 2012-2-22
 	 */
-	protected boolean isArrayOrCollection(Class<?> clazz)
+	protected void handleParamPropertyMapConvertException(ParamPropertyMap paramPropertyMap, String key, ConvertException e)
 	{
-		if(clazz.isArray())
-			return true;
-		else if(SoybeanMilkUtils.isAncestorClass(Collection.class, clazz))
-			return true;
+		if(e instanceof ParamConvertException)
+			throw e;
 		else
-			return false;
+			throw new ParamConvertException(paramPropertyMap.getParamFullKey(key), e.getSourceObject(), e.getTargetType(), e.getCause());
 	}
 }

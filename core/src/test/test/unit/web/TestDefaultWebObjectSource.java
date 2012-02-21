@@ -326,6 +326,7 @@ public class TestDefaultWebObjectSource
 			{
 				re=e;
 			}
+			
 			Assert.assertEquals("yourBean.id", re.getParamName());
 			Assert.assertEquals(value, re.getSourceObject());
 			Assert.assertEquals(Integer.class, re.getTargetType());

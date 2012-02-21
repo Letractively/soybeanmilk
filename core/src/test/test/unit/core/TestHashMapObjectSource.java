@@ -82,10 +82,20 @@ public class TestHashMapObjectSource
 		}
 	}
 	
-	@Test(expected=ObjectSourceException.class)
+	@Test
 	public void getPrimitiveForNull()
 	{
-		objSource.get("key", int.class);
+		ObjectSourceException re=null;
+		try
+		{
+			objSource.get("key", int.class);
+		}
+		catch(ObjectSourceException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue((re.getMessage().endsWith("but primitive type needed")));
 	}
 	
 	protected void addGenericConverter()

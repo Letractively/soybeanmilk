@@ -33,7 +33,8 @@ import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.WebObjectSource;
-import org.soybeanMilk.web.bean.FilterAwareHashMap;
+import org.soybeanMilk.web.bean.ParamPropertyMap;
+import org.soybeanMilk.web.bean.ParamValue;
 
 /**
  * 默认的{@linkplain WebObjectSource WEB对象源}实现。
@@ -451,37 +452,37 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	@SuppressWarnings("unchecked")
 	protected Object convertParameterMap(HttpServletRequest request, String paramKeyFilter, Type targetType)
 	{
-		FilterAwareHashMap<Object> src=null;
+		Object result=null;
+		
 		Map<String, Object> paramMap=request.getParameterMap();
 		
-		//是否设置过滤器
-		boolean hasFilter= (paramKeyFilter!=null && paramKeyFilter.length()>0);
-		if(!hasFilter)
-		{
-			src=new FilterAwareHashMap<Object>(paramMap, null, false);
-		}
+		if(targetType == null)
+			result=paramMap;
 		else
 		{
-			boolean explicitKey;
+			Object explicitValue=paramMap.get(paramKeyFilter);
 			
-			//有确切的值
-			if(paramMap.get(paramKeyFilter)!=null)
-				explicitKey=true;
+			if(explicitValue != null)
+			{
+				result=new ParamValue(paramKeyFilter, explicitValue);
+			}
+			else if(SoybeanMilkUtils.isClassType(targetType)
+					&& SoybeanMilkUtils.narrowToClassType(targetType).isPrimitive())
+			{
+				result=new ParamValue(paramKeyFilter, explicitValue);
+			}
 			else
 			{
-				explicitKey=false;
-				paramKeyFilter=paramKeyFilter+Constants.ACCESSOR;
+				ParamPropertyMap ppm=new ParamPropertyMap(null, paramKeyFilter);
+				ppm.filterWithProperty(paramMap);
+				
+				result=ppm;
 			}
-			
-			src=new FilterAwareHashMap<Object>(paramMap, paramKeyFilter, explicitKey);
-			src.filter();
 		}
 		
-		//设置为null，减少转换开销
-		if(src.isEmpty())
-			src=null;
+		result=getGenericConverter().convert(result, targetType);
 		
-		return getGenericConverter().convert(src, targetType);
+		return result;
 	}
 	
 	/**

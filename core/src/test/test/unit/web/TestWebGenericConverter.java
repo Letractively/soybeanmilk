@@ -21,8 +21,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.GenericType;
-import org.soybeanMilk.web.bean.FilterAwareHashMap;
 import org.soybeanMilk.web.bean.ParamConvertException;
+import org.soybeanMilk.web.bean.ParamPropertyMap;
+import org.soybeanMilk.web.bean.ParamValue;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 
 import test.unit.core.MockGenericArrayType;
@@ -92,18 +93,27 @@ public class TestWebGenericConverter
 		Assert.assertNull(dest);
 	}
 	
-	@Test(expected = GenericConvertException.class)
+	@Test
 	public void convertMap_toJavaBean_srcHasInexistentSubPropertyContain() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		src.put("javaBean.def", 356);
 		
-		Object dest = converter.convert(src, JavaBean2.class);
+		GenericConvertException re=null;
 		
-		Assert.assertNull(dest);
+		try
+		{
+			converter.convert(src, JavaBean2.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue(( re.getMessage().startsWith("can not find property 'def'") ));
 	}
 	
-	@Test(expected = GenericConvertException.class)
+	@Test
 	public void convertMap_toJavaBean_srcHasInexistentPropertyContainInSubArrayProperty() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
@@ -120,12 +130,20 @@ public class TestWebGenericConverter
 		src.put("javaBean2Array.name", cmplexCollectionProperty_name);
 		src.put("javaBean2Array.notExistsProperty", cmplexCollectionProperty_name);
 		
-		Object dest = converter.convert(src, ComplexJavaBean.class);
+		GenericConvertException re=null;
+		try
+		{
+			converter.convert(src, ComplexJavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
 		
-		Assert.assertNull(dest);
+		Assert.assertTrue( (re.getMessage().startsWith("can not find property 'notExistsProperty'")) );
 	}
 	
-	@Test(expected = GenericConvertException.class)
+	@Test
 	public void convertMap_toJavaBean_srcHasInexistentPropertyContainInSubListProperty() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
@@ -142,12 +160,21 @@ public class TestWebGenericConverter
 		src.put("javaBean2List.name", cmplexCollectionProperty_name);
 		src.put("javaBean2List.notExistsProperty", cmplexCollectionProperty_name);
 		
-		Object dest = converter.convert(src, ComplexJavaBean.class);
+		GenericConvertException re=null;
 		
-		Assert.assertNull(dest);
+		try
+		{
+			converter.convert(src, ComplexJavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue((re.getMessage().startsWith("can not find property 'notExistsProperty'")));
 	}
 	
-	@Test(expected = GenericConvertException.class)
+	@Test
 	public void convertMap_toJavaBean_srcHasInexistentPropertyContainInSubSetProperty() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
@@ -164,9 +191,18 @@ public class TestWebGenericConverter
 		src.put("javaBean2Set.name", cmplexCollectionProperty_name);
 		src.put("javaBean2Set.notExistsProperty", cmplexCollectionProperty_name);
 		
-		Object dest = converter.convert(src, ComplexJavaBean.class);
+		GenericConvertException re=null;
 		
-		Assert.assertNull(dest);
+		try
+		{
+			converter.convert(src, ComplexJavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue((re.getMessage().startsWith("can not find property 'notExistsProperty'")));
 	}
 	
 	@Test
@@ -352,7 +388,7 @@ public class TestWebGenericConverter
 	}
 
 	@Test
-	public void convertFilterAwareMap_toSimple_srcIsInvalidValue() throws Exception
+	public void convertParamValue_srcIsInvalidValue() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		String[] id=new String[]{"invalidValue"};
@@ -361,23 +397,25 @@ public class TestWebGenericConverter
 		src.put("id", id);
 		src.put("name", name);
 		
-		FilterAwareHashMap<?> fm=new FilterAwareHashMap<Object>(src, "id", true);
-		fm.filter();
+		ParamValue pv=new ParamValue("id", "invalidValue");
 		
+		ParamConvertException re=null;
 		try
 		{
-			converter.convert(fm, int.class);
+			converter.convert(pv, int.class);
 		}
 		catch(ParamConvertException e)
 		{
-			Assert.assertEquals("id", e.getParamName());
-			Assert.assertEquals("invalidValue", e.getSourceObject());
-			Assert.assertEquals(int.class, e.getTargetType());
+			re=e;
 		}
+		
+		Assert.assertEquals("id", re.getParamName());
+		Assert.assertEquals("invalidValue", re.getSourceObject());
+		Assert.assertEquals(int.class, re.getTargetType());
 	}
 	
 	@Test
-	public void convertFilterAwareMap_toJavaBean_srcArrayPropertyContainInvalidValue() throws Exception
+	public void convertParamPropertyMap_toJavaBean_srcArrayPropertyContainInvalidValue() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -390,23 +428,26 @@ public class TestWebGenericConverter
 		
 		src.put("filter.simpleArray", simpleCollectionProperty);
 		
-		FilterAwareHashMap<?> fm=new FilterAwareHashMap<Object>(src, "filter.", false);
-		fm.filter();
+		ParamPropertyMap ppm=new ParamPropertyMap("filter");
+		ppm.filterWithProperty(src);
 		
+		ParamConvertException re=null;
 		try
 		{
-			converter.convert(fm, ComplexJavaBean.class);
+			converter.convert(ppm, ComplexJavaBean.class);
 		}
 		catch(ParamConvertException e)
 		{
-			Assert.assertEquals("filter.simpleArray", e.getParamName());
-			Assert.assertEquals("invalidValue", e.getSourceObject());
-			Assert.assertEquals(Integer.class, e.getTargetType());
+			re=e;
 		}
+		
+		Assert.assertEquals("filter.simpleArray", re.getParamName());
+		Assert.assertEquals("invalidValue", re.getSourceObject());
+		Assert.assertEquals(Integer.class, re.getTargetType());
 	}
 	
 	@Test
-	public void convertFilterAwareMap_toJavaBean_srcComplexPropertyContainInvalidValue() throws Exception
+	public void convertParamPropertyMap_toJavaBean_srcComplexPropertyContainInvalidValue() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -427,21 +468,22 @@ public class TestWebGenericConverter
 		src.put("filter.javaBean2List.id", cmplexCollectionProperty_id);
 		src.put("filter.javaBean2List.name", cmplexCollectionProperty_name);
 		
+		ParamPropertyMap ppm=new ParamPropertyMap("filter");
+		ppm.filterWithProperty(src);
 		
-		
-		FilterAwareHashMap<Object> fm=new FilterAwareHashMap<Object>(src, "filter.", false);
-		fm.filter();
-		
+		ParamConvertException re=null;
 		try
 		{
-			converter.convert(fm, ComplexJavaBean.class);
+			converter.convert(ppm, ComplexJavaBean.class);
 		}
 		catch(ParamConvertException e)
 		{
-			Assert.assertEquals("filter.javaBean2List.id", e.getParamName());
-			Assert.assertEquals("invalidValue", e.getSourceObject());
-			Assert.assertEquals(int.class, e.getTargetType());
+			re=e;
 		}
+		
+		Assert.assertEquals("filter.javaBean2List.id", re.getParamName());
+		Assert.assertEquals("invalidValue", re.getSourceObject());
+		Assert.assertEquals(int.class, re.getTargetType());
 	}
 	
 	@Test

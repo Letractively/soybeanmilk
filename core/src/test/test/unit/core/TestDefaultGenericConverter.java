@@ -519,11 +519,23 @@ public class TestDefaultGenericConverter
 		Assert.assertEquals(new Integer(src), re);
 	}
 	
-	@Test(expected = GenericConvertException.class)
+	@Test
 	public void convertNull_toPrimitive()
 	{
 		Object src = null;
-		converter.convert(src, int.class);
+		
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.convert(src, int.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue(( re.getMessage().startsWith("can not convert '"+src+"' to primitive type") ));
 	}
 	
 	@Test
@@ -772,24 +784,47 @@ public class TestDefaultGenericConverter
 		converter.getProperty(null, "age.size", null);
 	}
 	
-	@Test(expected = GenericConvertException.class)
+	@Test
 	public void getProperty_notExistProperty()
 	{
 		MyBean bean=new MyBean();
 		bean.setId("111");
 		bean.setSize(7);
 		
-		converter.getProperty(bean, "age.size", null);
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.getProperty(bean, "age.size", null);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue(( re.getMessage().startsWith("can not find property 'age' in class") ));
 	}
 	
-	@Test(expected = ConvertException.class)
+	@Test
 	public void getProperty_invalidConvert()
 	{
 		MyBean bean=new MyBean();
 		bean.setId("abc");
 		bean.setSize(7);
 		
-		converter.getProperty(bean, "id", Integer.class);
+		ConvertException re=null;
+		
+		try
+		{
+			converter.getProperty(bean, "id", Integer.class);
+		}
+		catch(ConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertEquals("abc", re.getSourceObject());
+		Assert.assertEquals(Integer.class, re.getTargetType());
 	}
 	
 	@Test
@@ -812,11 +847,24 @@ public class TestDefaultGenericConverter
 		}
 	}
 	
-	@Test(expected = ConvertException.class)
+	@Test
 	public void setProperty_invalidConvert()
 	{
 		MyBean bean=new MyBean();
-		converter.setProperty(bean, "myBean2.size", "sdf");
+		
+		ConvertException re=null;
+		
+		try
+		{
+			converter.setProperty(bean, "myBean2.size", "sdf");
+		}
+		catch(ConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertEquals("sdf", re.getSourceObject());
+		Assert.assertEquals(Integer.class, re.getTargetType());
 	}
 	
 	public static class MyBean

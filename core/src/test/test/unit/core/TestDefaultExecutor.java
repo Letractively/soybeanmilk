@@ -94,6 +94,7 @@ public class TestDefaultExecutor
 			{
 				log.error("",e);
 			}
+			
 			Execution execution=(Execution)os.get(KEY_EXECUTION, null);
 			Assert.assertEquals(execution.toString(), os.get("before", null));
 		}
@@ -110,6 +111,7 @@ public class TestDefaultExecutor
 			{
 				log.error("",e);
 			}
+			
 			Assert.assertNull(os.get("before", null));
 		}
 	}
@@ -128,6 +130,7 @@ public class TestDefaultExecutor
 			{
 				log.error("",e);
 			}
+			
 			Execution execution=(Execution)os.get(KEY_EXECUTION, null);
 			Assert.assertEquals(execution.toString(), os.get("after", null));
 		}
@@ -144,6 +147,7 @@ public class TestDefaultExecutor
 			{
 				log.error("",e);
 			}
+			
 			Assert.assertNull(os.get("after", null));
 		}
 	}
@@ -162,7 +166,9 @@ public class TestDefaultExecutor
 			{
 				log.error("",e);
 			}
+			
 			Execution execution=(Execution)os.get(KEY_EXECUTION, null);
+			
 			Assert.assertEquals(execution.toString(), os.get("exception", null));
 		}
 		
@@ -193,7 +199,9 @@ public class TestDefaultExecutor
 		{
 			log.error("",e);
 		}
+		
 		ExecuteException execution=(ExecuteException)((Execution)os.get(KEY_EXECUTION, null)).getExecuteException();
+		
 		Assert.assertTrue( execution instanceof InvocationExecuteException );
 	}
 	

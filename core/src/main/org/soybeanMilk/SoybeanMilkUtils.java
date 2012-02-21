@@ -243,6 +243,21 @@ public class SoybeanMilkUtils
 	}
 	
 	/**
+	 * 拆分属性表达式
+	 * @param propertyExpression
+	 * @return
+	 * @date 2012-2-21
+	 */
+	public static String[] splitPropertyExpression(String propertyExpression)
+	{
+		String[] propertyArray=split(propertyExpression, Constants.ACCESSOR);
+		if(propertyArray==null || propertyArray.length==0)
+			propertyArray=new String[]{propertyExpression};
+		
+		return propertyArray;
+	}
+	
+	/**
 	 * 拆分字符串，连续的分隔符将按一个分隔符处理。
 	 * @param str
 	 * @param separatorChar 分隔符

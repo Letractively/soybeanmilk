@@ -22,7 +22,7 @@ import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.config.InterceptorInfo;
 
 /**
- * 请求参数转换异常，它可以记录导致异常的请求参数名，
+ * 参数转换异常，它可以记录导致异常的参数名，
  * 这在框架执行拦截器中会很有用（参考{@linkplain ConvertExecuteException}以及{@linkplain Execution}和{@linkplain InterceptorInfo}类说明）。<br>
  * 注意：
  * {@linkplain #getSourceObject()}方法获取的源对象不一定是参数值本身，

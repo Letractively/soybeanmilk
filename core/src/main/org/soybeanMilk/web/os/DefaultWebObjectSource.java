@@ -474,7 +474,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 			else
 			{
 				ParamPropertyMap ppm=new ParamPropertyMap(null, paramKeyFilter);
-				ppm.filterWithProperty(paramMap);
+				ppm.filter(paramMap);
 				
 				result=ppm;
 			}

@@ -125,7 +125,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, Map.class))
 		{
 			ParamPropertyMap ppm=new ParamPropertyMap();
-			ppm.filterWithProperty((Map<String, Object>)sourceObj);
+			ppm.filter((Map<String, Object>)sourceObj);
 			
 			result=convertParamPropertyMap(ppm, targetType);
 		}
@@ -211,7 +211,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			{
 				if(beanInfo.getSubPropertyInfo(property)==null)
 				{
-					if(!propertyMap.isRootPropertyMap())
+					if(!propertyMap.isRoot())
 						throw new GenericConvertException("can not find property '"+property+"' in class '"+beanInfo.getType().getName()+"'");
 					else
 						continue;
@@ -336,7 +336,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 				}
 				catch(Exception e)
 				{
-					throw new GenericConvertException("illegal index value '"+property+"' in property expression '"+propertyMap.getParamFullKey(property)+"'", e);
+					throw new GenericConvertException("illegal index value '"+property+"' in property expression '"+propertyMap.getFullParamName(property)+"'", e);
 				}
 				
 				Object element=null;
@@ -464,6 +464,6 @@ public class WebGenericConverter extends DefaultGenericConverter
 		if(e instanceof ParamConvertException)
 			throw e;
 		else
-			throw new ParamConvertException(paramPropertyMap.getParamFullKey(key), e.getSourceObject(), e.getTargetType(), e.getCause());
+			throw new ParamConvertException(paramPropertyMap.getFullParamName(key), e.getSourceObject(), e.getTargetType(), e.getCause());
 	}
 }

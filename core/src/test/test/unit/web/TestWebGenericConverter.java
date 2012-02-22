@@ -429,7 +429,7 @@ public class TestWebGenericConverter
 		src.put("filter.simpleArray", simpleCollectionProperty);
 		
 		ParamPropertyMap ppm=new ParamPropertyMap("filter");
-		ppm.filterWithProperty(src);
+		ppm.filter(src);
 		
 		ParamConvertException re=null;
 		try
@@ -469,7 +469,7 @@ public class TestWebGenericConverter
 		src.put("filter.javaBean2List.name", cmplexCollectionProperty_name);
 		
 		ParamPropertyMap ppm=new ParamPropertyMap("filter");
-		ppm.filterWithProperty(src);
+		ppm.filter(src);
 		
 		ParamConvertException re=null;
 		try

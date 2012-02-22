@@ -9,7 +9,7 @@ import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.web.WebConstants;
 
 /**
- * 参数属性映射表，它的关键字是属性名而非属性表达式，即只可能是“propertyA”、“propertyB”，而非“propertyA.propertyB”
+ * 参数属性映射表，它将参数映射表的关键字分解为属性名
  * @author earthAngry@gmail.com
  * @date 2012-2-19
  *
@@ -17,22 +17,36 @@ import org.soybeanMilk.web.WebConstants;
  */
 public class ParamPropertyMap implements Map<String, Object>
 {
+	/**父参数属性映射表*/
 	private ParamPropertyMap parent;
 	
+	/**此参数属性映射表的属性名*/
 	private String propertyName;
 	
 	private HashMap<String, Object> internalMap;
 	
+	/**
+	 * 创建默认参数属性映射表
+	 */
 	public ParamPropertyMap()
 	{
 		this(null, null);
 	}
 	
+	/**
+	 * 创建参数属性映射表，并设置一个初始属性名
+	 * @param propertyName
+	 */
 	public ParamPropertyMap(String propertyName)
 	{
 		this(null, propertyName);
 	}
 	
+	/**
+	 * 创建参数属性映射表，设置其父参数属性映射表和初始属性名
+	 * @param parent 父参数属性映射表
+	 * @param propertyName 初始属性名
+	 */
 	public ParamPropertyMap(ParamPropertyMap parent, String propertyName)
 	{
 		super();
@@ -43,51 +57,46 @@ public class ParamPropertyMap implements Map<String, Object>
 	}
 	
 	/**
-	 * 是否根属性映射表
+	 * 是否根参数属性映射表
 	 * @return
 	 * @date 2012-2-20
 	 */
-	public boolean isRootPropertyMap()
+	public boolean isRoot()
 	{
 		return (this.propertyName == null);
 	}
 	
-	public String getParamFullKey(String key)
+	/**
+	 * 获取某个属性的完成参数名
+	 * @param propertyName
+	 * @return
+	 * @date 2012-2-22
+	 */
+	public String getFullParamName(String propertyName)
 	{
 		String result=null;
 		
 		if(this.parent != null)
-			result=this.parent.getParamFullKey(this.propertyName);
+			result=this.parent.getFullParamName(this.propertyName);
 		else
 			result=this.propertyName;
 		
 		if(result==null || result.length()==0)
-			return key;
+			return propertyName;
 		else
-			return result+WebConstants.ACCESSOR+key;
+			return result+WebConstants.ACCESSOR+propertyName;
 	}
 	
-	public String getPropertyName() {
-		return propertyName;
-	}
-
-	public void setPropertyName(String propertyName) {
-		this.propertyName = propertyName;
-	}
-
-	public ParamPropertyMap getParent() {
-		return parent;
-	}
-
-	public void setParent(ParamPropertyMap parent) {
-		this.parent = parent;
-	}
-	
-	public void filterWithProperty(Map<String, Object> source)
+	/**
+	 * 过滤源参数映射表，将所有以此参数属性映射表的初始属性名开头的条目都存入此参数属性映射表
+	 * @param paramMap
+	 * @date 2012-2-22
+	 */
+	public void filter(Map<String, Object> paramMap)
 	{
 		String filter= (this.propertyName==null || this.propertyName.length()==0 ? null : this.propertyName+WebConstants.ACCESSOR);
 		
-		Set<String> keys=source.keySet();
+		Set<String> keys=paramMap.keySet();
 		boolean doAssemble=false;
 		
 		for(String key : keys)
@@ -121,7 +130,7 @@ public class ParamPropertyMap implements Map<String, Object>
 				{
 					if(i == propKeys.length-1)
 					{
-						parent.put(propKeys[i], source.get(key));
+						parent.put(propKeys[i], paramMap.get(key));
 					}
 					else
 					{
@@ -138,7 +147,23 @@ public class ParamPropertyMap implements Map<String, Object>
 			}
 		}
 	}
+	
+	public String getPropertyName() {
+		return propertyName;
+	}
 
+	public void setPropertyName(String propertyName) {
+		this.propertyName = propertyName;
+	}
+
+	public ParamPropertyMap getParent() {
+		return parent;
+	}
+
+	public void setParent(ParamPropertyMap parent) {
+		this.parent = parent;
+	}
+	
 	public void clear()
 	{
 		this.internalMap.clear();

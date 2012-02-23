@@ -629,21 +629,21 @@ public class TestWebGenericConverter
 		String[] names={"name_1", "name_2", "name_3"};
 		String[][] propsSimple=new String[][]
 		            {
-						{"1", "2", "3"},
-						{"4", "5", "6", "7"},
-						{"8", "9", "10"}
+						{"11", "12", "13"},
+						{"21", "22", "23", "24"},
+						{"31", "32", "33"}
 		            };
 		String[][] propsJavaBean_id=new String[][]
    		            {
-   						{"22", "33"},
-   						{"11", "55", "77", "99"},
-   						{"88"}
+   						{"11", "12"},
+   						{"21", "22", "23", "24"},
+   						{"31"}
    		            };
 		String[][] propsJavaBean_name=new String[][]
    		            {
-   						{"aa", "bb"},
-   						{"cc", "dd", "ee", "ff"},
-   						{"gg"}
+   						{"1_a", "1_b"},
+   						{"2_a", "2_b", "2_c", "2_d"},
+   						{"3_a"}
    		            };
 		
 		
@@ -712,19 +712,19 @@ public class TestWebGenericConverter
 			Integer[] simplePropArrayi=rei.getSimpleArray();
 			Integer[] simplePropListi=new Integer[simplePropsArray.length];
 			rei.getSimpleList().toArray(simplePropListi);
-			Set<?> simplePropSeti=rei.getSimpleSet();
+			Set<Integer> simplePropSeti=rei.getSimpleSet();
 			
 			Assert.assertTrue(Arrays.equals(simplePropsArray, simplePropArrayi));
 			Assert.assertTrue(Arrays.equals(simplePropsArray, simplePropListi));
-			Assert.assertEquals(simplePropsSet, simplePropSeti);
+			Assert.assertEquals(new TreeSet<Integer>(simplePropsSet), new TreeSet<Integer>(simplePropSeti));
 			
 			//JavaBean集合属性
 			JavaBean2[] javaBeanPropsArray=new JavaBean2[propsJavaBean_id[i].length];
 			for(int ji=0; ji<javaBeanPropsArray.length; ji++)
 			{
-				javaBeanPropsArray[i]=new JavaBean2();
-				javaBeanPropsArray[i].setId(Integer.parseInt(propsJavaBean_id[i][ji]));
-				javaBeanPropsArray[i].setName(propsJavaBean_name[i][ji]);
+				javaBeanPropsArray[ji]=new JavaBean2();
+				javaBeanPropsArray[ji].setId(Integer.parseInt(propsJavaBean_id[i][ji]));
+				javaBeanPropsArray[ji].setName(propsJavaBean_name[i][ji]);
 			}
 			Set<JavaBean2> javaBeanPropsSet=new HashSet<JavaBean2>();
 			for(JavaBean2 jb : javaBeanPropsArray)
@@ -735,11 +735,11 @@ public class TestWebGenericConverter
 			JavaBean2[] javaBeanPropsArrayi=rei.getJavaBean2Array();
 			JavaBean2[] javaBeanPropsListi=new JavaBean2[javaBeanPropsArray.length];
 			rei.getJavaBean2List().toArray(javaBeanPropsListi);
-			Set<?> javaBeanPropsSeti=rei.getJavaBean2Set();
+			Set<JavaBean2> javaBeanPropsSeti=rei.getJavaBean2Set();
 			
 			Assert.assertTrue(Arrays.equals(javaBeanPropsArray, javaBeanPropsArrayi));
 			Assert.assertTrue(Arrays.equals(javaBeanPropsArray, javaBeanPropsListi));
-			Assert.assertEquals(javaBeanPropsSet, javaBeanPropsSeti);
+			Assert.assertEquals(new TreeSet<JavaBean2>(javaBeanPropsSet), new TreeSet<JavaBean2>(javaBeanPropsSeti));
 		}
 	}
 	

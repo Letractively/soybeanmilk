@@ -60,10 +60,10 @@ import org.soybeanMilk.core.bean.PropertyInfo;
  * "setChildren.name"      -&gt;  ["tom", "mary"]
  * "arrayChildren.id"      -&gt;  ["11", "12"]
  * "arrayChildren.name"    -&gt;  ["tom", "mary"]
- * "mapChildren.map0.id"   -&gt;  "11" 或者 ["11"]
- * "mapChildren.map0.name" -&gt;  "tom" 或者 ["tom"]
- * "mapChildren.map1.id"   -&gt;  "22" 或者 ["22"]
- * "mapChildren.map1.name" -&gt;  "mary" 或者 ["mary"]
+ * "mapChildren.key0.id"   -&gt;  "11" 或者 ["11"]
+ * "mapChildren.key0.name" -&gt;  "tom" 或者 ["tom"]
+ * "mapChildren.key1.id"   -&gt;  "22" 或者 ["22"]
+ * "mapChildren.key1.name" -&gt;  "mary" 或者 ["mary"]
  * "ignored"               -&gt;  "this value will be ignored"
  * </pre>
  * 转换为：

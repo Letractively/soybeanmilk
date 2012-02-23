@@ -51,7 +51,7 @@ public class ParamConvertException extends ConvertException
 	}
 	
 	/**
-	 * 获取出现转换异常时的请求参数名，转换异常即是由于此参数的值不合法导致的
+	 * 获取出现转换异常时的完整参数名，转换异常即是由于此参数的值不合法导致的
 	 * @return
 	 * @date 2011-4-12
 	 */

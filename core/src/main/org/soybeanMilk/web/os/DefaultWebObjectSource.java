@@ -202,6 +202,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	}
 
 	//@Override
+	@SuppressWarnings("unchecked")
 	public Object get(Serializable key, Type expectType)
 	{
 		Object data = null;
@@ -219,7 +220,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		
 		if(WebConstants.Scope.PARAM.equalsIgnoreCase(scope))
 		{
-			data=convertParameterMap(getRequest(), subKey, expectType);
+			data=convertParameterMap(getRequest().getParameterMap(), subKey, expectType);
 		}
 		else if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scope))
 		{
@@ -251,7 +252,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		}
 		else if(scopedKey.length == 1)//没有包含作用域标识并且关键字不是作用域本身，则从param中取
 		{
-			data=convertParameterMap(getRequest(), strKey, expectType);
+			data=convertParameterMap(getRequest().getParameterMap(), strKey, expectType);
 			
 			scope=WebConstants.Scope.PARAM;
 			subKey=strKey;
@@ -438,23 +439,20 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	}
 	
 	/**
-	 * 转换请求参数映射表。<br>
+	 * 转换请求参数映射表<br>
 	 * 如果<code>paramKeyFilter</code>是一个明确的关键字（映射表中有该关键字的值），它将直接根据该关键字的值来转换；<br>
 	 * 如果<code>paramKeyFilter</code>是<code>null</code>，那么它将使用原始的请求参数映射表来进行转换；<br>
 	 * 否则，它会根据<code>paramKeyFilter</code>来对参数映射表进行过滤，产生一个新的映射表（它的关键字将会被替换为原始关键字的“<code>[paramKeyFilter]</code>.”之后的部分，比如由“<code>beanName.propertyName</code>”变为“<code>propertyName</code>”），
 	 * 然后使用它进行转换。
 	 * 
-	 * @param request 请求对象
+	 * @param paramMap 参数映射表
 	 * @param paramKeyFilter 筛选器，只有以此筛选器开头的参数关键字才会被转换，如果为null，则表明不做筛选
 	 * @param targetType 目标类型
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	protected Object convertParameterMap(HttpServletRequest request, String paramKeyFilter, Type targetType)
+	protected Object convertParameterMap(Map<String, Object> paramMap, String paramKeyFilter, Type targetType)
 	{
 		Object result=null;
-		
-		Map<String, Object> paramMap=request.getParameterMap();
 		
 		if(targetType == null)
 			result=paramMap;

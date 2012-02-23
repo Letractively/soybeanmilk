@@ -252,7 +252,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2011-1-5
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
 	{
 		Object re=null;
@@ -263,7 +263,9 @@ public class DefaultGenericConverter implements GenericConverter
 			re=sourceObj.toString();
 		else if(SoybeanMilkUtils.isEnum(targetType))
 		{
+			@SuppressWarnings("rawtypes")
 			Class enumClass=SoybeanMilkUtils.narrowToClassType(targetType);
+			
 			re= (sourceObj instanceof String) ?
 					Enum.valueOf(enumClass, (String)sourceObj) : Enum.valueOf(enumClass, sourceObj.toString());
 		}
@@ -347,7 +349,7 @@ public class DefaultGenericConverter implements GenericConverter
 				//Set<T>
 				else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualClass))
 				{
-					List<Object> list=convertArrayToList(sourceObj, List.class, argClasses[0]);
+					List<?> list=convertArrayToList(sourceObj, List.class, argClasses[0]);
 					re=listToSet(list, actualClass);
 				}
 				else
@@ -391,7 +393,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @date 2011-1-5
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<Object> convertArrayToList(Object array, Class<?> listClass, Class<?> elementClass)
+	protected List<?> convertArrayToList(Object array, Class<?> listClass, Class<?> elementClass)
 	{
 		List<Object> result=null;
 		
@@ -441,7 +443,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @date 2012-2-19
 	 */
 	@SuppressWarnings("unchecked")
-	protected Set<Object> listToSet(List<?> list, Class<?> setClass)
+	protected Set<?> listToSet(List<?> list, Class<?> setClass)
 	{
 		Set<Object> result=null;
 		

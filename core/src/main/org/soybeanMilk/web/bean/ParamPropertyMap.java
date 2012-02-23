@@ -35,7 +35,7 @@ public class ParamPropertyMap implements Map<String, Object>
 	
 	/**
 	 * 创建参数属性映射表，并设置一个初始属性名
-	 * @param propertyName
+	 * @param propertyName 初始属性名，用于追溯完整参数名
 	 */
 	public ParamPropertyMap(String propertyName)
 	{
@@ -45,7 +45,7 @@ public class ParamPropertyMap implements Map<String, Object>
 	/**
 	 * 创建参数属性映射表，设置其父参数属性映射表和初始属性名
 	 * @param parent 父参数属性映射表
-	 * @param propertyName 初始属性名
+	 * @param propertyName 初始属性名，用于追溯完整参数名
 	 */
 	public ParamPropertyMap(ParamPropertyMap parent, String propertyName)
 	{

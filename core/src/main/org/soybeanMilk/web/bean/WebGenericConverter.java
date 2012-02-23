@@ -34,18 +34,37 @@ import org.soybeanMilk.core.bean.GenericType;
 import org.soybeanMilk.core.bean.PropertyInfo;
 
 /**
- * WEB通用转换器，除了继承的转换支持，它还支持将请求参数映射表（{@link Map Map&lt;String, String[]&gt;}）对象转换为JavaBean对象、JavaBean数组以及JavaBean集合（List、Set）。<br>
- * 比如可以将下面的请求参数映射表：
+ * WEB通用转换器，除了继承的转换支持，它还支持将参数映射表（{@link Map Map&lt;String, Object&gt;}）对象转换为JavaBean对象、
+ * JavaBean数组、JavaBean集合（List、Set）、JavaBean映射表。<br>
+ * 参数映射表的关键字必须是如下格式：<br>
+ *         [属性名].[属性名]......<br>
+ * 其中，“[属性名]”可以是下面这些语义：<br>
+ * <ul>
+ * 	<li>
+ *  	JavaBean对象属性名
+ *  </li>
+ *  <li>
+ *  	List、Set、数组对象的下标值（必须是数值）
+ *  </li>
+ *  <li>
+ *  	Map对象的关键字
+ *  </li>
+ * </ul>
+ * 比如，它可以将下面的参数映射表：
  * <pre>
- * "id"                 -&gt;  "1" 或者 ["1"] 或者 ["1", "2"]（第一个元素"1"将被使用）
- * "name"               -&gt;  "jack" 或者 ["jack"] 或者 ["jack", "lily"]（第一个元素"jack"将被使用）
- * "listChildren.id"    -&gt;  ["11", "12"]
- * "listChildren.name"  -&gt;  ["tom", "mary"]
- * "setChildren.id"     -&gt;  ["11", "12"]
- * "setChildren.name"   -&gt;  ["tom", "mary"]
- * "arrayChildren.id"   -&gt;  ["11", "12"]
- * "arrayChildren.name" -&gt;  ["tom", "mary"]
- * "ignored"            -&gt;  "this value will be ignored"
+ * "id"                    -&gt;  "1" 或者 ["1"] 或者 ["1", "2"]（第一个元素"1"将被使用）
+ * "name"                  -&gt;  "jack" 或者 ["jack"] 或者 ["jack", "lily"]（第一个元素"jack"将被使用）
+ * "listChildren.id"       -&gt;  ["11", "12"]
+ * "listChildren.name"     -&gt;  ["tom", "mary"]
+ * "setChildren.id"        -&gt;  ["11", "12"]
+ * "setChildren.name"      -&gt;  ["tom", "mary"]
+ * "arrayChildren.id"      -&gt;  ["11", "12"]
+ * "arrayChildren.name"    -&gt;  ["tom", "mary"]
+ * "mapChildren.map0.id"   -&gt;  "11" 或者 ["11"]
+ * "mapChildren.map0.name" -&gt;  "tom" 或者 ["tom"]
+ * "mapChildren.map1.id"   -&gt;  "22" 或者 ["22"]
+ * "mapChildren.map1.name" -&gt;  "mary" 或者 ["mary"]
+ * "ignored"               -&gt;  "this value will be ignored"
  * </pre>
  * 转换为：
  * <pre>
@@ -55,14 +74,24 @@ import org.soybeanMilk.core.bean.PropertyInfo;
  * 	private List&lt;User&gt; listChildren;
  * 	private Set&lt;User&gt; setChildren;
  * 	private User[] arrayChildren;
+ * 	private Map&lt;String, User&gt; mapChildren;
  * 	...
  * }
  * </pre>
- * 类型的对象。<br>
- * 或者将：
+ * 类型的对象，或者将：
  * <pre>
- * "id"                 -&gt;  ["1","2","3"]
- * "name"               -&gt;  ["jack","tom","cherry"]
+ * "id"                             -&gt;  ["1","2","3"]
+ * "name"                           -&gt;  ["jack","tom","cherry"]
+ * "0.listChildren.id"              -&gt;  ["10","11"]
+ * "0.listChildren.name"            -&gt;  ["jack10","tom11"]
+ * "1.setChildren.0.id"             -&gt;  "20"
+ * "1.setChildren.0.name"           -&gt;  "jack20"
+ * "1.setChildren.1.id"             -&gt;  "21"
+ * "1.setChildren.1.name"           -&gt;  "tom31"
+ * "2.setChildren.0.id"             -&gt;  "30"
+ * "2.setChildren.0.name"           -&gt;  "jack30"
+ * "2.setChildren.1.id"             -&gt;  "31"
+ * "2.setChildren.1.name"           -&gt;  "tom31"
  * </pre>
  * 转换为：
  * <pre>
@@ -139,19 +168,19 @@ public class WebGenericConverter extends DefaultGenericConverter
 	
 	/**
 	 * 将映射表转换成目标类型的对象
-	 * @param paramPropMap 源映射表
+	 * @param sourceMap 源映射表
 	 * @param targetType
 	 * @return
 	 */
-	protected Object convertParamPropertyMap(ParamPropertyMap paramPropMap, Type targetType)
+	protected Object convertParamPropertyMap(ParamPropertyMap sourceMap, Type targetType)
 	{
 		if(log.isDebugEnabled())
-			log.debug("start converting Map '"+paramPropMap+"' to type '"+targetType+"'");
+			log.debug("start converting Map '"+sourceMap+"' to type '"+targetType+"'");
 		
 		Object result = null;
 		
 		//空的映射表作为null处理
-		if(paramPropMap==null || paramPropMap.isEmpty())
+		if(sourceMap==null || sourceMap.isEmpty())
 		{
 			result=convert(null, targetType);
 		}
@@ -159,34 +188,34 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			if(targetType instanceof Class<?>)
 			{
-				result=convertPropertyMapToClass(paramPropMap, (Class<?>)targetType);
+				result=convertParamPropertyMapToClass(sourceMap, (Class<?>)targetType);
 			}
 			else if(targetType instanceof GenericType)
 			{
-				result=convertPropertyMapToGenericType(paramPropMap, (GenericType)targetType);
+				result=convertParamPropertyMapToGenericType(sourceMap, (GenericType)targetType);
 			}
 			else if(targetType instanceof ParameterizedType
 					|| targetType instanceof GenericArrayType
 					|| targetType instanceof TypeVariable<?>
 					|| targetType instanceof WildcardType)
 			{
-				result=convertPropertyMapToGenericType(paramPropMap, GenericType.getGenericType(targetType, null));
+				result=convertParamPropertyMapToGenericType(sourceMap, GenericType.getGenericType(targetType, null));
 			}
 			else
-				throw new GenericConvertException("converting '"+paramPropMap+"' to '"+targetType+"' is not supported");
+				throw new GenericConvertException("converting '"+sourceMap+"' to '"+targetType+"' is not supported");
 		}
 		
 		return result;
 	}
 	
 	/**
-	 * 将属性映射表转换为目标类型为<code>Class&lt?&gt;</code>的对象，目标类型只可能为JavaBean或者JavaBean数组
-	 * @param propertyMap 属性映射表
+	 * 将参数属性映射表转换为目标类型为<code>Class&lt?&gt;</code>的对象，目标类型只可能为JavaBean或者JavaBean数组
+	 * @param sourceMap 参数属性映射表
 	 * @param targetClass
 	 * @return
 	 * @date 2011-10-12
 	 */
-	protected Object convertPropertyMapToClass(ParamPropertyMap propertyMap, Class<?> targetClass)
+	protected Object convertParamPropertyMapToClass(ParamPropertyMap sourceMap, Class<?> targetClass)
 	{
 		Object result=null;
 		
@@ -195,8 +224,9 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			Class<?> eleClass=targetClass.getComponentType();
 			
-			result=convertPropertyMapToList(propertyMap, List.class, eleClass);
-			result=listToArray((List<?>)result, eleClass);
+			List<?> tmpRe=convertParamPropertyMapToList(sourceMap, List.class, eleClass);
+			
+			result=listToArray(tmpRe, eleClass);
 		}
 		//JavaBean
 		else
@@ -206,12 +236,12 @@ public class WebGenericConverter extends DefaultGenericConverter
 			if(!beanInfo.hasSubPropertyInfo())
 				throw new GenericConvertException("the target javaBean Class '"+targetClass+"' is not valid, it has no javaBean property");
 			
-			Set<String> propertyKeys=propertyMap.keySet();
+			Set<String> propertyKeys=sourceMap.keySet();
 			for(String property : propertyKeys)
 			{
 				if(beanInfo.getSubPropertyInfo(property)==null)
 				{
-					if(!propertyMap.isRoot())
+					if(!sourceMap.isRoot())
 						throw new GenericConvertException("can not find property '"+property+"' in class '"+beanInfo.getType().getName()+"'");
 					else
 						continue;
@@ -223,11 +253,11 @@ public class WebGenericConverter extends DefaultGenericConverter
 				
 				try
 				{
-					setProperty(result, property, propertyMap.get(property));
+					setProperty(result, property, sourceMap.get(property));
 				}
 				catch(ConvertException e)
 				{
-					handleParamPropertyMapConvertException(propertyMap, property, e);
+					handleParamPropertyMapConvertException(sourceMap, property, e);
 				}
 			}
 		}
@@ -236,13 +266,13 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 将属性映射表转换为泛型类型的对象
+	 * 将参数属性映射表转换为泛型类型的对象
 	 * @param sourceMap
 	 * @param genericType
 	 * @return
 	 * @date 2011-10-12
 	 */
-	protected Object convertPropertyMapToGenericType(ParamPropertyMap sourceMap, GenericType genericType)
+	protected Object convertParamPropertyMapToGenericType(ParamPropertyMap sourceMap, GenericType genericType)
 	{
 		Object result=null;
 		
@@ -256,13 +286,18 @@ public class WebGenericConverter extends DefaultGenericConverter
 			//List<T>
 			if(SoybeanMilkUtils.isAncestorClass(List.class, actualClass))
 			{
-				result=convertPropertyMapToList(sourceMap, actualClass, argClasses[0]);
+				result=convertParamPropertyMapToList(sourceMap, actualClass, argClasses[0]);
 			}
 			//Set<T>
 			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualClass))
 			{
-				result=convertPropertyMapToList(sourceMap, List.class, argClasses[0]);
-				result=listToSet((List<?>)result, actualClass);
+				List<?> tmpRe=convertParamPropertyMapToList(sourceMap, List.class, argClasses[0]);
+				result=listToSet(tmpRe, actualClass);
+			}
+			//Map<K, V>
+			else if(SoybeanMilkUtils.isAncestorClass(Map.class, actualClass))
+			{
+				result=convertParamPropertyMapToMap(sourceMap, actualClass, argClasses[0], argClasses[1]);
 			}
 			else
 				canConvert=false;
@@ -272,7 +307,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			Class<?> componentClass=genericType.getComponentClass();
 			
-			result=convertPropertyMapToList(sourceMap, List.class, componentClass);
+			result=convertParamPropertyMapToList(sourceMap, List.class, componentClass);
 			result=listToArray((List<?>)result, componentClass);
 		}
 		//T
@@ -297,7 +332,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 将属性映射表转换为列表对象，属性映射表的字符串关键字可以是两种内容：<br>
+	 * 将参数属性映射表转换为列表对象，参数属性映射表的字符串关键字可以是两种内容：<br>
 	 * <ol>
 	 * 	<li>
 	 * 		数字，比如：“0”、“1”，表示属性值在列表中的索引
@@ -306,25 +341,25 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * 		字符，比如："property1"、“property2”，表示列表元素对象对应的属性名
 	 * 	</li>
 	 * </ol>
-	 * @param propertyMap
+	 * @param sourceMap
 	 * @param listClass
 	 * @param elementClass
 	 * @return
 	 * @date 2012-2-19
 	 */
-	protected List<Object> convertPropertyMapToList(ParamPropertyMap propertyMap, Class<?> listClass, Class<?> elementClass)
+	protected List<?> convertParamPropertyMapToList(ParamPropertyMap sourceMap, Class<?> listClass, Class<?> elementClass)
 	{
-		if(propertyMap==null || propertyMap.isEmpty())
+		if(sourceMap == null)
 			return null;
 		
 		@SuppressWarnings("unchecked")
 		List<Object> result=(List<Object>)instance(listClass, -1);
 		
 		int arrayValueLen=-1;
-		Set<String> propertyKeyes=propertyMap.keySet();
+		Set<String> propertyKeyes=sourceMap.keySet();
 		for(String property : propertyKeyes)
 		{
-			Object value=propertyMap.get(property);
+			Object value=sourceMap.get(property);
 			
 			//优先处理索引属性
 			if(isIndexOfProperty(property))
@@ -336,20 +371,44 @@ public class WebGenericConverter extends DefaultGenericConverter
 				}
 				catch(Exception e)
 				{
-					throw new GenericConvertException("illegal index value '"+property+"' in property expression '"+propertyMap.getFullParamName(property)+"'", e);
+					throw new GenericConvertException("illegal index value '"+property+"' in property expression '"+sourceMap.getFullParamName(property)+"'", e);
 				}
 				
-				Object element=null;
-				try
-				{
-					element=convert(value, elementClass);
-				}
-				catch(ConvertException e)
-				{
-					handleParamPropertyMapConvertException(propertyMap, property, e);
-				}
+				while(result.size() < idx+1)
+					result.add(null);
 				
-				result.set(idx, element);
+				Object element=result.get(idx);
+				
+				if(element!=null && (value instanceof ParamPropertyMap))
+				{
+					ParamPropertyMap subPropMap=(ParamPropertyMap)value;
+					
+					Set<String> subPropKeys=subPropMap.keySet();
+					for(String subProp : subPropKeys)
+					{
+						try
+						{
+							setProperty(element, subProp, subPropMap.get(subProp));
+						}
+						catch(ConvertException e)
+						{
+							handleParamPropertyMapConvertException(sourceMap, property, e);
+						}
+					}
+				}
+				else
+				{
+					try
+					{
+						element=convert(value, elementClass);
+					}
+					catch(ConvertException e)
+					{
+						handleParamPropertyMapConvertException(sourceMap, property, e);
+					}
+					
+					result.set(idx, element);
+				}
 			}
 			else
 			{
@@ -381,7 +440,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 						}
 						catch(ConvertException e)
 						{
-							handleParamPropertyMapConvertException(propertyMap, property, e);
+							handleParamPropertyMapConvertException(sourceMap, property, e);
 						}
 					}
 				}
@@ -403,10 +462,39 @@ public class WebGenericConverter extends DefaultGenericConverter
 					}
 					catch(ConvertException e)
 					{
-						handleParamPropertyMapConvertException(propertyMap, property, e);
+						handleParamPropertyMapConvertException(sourceMap, property, e);
 					}
 				}
 			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 将参数属性映射表转换为目标映射表, <code>sourceMap</code>的关键字将被转换目标映射表的关键字，值将被转换为此关键字对应的值
+	 * @param sourceMap
+	 * @param mapClass
+	 * @param keyClass
+	 * @param valueClass
+	 * @return
+	 * @date 2012-2-23
+	 */
+	protected Map<?, ?> convertParamPropertyMapToMap(ParamPropertyMap sourceMap, Class<?> mapClass, Class<?> keyClass, Class<?> valueClass)
+	{
+		if(sourceMap == null)
+			return null;
+		
+		@SuppressWarnings("unchecked")
+		Map<Object, Object> result=(Map<Object, Object>)instance(mapClass, -1);
+		
+		Set<String> keys=sourceMap.keySet();
+		for(String key : keys)
+		{
+			Object tk=convert(key, keyClass);
+			Object tv=convert(sourceMap.get(key), valueClass);
+			
+			result.put(tk, tv);
 		}
 		
 		return result;

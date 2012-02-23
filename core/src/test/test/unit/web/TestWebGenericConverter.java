@@ -3,6 +3,7 @@ package test.unit.web;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -620,6 +621,129 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
+	public void convertMap_keyComplexSemantics_toJavaBeanArray() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] ids={"1", "2", "3"};
+		String[] names={"name_1", "name_2", "name_3"};
+		String[][] propsSimple=new String[][]
+		            {
+						{"1", "2", "3"},
+						{"4", "5", "6", "7"},
+						{"8", "9", "10"}
+		            };
+		String[][] propsJavaBean_id=new String[][]
+   		            {
+   						{"22", "33"},
+   						{"11", "55", "77", "99"},
+   						{"88"}
+   		            };
+		String[][] propsJavaBean_name=new String[][]
+   		            {
+   						{"aa", "bb"},
+   						{"cc", "dd", "ee", "ff"},
+   						{"gg"}
+   		            };
+		
+		
+		
+		src.put("id", ids);
+		src.put("name", names);
+		
+		//简单集合属性
+		src.put("0.simpleArray", propsSimple[0]);
+		src.put("0.simpleList", propsSimple[0]);
+		src.put("0.simpleSet", propsSimple[0]);
+		
+		src.put("1.simpleArray", propsSimple[1]);
+		src.put("1.simpleList", propsSimple[1]);
+		src.put("1.simpleSet", propsSimple[1]);
+		
+		for(int i=0; i<propsSimple[2].length; i++)
+		{
+			src.put("2.simpleArray."+i, propsSimple[2][i]);
+			src.put("2.simpleList."+i, propsSimple[2][i]);
+			src.put("2.simpleSet."+i, propsSimple[2][i]);
+		}
+		
+		//JavaBean集合属性
+		for(int i=0; i<propsJavaBean_name[0].length; i++)
+		{
+			src.put("0.javaBean2Array."+i+".id", propsJavaBean_id[0][i]);
+			src.put("0.javaBean2List."+i+".id", propsJavaBean_id[0][i]);
+			src.put("0.javaBean2Set."+i+".id", propsJavaBean_id[0][i]);
+			src.put("0.javaBean2Array."+i+".name", propsJavaBean_name[0][i]);
+			src.put("0.javaBean2List."+i+".name", propsJavaBean_name[0][i]);
+			src.put("0.javaBean2Set."+i+".name", propsJavaBean_name[0][i]);
+		}
+		
+		src.put("1.javaBean2Array.id", propsJavaBean_id[1]);
+		src.put("1.javaBean2List.id", propsJavaBean_id[1]);
+		src.put("1.javaBean2Set.id", propsJavaBean_id[1]);
+		src.put("1.javaBean2Array.name", propsJavaBean_name[1]);
+		src.put("1.javaBean2List.name", propsJavaBean_name[1]);
+		src.put("1.javaBean2Set.name", propsJavaBean_name[1]);
+		
+		src.put("2.javaBean2Array.id", propsJavaBean_id[2]);
+		src.put("2.javaBean2List.id", propsJavaBean_id[2]);
+		src.put("2.javaBean2Set.id", propsJavaBean_id[2]);
+		src.put("2.javaBean2Array.name", propsJavaBean_name[2]);
+		src.put("2.javaBean2List.name", propsJavaBean_name[2]);
+		src.put("2.javaBean2Set.name", propsJavaBean_name[2]);
+		
+		ComplexJavaBean[] re=(ComplexJavaBean[])converter.convert(src, ComplexJavaBean[].class);
+		
+		Assert.assertEquals(ids.length, re.length);
+		
+		for(int i=0; i<ids.length; i++)
+		{
+			ComplexJavaBean rei=re[i];
+			
+			Assert.assertEquals(ids[i], rei.getId()+"");
+			Assert.assertEquals(names[i], rei.getName());
+			
+			//简单集合属性
+			Integer[] simplePropsArray=stringArrayToIntArray(propsSimple[i]);
+			Set<Integer> simplePropsSet=new HashSet<Integer>();
+			for(Integer it : simplePropsArray)
+				simplePropsSet.add(it);
+			
+			Integer[] simplePropArrayi=rei.getSimpleArray();
+			Integer[] simplePropListi=new Integer[simplePropsArray.length];
+			rei.getSimpleList().toArray(simplePropListi);
+			Set<?> simplePropSeti=rei.getSimpleSet();
+			
+			Assert.assertTrue(Arrays.equals(simplePropsArray, simplePropArrayi));
+			Assert.assertTrue(Arrays.equals(simplePropsArray, simplePropListi));
+			Assert.assertEquals(simplePropsSet, simplePropSeti);
+			
+			//JavaBean集合属性
+			JavaBean2[] javaBeanPropsArray=new JavaBean2[propsJavaBean_id[i].length];
+			for(int ji=0; ji<javaBeanPropsArray.length; ji++)
+			{
+				javaBeanPropsArray[i]=new JavaBean2();
+				javaBeanPropsArray[i].setId(Integer.parseInt(propsJavaBean_id[i][ji]));
+				javaBeanPropsArray[i].setName(propsJavaBean_name[i][ji]);
+			}
+			Set<JavaBean2> javaBeanPropsSet=new HashSet<JavaBean2>();
+			for(JavaBean2 jb : javaBeanPropsArray)
+			{
+				javaBeanPropsSet.add(jb);
+			}
+			
+			JavaBean2[] javaBeanPropsArrayi=rei.getJavaBean2Array();
+			JavaBean2[] javaBeanPropsListi=new JavaBean2[javaBeanPropsArray.length];
+			rei.getJavaBean2List().toArray(javaBeanPropsListi);
+			Set<?> javaBeanPropsSeti=rei.getJavaBean2Set();
+			
+			Assert.assertTrue(Arrays.equals(javaBeanPropsArray, javaBeanPropsArrayi));
+			Assert.assertTrue(Arrays.equals(javaBeanPropsArray, javaBeanPropsListi));
+			Assert.assertEquals(javaBeanPropsSet, javaBeanPropsSeti);
+		}
+	}
+	
+	@Test
 	public void convertMap_toGeneric_JavaBeanList() throws Exception
 	{
 		convertMap_toJavaBeanList(List.class);
@@ -829,6 +953,18 @@ public class TestWebGenericConverter
 			Assert.assertEquals(births[idx], new SimpleDateFormat("yyyy-MM-dd").format(jb.getBirth()));
 		}
 	}
+	
+	protected Integer[] stringArrayToIntArray(String[] strs)
+	{
+		Integer[] re=new Integer[strs.length];
+		
+		for(int i=0; i<re.length; i++)
+		{
+			re[i]=Integer.parseInt(strs[i]);
+		}
+		
+		return re;
+	}
 
 	public static class JavaBean implements Comparable<JavaBean>
 	{
@@ -904,6 +1040,7 @@ public class TestWebGenericConverter
 		{
 			this.javaBean = javaBean;
 		}
+		
 		//@Override
 		public int compareTo(JavaBean2 o)
 		{
@@ -915,6 +1052,31 @@ public class TestWebGenericConverter
 				re=this.name.compareTo(o.name);
 			
 			return re;
+		}
+		
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			JavaBean2 other = (JavaBean2) obj;
+			if (id != other.id)
+				return false;
+			if (javaBean == null) {
+				if (other.javaBean != null)
+					return false;
+			} else if (!javaBean.equals(other.javaBean))
+				return false;
+			if (name == null) {
+				if (other.name != null)
+					return false;
+			} else if (!name.equals(other.name))
+				return false;
+			return true;
 		}
 		
 		//@Override

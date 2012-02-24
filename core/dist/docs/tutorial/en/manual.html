@@ -891,13 +891,13 @@ public void handleException(Execution execution)
 				<a name="tag_arg_generic"></a>
 				The <span class="glossary">Invoke</span> method argument can be any type, but the framework default can only convert request parameters to these types:
 				primitive and their wrapper types, BigInteger and BigDecimal, java.util.Date and its sub types, JavaBean, and array type of the above;
-				or generic types, such as :<br>
+				or their collection types, Map types, such as :<br>
 <pre class="code-java">
 void genericMethod(List&lt;Integer&gt; list);
 
-void genericMethod(List&lt;JavaBeanClass&gt; list, Set&lt;JavaBeanClass&gt; set);
+void genericMethod(List&lt;JavaBeanClass&gt; list, Set&lt;JavaBeanClass&gt; set, Map&lt;String, JavaBeanClass&gt; map);
 
-void genericMethod(List&lt;T&gt; list, Set&lt;G&gt; set);
+void genericMethod(List&lt;T&gt; list, Set&lt;G&gt; set, Map&lt;String, T&gt; map);
 
 void genericMethod(T t, G g);
 

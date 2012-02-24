@@ -816,14 +816,14 @@ public void handleException(Execution execution)
 			</p>
 			<p>
 				<a name="tag_arg_generic"></a>
-				<span class="glossary">调用方法</span>的参数可以是任意类型，不过框架默认只能自动将请求参数转换为下面这些具体类型：基本类型及其包装类型、BigInteger和BigDecimal类型、java.util.Date及其子类型、JavaBean，以及它们的数组类型；
-				或者是泛型类型，比如：<br>
+				<span class="glossary">调用方法</span>的参数可以是任意类型，不过框架默认只能自动将请求参数转换为下面这些具体类型：基本类型及其包装类型、BigInteger和BigDecimal类型、java.util.Date及其子类型、JavaBean，以及它们的数组类型、
+				集合类型、Map类型，比如：<br>
 <pre class="code-java">
 void genericMethod(List&lt;Integer&gt; list);
 
-void genericMethod(List&lt;JavaBeanClass&gt; list, Set&lt;JavaBeanClass&gt; set);
+void genericMethod(List&lt;JavaBeanClass&gt; list, Set&lt;JavaBeanClass&gt; set, Map&lt;String, JavaBeanClass&gt; map);
 
-void genericMethod(List&lt;T&gt; list, Set&lt;G&gt; set);
+void genericMethod(List&lt;T&gt; list, Set&lt;G&gt; set, Map&lt;String, T&gt; map);
 
 void genericMethod(T t, G g);
 

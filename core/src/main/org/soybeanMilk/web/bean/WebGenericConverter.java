@@ -83,15 +83,19 @@ import org.soybeanMilk.core.bean.PropertyInfo;
  * "id"                             -&gt;  ["1","2","3"]
  * "name"                           -&gt;  ["jack","tom","cherry"]
  * "0.listChildren.id"              -&gt;  ["10","11"]
- * "0.listChildren.name"            -&gt;  ["jack10","tom11"]
+ * "0.listChildren.name"            -&gt;  ["jack10","jack11"]
  * "1.setChildren.0.id"             -&gt;  "20"
- * "1.setChildren.0.name"           -&gt;  "jack20"
+ * "1.setChildren.0.name"           -&gt;  "tom20"
  * "1.setChildren.1.id"             -&gt;  "21"
- * "1.setChildren.1.name"           -&gt;  "tom31"
- * "2.setChildren.0.id"             -&gt;  "30"
- * "2.setChildren.0.name"           -&gt;  "jack30"
- * "2.setChildren.1.id"             -&gt;  "31"
- * "2.setChildren.1.name"           -&gt;  "tom31"
+ * "1.setChildren.1.name"           -&gt;  "tom21"
+ * "2.arrayChildren.0.id"           -&gt;  "30"
+ * "2.arrayChildren.0.name"         -&gt;  "cherry30"
+ * "2.arrayChildren.1.id"           -&gt;  "31"
+ * "2.arrayChildren.1.name"         -&gt;  "cherry31"
+ * "2.mapChildren.key0.id"          -&gt;  "30"
+ * "2.mapChildren.key0.name"        -&gt;  "cherry30"
+ * "2.mapChildren.key1.id"          -&gt;  "31"
+ * "2.mapChildren.key1.name"        -&gt;  "cherry31"
  * </pre>
  * 转换为：
  * <pre>
@@ -491,8 +495,26 @@ public class WebGenericConverter extends DefaultGenericConverter
 		Set<String> keys=sourceMap.keySet();
 		for(String key : keys)
 		{
-			Object tk=convert(key, keyClass);
-			Object tv=convert(sourceMap.get(key), valueClass);
+			Object tk=null;
+			Object tv=null;
+			
+			try
+			{
+				tk=convert(key, keyClass);
+			}
+			catch(ConvertException e)
+			{
+				throw new GenericConvertException("convert '"+key+"' in param '"+sourceMap.getFullParamName(key)+"' to Map key class '"+keyClass+"' failed", e);
+			}
+			
+			try
+			{
+				tv=convert(sourceMap.get(key), valueClass);
+			}
+			catch(ConvertException e)
+			{
+				handleParamPropertyMapConvertException(sourceMap, key, e);
+			}
 			
 			result.put(tk, tv);
 		}

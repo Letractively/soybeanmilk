@@ -106,7 +106,7 @@ public class ParamPropertyMap implements Map<String, Object>
 	 * @param paramMap
 	 * @date 2012-2-22
 	 */
-	public void filter(Map<String, Object> paramMap)
+	public void filter(Map<String, ?> paramMap)
 	{
 		String filter= (this.propertyName==null || this.propertyName.length()==0 ? null : this.propertyName+WebConstants.ACCESSOR);
 		

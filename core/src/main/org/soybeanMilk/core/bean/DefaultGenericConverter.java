@@ -163,9 +163,7 @@ public class DefaultGenericConverter implements GenericConverter
 			if(parent == null)
 				break;
 			
-			PropertyInfo propInfo=parentBeanInfo.getSubPropertyInfo(properties[i]);
-			if(propInfo == null)
-				throw new GenericConvertException("can not find property '"+properties[i]+"' in class '"+parentBeanInfo.getType().getName()+"'");
+			PropertyInfo propInfo=getSubPropertyInfoNotNull(parentBeanInfo, properties[i]);
 			
 			parent=getProperty(parent, propInfo, null);
 			parentBeanInfo=propInfo;
@@ -193,21 +191,16 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		for(int i=0, len=properties.length; i<len; i++)
 		{
-			PropertyInfo propInfo=parentBeanInfo.getSubPropertyInfo(properties[i]);
+			PropertyInfo propInfo=getSubPropertyInfoNotNull(parentBeanInfo, properties[i]);
 			
 			if(i == len-1)
-			{
-				if(propInfo == null)
-					throw new GenericConvertException("can not find property '"+properties[i]+"' in class '"+parentBeanInfo.getType().getName()+"'");
-				
 				setProperty(parent, propInfo, value);
-			}
 			else
 			{
 				Object tmp=getProperty(parent, propInfo, null);
 				if(tmp == null)
 				{
-					tmp=instance(propInfo.getType(), -1);
+					tmp=instance(propInfo.getPropType(), -1);
 					setProperty(parent, propInfo, tmp);
 				}
 				
@@ -491,7 +484,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 */
 	protected void setProperty(Object obj, PropertyInfo propertyInfo, Object value)
 	{
-		Type targetType=propertyInfo.getGenericType();
+		Type targetType=propertyInfo.getPropGenericType();
 		if(!SoybeanMilkUtils.isClassType(targetType))
 			targetType=GenericType.getGenericType(targetType, propertyInfo.getOwnerClass());
 		
@@ -531,6 +524,22 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * 获取子属性信息
+	 * @param parent
+	 * @param property
+	 * @return
+	 * @date 2012-2-26
+	 */
+	protected PropertyInfo getSubPropertyInfoNotNull(PropertyInfo parent, String property)
+	{
+		PropertyInfo re=parent.getSubPropertyInfo(property);
+		if(re == null)
+			throw new GenericConvertException("can not find property '"+property+"' in class '"+parent.getPropType().getName()+"'");
+		
+		return re;
 	}
 	
 	/**

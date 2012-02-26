@@ -286,7 +286,7 @@ public class TestWebGenericConverter
 	}
 
 	@Test
-	public void convertMap_toJavaBean_collectionProperty() throws Exception
+	public void convertMap_toJavaBean_collectionProperty_simpleKeyArrayValueMap() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -294,8 +294,11 @@ public class TestWebGenericConverter
 		String[] name=new String[]{"jack"};
 		String[] simpleCollectionProperty=new String[]{"1","3","9"};
 		
-		String[] cmplexCollectionProperty_id=new String[]{"2","5","7"};
-		String[] cmplexCollectionProperty_name=new String[]{"aaa","bbb","ccc"};
+		String[] propsJavaBean2Collection_id=new String[]{"2","5","7"};
+		String[] propsJavaBean2Collection_name=new String[]{"aaa","bbb","ccc"};
+		
+		String[] propsJavaBean2Collection_propsJavaBean_name=new String[]{"1-1", "1-2", "1-3"};
+		String[] propsJavaBean2Collection_propsJavaBean_age=new String[]{"11", "12", "13"};
 		
 		src.put("id", id);
 		src.put("name", name);
@@ -304,19 +307,26 @@ public class TestWebGenericConverter
 		src.put("simpleList", simpleCollectionProperty);
 		src.put("simpleSet", simpleCollectionProperty);
 		
-		src.put("javaBean2Array.id", cmplexCollectionProperty_id);
-		src.put("javaBean2Array.name", cmplexCollectionProperty_name);
+		src.put("javaBean2Array.id", propsJavaBean2Collection_id);
+		src.put("javaBean2Array.name", propsJavaBean2Collection_name);
+		src.put("javaBean2Array.javaBean.name", propsJavaBean2Collection_propsJavaBean_name);
+		src.put("javaBean2Array.javaBean.age", propsJavaBean2Collection_propsJavaBean_age);
 		
-		src.put("javaBean2List.id", cmplexCollectionProperty_id);
-		src.put("javaBean2List.name", cmplexCollectionProperty_name);
+		src.put("javaBean2List.id", propsJavaBean2Collection_id);
+		src.put("javaBean2List.name", propsJavaBean2Collection_name);
+		src.put("javaBean2List.javaBean.name", propsJavaBean2Collection_propsJavaBean_name);
+		src.put("javaBean2List.javaBean.age", propsJavaBean2Collection_propsJavaBean_age);
 		
-		src.put("javaBean2Set.id", cmplexCollectionProperty_id);
-		src.put("javaBean2Set.name", cmplexCollectionProperty_name);
+		src.put("javaBean2Set.id", propsJavaBean2Collection_id);
+		src.put("javaBean2Set.name", propsJavaBean2Collection_name);
+		src.put("javaBean2Set.javaBean.name", propsJavaBean2Collection_propsJavaBean_name);
+		src.put("javaBean2Set.javaBean.age", propsJavaBean2Collection_propsJavaBean_age);
 		
 		ComplexJavaBean dest=(ComplexJavaBean)converter.convert(src, ComplexJavaBean.class);
 		
 		Assert.assertEquals(Integer.parseInt(id[0]), dest.getId());
 		Assert.assertEquals(name[0], dest.getName());
+		
 		{
 			Integer[] p=dest.getSimpleArray();
 			for(int i=0;i<p.length;i++)
@@ -346,8 +356,10 @@ public class TestWebGenericConverter
 			
 			for(int i=0;i<p.length;i++)
 			{
-				Assert.assertEquals(Integer.parseInt(cmplexCollectionProperty_id[i]), p[i].getId());
-				Assert.assertEquals(cmplexCollectionProperty_name[i], p[i].getName());
+				Assert.assertEquals(Integer.parseInt(propsJavaBean2Collection_id[i]), p[i].getId());
+				Assert.assertEquals(propsJavaBean2Collection_name[i], p[i].getName());
+				Assert.assertEquals(propsJavaBean2Collection_propsJavaBean_name[i], p[i].getJavaBean().getName());
+				Assert.assertEquals(propsJavaBean2Collection_propsJavaBean_age[i], p[i].getJavaBean().getAge().toString());
 			}
 		}
 		
@@ -356,8 +368,10 @@ public class TestWebGenericConverter
 			
 			for(int i=0;i<p.size();i++)
 			{
-				Assert.assertEquals(Integer.parseInt(cmplexCollectionProperty_id[i]), p.get(i).getId());
-				Assert.assertEquals(cmplexCollectionProperty_name[i], p.get(i).getName());
+				Assert.assertEquals(Integer.parseInt(propsJavaBean2Collection_id[i]), p.get(i).getId());
+				Assert.assertEquals(propsJavaBean2Collection_name[i], p.get(i).getName());
+				Assert.assertEquals(propsJavaBean2Collection_propsJavaBean_name[i], p.get(i).getJavaBean().getName());
+				Assert.assertEquals(propsJavaBean2Collection_propsJavaBean_age[i], p.get(i).getJavaBean().getAge().toString());
 			}
 		}
 		
@@ -366,10 +380,12 @@ public class TestWebGenericConverter
 			for(JavaBean2 jb : p)
 			{
 				int idx=-1;
-				for(int i=0;i<cmplexCollectionProperty_id.length;i++)
+				for(int i=0;i<propsJavaBean2Collection_id.length;i++)
 				{
-					if(Integer.parseInt(cmplexCollectionProperty_id[i]) ==jb.getId()
-							&& cmplexCollectionProperty_name[i].equals(jb.getName()))
+					if(Integer.parseInt(propsJavaBean2Collection_id[i]) ==jb.getId()
+							&& propsJavaBean2Collection_name[i].equals(jb.getName())
+							&& propsJavaBean2Collection_propsJavaBean_name[i].equals(jb.getJavaBean().getName())
+							&& propsJavaBean2Collection_propsJavaBean_age[i].equals(jb.getJavaBean().getAge().toString()))
 							idx=i;
 				}
 				
@@ -1762,8 +1778,10 @@ public class TestWebGenericConverter
 		}
 		
 		//@Override
-		public String toString() {
-			return "JavaBean2 [id=" + id + ", name=" + name + "]";
+		public String toString()
+		{
+			return "JavaBean2 [id=" + id + ", name=" + name + ", javaBean="
+					+ javaBean + "]";
 		}
 	}
 	

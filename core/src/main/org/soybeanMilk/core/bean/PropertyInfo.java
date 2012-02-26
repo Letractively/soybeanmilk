@@ -40,9 +40,9 @@ public class PropertyInfo
 	private Class<?> ownerClass;
 	
 	/**属性类型*/
-	private Class<?> type;
+	private Class<?> propType;
 	/**属性的泛型类型*/
-	private Type genericType;
+	private Type propGenericType;
 	
 	/**此属性类型的属性信息集，以属性名作为关键字*/
 	private Map<String,PropertyInfo> subPropertyInfos;
@@ -54,26 +54,26 @@ public class PropertyInfo
 	private Method writeMethod;
 	
 	/**此属性名*/
-	private String name;
+	private String propName;
 	
 	protected PropertyInfo(Class<?> propertyType)
 	{
 		this(null, propertyType, null, null, null);
 	}
 	
-	protected PropertyInfo(Class<?> ownerClass, Class<?> type, String name, Method readMethod, Method writeMethod)
+	protected PropertyInfo(Class<?> ownerClass, Class<?> propType, String propName, Method readMethod, Method writeMethod)
 	{
 		super();
 		this.ownerClass=ownerClass;
-		this.type = type;
-		this.name=name;
+		this.propType = propType;
+		this.propName=propName;
 		this.readMethod = readMethod;
 		this.writeMethod = writeMethod;
 		
 		if(writeMethod != null)
-			this.genericType=writeMethod.getGenericParameterTypes()[0];
+			this.propGenericType=writeMethod.getGenericParameterTypes()[0];
 		else
-			this.genericType=type;
+			this.propGenericType=propType;
 	}
 	
 	/**
@@ -90,33 +90,33 @@ public class PropertyInfo
 	}
 	
 	/**
-	 * 获取属性的{@linkplain Class}类型。
+	 * 获取属性的{@linkplain Class}类型
 	 * @return
 	 * @date 2010-12-28
 	 */
-	public Class<?> getType() {
-		return type;
+	public Class<?> getPropType() {
+		return propType;
 	}
 
-	protected void setType(Class<?> type) {
-		this.type = type;
+	protected void setPropType(Class<?> propType) {
+		this.propType = propType;
 	}
 	
 	/**
-	 * 获取属性的类型。它可能包含更多的信息，比如参数化类型。
+	 * 获取属性的类型。它可能包含更多的信息，比如参数化类型
 	 * @return
 	 * @date 2010-12-28
 	 */
-	public Type getGenericType() {
-		return genericType;
+	public Type getPropGenericType() {
+		return propGenericType;
 	}
 
-	protected void setGenericType(Type genericType) {
-		this.genericType = genericType;
+	protected void setPropGenericType(Type propGenericType) {
+		this.propGenericType = propGenericType;
 	}
 
 	/**
-	 * 获取此属性的类信息，以属性名作为关键字。如果没有类信息，则返回<code>null</code>（比如<code>int</code>类型）。
+	 * 获取此属性的类信息，以属性名作为关键字。如果没有类信息，则返回<code>null</code>（比如<code>int</code>类型）
 	 * @return
 	 * @date 2010-12-28
 	 */
@@ -129,7 +129,7 @@ public class PropertyInfo
 	}
 
 	/**
-	 * 获取属性的读方法。
+	 * 获取属性的读方法
 	 * @return
 	 * @date 2010-12-28
 	 */
@@ -142,7 +142,7 @@ public class PropertyInfo
 	}
 
 	/**
-	 * 获取属性的写方法。
+	 * 获取属性的写方法
 	 * @return
 	 * @date 2010-12-28
 	 */
@@ -154,12 +154,17 @@ public class PropertyInfo
 		this.writeMethod = writeMethod;
 	}
 	
-	public String getName() {
-		return name;
+	/**
+	 * 获取属性名称
+	 * @return
+	 * @date 2012-2-26
+	 */
+	public String getPropName() {
+		return propName;
 	}
 
-	protected void setName(String name) {
-		this.name = name;
+	protected void setPropName(String propName) {
+		this.propName = propName;
 	}
 	
 	/**
@@ -172,10 +177,10 @@ public class PropertyInfo
 		if(subPropertyInfos == null)
 			subPropertyInfos=new HashMap<String, PropertyInfo>();
 		
-		if(propertyInfo.getName() == null)
+		if(propertyInfo.getPropName() == null)
 			throw new IllegalArgumentException("the name of this PropertyInfo must not be null.");
 		
-		subPropertyInfos.put(propertyInfo.getName(), propertyInfo);
+		subPropertyInfos.put(propertyInfo.getPropName(), propertyInfo);
 	}
 	
 	/**
@@ -200,8 +205,8 @@ public class PropertyInfo
 	
 	//@Override
 	public String toString() {
-		return "PropertyInfo [name=" + name + ", type=" + type
-				+ ", genericType=" + genericType + "]";
+		return "PropertyInfo [name=" + propName + ", type=" + propType
+				+ ", genericType=" + propGenericType + "]";
 	}
 	
 	/**
@@ -210,7 +215,7 @@ public class PropertyInfo
 	private static ConcurrentHashMap<Class<?>,PropertyInfo> propertyInfoCache = new ConcurrentHashMap<Class<?>, PropertyInfo>();
 	
 	/**
-	 * 获取类的属性信息，一个仅包含<code>propertyType</code>属性（值为参数<code>beanClass</code>）的<code>PropertyInfo</code>对象将被返回，用作顶层对象。
+	 * 获取类的属性信息，一个仅包含<code>propertyType</code>属性（值为参数<code>beanClass</code>）的<code>PropertyInfo</code>对象将被返回，用作顶层对象
 	 * @param beanClass
 	 * @return
 	 * @date 2010-12-28
@@ -253,13 +258,13 @@ public class PropertyInfo
 		
 		PropertyInfo beanInfo=new PropertyInfo(beanClass);
 		
-		localExists.put(beanInfo.getType(), beanInfo);
+		localExists.put(beanInfo.getPropType(), beanInfo);
 		
 		PropertyDescriptor[] pds=null;
 		
 		try
 		{
-			pds=Introspector.getBeanInfo(beanInfo.getType()).getPropertyDescriptors();
+			pds=Introspector.getBeanInfo(beanInfo.getPropType()).getPropertyDescriptors();
 		}
 		catch(IntrospectionException e)
 		{

@@ -246,14 +246,14 @@ public class WebGenericConverter extends DefaultGenericConverter
 				if(beanInfo.getSubPropertyInfo(property)==null)
 				{
 					if(!sourceMap.isRoot())
-						throw new GenericConvertException("can not find property '"+property+"' in class '"+beanInfo.getType().getName()+"'");
+						throw new GenericConvertException("can not find property '"+property+"' in class '"+beanInfo.getPropType().getName()+"'");
 					else
 						continue;
 				}
 				
 				//延迟初始化
 				if(result == null)
-					result = instance(beanInfo.getType(), -1);
+					result = instance(beanInfo.getPropType(), -1);
 				
 				try
 				{
@@ -359,13 +359,15 @@ public class WebGenericConverter extends DefaultGenericConverter
 		@SuppressWarnings("unchecked")
 		List<Object> result=(List<Object>)instance(listClass, -1);
 		
+		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(elementClass);
+		
 		int arrayValueLen=-1;
 		Set<String> propertyKeyes=sourceMap.keySet();
 		for(String property : propertyKeyes)
 		{
 			Object value=sourceMap.get(property);
 			
-			//优先处理索引属性
+			//需要优先处理索引属性
 			if(isIndexOfProperty(property))
 			{
 				int idx=-1;
@@ -390,9 +392,11 @@ public class WebGenericConverter extends DefaultGenericConverter
 					Set<String> subPropKeys=subPropMap.keySet();
 					for(String subProp : subPropKeys)
 					{
+						PropertyInfo propInfo=getSubPropertyInfoNotNull(beanInfo, subProp);
+						
 						try
 						{
-							setProperty(element, subProp, subPropMap.get(subProp));
+							setProperty(element, propInfo, subPropMap.get(subProp));
 						}
 						catch(ConvertException e)
 						{
@@ -418,7 +422,21 @@ public class WebGenericConverter extends DefaultGenericConverter
 			{
 				if(value == null)
 					continue;
-				else if(SoybeanMilkUtils.isArray(value.getClass()))
+				
+				PropertyInfo propInfo=null;
+				if(sourceMap.isRoot())
+				{
+					propInfo=beanInfo.getSubPropertyInfo(property);
+					
+					//忽略无关属性
+					if(propInfo == null)
+						continue;
+				}
+				else
+					propInfo=getSubPropertyInfoNotNull(beanInfo, property);
+				
+				//当前属性值是数组
+				if(SoybeanMilkUtils.isArray(value.getClass()))
 				{
 					int len=Array.getLength(value);
 					if(arrayValueLen == -1)
@@ -440,7 +458,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 						
 						try
 						{
-							setProperty(element, property, Array.get(value, i));
+							setProperty(element, propInfo, Array.get(value, i));
 						}
 						catch(ConvertException e)
 						{
@@ -448,6 +466,39 @@ public class WebGenericConverter extends DefaultGenericConverter
 						}
 					}
 				}
+				//当前属性值是属性映射表，则要将当前属性值转换为集合，并依次赋值
+				else if(value instanceof ParamPropertyMap)
+				{
+					ParamPropertyMap pppm=(ParamPropertyMap)value;
+					
+					List<?> propList=convertParamPropertyMapToList(pppm, List.class, propInfo.getPropType());
+					
+					if(propList != null)
+					{
+						while(result.size() < propList.size())
+							result.add(null);
+						
+						for(int i=0; i<propList.size(); i++)
+						{
+							Object element=result.get(i);
+							if(element ==null)
+							{
+								element=instance(elementClass, -1);
+								result.set(i, element);
+							}
+							
+							try
+							{
+								setProperty(element, propInfo, propList.get(i));
+							}
+							catch(ConvertException e)
+							{
+								handleParamPropertyMapConvertException(sourceMap, property, e);
+							}
+						}
+					}
+				}
+				//属性值是其他对象
 				else
 				{
 					while(result.size() < 1)
@@ -462,7 +513,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 					
 					try
 					{
-						setProperty(element, property, value);
+						setProperty(element, propInfo, value);
 					}
 					catch(ConvertException e)
 					{

@@ -450,7 +450,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	 * @param targetType 目标类型
 	 * @return
 	 */
-	protected Object convertParameterMap(Map<String, Object> paramMap, String paramKeyFilter, Type targetType)
+	protected Object convertParameterMap(Map<String, ?> paramMap, String paramKeyFilter, Type targetType)
 	{
 		Object result=null;
 		

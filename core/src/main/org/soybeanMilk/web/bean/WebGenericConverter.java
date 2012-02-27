@@ -138,7 +138,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			
 			result=convert(sourceObj, targetType);
 		}
-		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, ParamValue.class))
+		else if(sourceObj instanceof ParamValue)
 		{
 			ParamValue pv=(ParamValue)sourceObj;
 			
@@ -151,11 +151,11 @@ public class WebGenericConverter extends DefaultGenericConverter
 				handleParamValueConvertException(pv, e);
 			}
 		}
-		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, ParamPropertyMap.class))
+		else if(sourceObj instanceof ParamPropertyMap)
 		{
 			result=convertParamPropertyMap((ParamPropertyMap)sourceObj, targetType);
 		}
-		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, Map.class))
+		else if(sourceObj instanceof Map)
 		{
 			ParamPropertyMap ppm=new ParamPropertyMap();
 			ppm.filter((Map<String, Object>)sourceObj);

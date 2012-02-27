@@ -20,6 +20,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -364,6 +365,13 @@ public class GenericType implements Type
 		}
 	}
 	
+	@Override
+	public String toString() {
+		return "GenericType [actualClass=" + actualClass + ", paramClasses="
+				+ Arrays.toString(paramClasses) + ", componentClass="
+				+ componentClass + "]";
+	}
+
 	private static ConcurrentHashMap<GenericTypeKey, GenericType> genericTypeCache=new ConcurrentHashMap<GenericTypeKey, GenericType>();
 	
 	/**

@@ -55,4 +55,10 @@ public class ParamValue
 	public void setValue(Object value) {
 		this.value = value;
 	}
+
+	@Override
+	public String toString()
+	{
+		return "ParamValue [paramName=" + paramName + ", value=" + value + "]";
+	}
 }

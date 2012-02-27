@@ -237,4 +237,10 @@ public class ParamPropertyMap implements Map<String, Object>
 	{
 		return this.internalMap.values();
 	}
+
+	@Override
+	public String toString() {
+		return "ParamPropertyMap [paramName=" + getFullParamName("")
+				+ ", values=" + internalMap + "]";
+	}
 }

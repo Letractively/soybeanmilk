@@ -178,9 +178,6 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 */
 	protected Object convertParamPropertyMap(ParamPropertyMap sourceMap, Type targetType)
 	{
-		if(log.isDebugEnabled())
-			log.debug("start converting '"+SoybeanMilkUtils.toString(sourceMap)+"' to type '"+SoybeanMilkUtils.toString(targetType)+"'");
-		
 		Object result = null;
 		
 		//空的映射表作为null处理

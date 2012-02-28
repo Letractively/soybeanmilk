@@ -115,7 +115,7 @@ public class DefaultGenericConverter implements GenericConverter
 	public Object convert(Object sourceObj, Type targetType)
 	{
 		if(log.isDebugEnabled())
-			log.debug("start converting '"+sourceObj+"' of type '"+(sourceObj==null ? null : sourceObj.getClass())+"' to type '"+targetType+"'");
+			log.debug("start converting '"+SoybeanMilkUtils.toString(sourceObj)+"' to type '"+SoybeanMilkUtils.toString(targetType)+"'");
 		
 		if(targetType == null)
 			return sourceObj;
@@ -125,7 +125,7 @@ public class DefaultGenericConverter implements GenericConverter
 				|| (sourceObj instanceof String && ((String)sourceObj).length()==0))
 		{
 			if(SoybeanMilkUtils.isPrimitive(targetType))
-				throw new GenericConvertException("can not convert '"+sourceObj+"' to primitive type '"+targetType+"'");
+				throw new GenericConvertException("can not convert '"+SoybeanMilkUtils.toString(sourceObj)+"' to primitive type '"+targetType+"'");
 			else
 				return null;
 		}
@@ -150,7 +150,7 @@ public class DefaultGenericConverter implements GenericConverter
 			throw new IllegalArgumentException("[propertyExpression] must not be empty");
 		
 		if(log.isDebugEnabled())
-			log.debug("start getting  property '"+propertyExpression+"' from '"+srcObj+"'");
+			log.debug("start getting  property '"+propertyExpression+"' from '"+SoybeanMilkUtils.toString(srcObj)+"'");
 		
 		Object result=null;
 		
@@ -183,7 +183,7 @@ public class DefaultGenericConverter implements GenericConverter
 			throw new IllegalArgumentException("[propertyExpression] must not be empty");
 		
 		if(log.isDebugEnabled())
-			log.debug("start setting '"+value+"' to '"+srcObj+"' property '"+propertyExpression+"'");
+			log.debug("start setting '"+SoybeanMilkUtils.toString(value)+"' to '"+SoybeanMilkUtils.toString(srcObj)+"' property '"+propertyExpression+"'");
 		
 		Object parent=srcObj;
 		PropertyInfo parentBeanInfo=PropertyInfo.getPropertyInfo(srcObj.getClass());
@@ -219,7 +219,7 @@ public class DefaultGenericConverter implements GenericConverter
 		getConverters().put(generateConverterKey(sourceType, targetType), converter);
 		
 		if(log.isDebugEnabled())
-			log.debug("add a support Converter '"+converter.getClass().getName()+"' for converting '"+sourceType+"' to '"+targetType+"'");
+			log.debug("add a support Converter '"+SoybeanMilkUtils.toString(converter.getClass())+"' for converting '"+SoybeanMilkUtils.toString(sourceType)+"' to '"+SoybeanMilkUtils.toString(targetType)+"'");
 	}
 	
 	//@Override
@@ -288,7 +288,7 @@ public class DefaultGenericConverter implements GenericConverter
 			canConvert=false;
 		
 		if(!canConvert)
-			throw new GenericConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+targetType+"'");
+			throw new GenericConvertException("can not find Converter for converting '"+SoybeanMilkUtils.toString(sourceObj.getClass())+"' to '"+SoybeanMilkUtils.toString(targetType)+"'");
 		
 		return re;
 	}
@@ -373,7 +373,7 @@ public class DefaultGenericConverter implements GenericConverter
 			canConvert=false;
 		
 		if(!canConvert)
-			throw new GenericConvertException("can not find Converter for converting '"+sourceObj.getClass().getName()+"' to '"+genericType.getType()+"'");
+			throw new GenericConvertException("can not find Converter for converting '"+SoybeanMilkUtils.toString(sourceObj.getClass())+"' to '"+SoybeanMilkUtils.toString(genericType)+"'");
 		
 		return re;
 	}
@@ -537,7 +537,7 @@ public class DefaultGenericConverter implements GenericConverter
 	{
 		PropertyInfo re=parent.getSubPropertyInfo(property);
 		if(re == null)
-			throw new GenericConvertException("can not find property '"+property+"' in class '"+parent.getPropType().getName()+"'");
+			throw new GenericConvertException("can not find property '"+property+"' in class '"+SoybeanMilkUtils.toString(parent.getPropType())+"'");
 		
 		return re;
 	}
@@ -582,7 +582,7 @@ public class DefaultGenericConverter implements GenericConverter
 			}
 			catch(Exception e)
 			{
-				throw new GenericConvertException("exception occur while creating instance of class '"+objectType+"' ",e);
+				throw new GenericConvertException("exception occur while creating instance of type '"+SoybeanMilkUtils.toString(objectType)+"' ",e);
 			}
 		}
 	}

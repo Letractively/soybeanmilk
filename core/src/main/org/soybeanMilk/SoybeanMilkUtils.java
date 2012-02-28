@@ -14,6 +14,7 @@
 
 package org.soybeanMilk;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
@@ -215,6 +216,48 @@ public class SoybeanMilkUtils
             return Character.class;
         else
             return type;
+	}
+	
+	/**
+	 * 获取对象的字符串表述
+	 * @param obj
+	 * @return
+	 * @date 2012-2-28
+	 */
+	public static String toString(Object obj)
+	{
+		if(obj == null)
+			return null;
+		
+		if(obj instanceof Class<?>)
+		{
+			return ((Class<?>)obj).getName();
+		}
+		else if(obj instanceof String)
+		{
+			return "\""+obj+"\"";
+		}
+		else if(obj.getClass().isArray())
+		{
+			int len=Array.getLength(obj);
+			
+			StringBuilder sb=new StringBuilder();
+			sb.append('[');
+			
+			for(int i=0; i<len; i++)
+			{
+				sb.append(toString(Array.get(obj, i)));
+				
+				if(i != len-1)
+					sb.append(", ");
+			}
+			
+			sb.append(']');
+			
+			return sb.toString();
+		}
+		else
+			return obj.toString();
 	}
 	
 	/**

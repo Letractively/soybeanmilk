@@ -550,7 +550,7 @@ public class TestWebGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue( re.getMessage().startsWith("converting 'Map<String,?>' to") );
+		Assert.assertTrue( re.getMessage().endsWith("is not supported") );
 	}
 	
 	@Test
@@ -1494,16 +1494,19 @@ public class TestWebGenericConverter
 		String[] property={"12", "13"};
 		
 		src.put("id", id);
-		src.put("property", property);
+		src.put("list", property);
+		src.put("array", property);
+		src.put("obj", property[0]);
 		
 		GenericJavaBeanSub dest=(GenericJavaBeanSub)converter.convert(src, GenericJavaBeanSub.class);
 		
 		Assert.assertEquals(new Integer(id[0]), dest.getId());
-		
+		Assert.assertEquals(new Double(property[0]), dest.getObj());
 		for(int i=0; i<property.length; i++)
 		{
-			Assert.assertEquals(new Double(property[i]), dest.getProperty().get(i));
-			Assert.assertEquals(new Double(property[i]), dest.getProperty().get(i));
+			Assert.assertEquals(new Double(property[i]), dest.getList().get(i));
+			Assert.assertEquals(new Double(property[i]), dest.getArray()[i]);
+			
 		}
 	}
 	
@@ -1903,7 +1906,9 @@ public class TestWebGenericConverter
 	public static class GenericJavaBean<T>
 	{
 		private Integer id;
-		private List<T> property;
+		private List<T> list;
+		private T[] array;
+		private T obj;
 		
 		public Integer getId() {
 			return id;
@@ -1911,11 +1916,23 @@ public class TestWebGenericConverter
 		public void setId(Integer id) {
 			this.id = id;
 		}
-		public List<T> getProperty() {
-			return property;
+		public List<T> getList() {
+			return list;
 		}
-		public void setProperty(List<T> property) {
-			this.property = property;
+		public void setList(List<T> list) {
+			this.list = list;
+		}
+		public T[] getArray() {
+			return array;
+		}
+		public void setArray(T[] array) {
+			this.array = array;
+		}
+		public T getObj() {
+			return obj;
+		}
+		public void setObj(T obj) {
+			this.obj = obj;
 		}
 	}
 	

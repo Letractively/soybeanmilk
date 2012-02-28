@@ -132,7 +132,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 				&& !SoybeanMilkUtils.isArray((Class<?>)targetType))
 		{
 			if(log.isDebugEnabled())
-				log.debug("'"+sourceObj+"' is an array while the target not, so it's first element will be used for converting");
+				log.debug("'"+SoybeanMilkUtils.toString(sourceObj)+"' is an array while the target not, so it's first element will be used for converting");
 			
 			sourceObj=Array.get(sourceObj, 0);
 			
@@ -179,7 +179,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	protected Object convertParamPropertyMap(ParamPropertyMap sourceMap, Type targetType)
 	{
 		if(log.isDebugEnabled())
-			log.debug("start converting Map '"+sourceMap+"' to type '"+targetType+"'");
+			log.debug("start converting '"+SoybeanMilkUtils.toString(sourceMap)+"' to type '"+SoybeanMilkUtils.toString(targetType)+"'");
 		
 		Object result = null;
 		
@@ -206,7 +206,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 				result=convertParamPropertyMapToGenericType(sourceMap, GenericType.getGenericType(targetType, null));
 			}
 			else
-				throw new GenericConvertException("converting '"+sourceMap+"' to '"+targetType+"' is not supported");
+				throw new GenericConvertException("converting '"+SoybeanMilkUtils.toString(sourceMap)+"' to type '"+SoybeanMilkUtils.toString(targetType)+"' is not supported");
 		}
 		
 		return result;
@@ -238,7 +238,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(targetClass);
 			
 			if(!beanInfo.hasSubPropertyInfo())
-				throw new GenericConvertException("the target javaBean Class '"+targetClass+"' is not valid, it has no javaBean property");
+				throw new GenericConvertException("the target javaBean Class '"+SoybeanMilkUtils.toString(targetClass)+"' is not valid, it has no javaBean property");
 			
 			Set<String> propertyKeys=sourceMap.keySet();
 			for(String property : propertyKeys)
@@ -246,7 +246,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 				if(beanInfo.getSubPropertyInfo(property)==null)
 				{
 					if(!sourceMap.isRoot())
-						throw new GenericConvertException("can not find property '"+property+"' in class '"+beanInfo.getPropType().getName()+"'");
+						throw new GenericConvertException("can not find property '"+property+"' in class '"+SoybeanMilkUtils.toString(beanInfo.getPropType())+"'");
 					else
 						continue;
 				}
@@ -330,7 +330,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			canConvert=false;
 		
 		if(!canConvert)
-			throw new GenericConvertException("converting 'Map<String,?>' to '"+genericType.getType()+"' is not supported");
+			throw new GenericConvertException("converting '"+SoybeanMilkUtils.toString(sourceMap)+"' to type '"+SoybeanMilkUtils.toString(genericType)+"' is not supported");
 		
 		return result;
 	}
@@ -555,7 +555,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			}
 			catch(ConvertException e)
 			{
-				throw new GenericConvertException("convert '"+key+"' in param '"+sourceMap.getFullParamName(key)+"' to Map key class '"+keyClass+"' failed", e);
+				throw new GenericConvertException("convert '"+key+"' in param '"+sourceMap.getFullParamName(key)+"' to Map key class '"+SoybeanMilkUtils.toString(keyClass)+"' failed", e);
 			}
 			
 			try

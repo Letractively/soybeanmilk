@@ -358,7 +358,6 @@ public class WebGenericConverter extends DefaultGenericConverter
 		
 		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(elementClass);
 		
-		int arrayValueLen=-1;
 		Set<String> propertyKeyes=sourceMap.keySet();
 		for(String property : propertyKeyes)
 		{
@@ -436,15 +435,11 @@ public class WebGenericConverter extends DefaultGenericConverter
 				if(SoybeanMilkUtils.isArray(value.getClass()))
 				{
 					int len=Array.getLength(value);
-					if(arrayValueLen == -1)
-						arrayValueLen=len;
-					else if(len != arrayValueLen)
-						throw new GenericConvertException("all the array elements in the source Map must be the same length for converting them to JavaBean List");
 					
 					while(result.size() < len)
 						result.add(null);
 					
-					for(int i=0; i<arrayValueLen; i++)
+					for(int i=0; i<len; i++)
 					{
 						Object element=result.get(i);
 						if(element ==null)

@@ -810,7 +810,7 @@ public class TestWebGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue(( re.getMessage().startsWith("convert 'invalidKey' in param '0.javaBean2Map.invalidKey' to Map key class") ));
+		Assert.assertTrue(( re.getMessage().startsWith("convert 'invalidKey' in param name '0.javaBean2Map.invalidKey' to Map key of type") ));
 	}
 	
 	@Test

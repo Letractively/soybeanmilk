@@ -240,13 +240,17 @@ public class WebGenericConverter extends DefaultGenericConverter
 			Set<String> propertyKeys=sourceMap.keySet();
 			for(String property : propertyKeys)
 			{
-				if(beanInfo.getSubPropertyInfo(property)==null)
+				PropertyInfo propInfo=null;
+				if(sourceMap.isRoot())
 				{
-					if(!sourceMap.isRoot())
-						throw new GenericConvertException("can not find property '"+property+"' in class '"+SoybeanMilkUtils.toString(beanInfo.getPropType())+"'");
-					else
+					propInfo=beanInfo.getSubPropertyInfo(property);
+					
+					//忽略无关属性
+					if(propInfo == null)
 						continue;
 				}
+				else
+					propInfo=getSubPropertyInfoNotNull(beanInfo, property);
 				
 				//延迟初始化
 				if(result == null)
@@ -254,7 +258,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 				
 				try
 				{
-					setProperty(result, property, sourceMap.get(property));
+					setProperty(result, propInfo, sourceMap.get(property));
 				}
 				catch(ConvertException e)
 				{
@@ -547,7 +551,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			}
 			catch(ConvertException e)
 			{
-				throw new GenericConvertException("convert '"+key+"' in param '"+sourceMap.getFullParamName(key)+"' to Map key class '"+SoybeanMilkUtils.toString(keyClass)+"' failed", e);
+				throw new GenericConvertException("convert '"+key+"' in param name '"+sourceMap.getFullParamName(key)+"' to Map key of type '"+SoybeanMilkUtils.toString(keyClass)+"' failed", e);
 			}
 			
 			try

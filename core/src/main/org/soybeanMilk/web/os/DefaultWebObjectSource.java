@@ -113,7 +113,7 @@ import org.soybeanMilk.web.bean.ParamValue;
  *  	</li>
  *  	<li>
  *  		<span class="tagValue">response</span> <br/>
- *  		回应HttpServletResponse对象。如果目标类型不是“<span class="var">HttpServletResponse</span>”，
+ *  		响应HttpServletResponse对象。如果目标类型不是“<span class="var">HttpServletResponse</span>”，
  *  		那么你需要为此对象源的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletResponse</span>”到目标类型辅助{@linkplain Converter 转换器}。
  *  	</li>
  *  	<li>
@@ -180,7 +180,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	}
 
 	/**
-	 * 设置当前{@linkplain HttpServletResponse 回应}对象
+	 * 设置当前{@linkplain HttpServletResponse 响应}对象
 	 * @param response
 	 * @date 2011-12-11
 	 */

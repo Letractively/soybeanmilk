@@ -30,7 +30,7 @@ public interface WebObjectSourceFactory
 	/**
 	 * 为请求创建WEB对象源
 	 * @param request 当前{@linkplain HttpServletRequest 请求}对象
-	 * @param response 当前{@linkplain HttpServletResponse 回应}对象
+	 * @param response 当前{@linkplain HttpServletResponse 响应}对象
 	 * @param application 当前{@linkplain ServletContext Servlet语境}对象
 	 * @return
 	 */

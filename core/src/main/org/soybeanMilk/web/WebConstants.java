@@ -95,7 +95,7 @@ public class WebConstants extends Constants
 		public static final String APPLICATION="application";
 		
 		/**
-		 * 回应，它表示HttpServletResponse对象
+		 * 响应，它表示HttpServletResponse对象
 		 */
 		public static final String RESPONSE="response";
 		

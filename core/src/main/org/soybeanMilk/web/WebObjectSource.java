@@ -34,7 +34,7 @@ public interface WebObjectSource extends ObjectSource
 	HttpServletRequest getRequest();
 	
 	/**
-	 * 获取当前{@linkplain HttpServletResponse 回应}对象
+	 * 获取当前{@linkplain HttpServletResponse 响应}对象
 	 * @return
 	 * @date 2011-12-11
 	 */

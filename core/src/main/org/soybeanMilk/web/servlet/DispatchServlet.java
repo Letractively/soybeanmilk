@@ -125,6 +125,9 @@ public class DispatchServlet extends HttpServlet
 	//@Override
 	public void init() throws ServletException
 	{
+		if(log.isInfoEnabled())
+			log.info("start  initializing SoybeanMilk web context");
+		
 		super.init();
 		
 		//编码
@@ -135,6 +138,12 @@ public class DispatchServlet extends HttpServlet
 		
 		//执行器
 		setWebExecutor(getInitWebExecutor());
+		
+		if(log.isInfoEnabled())
+		{
+			int totalExecutables= getWebExecutor().getWebConfiguration().getExecutables() == null ? 0 : getWebExecutor().getWebConfiguration().getExecutables().size();
+			log.info(totalExecutables+" executables has been initialized");
+		}
 		
 		//WEB对象源工厂
 		WebObjectSourceFactory wsf=getInitWebObjectSourceFactory();
@@ -158,6 +167,9 @@ public class DispatchServlet extends HttpServlet
 			setAppExecutorKey(null);
 		if(aek != null)
 			getServletContext().setAttribute(aek, getWebExecutor());
+		
+		if(log.isInfoEnabled())
+			log.info("finish initializing SoybeanMilk web context");
 	}
 	
 	/**
@@ -290,6 +302,8 @@ public class DispatchServlet extends HttpServlet
 	 */
 	protected WebExecutor getInitWebExecutor() throws ServletException
 	{
+		DefaultWebExecutor we=null;
+		
 		DefaultResolverFactory rf=new DefaultResolverFactory();
 		rf.setExternalResolverFactory(getInitExternalResolverFactory());
 		
@@ -301,7 +315,9 @@ public class DispatchServlet extends HttpServlet
 		
 		parser.parse(configFileName);
 		
-		return new DefaultWebExecutor(webConfiguration);
+		we=new DefaultWebExecutor(webConfiguration);
+		
+		return we;
 	}
 	
 	/**

@@ -136,7 +136,7 @@ public class ParamPropertyMap implements Map<String, Object>
 			
 			if(doAssemble)
 			{
-				String[] propKeys=SoybeanMilkUtils.splitPropertyExpression(propExp);
+				String[] propKeys=SoybeanMilkUtils.splitAccessExpression(propExp);
 				
 				ParamPropertyMap parent=this;
 				

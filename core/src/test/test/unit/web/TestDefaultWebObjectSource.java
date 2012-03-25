@@ -12,7 +12,6 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.web.WebObjectSource;
@@ -140,7 +139,7 @@ public class TestDefaultWebObjectSource
 	@Test
 	public void convertServletObjectThrow()
 	{
-		String exceptionPrefix="no Converter defined for converting";
+		String exceptionPrefix="can not find Converter for converting";
 		
 		{
 			Exception re=null;
@@ -367,28 +366,21 @@ public class TestDefaultWebObjectSource
 		
 		{
 			webObjectSource.set("value", value);
-			Assert.assertEquals(request.getAttribute("value"), value);
+			Assert.assertEquals(value, request.getAttribute("value"));
 			
 			Object dest=webObjectSource.get("request.value", String.class);
 			Assert.assertEquals(value, dest);
 		}
 		{
-			webObjectSource.set("request", value);
-			Assert.assertEquals(request.getAttribute("request"), value);
-			
-			Object dest=webObjectSource.get("request.request", String.class);
-			Assert.assertEquals(value, dest);
-		}
-		{
 			webObjectSource.set("request.value", value);
-			Assert.assertEquals(request.getAttribute("value"), value);
+			Assert.assertEquals(value, request.getAttribute("value"));
 			
 			Object dest=webObjectSource.get("request.value", String.class);
 			Assert.assertEquals(value, dest);
 		}
 		{
 			webObjectSource.set("request.my.value", value);
-			Assert.assertEquals(request.getAttribute("my.value"), value);
+			Assert.assertEquals(value, request.getAttribute("my.value"));
 			
 			Object dest=webObjectSource.get("request.my.value", String.class);
 			Assert.assertEquals(value, dest);
@@ -518,38 +510,22 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetForUnknownScope()
+	public void setAndGetForUnknownScopeKey()
 	{
 		String value="12345";
 		
 		{
-			Exception re=null;
+			Object re=webObjectSource.get("unknown.value", String.class);
 			
-			try
-			{
-				webObjectSource.get("unknown.value", null);
-			}
-			catch(ObjectSourceException e)
-			{
-				re=e;
-			}
-			
-			Assert.assertEquals("key 'unknown.value' is invalid, get object from scope 'unknown' is not supported", re.getMessage());
+			Assert.assertNull(re);
 		}
 		
 		{
-			Exception re=null;
+			webObjectSource.set("unknown.value", value);
 			
-			try
-			{
-				webObjectSource.set("unknown.value", value);
-			}
-			catch(ObjectSourceException e)
-			{
-				re=e;
-			}
+			Object re=webObjectSource.get("unknown.value", String.class);
 			
-			Assert.assertEquals("key 'unknown.value' is invalid, set object into scope 'unknown' is not supported", re.getMessage());
+			Assert.assertEquals(value, re);
 		}
 	}
 	

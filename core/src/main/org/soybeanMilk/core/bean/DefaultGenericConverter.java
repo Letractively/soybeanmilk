@@ -156,7 +156,7 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		Object parent=srcObj;
 		PropertyInfo parentBeanInfo=PropertyInfo.getPropertyInfo(srcObj.getClass());
-		String[] properties=SoybeanMilkUtils.splitPropertyExpression(propertyExpression);
+		String[] properties=SoybeanMilkUtils.splitAccessExpression(propertyExpression);
 		
 		for(int i=0, len=properties.length; i<len; i++)
 		{
@@ -187,7 +187,7 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		Object parent=srcObj;
 		PropertyInfo parentBeanInfo=PropertyInfo.getPropertyInfo(srcObj.getClass());
-		String[] properties=SoybeanMilkUtils.splitPropertyExpression(propertyExpression);
+		String[] properties=SoybeanMilkUtils.splitAccessExpression(propertyExpression);
 		
 		for(int i=0, len=properties.length; i<len; i++)
 		{

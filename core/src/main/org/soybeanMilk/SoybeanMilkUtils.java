@@ -261,7 +261,7 @@ public class SoybeanMilkUtils
 	}
 	
 	/**
-	 * 将字符串从第一个'.'位置拆分为两部分，如果不包含'.'，则返回仅包含原字符串的长度为1的数组，
+	 * 将字符串从第一个{@linkplain Constants#ACCESSOR 访问符}位置拆分为两部分，如果不包含{@linkplain Constants#ACCESSOR 访问符}，则返回仅包含原字符串的长度为1的数组，
 	 * 否则返回长度为2的且元素为拆分后的字符串的数组。
 	 * @param str
 	 * @return
@@ -286,16 +286,20 @@ public class SoybeanMilkUtils
 	}
 	
 	/**
-	 * 拆分属性表达式
-	 * @param propertyExpression
+	 * 拆分访问符表达式（以{@linkplain Constants#ACCESSOR 访问符}分隔的字符串）
+	 * @param accessExpression
 	 * @return
 	 * @date 2012-2-21
 	 */
-	public static String[] splitPropertyExpression(String propertyExpression)
+	public static String[] splitAccessExpression(String accessExpression)
 	{
-		String[] propertyArray=split(propertyExpression, Constants.ACCESSOR);
+		if(accessExpression == null)
+			return null;
+		
+		String[] propertyArray=split(accessExpression, Constants.ACCESSOR);
+		
 		if(propertyArray==null || propertyArray.length==0)
-			propertyArray=new String[]{propertyExpression};
+			propertyArray=new String[]{accessExpression};
 		
 		return propertyArray;
 	}

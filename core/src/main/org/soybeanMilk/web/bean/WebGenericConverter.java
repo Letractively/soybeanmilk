@@ -24,14 +24,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.bean.ConvertException;
+import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.GenericType;
 import org.soybeanMilk.core.bean.PropertyInfo;
+import org.soybeanMilk.web.WebObjectSource;
 
 /**
  * WEB通用转换器，除了继承的转换支持，它还支持将参数映射表（{@link Map Map&lt;String, Object&gt;}）对象转换为JavaBean对象、
@@ -161,6 +168,26 @@ public class WebGenericConverter extends DefaultGenericConverter
 			ppm.filter((Map<String, Object>)sourceObj);
 			
 			result=convertParamPropertyMap(ppm, targetType);
+		}
+		else if(sourceObj instanceof HttpServletRequest)
+		{
+			result=getConverterNotNull(HttpServletRequest.class, targetType).convert(sourceObj, targetType);
+		}
+		else if(sourceObj instanceof HttpServletResponse)
+		{
+			result=getConverterNotNull(HttpServletResponse.class, targetType).convert(sourceObj, targetType);
+		}
+		else if(sourceObj instanceof HttpSession)
+		{
+			result=getConverterNotNull(HttpSession.class, targetType).convert(sourceObj, targetType);
+		}
+		else if(sourceObj instanceof ServletContext)
+		{
+			result=getConverterNotNull(ServletContext.class, targetType).convert(sourceObj, targetType);
+		}
+		else if(sourceObj instanceof WebObjectSource)
+		{
+			result=getConverterNotNull(WebObjectSource.class, targetType).convert(sourceObj, targetType);
 		}
 		else
 		{
@@ -593,6 +620,22 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		
 		return digit;
+	}
+	
+	/**
+	 * 获取辅助{@linkplain Converter 转换器}，结果不会为<code>null</code>
+	 * @param sourceType
+	 * @param targetType
+	 * @return
+	 */
+	protected Converter getConverterNotNull(Type sourceType, Type targetType)
+	{
+		Converter cvt=getConverter(sourceType, targetType);
+		
+		if(cvt == null)
+			throw new GenericConvertException("can not find Converter for converting '"+SoybeanMilkUtils.toString(sourceType)+"' to '"+SoybeanMilkUtils.toString(targetType)+"'");
+		
+		return cvt;
 	}
 	
 	/**

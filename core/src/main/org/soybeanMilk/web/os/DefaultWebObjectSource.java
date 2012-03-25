@@ -26,7 +26,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
-import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
@@ -200,328 +199,390 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	public void setApplication(ServletContext application) {
 		this.application = application;
 	}
-
+	
 	//@Override
 	@SuppressWarnings("unchecked")
 	public Object get(Serializable key, Type expectType)
 	{
-		Object data = null;
+		if(key == null)
+			throw new ObjectSourceException("[key] must not be null");
 		
-		//WEB环境下只有字符串主键
-		String strKey = (String)key;
+		Object result = null;
 		
-		if(strKey==null)
-			throw new ObjectSourceException("[key] must not be null.");
+		String strKey=(key instanceof String ? (String)key : key.toString());
+		String[] scopedKeys=SoybeanMilkUtils.splitByFirstAccessor(strKey);
 		
-		String[] scopedKey=SoybeanMilkUtils.splitByFirstAccessor(strKey);
-		
-		String scope = scopedKey[0];
-		String subKey = scopedKey.length==1 ? null : scopedKey[1];
-		
-		if(WebConstants.Scope.PARAM.equalsIgnoreCase(scope))
+		if(WebConstants.Scope.PARAM.equalsIgnoreCase(scopedKeys[0]))
 		{
-			data=convertParameterMap(getRequest().getParameterMap(), subKey, expectType);
+			result=getParameterByFilter(getRequest().getParameterMap(), (scopedKeys.length > 1 ? scopedKeys[1] : null));
 		}
-		else if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scopedKeys[0]))
 		{
-			data=convertServletObjectAttribute(getRequest(), subKey, expectType);
-		}
-		else if(WebConstants.Scope.SESSION.equalsIgnoreCase(scope))
-		{
-			data=convertServletObjectAttribute(getRequest().getSession(), subKey, expectType);
-		}
-		else if(WebConstants.Scope.APPLICATION.equalsIgnoreCase(scope))
-		{
-			data=convertServletObjectAttribute(getApplication(), subKey, expectType);
-		}
-		else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scope))
-		{
-			data=convertServletObjectAttribute(getResponse(), subKey, expectType);
-		}
-		else if(WebConstants.Scope.OBJECT_SOURCE.equalsIgnoreCase(scope))
-		{
-			if(subKey != null)
-				throw new ObjectSourceException("invalide key '"+strKey+"', get object from '"+WebConstants.Scope.OBJECT_SOURCE+"' scope is not supported");
-			
-			if(expectType==null || SoybeanMilkUtils.isInstanceOf(this, expectType))
-				data=this;
+			if(scopedKeys.length > 1)
+				result=getServletObjAttrExpression(getRequest(), scopedKeys[1]);
 			else
-			{
-				data=getConverterNotNull(DefaultWebObjectSource.class, expectType).convert(this, expectType);
-			}
+				result=getRequest();
 		}
-		else if(scopedKey.length == 1)//没有包含作用域标识并且关键字不是作用域本身，则从param中取
+		else if(WebConstants.Scope.SESSION.equalsIgnoreCase(scopedKeys[0]))
 		{
-			data=convertParameterMap(getRequest().getParameterMap(), strKey, expectType);
-			
-			scope=WebConstants.Scope.PARAM;
-			subKey=strKey;
+			if(scopedKeys.length > 1)
+				result=getServletObjAttrExpression(getRequest().getSession(), scopedKeys[1]);
+			else
+				result=getRequest().getSession();
+		}
+		else if(WebConstants.Scope.APPLICATION.equalsIgnoreCase(scopedKeys[0]))
+		{
+			if(scopedKeys.length > 1)
+				result=getServletObjAttrExpression(getApplication(), scopedKeys[1]);
+			else
+				result=getApplication();
+		}
+		else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scopedKeys[0]))
+		{
+			if(scopedKeys.length > 1)
+				throw new ObjectSourceException("'"+key+"' is invalid, get object from "
+						+HttpServletResponse.class.getSimpleName()+" is not supported");
+			else
+				result=getResponse();
+		}
+		else if(WebConstants.Scope.OBJECT_SOURCE.equalsIgnoreCase(scopedKeys[0]))
+		{
+			if(scopedKeys.length > 1)
+				throw new ObjectSourceException("'"+key+"' is invalid, get object from "
+						+WebObjectSource.class.getSimpleName()+" is not supported");
+			else
+				result=this;
 		}
 		else
-			data=getObjectFromUnknownScope(scope, subKey, expectType);
+		{
+			result=getObjectWithScopeUnknownKey(strKey);
+		}
+		
+		result=convertGotObject(result, expectType);
 		
 		if(log.isDebugEnabled())
-			log.debug("get '"+data+"' from scope '"+scope+"' with key '"+subKey+"'");
+			log.debug("get object '"+SoybeanMilkUtils.toString(result)+"' from '"+SoybeanMilkUtils.toString(this)+"' with key '"+SoybeanMilkUtils.toString(strKey)+"'");
 		
-		return data;
+		return result;
 	}
 	
 	//@Override
 	public void set(Serializable key, Object obj)
 	{
-		String strKey = (String)key;
-		
-		//主键不能为空
-		if(strKey == null)
+		if(key == null)
 			throw new IllegalArgumentException("[key] must not be null");
 		
-		String[] scopedKey=SoybeanMilkUtils.splitByFirstAccessor(strKey);
-		//没有包含访问符，则保存到request中
-		String scope = scopedKey.length==1 ? WebConstants.Scope.REQUEST : scopedKey[0];
-		String subKey = scopedKey.length==1 ? scopedKey[0] : scopedKey[1];
+		String strKey=(key instanceof String ? (String)key : key.toString());
+		String[] scopedKeys=SoybeanMilkUtils.splitByFirstAccessor(strKey);
 		
-		if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scope))
+		if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scopedKeys[0]))
 		{
-			setAttributeByKeyExpression(getRequest(), subKey, obj);
+			if(scopedKeys.length > 1)
+				setServletObjAttrExpression(getRequest(), scopedKeys[1], obj, true);
+			else
+				throw new ObjectSourceException("key '"+key+"' is invalid, you can not replace '"
+						+WebConstants.Scope.REQUEST+"' scope object");
 		}
-		else if(WebConstants.Scope.SESSION.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.SESSION.equalsIgnoreCase(scopedKeys[0]))
 		{
-			setAttributeByKeyExpression(getRequest().getSession(), subKey, obj);
+			if(scopedKeys.length > 1)
+				setServletObjAttrExpression(getRequest().getSession(), scopedKeys[1], obj, true);
+			else
+				throw new ObjectSourceException("key '"+key+"' is invalid, you can not replace '"
+						+WebConstants.Scope.SESSION+"' scope object");
 		}
-		else if(WebConstants.Scope.APPLICATION.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.APPLICATION.equalsIgnoreCase(scopedKeys[0]))
 		{
-			setAttributeByKeyExpression(getApplication(), subKey, obj);
+			if(scopedKeys.length > 1)
+				setServletObjAttrExpression(getApplication(), scopedKeys[1], obj, true);
+			else
+				throw new ObjectSourceException("key '"+key+"' is invalid, you can not replace '"
+						+WebConstants.Scope.APPLICATION+"' scope object");
 		}
-		else if(WebConstants.Scope.PARAM.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.PARAM.equalsIgnoreCase(scopedKeys[0]))
 		{
-			throw new ObjectSourceException("'"+key+"' is invalid, you can not save object into '"+WebConstants.Scope.PARAM+"' scope");
+			throw new ObjectSourceException("key '"+key+"' is invalid, set object to '"
+					+WebConstants.Scope.PARAM+"' scope is not supported");
 		}
-		else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scope))
+		else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scopedKeys[0]))
 		{
-			throw new ObjectSourceException("'"+key+"' is not valid, you can not save object into '"+WebConstants.Scope.RESPONSE+"' scope");
+			throw new ObjectSourceException("key '"+key+"' is invalid, set object to '"
+					+WebConstants.Scope.RESPONSE+"' scope is not supported");
+		}
+		else if(WebConstants.Scope.OBJECT_SOURCE.equalsIgnoreCase(scopedKeys[0]))
+		{
+			throw new ObjectSourceException("key '"+key+"' is invalid, set object to '"
+					+WebConstants.Scope.OBJECT_SOURCE+"' scope is not supported");
 		}
 		else
-			setObjectToUnknownScope(scope, subKey, obj);
+			setObjectWithScopeUnknownKey(strKey, obj);
 		
 		if(log.isDebugEnabled())
-			log.debug("save '"+obj+"' into scope '"+scope+"' with key '"+subKey+"'");
+			log.debug("set object '"+SoybeanMilkUtils.toString(obj)+"' to '"+SoybeanMilkUtils.toString(this)+"' with key '"+SoybeanMilkUtils.toString(strKey)+"'");
 	}
 	
 	/**
-	 * 从无法识别的作用域中获取对象。
-	 * @param scope 作用域
-	 * @param keyInScope 此作用域中的对象关键字
-	 * @param expectType
+	 * 获取无法识别作用域的关键字对应的对象。
+	 * @param key 关键字，此关键字的作用域无法被识别
 	 * @return
-	 * @date 2011-2-22
+	 * @date 2012-3-24
 	 */
-	protected Object getObjectFromUnknownScope(String scope, String keyInScope, Type expectType)
+	@SuppressWarnings("unchecked")
+	protected Object getObjectWithScopeUnknownKey(String key)
 	{
-		throw new ObjectSourceException("key '"+(scope+Constants.ACCESSOR+keyInScope)+"' is invalid, get object from scope '"+scope+"' is not supported");
-	}
-	
-	/**
-	 * 将对象保存到无法识别的作用域中。
-	 * @param scope 作用域
-	 * @param keyInScope 此作用域中的保存关键字
-	 * @param value
-	 * @date 2011-2-22
-	 */
-	protected void setObjectToUnknownScope(String scope, String keyInScope, Object value)
-	{
-		throw new ObjectSourceException("key '"+(scope+Constants.ACCESSOR+keyInScope)+"' is invalid, set object into scope '"+scope+"' is not supported");
-	}
-	
-	/**
-	 * 转换Servlet对象的属性对象，如果<code>keyExpression</code>为空，Servlet对象本身将被用于转换。
-	 * @param servletObj
-	 * @param keyExpression 关键字表达式，比如“myobj”、“myobj.myProperty”
-	 * @param targetType
-	 * @return
-	 * @date 2011-2-22
-	 */
-	protected Object convertServletObjectAttribute(Object servletObj, String keyExpression, Type targetType)
-	{
-		Object re=null;
-		
-		if(keyExpression==null || keyExpression.length()==0)
-		{
-			if(targetType==null || SoybeanMilkUtils.isInstanceOf(servletObj, targetType))
-				re=servletObj;
-			else
-			{
-				Type srcType=getServletObjectType(servletObj);
-				
-				re=getConverterNotNull(srcType, targetType).convert(servletObj, targetType);
-			}
-		}
-		else
-		{
-			String[] keyWithProperty=SoybeanMilkUtils.splitByFirstAccessor(keyExpression);
-			re=getServletObjAttribute(servletObj, keyWithProperty[0]);
-			
-			//关键字表达式不包访问符
-			if(keyWithProperty.length == 1)
-				re=getGenericConverter().convert(re, targetType);
-			else
-			{
-				//包含访问符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式
-				if(re == null)
-					re=getGenericConverter().convert(getServletObjAttribute(servletObj, keyExpression), targetType);
-				else
-					re=getGenericConverter().getProperty(re, keyWithProperty[1], targetType);
-			}
-		}
-		
-		return re;
-	}
-	
-	/**
-	 * 将对象保存到servlet对象作用域内。
-	 * @param servletObj
-	 * @param keyExpression 关键字表达式，比如“yourBean”、“yourBean.property”
-	 * @param obj
-	 * @date 2010-12-30
-	 */
-	protected void setAttributeByKeyExpression(Object servletObj, String keyExpression, Object obj)
-	{
-		String[] objKeyWithProperty=SoybeanMilkUtils.splitByFirstAccessor(keyExpression);
-		
-		//只有包含了访问符，并且对象存在时，才按照属性表达式方式，否则直接按照关键字方式
-		if(objKeyWithProperty.length == 2)
-		{
-			Object data=getServletObjAttribute(servletObj, objKeyWithProperty[0]);
-			if(data != null)
-				getGenericConverter().setProperty(data, objKeyWithProperty[1], obj);
-			else
-				setServletObjAttribute(servletObj, keyExpression, obj);
-		}
-		else
-			setServletObjAttribute(servletObj, keyExpression, obj);
-	}
-	
-	/**
-	 * 将对象保存到servlet对象作用域内。
-	 * @param servletObj
-	 * @param key
-	 * @param value
-	 * @date 2010-12-30
-	 */
-	protected void setServletObjAttribute(Object servletObj, String key, Object value)
-	{
-		if(servletObj instanceof HttpServletRequest)
-			((HttpServletRequest)servletObj).setAttribute(key, value);
-		else if(servletObj instanceof HttpSession)
-			((HttpSession)servletObj).setAttribute(key, value);
-		else if(servletObj instanceof ServletContext)
-			((ServletContext)servletObj).setAttribute(key, value);
-		else
-			throw new ObjectSourceException("can not set attribute to servlet object '"+servletObj+"'");
-	}
-	
-	/**
-	 * 从servlet对象作用域内取得对象。
-	 * @param servletObj
-	 * @param key
-	 * @param value
-	 * @date 2010-12-30
-	 */
-	protected Object getServletObjAttribute(Object servletObj, String key)
-	{
-		if(servletObj instanceof HttpServletRequest)
-			return ((HttpServletRequest)servletObj).getAttribute(key);
-		else if(servletObj instanceof HttpSession)
-			return ((HttpSession)servletObj).getAttribute(key);
-		else if(servletObj instanceof ServletContext)
-			return ((ServletContext)servletObj).getAttribute(key);
-		else
-			throw new ObjectSourceException("can not get attribute from servlet object '"+servletObj+"'");
-	}
-	
-	/**
-	 * 转换请求参数映射表<br>
-	 * 如果<code>paramKeyFilter</code>是一个明确的关键字（映射表中有该关键字的值），它将直接根据该关键字的值来转换；<br>
-	 * 如果<code>paramKeyFilter</code>是<code>null</code>，那么它将使用原始的请求参数映射表来进行转换；<br>
-	 * 否则，它会根据<code>paramKeyFilter</code>来对参数映射表进行过滤，产生一个新的映射表（它的关键字将会被替换为原始关键字的“<code>[paramKeyFilter]</code>.”之后的部分，比如由“<code>beanName.propertyName</code>”变为“<code>propertyName</code>”），
-	 * 然后使用它进行转换。
-	 * 
-	 * @param paramMap 参数映射表
-	 * @param paramKeyFilter 筛选器，只有以此筛选器开头的参数关键字才会被转换，如果为null，则表明不做筛选
-	 * @param targetType 目标类型
-	 * @return
-	 */
-	protected Object convertParameterMap(Map<String, ?> paramMap, String paramKeyFilter, Type targetType)
-	{
-		Object result=null;
-		
-		if(targetType == null)
-			result=paramMap;
-		else
-		{
-			Object explicitValue=paramMap.get(paramKeyFilter);
-			
-			if(explicitValue != null)
-			{
-				result=new ParamValue(paramKeyFilter, explicitValue);
-			}
-			else if(SoybeanMilkUtils.isClassType(targetType)
-					&& SoybeanMilkUtils.narrowToClassType(targetType).isPrimitive())
-			{
-				result=new ParamValue(paramKeyFilter, explicitValue);
-			}
-			else
-			{
-				ParamPropertyMap ppm=new ParamPropertyMap(null, paramKeyFilter);
-				ppm.filter(paramMap);
-				
-				result=ppm;
-			}
-		}
-		
-		result=getGenericConverter().convert(result, targetType);
+		Object result=getServletObjAttrExpression(getRequest(), key);
+		if(result == null)
+			result=getServletObjAttrExpression(getRequest().getSession(), key);
+		if(result == null)
+			result=getServletObjAttrExpression(getApplication(), key);
+		if(result == null)
+			result=getParameterByFilter(getRequest().getParameterMap(), key);
 		
 		return result;
 	}
 	
 	/**
-	 * 取得Servlet对象的标准类型
-	 * @param servletObject
-	 * @return
-	 * @date 2011-2-22
+	 * 将对象以作用域无法识别的关键字保存到此对象源中
+	 * @param key
+	 * @param value
+	 * @date 2012-3-24
 	 */
-	protected Class<?> getServletObjectType(Object servletObject)
+	protected void setObjectWithScopeUnknownKey(String key, Object value)
 	{
-		Class<?> type=null;
-		
-		if(servletObject instanceof HttpServletRequest)
-			type=HttpServletRequest.class;
-		else if(servletObject instanceof HttpSession)
-			type=HttpSession.class;
-		else if(servletObject instanceof HttpServletResponse)
-			type=HttpServletResponse.class;
-		else if(servletObject instanceof ServletContext)
-			type=ServletContext.class;
-		else
-			throw new ObjectSourceException("unknown servlet object '"+servletObject.getClass().getName()+"'");
-		
-		return type;
+		boolean success=setServletObjAttrExpression(getRequest(), key, value, false);
+		if(!success)
+			success=setServletObjAttrExpression(getRequest().getSession(), key, value, false);
+		if(!success)
+			success=setServletObjAttrExpression(getApplication(), key, value, false);
+		if(!success)
+			setServletObjAttr(getRequest(), key, value);
 	}
 	
 	/**
-	 * 查找转换器，返回结果不会为<code>null</code>
-	 * @param sourceType
+	 * 获取给定属性表达式在Servlet对象中的值
+	 * @param servletObj
+	 * @param attrExpression
+	 * @return
+	 */
+	protected Object getServletObjAttrExpression(Object servletObj, String attrExpression)
+	{
+		if(attrExpression == null)
+			return null;
+		
+		Object result=null;
+		
+		String[] propKeys=SoybeanMilkUtils.splitAccessExpression(attrExpression);
+		
+		//不包含访问符，则直接取值
+		if(propKeys.length == 1)
+			result=getServletObjAttr(servletObj, attrExpression);
+		else
+		{
+			//尝试确定Servlet作用域属性名并获取属性值
+			StringBuilder nameCache=new StringBuilder();
+			int i=0;
+			for(; i<propKeys.length; i++)
+			{
+				if(i != 0)
+					nameCache.append(WebConstants.ACCESSOR);
+				
+				nameCache.append(propKeys[i]);
+				
+				result=getServletObjAttr(servletObj, nameCache.toString());
+				
+				if(result != null)
+					break;
+			}
+			
+			i=i+1;
+			
+			//作用域属性名之后的即是对象的属性名
+			if(result!=null && i<propKeys.length)
+			{
+				nameCache.delete(0, nameCache.length());
+				for(int j=i; j<propKeys.length; j++)
+				{
+					if(j != 0)
+						nameCache.append(WebConstants.ACCESSOR);
+					
+					nameCache.append(propKeys[j]);
+				}
+				
+				result=getProperty(result, nameCache.toString());
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 将值以给定属性表达式保存到Servlet对象中
+	 * @param servletObj
+	 * @param attrExpression
+	 * @param value
+	 * @param attrExpressionLiteral
+	 * @return 是否成功保存
+	 * @date 2012-3-25
+	 */
+	protected boolean setServletObjAttrExpression(Object servletObj, String attrExpression, Object value, boolean attrExpressionLiteral)
+	{
+		if(attrExpression == null)
+			return false;
+		
+		boolean result=false;
+		
+		String[] propKeys=SoybeanMilkUtils.splitAccessExpression(attrExpression);
+		
+		//没有包含访问符，则直接保存到此作用域
+		if(propKeys.length ==1)
+		{
+			setServletObjAttr(servletObj, attrExpression, value);
+			result=true;
+		}
+		else
+		{
+			//尝试确定Servlet作用域属性名并获取属性值
+			Object attrObj=null;
+			StringBuilder nameCache=new StringBuilder();
+			int i=0;
+			for(; i<propKeys.length; i++)
+			{
+				if(i != 0)
+					nameCache.append(WebConstants.ACCESSOR);
+				
+				nameCache.append(propKeys[i]);
+				
+				attrObj=getServletObjAttr(servletObj, nameCache.toString());
+				
+				if(attrObj != null)
+					break;
+			}
+			
+			i=i+1;
+			
+			//作用域属性名之后的即是对象属性名
+			if(attrObj!=null && i<propKeys.length)
+			{
+				nameCache.delete(0, nameCache.length());
+				for(int j=i; j<propKeys.length; j++)
+				{
+					if(j != 0)
+						nameCache.append(WebConstants.ACCESSOR);
+					
+					nameCache.append(propKeys[j]);
+				}
+				
+				setProperty(attrObj, nameCache.toString(), value);
+				result=true;
+			}
+			else if(attrExpressionLiteral)
+			{
+				setServletObjAttr(servletObj, attrExpression, value);
+				result=true;
+			}
+		}
+		
+		return result;
+	}
+
+	/**
+	 * 获取请求参数过滤后的对象。<br>
+	 * 如果<code>paramFilter</code>是一个明确的关键字（映射表中有该关键字的值），它将返回一个{@linkplain ParamValue}对象；<br>
+	 * 否则，它将返回一个以<code>paramFilter</code>作为过滤器的{@linkplain ParamPropertyMap}对象。
+	 * 
+	 * @param paramMap 参数映射表
+	 * @param paramFilter 参数筛选器，只有以此筛选器开头的参数关键字才会被保留，如果为null，则表明不做筛选
+	 * @return
+	 */
+	protected Object getParameterByFilter(Map<String, ?> paramMap, String paramFilter)
+	{
+		Object result=paramMap.get(paramFilter);
+		
+		if(result != null)
+		{
+			result=new ParamValue(paramFilter, result);
+		}
+		else
+		{
+			ParamPropertyMap ppm=new ParamPropertyMap(null, paramFilter);
+			ppm.filter(paramMap);
+			
+			result=ppm;
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 从Servlet对象作用域内获取给定属性名的对象
+	 * @param servletObj
+	 * @param attr 属性名
+	 * @date 2010-12-30
+	 */
+	protected Object getServletObjAttr(Object servletObj, String attr)
+	{
+		if(servletObj instanceof HttpServletRequest)
+			return ((HttpServletRequest)servletObj).getAttribute(attr);
+		else if(servletObj instanceof HttpSession)
+			return ((HttpSession)servletObj).getAttribute(attr);
+		else if(servletObj instanceof ServletContext)
+			return ((ServletContext)servletObj).getAttribute(attr);
+		else
+			throw new ObjectSourceException("can not get attribute from servlet object '"+servletObj+"'");
+	}
+	
+	/**
+	 * 将对象保存到servlet对象作用域内
+	 * @param servletObj
+	 * @param attr 属性名
+	 * @param value
+	 * @date 2010-12-30
+	 */
+	protected void setServletObjAttr(Object servletObj, String attr, Object value)
+	{
+		if(servletObj instanceof HttpServletRequest)
+			((HttpServletRequest)servletObj).setAttribute(attr, value);
+		else if(servletObj instanceof HttpSession)
+			((HttpSession)servletObj).setAttribute(attr, value);
+		else if(servletObj instanceof ServletContext)
+			((ServletContext)servletObj).setAttribute(attr, value);
+		else
+			throw new ObjectSourceException("can not set attribute to servlet object '"+servletObj+"'");
+	}
+	
+	/**
+	 * 将从对象源中获取的对象转换到目标类型的对象
+	 * @param sourceObj
 	 * @param targetType
 	 * @return
-	 * @date 2011-4-14
+	 * @date 2012-3-24
 	 */
-	protected Converter getConverterNotNull(Type sourceType, Type targetType)
+	protected Object convertGotObject(Object sourceObj, Type targetType)
 	{
-		GenericConverter genericConverter=getGenericConverter();
-		
-		Converter cvt=(genericConverter == null ? null : genericConverter.getConverter(sourceType, targetType));
-		if(cvt == null)
-			throw new NullPointerException("no Converter defined for converting '"+sourceType+"' to '"+targetType+"'");
-		
-		return cvt;
+		return getGenericConverter().convert(sourceObj, targetType);
+	}
+	
+	/**
+	 * 获取对象的给定属性表达式的值
+	 * @param obj
+	 * @param propExpression
+	 * @return
+	 * @date 2012-3-25
+	 */
+	protected Object getProperty(Object obj, String propExpression)
+	{
+		return getGenericConverter().getProperty(obj, propExpression, null);
+	}
+	
+	/**
+	 * 设置对象的给定属性表达式的值
+	 * @param obj
+	 * @param propExpression
+	 * @param value
+	 * @date 2012-3-25
+	 */
+	protected void setProperty(Object obj, String propExpression, Object value)
+	{
+		getGenericConverter().setProperty(obj, propExpression, value);
 	}
 }

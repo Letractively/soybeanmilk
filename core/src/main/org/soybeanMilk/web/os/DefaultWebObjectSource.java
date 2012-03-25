@@ -322,7 +322,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	}
 	
 	/**
-	 * 获取无法识别作用域的关键字对应的对象。
+	 * 从此对象源获取无法识别作用域的关键字对应的对象。
 	 * @param key 关键字，此关键字的作用域无法被识别
 	 * @return
 	 * @date 2012-3-24
@@ -331,31 +331,44 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	protected Object getObjectWithScopeUnknownKey(String key)
 	{
 		Object result=getServletObjAttrExpression(getRequest(), key);
-		if(result == null)
-			result=getServletObjAttrExpression(getRequest().getSession(), key);
-		if(result == null)
-			result=getServletObjAttrExpression(getApplication(), key);
-		if(result == null)
-			result=getParameterByFilter(getRequest().getParameterMap(), key);
 		
+		if(result == null)
+		{
+			result=getServletObjAttrExpression(getRequest().getSession(), key);
+			
+			if(result == null)
+			{
+				result=getServletObjAttrExpression(getApplication(), key);
+				
+				if(result == null)
+					result=getParameterByFilter(getRequest().getParameterMap(), key);
+			}
+		}
 		return result;
 	}
 	
 	/**
-	 * 将对象以作用域无法识别的关键字保存到此对象源中
-	 * @param key
+	 * 将对象以作用域无法识别的关键字保存到此对象源中。
+	 * @param key 关键字，此关键字的作用域无法被识别
 	 * @param value
 	 * @date 2012-3-24
 	 */
 	protected void setObjectWithScopeUnknownKey(String key, Object value)
 	{
 		boolean success=setServletObjAttrExpression(getRequest(), key, value, false);
+		
 		if(!success)
+		{
 			success=setServletObjAttrExpression(getRequest().getSession(), key, value, false);
-		if(!success)
-			success=setServletObjAttrExpression(getApplication(), key, value, false);
-		if(!success)
-			setServletObjAttr(getRequest(), key, value);
+			
+			if(!success)
+			{
+				success=setServletObjAttrExpression(getApplication(), key, value, false);
+				
+				if(!success)
+					setServletObjAttr(getRequest(), key, value);
+			}
+		}
 	}
 	
 	/**

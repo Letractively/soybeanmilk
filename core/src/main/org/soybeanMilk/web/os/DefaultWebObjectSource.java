@@ -240,7 +240,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scopedKeys[0]))
 		{
 			if(scopedKeys.length > 1)
-				throw new ObjectSourceException("'"+key+"' is invalid, get object from "
+				throw new ObjectSourceException("key '"+key+"' is invalid, get object from "
 						+HttpServletResponse.class.getSimpleName()+" is not supported");
 			else
 				result=getResponse();
@@ -248,7 +248,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		else if(WebConstants.Scope.OBJECT_SOURCE.equalsIgnoreCase(scopedKeys[0]))
 		{
 			if(scopedKeys.length > 1)
-				throw new ObjectSourceException("'"+key+"' is invalid, get object from "
+				throw new ObjectSourceException("key '"+key+"' is invalid, get object from "
 						+WebObjectSource.class.getSimpleName()+" is not supported");
 			else
 				result=this;

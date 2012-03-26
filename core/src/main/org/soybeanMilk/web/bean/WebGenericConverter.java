@@ -135,13 +135,13 @@ public class WebGenericConverter extends DefaultGenericConverter
 		Object result=null;
 		
 		//如果源对象是数组而目标类型不是，则使用数组的第一个元素转换，与request.getParameter(...)规则相同
-		if(SoybeanMilkUtils.isArray(sourceObj.getClass()) && SoybeanMilkUtils.isClassType(targetType)
-				&& !SoybeanMilkUtils.isArray((Class<?>)targetType))
+		if(SoybeanMilkUtils.isArray(sourceObj.getClass())
+				&& SoybeanMilkUtils.isClassType(targetType) && !SoybeanMilkUtils.isArray((Class<?>)targetType))
 		{
 			if(log.isDebugEnabled())
 				log.debug("'"+SoybeanMilkUtils.toString(sourceObj)+"' is an array while the target not, so it's first element will be used for converting");
 			
-			sourceObj=Array.get(sourceObj, 0);
+			sourceObj=(Array.getLength(sourceObj) == 0 ? null : Array.get(sourceObj, 0));
 			
 			result=convert(sourceObj, targetType);
 		}

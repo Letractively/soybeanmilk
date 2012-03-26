@@ -253,7 +253,9 @@ public class DefaultGenericConverter implements GenericConverter
 		boolean canConvert=true;
 		
 		if(String.class.equals(targetType))
+		{
 			re=sourceObj.toString();
+		}
 		else if(SoybeanMilkUtils.isEnum(targetType))
 		{
 			@SuppressWarnings("rawtypes")
@@ -379,7 +381,7 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	/**
-	 * 由数组转换为{@linkplain java.util.List List}对象，它不会对数组元素执行类型转换。
+	 * 由数组转换为{@linkplain java.util.List List}对象。
 	 * @param array
 	 * @param listClass
 	 * @return
@@ -631,7 +633,6 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		public ConverterKey(Type sourceType, Type targetType)
 		{
-			super();
 			this.sourceType = sourceType;
 			this.targetType = targetType;
 		}

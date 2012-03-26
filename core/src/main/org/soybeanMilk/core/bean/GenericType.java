@@ -24,10 +24,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.soybeanMilk.core.exe.Invoke;
+
 /**
  * 泛型类型元信息。<br>
  * 它同时封装泛型类型的持有类信息，并提供了获取泛型类型的具体类型的方法。<br>
- * {@linkplain DefaultGenericConverter 默认通用转换器}即是靠它来支持泛型类型转换的。
+ * {@linkplain Invoke 调用}会首先将它的泛型方法参数类型对象转换为<code>GenericType</code>类型的对象，
+ * 从而为底层的{@linkplain GenericConverter 通用转换器}提供足够的类型转换信息。
  * @author earthAngry@gmail.com
  * @date 2011-9-29
  *

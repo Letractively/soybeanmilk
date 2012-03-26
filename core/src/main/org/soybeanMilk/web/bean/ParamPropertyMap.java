@@ -14,7 +14,6 @@
 
 package org.soybeanMilk.web.bean;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -29,15 +28,15 @@ import org.soybeanMilk.web.WebConstants;
  *
  * @param <Object>
  */
-public class ParamPropertyMap implements Map<String, Object>
+public class ParamPropertyMap extends HashMap<String, Object>
 {
+	private static final long serialVersionUID = 1L;
+	
 	/**父参数属性映射表*/
 	private ParamPropertyMap parent;
 	
 	/**此参数属性映射表的属性名*/
 	private String propertyName;
-	
-	private HashMap<String, Object> internalMap;
 	
 	/**
 	 * 创建默认参数属性映射表
@@ -66,8 +65,6 @@ public class ParamPropertyMap implements Map<String, Object>
 		super();
 		this.parent = parent;
 		this.propertyName=propertyName;
-		
-		this.internalMap=new HashMap<String, Object>();
 	}
 	
 	/**
@@ -178,69 +175,10 @@ public class ParamPropertyMap implements Map<String, Object>
 		this.parent = parent;
 	}
 	
-	public void clear()
-	{
-		this.internalMap.clear();
-	}
-
-	public boolean containsKey(Object arg0)
-	{
-		return this.internalMap.containsKey(arg0);
-	}
-
-	public boolean containsValue(Object arg0)
-	{
-		return this.internalMap.containsValue(arg0);
-	}
-
-	public Set<Entry<String, Object>> entrySet()
-	{
-		return this.internalMap.entrySet();
-	}
-
-	public Object get(Object arg0)
-	{
-		return this.internalMap.get(arg0);
-	}
-
-	public boolean isEmpty()
-	{
-		return this.internalMap.isEmpty();
-	}
-
-	public Set<String> keySet()
-	{
-		return this.internalMap.keySet();
-	}
-
-	public Object put(String arg0, Object arg1)
-	{
-		return this.internalMap.put(arg0, arg1);
-	}
-
-	public void putAll(Map<? extends String, ? extends Object> arg0)
-	{
-		this.internalMap.putAll(arg0);
-	}
-
-	public Object remove(Object arg0)
-	{
-		return this.internalMap.remove(arg0);
-	}
-
-	public int size()
-	{
-		return this.internalMap.size();
-	}
-	
-	public Collection<Object> values()
-	{
-		return this.internalMap.values();
-	}
-
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		return "ParamPropertyMap [paramName=" + getFullParamName("")
-				+ ", values=" + internalMap + "]";
+				+ ", " + super.toString() + "]";
 	}
 }

@@ -214,7 +214,7 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetFromParam() throws Exception
+	public void getFromParam() throws Exception
 	{
 		String value="12345";
 		
@@ -356,7 +356,9 @@ public class TestDefaultWebObjectSource
 	@Test
 	public void getFromParamWithNotExistParam() throws Exception
 	{
-		webObjectSource.get("param.noValue", Integer.class);
+		Object re=webObjectSource.get("param.noValue", Integer.class);
+		
+		Assert.assertNull(re);
 	}
 	
 	@Test
@@ -487,45 +489,59 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetWithNotScopedKey() throws Exception
+	public void setAndGetWithNoAccessorKey() throws Exception
 	{
+		String key="simpleKey";
 		String value="12345";
 		
-		//默认应该保存到request中
+		//以这个关键字存储,则同样可以以这个关键字获取
 		{
-			webObjectSource.set("value", value);
-			Assert.assertEquals(value, request.getAttribute("value"));
+			request.setParameter(key, value);
 			
-			Object dest=webObjectSource.get("request.value", String.class);
+			Object dest=webObjectSource.get(key, String.class);
 			Assert.assertEquals(value, dest);
 		}
 		
-		//默认应该从param取
+		//默认应该保存到request中
 		{
-			request.setParameter("value", value);
+			webObjectSource.set(key, value);
 			
-			Object dest0=webObjectSource.get("value", String.class);
-			Assert.assertEquals(value, dest0);
+			Assert.assertEquals(value, request.getAttribute(key));
+			
+			Object dest=webObjectSource.get("request."+key, String.class);
+			Assert.assertEquals(value, dest);
 		}
 	}
 	
 	@Test
 	public void setAndGetForUnknownScopeKey() throws Exception
 	{
+		String key="unknownScope.someName0.someName1";
 		String value="12345";
 		
 		{
-			Object re=webObjectSource.get("unknown.value", String.class);
+			Object re=webObjectSource.get(key, String.class);
 			
 			Assert.assertNull(re);
 		}
 		
+		//以这个关键字存储,则同样可以以这个关键字获取
 		{
-			webObjectSource.set("unknown.value", value);
+			webObjectSource.set(key, value);
 			
-			Object re=webObjectSource.get("unknown.value", String.class);
+			Object re=webObjectSource.get(key, String.class);
 			
 			Assert.assertEquals(value, re);
+		}
+		
+		//默认应该保存到request中
+		{
+			webObjectSource.set(key, value);
+			
+			Assert.assertEquals(value, request.getAttribute(key));
+			
+			Object dest=webObjectSource.get("request."+key, String.class);
+			Assert.assertEquals(value, dest);
 		}
 	}
 	

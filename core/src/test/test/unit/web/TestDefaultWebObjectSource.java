@@ -207,10 +207,20 @@ public class TestDefaultWebObjectSource
 		request.setParameter("value", value);
 		
 		Map src=request.getParameterMap();
-		Map dest=(Map)webObjectSource.get("param", Map.class);
 		
-		Assert.assertEquals(src.get(value), dest.get(value));
-		Assert.assertEquals(src, dest);
+		{
+			Map dest=(Map)webObjectSource.get("param", Map.class);
+			
+			Assert.assertEquals(src.get(value), dest.get(value));
+			Assert.assertEquals(src, dest);
+		}
+		
+		{
+			Map dest=(Map)webObjectSource.get("param", null);
+			
+			Assert.assertEquals(src.get(value), dest.get(value));
+			Assert.assertEquals(src, dest);
+		}
 	}
 	
 	@Test

@@ -20,6 +20,7 @@ import org.soybeanMilk.core.ObjectSource;
 
 /**
  * 可执行对象的顶层抽象类，它实现名称定义。
+ * 
  * @author earthAngry@gmail.com
  * @date 2010-11-21
  */

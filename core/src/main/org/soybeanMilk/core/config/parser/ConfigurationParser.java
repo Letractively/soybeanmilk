@@ -1108,7 +1108,7 @@ public class ConfigurationParser
 		else if(TAG_INVOKE.equals(type))
 			return createInvokeIntance();
 		else
-			throw new ParseException("invalid Executable type <"+type+">");
+			throw new ParseException("illegal Executable type <"+type+">");
 	}
 	
 	/**

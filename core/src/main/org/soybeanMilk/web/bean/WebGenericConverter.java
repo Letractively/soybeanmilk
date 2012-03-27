@@ -130,7 +130,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 	
 	//@Override
 	@SuppressWarnings("unchecked")
-	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType)
+	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType) throws ConvertException
 	{
 		Object result=null;
 		
@@ -145,29 +145,21 @@ public class WebGenericConverter extends DefaultGenericConverter
 			
 			result=convert(sourceObj, targetType);
 		}
-		else if(sourceObj instanceof ParamValue)
-		{
-			ParamValue pv=(ParamValue)sourceObj;
-			
-			try
-			{
-				result=convert(pv.getValue(), targetType);
-			}
-			catch(ConvertException e)
-			{
-				handleParamValueConvertException(pv, e);
-			}
-		}
-		else if(sourceObj instanceof ParamPropertyMap)
-		{
-			result=convertParamPropertyMap((ParamPropertyMap)sourceObj, targetType);
-		}
 		else if(sourceObj instanceof Map)
 		{
-			ParamPropertyMap ppm=new ParamPropertyMap();
-			ppm.filter((Map<String, Object>)sourceObj);
+			PropertyValueMap pvm=null;
 			
-			result=convertParamPropertyMap(ppm, targetType);
+			if(sourceObj instanceof PropertyValueMap)
+			{
+				pvm=(PropertyValueMap)sourceObj;
+			}
+			else
+			{
+				pvm=new PropertyValueMap();
+				pvm.resolve((Map<String, Object>)sourceObj);
+			}
+			
+			result=convertPropertyValueMap(pvm, targetType);
 		}
 		else if(sourceObj instanceof HttpServletRequest)
 		{
@@ -198,12 +190,12 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 将映射表转换成目标类型的对象
-	 * @param sourceMap 源映射表
+	 * 将属性值映射表转换成目标类型的对象
+	 * @param sourceMap 源属性值映射表
 	 * @param targetType
 	 * @return
 	 */
-	protected Object convertParamPropertyMap(ParamPropertyMap sourceMap, Type targetType)
+	protected Object convertPropertyValueMap(PropertyValueMap sourceMap, Type targetType) throws ConvertException
 	{
 		Object result = null;
 		
@@ -216,18 +208,18 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			if(targetType instanceof Class<?>)
 			{
-				result=convertParamPropertyMapToClass(sourceMap, (Class<?>)targetType);
+				result=convertPropertyValueMapToClass(sourceMap, (Class<?>)targetType);
 			}
 			else if(targetType instanceof GenericType)
 			{
-				result=convertParamPropertyMapToGenericType(sourceMap, (GenericType)targetType);
+				result=convertPropertyValueMapToGenericType(sourceMap, (GenericType)targetType);
 			}
 			else if(targetType instanceof ParameterizedType
 					|| targetType instanceof GenericArrayType
 					|| targetType instanceof TypeVariable<?>
 					|| targetType instanceof WildcardType)
 			{
-				result=convertParamPropertyMapToGenericType(sourceMap, GenericType.getGenericType(targetType, null));
+				result=convertPropertyValueMapToGenericType(sourceMap, GenericType.getGenericType(targetType, null));
 			}
 			else
 				throw new GenericConvertException("converting '"+SoybeanMilkUtils.toString(sourceMap)+"' to type '"+SoybeanMilkUtils.toString(targetType)+"' is not supported");
@@ -237,13 +229,12 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 将参数属性映射表转换为目标类型为<code>Class&lt?&gt;</code>的对象，目标类型只可能为JavaBean或者JavaBean数组
-	 * @param sourceMap 参数属性映射表
+	 * 将属性值映射表转换为目标类型为<code>Class&lt?&gt;</code>的对象，目标类型只可能为JavaBean或者JavaBean数组
+	 * @param sourceMap 属性值映射表
 	 * @param targetClass
 	 * @return
-	 * @date 2011-10-12
 	 */
-	protected Object convertParamPropertyMapToClass(ParamPropertyMap sourceMap, Class<?> targetClass)
+	protected Object convertPropertyValueMapToClass(PropertyValueMap sourceMap, Class<?> targetClass) throws ConvertException
 	{
 		Object result=null;
 		
@@ -252,7 +243,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			Class<?> eleClass=targetClass.getComponentType();
 			
-			List<?> tmpRe=convertParamPropertyMapToList(sourceMap, List.class, eleClass);
+			List<?> tmpRe=convertPropertyValueMapToList(sourceMap, List.class, eleClass);
 			
 			result=listToArray(tmpRe, eleClass);
 		}
@@ -289,7 +280,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 				}
 				catch(ConvertException e)
 				{
-					handleParamPropertyMapConvertException(sourceMap, property, e);
+					handlePropertyValueMapConvertException(sourceMap, property, e);
 				}
 			}
 		}
@@ -298,13 +289,12 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 将参数属性映射表转换为泛型类型的对象
+	 * 将属性值映射表转换为泛型类型的对象
 	 * @param sourceMap
 	 * @param genericType
 	 * @return
-	 * @date 2011-10-12
 	 */
-	protected Object convertParamPropertyMapToGenericType(ParamPropertyMap sourceMap, GenericType genericType)
+	protected Object convertPropertyValueMapToGenericType(PropertyValueMap sourceMap, GenericType genericType) throws ConvertException
 	{
 		Object result=null;
 		
@@ -318,18 +308,18 @@ public class WebGenericConverter extends DefaultGenericConverter
 			//List<T>
 			if(SoybeanMilkUtils.isAncestorClass(List.class, actualClass))
 			{
-				result=convertParamPropertyMapToList(sourceMap, actualClass, argClasses[0]);
+				result=convertPropertyValueMapToList(sourceMap, actualClass, argClasses[0]);
 			}
 			//Set<T>
 			else if(SoybeanMilkUtils.isAncestorClass(Set.class, actualClass))
 			{
-				List<?> tmpRe=convertParamPropertyMapToList(sourceMap, List.class, argClasses[0]);
+				List<?> tmpRe=convertPropertyValueMapToList(sourceMap, List.class, argClasses[0]);
 				result=listToSet(tmpRe, actualClass);
 			}
 			//Map<K, V>
 			else if(SoybeanMilkUtils.isAncestorClass(Map.class, actualClass))
 			{
-				result=convertParamPropertyMapToMap(sourceMap, actualClass, argClasses[0], argClasses[1]);
+				result=convertPropertyValueMapToMap(sourceMap, actualClass, argClasses[0], argClasses[1]);
 			}
 			else
 				canConvert=false;
@@ -339,7 +329,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			Class<?> componentClass=genericType.getComponentClass();
 			
-			result=convertParamPropertyMapToList(sourceMap, List.class, componentClass);
+			result=convertPropertyValueMapToList(sourceMap, List.class, componentClass);
 			result=listToArray((List<?>)result, componentClass);
 		}
 		//T
@@ -364,22 +354,21 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 将参数属性映射表转换为列表对象，参数属性映射表的字符串关键字可以是两种内容：<br>
+	 * 将属性值映射表转换为列表对象，属性值映射表的关键字可以是两种内容：<br>
 	 * <ol>
 	 * 	<li>
 	 * 		数字，比如：“0”、“1”，表示属性值在列表中的索引
 	 * 	</li>
 	 * 	<li>
-	 * 		字符，比如："property1"、“property2”，表示列表元素对象对应的属性名
+	 * 		字符，比如：“property1”、“property2”，表示列表元素对象对应的属性名
 	 * 	</li>
 	 * </ol>
 	 * @param sourceMap
 	 * @param listClass
 	 * @param elementClass
 	 * @return
-	 * @date 2012-2-19
 	 */
-	protected List<?> convertParamPropertyMapToList(ParamPropertyMap sourceMap, Class<?> listClass, Class<?> elementClass)
+	protected List<?> convertPropertyValueMapToList(PropertyValueMap sourceMap, Class<?> listClass, Class<?> elementClass) throws ConvertException
 	{
 		if(sourceMap == null)
 			return null;
@@ -404,7 +393,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 				}
 				catch(Exception e)
 				{
-					throw new GenericConvertException("illegal index value '"+property+"' in property expression '"+sourceMap.getFullParamName(property)+"'", e);
+					throw new GenericConvertException("illegal index value '"+property+"' in property expression '"+sourceMap.getPropertyNamePath(property)+"'", e);
 				}
 				
 				while(result.size() < idx+1)
@@ -412,9 +401,9 @@ public class WebGenericConverter extends DefaultGenericConverter
 				
 				Object element=result.get(idx);
 				
-				if(element!=null && (value instanceof ParamPropertyMap))
+				if(element!=null && (value instanceof PropertyValueMap))
 				{
-					ParamPropertyMap subPropMap=(ParamPropertyMap)value;
+					PropertyValueMap subPropMap=(PropertyValueMap)value;
 					
 					Set<String> subPropKeys=subPropMap.keySet();
 					for(String subProp : subPropKeys)
@@ -427,7 +416,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 						}
 						catch(ConvertException e)
 						{
-							handleParamPropertyMapConvertException(sourceMap, property, e);
+							handlePropertyValueMapConvertException(sourceMap, property, e);
 						}
 					}
 				}
@@ -439,7 +428,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 					}
 					catch(ConvertException e)
 					{
-						handleParamPropertyMapConvertException(sourceMap, property, e);
+						handlePropertyValueMapConvertException(sourceMap, property, e);
 					}
 					
 					result.set(idx, element);
@@ -485,16 +474,16 @@ public class WebGenericConverter extends DefaultGenericConverter
 						}
 						catch(ConvertException e)
 						{
-							handleParamPropertyMapConvertException(sourceMap, property, e);
+							handlePropertyValueMapConvertException(sourceMap, property, e);
 						}
 					}
 				}
 				//当前属性值是属性映射表，则要将当前属性值转换为集合，并依次赋值
-				else if(value instanceof ParamPropertyMap)
+				else if(value instanceof PropertyValueMap)
 				{
-					ParamPropertyMap pppm=(ParamPropertyMap)value;
+					PropertyValueMap pppm=(PropertyValueMap)value;
 					
-					List<?> propList=convertParamPropertyMapToList(pppm, List.class, propInfo.getPropType());
+					List<?> propList=convertPropertyValueMapToList(pppm, List.class, propInfo.getPropType());
 					
 					if(propList != null)
 					{
@@ -516,7 +505,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 							}
 							catch(ConvertException e)
 							{
-								handleParamPropertyMapConvertException(sourceMap, property, e);
+								handlePropertyValueMapConvertException(sourceMap, property, e);
 							}
 						}
 					}
@@ -540,7 +529,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 					}
 					catch(ConvertException e)
 					{
-						handleParamPropertyMapConvertException(sourceMap, property, e);
+						handlePropertyValueMapConvertException(sourceMap, property, e);
 					}
 				}
 			}
@@ -550,15 +539,14 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 将参数属性映射表转换为目标映射表, <code>sourceMap</code>的关键字将被转换目标映射表的关键字，值将被转换为此关键字对应的值
+	 * 将属性值映射表转换为目标映射表, <code>sourceMap</code>的关键字将被转换目标映射表的关键字，值将被转换为此关键字对应的值
 	 * @param sourceMap
 	 * @param mapClass
 	 * @param keyClass
 	 * @param valueClass
 	 * @return
-	 * @date 2012-2-23
 	 */
-	protected Map<?, ?> convertParamPropertyMapToMap(ParamPropertyMap sourceMap, Class<?> mapClass, Class<?> keyClass, Class<?> valueClass)
+	protected Map<?, ?> convertPropertyValueMapToMap(PropertyValueMap sourceMap, Class<?> mapClass, Class<?> keyClass, Class<?> valueClass) throws ConvertException
 	{
 		if(sourceMap == null)
 			return null;
@@ -578,7 +566,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			}
 			catch(ConvertException e)
 			{
-				throw new GenericConvertException("convert '"+key+"' in param name '"+sourceMap.getFullParamName(key)+"' to Map key of type '"+SoybeanMilkUtils.toString(keyClass)+"' failed", e);
+				throw new GenericConvertException("convert '"+key+"' in key '"+sourceMap.getPropertyNamePath(key)+"' to Map key of type '"+SoybeanMilkUtils.toString(keyClass)+"' failed", e);
 			}
 			
 			try
@@ -587,7 +575,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			}
 			catch(ConvertException e)
 			{
-				handleParamPropertyMapConvertException(sourceMap, key, e);
+				handlePropertyValueMapConvertException(sourceMap, key, e);
 			}
 			
 			result.put(tk, tv);
@@ -600,7 +588,6 @@ public class WebGenericConverter extends DefaultGenericConverter
 	 * 给定的字符串是否是索引值而非属性名（全部由数字组成）
 	 * @param str
 	 * @return
-	 * @date 2012-2-19
 	 */
 	protected boolean isIndexOfProperty(String str)
 	{
@@ -639,31 +626,16 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 处理参数值转换异常
-	 * @param pv
-	 * @param e
-	 * @date 2012-2-22
-	 */
-	protected void handleParamValueConvertException(ParamValue pv, ConvertException e)
-	{
-		if(e instanceof ParamConvertException)
-			throw e;
-		else
-			throw new ParamConvertException(pv.getParamName(), e.getSourceObject(), e.getTargetType(), e.getCause());
-	}
-	
-	/**
-	 * 处理参数属性映射表异常
+	 * 处理属性值映射表转换异常
 	 * @param paramPropertyMap
 	 * @param key
 	 * @param e
-	 * @date 2012-2-22
 	 */
-	protected void handleParamPropertyMapConvertException(ParamPropertyMap paramPropertyMap, String key, ConvertException e)
+	protected void handlePropertyValueMapConvertException(PropertyValueMap paramPropertyMap, String key, ConvertException e) throws ConvertException
 	{
-		if(e instanceof ParamConvertException)
+		if(e instanceof MapConvertException)
 			throw e;
 		else
-			throw new ParamConvertException(paramPropertyMap.getFullParamName(key), e.getSourceObject(), e.getTargetType(), e.getCause());
+			throw new MapConvertException(paramPropertyMap.getPropertyNamePath(key), e.getSourceObject(), e.getTargetType(), e.getCause());
 	}
 }

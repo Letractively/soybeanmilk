@@ -28,7 +28,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toBigDecimal()
+	public void convertString_toBigDecimal() throws Exception
 	{
 		String src = "1254324.3823823";
 		
@@ -38,7 +38,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toBigInteger()
+	public void convertString_toBigInteger() throws Exception
 	{
 		String src = "12349787293841930481029348234242134";
 		
@@ -48,7 +48,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toBoolean()
+	public void convertString_toBoolean() throws Exception
 	{
 		{
 			String src = "true";
@@ -108,7 +108,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toByte()
+	public void convertString_toByte() throws Exception
 	{
 		{
 			String src = "5";
@@ -126,7 +126,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toCharacter()
+	public void convertString_toCharacter() throws Exception
 	{
 		{
 			String src = "2";
@@ -144,7 +144,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toDate()
+	public void convertString_toDate() throws Exception
 	{
 		{
 			String src = "2010";
@@ -197,7 +197,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toDouble()
+	public void convertString_toDouble() throws Exception
 	{
 		{
 			String src = "1";
@@ -233,7 +233,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toEnum()
+	public void convertString_toEnum() throws Exception
 	{
 		{
 			String src="ENUM_1";
@@ -250,7 +250,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toFloat()
+	public void convertString_toFloat() throws Exception
 	{
 		{
 			String src = "1";
@@ -278,7 +278,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toInteger()
+	public void convertString_toInteger() throws Exception
 	{
 		String src = "1";
 		
@@ -294,7 +294,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toLong()
+	public void convertString_toLong() throws Exception
 	{
 		String src = "13424235532342";
 		
@@ -310,7 +310,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toLongArray()
+	public void convertStringArray_toLongArray() throws Exception
 	{
 		String[] src=new String[]{"2342353413241234", "1342413542348779"};
 		{
@@ -329,7 +329,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toShort()
+	public void convertString_toShort() throws Exception
 	{
 		String src = "1342";
 		
@@ -345,7 +345,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toSqlDate()
+	public void convertString_toSqlDate() throws Exception
 	{
 		{
 			String src = "2010-10-12";
@@ -356,7 +356,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toSqlTime()
+	public void convertString_toSqlTime() throws Exception
 	{
 		{
 			String src = "15:30:20";
@@ -374,7 +374,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toSqlTimestamp()
+	public void convertString_toSqlTimestamp() throws Exception
 	{
 		{
 			String src = "2010-10-12 13:00:00";
@@ -393,7 +393,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toString()
+	public void convertString_toString() throws Exception
 	{
 		String src = "string_abc";
 		String dest = (String)converter.convert(src, String.class);
@@ -402,7 +402,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toAncestorType()
+	public void convertString_toAncestorType() throws Exception
 	{
 		String src = "string_abc";
 		String dest = (String)converter.convert(src, Object.class);
@@ -411,7 +411,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_emptyStringToObject()
+	public void convertString_emptyStringToObject() throws Exception
 	{
 		String src="";
 		Integer re=(Integer)converter.convert(src, Integer.class);
@@ -420,7 +420,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test(expected = GenericConvertException.class)
-	public void convertString_emptyStringToPrimitive()
+	public void convertString_emptyStringToPrimitive() throws Exception
 	{
 		String src="";
 		Boolean re=(Boolean)converter.convert(src, boolean.class);
@@ -429,7 +429,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test(expected = ConvertException.class)
-	public void convertString_invalidStringToInteger()
+	public void convertString_invalidStringToInteger() throws Exception
 	{
 		String src="sdf";
 		Integer re=(Integer)converter.convert(src, Integer.class);
@@ -438,7 +438,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toGeneric_TypeVariable()
+	public void convertString_toGeneric_TypeVariable() throws Exception
 	{
 		String src="33";
 		
@@ -451,7 +451,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toGeneric_ParameterizedType()
+	public void convertString_toGeneric_ParameterizedType() throws Exception
 	{
 		String src="33";
 		
@@ -472,7 +472,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toGeneric_GenericArrayType()
+	public void convertString_toGeneric_GenericArrayType() throws Exception
 	{
 		String src="33";
 		
@@ -493,7 +493,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toGeneric_WildCardType()
+	public void convertString_toGeneric_WildCardType() throws Exception
 	{
 		String src="33";
 		
@@ -506,7 +506,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toGeneric_GenericType()
+	public void convertString_toGeneric_GenericType() throws Exception
 	{
 		String src="33";
 		
@@ -520,7 +520,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertNull_toPrimitive()
+	public void convertNull_toPrimitive() throws Exception
 	{
 		Object src = null;
 		
@@ -539,7 +539,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toStringArray()
+	public void convertStringArray_toStringArray() throws Exception
 	{
 		String[] src = new String[]{"1254324.3823823","2342.23879102348"};
 		
@@ -550,7 +550,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toBooleanArray()
+	public void convertStringArray_toBooleanArray() throws Exception
 	{
 		{
 			String[] src = new String[]{"true","1","false","0"};
@@ -574,7 +574,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toGeneric_TypeVariable()
+	public void convertStringArray_toGeneric_TypeVariable() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -589,7 +589,7 @@ public class TestDefaultGenericConverter
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void convertStringArray_toGeneric_ParameterizedType_List()
+	public void convertStringArray_toGeneric_ParameterizedType_List() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -604,7 +604,7 @@ public class TestDefaultGenericConverter
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void convertStringArray_toGeneric_ParameterizedType_Set()
+	public void convertStringArray_toGeneric_ParameterizedType_Set() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -615,7 +615,7 @@ public class TestDefaultGenericConverter
 	}
 
 	@Test
-	public void convertStringArray_toGeneric_ParameterizedType_notSupported()
+	public void convertStringArray_toGeneric_ParameterizedType_notSupported() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -636,7 +636,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toGeneric_GenericArrayType()
+	public void convertStringArray_toGeneric_GenericArrayType() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -648,7 +648,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toGeneric_WildCardType()
+	public void convertStringArray_toGeneric_WildCardType() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -662,7 +662,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toGeneric_GenericType()
+	public void convertStringArray_toGeneric_GenericType() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -675,7 +675,7 @@ public class TestDefaultGenericConverter
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void convertStringArray_toNormalList()
+	public void convertStringArray_toNormalList() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -695,7 +695,7 @@ public class TestDefaultGenericConverter
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void convertStringArray_toNormalSet()
+	public void convertStringArray_toNormalSet() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -714,7 +714,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convert_notSupported()
+	public void convert_notSupported() throws Exception
 	{
 		int src=3355;
 		
@@ -733,7 +733,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void getProperty()
+	public void getProperty() throws Exception
 	{
 		MyBean bean=new MyBean();
 		MyBean2 bean2=new MyBean2();
@@ -779,13 +779,13 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void getProperty_nullInput()
+	public void getProperty_nullInput() throws Exception
 	{
 		converter.getProperty(null, "age.size", null);
 	}
 	
 	@Test
-	public void getProperty_notExistProperty()
+	public void getProperty_notExistProperty() throws Exception
 	{
 		MyBean bean=new MyBean();
 		bean.setId("111");
@@ -806,7 +806,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void getProperty_invalidConvert()
+	public void getProperty_invalidConvert() throws Exception
 	{
 		MyBean bean=new MyBean();
 		bean.setId("abc");
@@ -828,7 +828,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void setProperty()
+	public void setProperty() throws Exception
 	{
 		{
 			MyBean bean=new MyBean();
@@ -848,7 +848,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void setProperty_invalidConvert()
+	public void setProperty_invalidConvert() throws Exception
 	{
 		MyBean bean=new MyBean();
 		

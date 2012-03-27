@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.lang.reflect.Type;
 
 import org.soybeanMilk.core.ObjectSource;
+import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.GenericConverter;
 
 
@@ -47,8 +48,8 @@ public abstract class ConvertableObjectSource implements ObjectSource
 	}
 	
 	//@Override
-	public abstract Object get(Serializable key, Type expectType);
+	public abstract Object get(Serializable key, Type expectType) throws ObjectSourceException;
 	
 	//@Override
-	public abstract void set(Serializable key, Object obj);
+	public abstract void set(Serializable key, Object obj) throws ObjectSourceException;
 }

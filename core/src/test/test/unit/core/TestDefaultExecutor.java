@@ -12,9 +12,9 @@ import org.junit.Test;
 import org.soybeanMilk.core.DefaultExecutor;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.Execution;
-import org.soybeanMilk.core.InvocationExecuteException;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
+import org.soybeanMilk.core.exe.InvocationExecuteException;
 import org.soybeanMilk.core.os.HashMapObjectSource;
 
 
@@ -45,7 +45,7 @@ public class TestDefaultExecutor
 	 * 测试拦截器
 	 */
 	@Test
-	public void interceptorExecution()
+	public void interceptorExecution() throws Exception
 	{
 		{
 			HashMapObjectSource os=new HashMapObjectSource();
@@ -81,7 +81,7 @@ public class TestDefaultExecutor
 	}
 	
 	@Test
-	public void interceptorBefore()
+	public void interceptorBefore() throws Exception
 	{
 		{
 			HashMapObjectSource os=new HashMapObjectSource();
@@ -117,7 +117,7 @@ public class TestDefaultExecutor
 	}
 	
 	@Test
-	public void interceptorAfter()
+	public void interceptorAfter() throws Exception
 	{
 		{
 			HashMapObjectSource os=new HashMapObjectSource();
@@ -153,7 +153,7 @@ public class TestDefaultExecutor
 	}
 	
 	@Test
-	public void interceptorException()
+	public void interceptorException() throws Exception
 	{
 		{
 			HashMapObjectSource os=new HashMapObjectSource();

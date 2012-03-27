@@ -3,8 +3,8 @@ package test.unit.core;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
+import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.os.HashMapObjectSource;
 
 
@@ -16,53 +16,12 @@ public class TestHashMapObjectSource
 	@Before
 	public void setUp()
 	{
-		objSource=new HashMapObjectSource();
+		objSource=new HashMapObjectSource(new DefaultGenericConverter());
 	}
 	
 	@Test
-	public void getNoConverter()
+	public void get() throws Exception
 	{
-		{
-			Object dest=objSource.get(null, null);
-			Assert.assertNull(dest);
-		}
-		{
-			Object dest=objSource.get("key", null);
-			Assert.assertNull(dest);
-		}
-		{
-			Object dest=objSource.get("key", String.class);
-			Assert.assertNull(dest);
-		}
-		{
-			String src="hi";
-			objSource.set("key", src);
-			
-			String dest=(String)objSource.get("key", String.class);
-			Assert.assertEquals(src, dest);
-		}
-		{
-			Integer src=1;
-			
-			objSource.set("key", src);
-			Integer dest=(Integer)objSource.get("key", Integer.class);
-			Assert.assertEquals(src, dest);
-		}
-		
-		{
-			Integer src=1;
-			
-			objSource.set(1, src);
-			Integer dest=(Integer)objSource.get(1, int.class);
-			Assert.assertEquals(src, dest);
-		}
-	}
-	
-	@Test
-	public void getWithConverter()
-	{
-		addGenericConverter();
-		
 		{
 			String src="1";
 			
@@ -83,23 +42,18 @@ public class TestHashMapObjectSource
 	}
 	
 	@Test
-	public void getPrimitiveForNull()
+	public void getPrimitiveForNull() throws Exception
 	{
-		ObjectSourceException re=null;
+		GenericConvertException re=null;
 		try
 		{
 			objSource.get("key", int.class);
 		}
-		catch(ObjectSourceException e)
+		catch(GenericConvertException e)
 		{
 			re=e;
 		}
 		
-		Assert.assertTrue((re.getMessage().endsWith("but primitive type needed")));
-	}
-	
-	protected void addGenericConverter()
-	{
-		objSource.setGenericConverter(new DefaultGenericConverter());
+		Assert.assertTrue((re.getMessage().startsWith("can not convert 'null' to primitive")));
 	}
 }

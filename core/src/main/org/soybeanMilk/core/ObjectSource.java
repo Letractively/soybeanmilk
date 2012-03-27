@@ -27,15 +27,17 @@ public interface ObjectSource
 	/**
 	 * 取得对象
 	 * @param key 对象关键字
-	 * @param expectType 期望的对象类型，可能为<code>null</code>
+	 * @param expectType 期望的对象类型，如果为<code>null</code>，则表明不关心类型
 	 * @return
+	 * @throws ObjectSourceException
 	 */
-	Object get(Serializable key, Type expectType);
+	Object get(Serializable key, Type expectType) throws ObjectSourceException;
 	
 	/**
 	 * 保存对象
 	 * @param key 对象关键字
 	 * @param obj 要保存的对象
+	 * @throws ObjectSourceException
 	 */
-	void set(Serializable key, Object obj);
+	void set(Serializable key, Object obj) throws ObjectSourceException;
 }

@@ -23,15 +23,14 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
-import org.soybeanMilk.core.ConvertExecuteException;
 import org.soybeanMilk.core.ExecuteException;
-import org.soybeanMilk.core.InvocationExecuteException;
 import org.soybeanMilk.core.ObjectSource;
-import org.soybeanMilk.core.bean.ConvertException;
+import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.GenericType;
 
 /**
  * 调用，它包含执行方法（{@linkplain Method}对象）、方法的{@linkplain Arg 参数信息}、{@linkplain ResolverProvider 解决对象提供者}
+ * 
  * @author earthAngry@gmail.com
  * @date 2010-9-30
  * 
@@ -275,7 +274,7 @@ public class Invoke extends AbstractExecutable
 	 * @return
 	 * @date 2011-10-28
 	 */
-	public boolean isBreaked(ObjectSource objectSource)
+	public boolean isBreaked(ObjectSource objectSource) throws ExecuteException
 	{
 		Boolean breaked=null;
 		
@@ -293,7 +292,17 @@ public class Invoke extends AbstractExecutable
 			
 			if(breaked == null)
 			{
-				Object brkObj=objectSource.get(this.breaker, null);
+				Object brkObj=null;
+				
+				try
+				{
+					brkObj=objectSource.get(this.breaker, null);
+				}
+				catch(Exception e)
+				{
+					throw new ExecuteException(e);
+				}
+				
 				if(brkObj!=null && Boolean.TRUE.equals(brkObj))
 					breaked=true;
 			}
@@ -311,13 +320,13 @@ public class Invoke extends AbstractExecutable
 	protected void executeMethod(ObjectSource objectSource) throws ExecuteException
 	{
 		Serializable resultKey=getResultKey();
+		Object methodResult=null;
+		
+		Object[] argValues=prepareMethodArguments(objectSource);
 		
 		try
 		{
-			Object methodResult=getMethod().invoke(getResolver(objectSource), makeMethodArguments(objectSource));
-			
-			if(resultKey != null)
-				objectSource.set(resultKey, methodResult);
+			methodResult=getMethod().invoke(getResolver(objectSource), argValues);
 		}
 		catch(InvocationTargetException e)
 		{
@@ -331,16 +340,28 @@ public class Invoke extends AbstractExecutable
 		{
 			throw new ExecuteException(e);
 		}
+		
+		if(resultKey != null)
+		{
+			try
+			{
+				objectSource.set(resultKey, methodResult);
+			}
+			catch(ObjectSourceException e)
+			{
+				throw new ExecuteException(e);
+			}
+		}
 	}
 	
 	/**
 	 * 从对象源中取得方法的参数值数组
 	 * @param objectSource
 	 * @return
-	 * @throws ExecuteException
+	 * @throws ArgPrepareExecuteException
 	 * @date 2011-1-11
 	 */
-	protected Object[] makeMethodArguments(ObjectSource objectSource) throws ExecuteException
+	protected Object[] prepareMethodArguments(ObjectSource objectSource) throws ExecuteException
 	{
 		Object[] values=null;
 		
@@ -360,7 +381,7 @@ public class Invoke extends AbstractExecutable
 		}
 		
 		if(log.isDebugEnabled())
-			log.debug("construct method arguments '"+Arrays.toString(values)+"'");
+			log.debug("construct method arguments '"+SoybeanMilkUtils.toString(values)+"'");
 		
 		return values;
 	}
@@ -371,7 +392,7 @@ public class Invoke extends AbstractExecutable
 	 * @param argIdx
 	 * @param objectSource
 	 * @return
-	 * @throws ExecuteException
+	 * @throws ArgPrepareExecuteException
 	 * @date 2011-4-11
 	 */
 	protected Object getArgValueFromObjectSource(Arg[] args, int argIdx, ObjectSource objectSource) throws ExecuteException
@@ -387,9 +408,9 @@ public class Invoke extends AbstractExecutable
 		{
 			re=objectSource.get(args[argIdx].getKey(), argType);
 		}
-		catch(ConvertException e)
+		catch(ObjectSourceException e)
 		{
-			throw new ConvertExecuteException(this, argIdx, e);
+			throw new ArgPrepareExecuteException(this, argIdx, e);
 		}
 		
 		return re;

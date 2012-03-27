@@ -423,7 +423,7 @@ public class InvokeStatementParser
 			stmt=unEscape(stmt);
 			
 			if(stmt.length()<2)
-				throw new ParseException("invalid String definition "+stmt+"");
+				throw new ParseException("illegal String definition "+stmt+"");
 			
 			value=stmt.substring(1, stmt.length()-1);
 		}
@@ -432,7 +432,7 @@ public class InvokeStatementParser
 			stmt=unEscape(stmt);
 			
 			if(stmt.length() != 3)
-				throw new ParseException("invalid char definition "+stmt+"");
+				throw new ParseException("illegal char definition "+stmt+"");
 			
 			value=stmt.charAt(1);
 		}
@@ -475,7 +475,7 @@ public class InvokeStatementParser
 					int end=i+4;
 					
 					if(end > len)
-						throw new ParseException("invalid \\uxxxx encoding in \""+s+"\"");
+						throw new ParseException("illegal \\uxxxx encoding in \""+s+"\"");
 					
 					int v=0;
 					for (;i<end;i++)
@@ -496,7 +496,7 @@ public class InvokeStatementParser
 				        		v = (v << 4) + 10 + next - 'A';
 				        		break;
 				        	default:
-				        		throw new ParseException("invalid \\uxxxx encoding in \""+s+"\"");
+				        		throw new ParseException("illegal \\uxxxx encoding in \""+s+"\"");
 				        }
 					}
 					

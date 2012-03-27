@@ -2,9 +2,6 @@ package test.unit.web;
 
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 
@@ -13,7 +10,6 @@ import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 import org.soybeanMilk.web.config.WebConfiguration;
@@ -49,39 +45,12 @@ public class TestAbstractTargetHandler
 	}
 	
 	@Test
-	public void getRequestInvokeResultKey() throws Exception
-	{
-		String[] expected={"result0", "result1", "result5", "result4"};
-		WebAction webAction=(WebAction)webConfiguration.getExecutable("exe1");
-		
-		MockHttpServletRequest request=new MockHttpServletRequest();
-		MockHttpServletResponse response=new MockHttpServletResponse();
-		MockServletContext application=new MockServletContext();
-		
-		WebObjectSource webObjectSource=new DefaultWebObjectSource(request, response, application, new WebGenericConverter());
-		
-		webAction.execute(webObjectSource);
-		
-		Map<String, Object> re=abstractTargetHandler.getResultInScope(webAction, WebConstants.Scope.REQUEST, webObjectSource);
-		Set<String> reKeys=re.keySet();
-		
-		Set<String> expectedSet=new HashSet<String>();
-		for(String s : expected)
-			expectedSet.add(s);
-		
-		Set<String> actualSet=new HashSet<String>();
-		actualSet.addAll(reKeys);
-		
-		Assert.assertEquals(expectedSet, actualSet);
-	}
-	
-	@Test
 	public void getAllInvokeResultKey() throws Exception
 	{
-		String[] expected={"request.result0", "request.result1", "session.result2", "application.result3", "request.result5", "request.result4"};
+		String[] expected={"result0", "request.result1", "session.result2", "application.result3", "request.result5", "request.result4"};
 		WebAction webAction=(WebAction)webConfiguration.getExecutable("exe1");
 		
-		String[] re=abstractTargetHandler.getAllInvokeResultKey(webAction, null);
+		String[] re=abstractTargetHandler.getAllResultKeys(webAction);
 		
 		for(int i=0;i<expected.length;i++)
 		{

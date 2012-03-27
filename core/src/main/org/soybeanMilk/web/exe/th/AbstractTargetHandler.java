@@ -16,15 +16,11 @@ package org.soybeanMilk.web.exe.th;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 
-import org.soybeanMilk.SoybeanMilkUtils;
-import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.exe.Invoke;
@@ -59,28 +55,32 @@ public abstract class AbstractTargetHandler implements TargetHandler
 			throws ServletException, IOException;
 	
 	/**
-	 * 获取动作<code>webAction</code>保存到<code>scope</code>作用域内的所有对象。
+	 * 获取动作<code>webAction</code>执行时保存到{@linkplain WebObjectSource Web对象源}中的所有对象。
 	 * @param webAction
-	 * @param scope 作用域，参考{@linkplain WebConstants.Scope}类
 	 * @param webObjectSource
-	 * @return 对象映射表，它关键字的<code>scope</code>作用域前缀已被去除。
+	 * @return 对象数组，如果<code>webAction</code>没有保存任何对象，它将会是<code>null</code>
 	 * @date 2011-5-8
 	 */
-	public Map<String, Object> getResultInScope(WebAction webAction, String scope, WebObjectSource webObjectSource)
+	public Object[] getAllResults(WebAction webAction, WebObjectSource webObjectSource) throws ServletException, IOException
 	{
-		Map<String, Object> re=new HashMap<String, Object>();
+		Object[] re=null;
 		
-		String[] all=getAllInvokeResultKey(webAction, webObjectSource);
-		if(all!=null && all.length>0)
+		String[] keys=getAllResultKeys(webAction);
+		
+		if(keys!=null && keys.length>0)
 		{
-			for(String s : all)
+			re=new Object[keys.length];
+			
+			for(int i=0; i<keys.length; i++)
 			{
-				String[] scopedKey=SoybeanMilkUtils.splitByFirstAccessor(s);
-				
-				if(scopedKey[0].equalsIgnoreCase(scope))
+				try
 				{
-					Object obj=webObjectSource.get(s, null);
-					re.put(scopedKey[1], obj);
+					Object obj=webObjectSource.get(keys[i], null);
+					re[i]=obj;
+				}
+				catch(Exception e)
+				{
+					throw new ServletException(e);
 				}
 			}
 		}
@@ -92,19 +92,18 @@ public abstract class AbstractTargetHandler implements TargetHandler
 	 * 获取{@linkplain WebAction Web动作}包含的所有{@linkplain Invoke 调用}的结果关键字，
 	 * 在{@linkplain WebObjectSource Web对象源}中保存着这些关键字对应的对象。
 	 * @param webAction
-	 * @param webObjectSource
-	 * @return 结果关键字，每个关键字都会包含作用域前缀。
+	 * @return 结果关键字数组
 	 * @date 2011-4-19
 	 */
-	public String[] getAllInvokeResultKey(WebAction webAction, WebObjectSource webObjectSource)
+	public String[] getAllResultKeys(WebAction webAction)
 	{
 		List<String> reList=new ArrayList<String>();
-		findAllResultKey(reList, webAction);
+		findAllResultKeys(reList, webAction);
 		
 		return reList.toArray(new String[reList.size()]);
 	}
 	
-	private void findAllResultKey(List<String> re, WebAction webAction)
+	private void findAllResultKeys(List<String> re, WebAction webAction)
 	{
 		List<Executable> exes=webAction.getExecutables();
 		if(exes==null)
@@ -116,16 +115,11 @@ public abstract class AbstractTargetHandler implements TargetHandler
 			{
 				String resultKey=(String)((Invoke)exe).getResultKey();
 				if(resultKey != null)
-				{
-					if(SoybeanMilkUtils.splitByFirstAccessor(resultKey).length == 1)
-						resultKey=WebConstants.Scope.REQUEST+Constants.ACCESSOR+resultKey;
-					
 					re.add(resultKey);
-				}
 			}
 			else if(exe instanceof WebAction)
 			{
-				findAllResultKey(re, (WebAction)exe);
+				findAllResultKeys(re, (WebAction)exe);
 			}
 			else
 				throw new UnsupportedOperationException("unknown Executable object of type "+exe.getClass().getName());
@@ -140,7 +134,7 @@ public abstract class AbstractTargetHandler implements TargetHandler
 	 * @return 目标URL，没有则返回<code>null</code>
 	 * @date 2011-4-19
 	 */
-	public String getActualTargetUrl(WebAction webAction, ObjectSource objectSource)
+	public String getActualTargetUrl(WebAction webAction, ObjectSource objectSource) throws ServletException, IOException
 	{
 		String re=null;
 		
@@ -157,7 +151,7 @@ public abstract class AbstractTargetHandler implements TargetHandler
 	 * @param objectSource
 	 * @return
 	 */
-	public static String evaluateVariableUrl(String variableUrl, ObjectSource objectSource)
+	protected String evaluateVariableUrl(String variableUrl, ObjectSource objectSource) throws ServletException, IOException
 	{
 		if(variableUrl == null)
 			return null;
@@ -179,8 +173,15 @@ public abstract class AbstractTargetHandler implements TargetHandler
 				String var=variableUrl.substring(start, j);
 				if(c == WebConstants.VARIABLE_QUOTE_RIGHT)
 				{
-					String value=(String)objectSource.get(var, String.class);
-					result.append(value==null ? "null" : value);
+					try
+					{
+						String value=(String)objectSource.get(var, String.class);
+						result.append(value==null ? "null" : value);
+					}
+					catch(Exception e)
+					{
+						throw new ServletException(e);
+					}
 				}
 				else
 				{

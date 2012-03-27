@@ -15,9 +15,9 @@ import org.junit.Test;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.web.WebObjectSource;
-import org.soybeanMilk.web.bean.ParamConvertException;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 import org.soybeanMilk.web.os.DefaultWebObjectSource;
+import org.soybeanMilk.web.os.ParamIllegalException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -42,7 +42,7 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void getServletObject()
+	public void getServletObject() throws Exception
 	{
 		//request
 		{
@@ -96,7 +96,7 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void convertServletObject()
+	public void convertServletObject() throws Exception
 	{
 		final JavaBean staticJavaBean=new JavaBean();
 		
@@ -137,7 +137,7 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void convertServletObjectThrow()
+	public void convertServletObjectThrow() throws Exception
 	{
 		String exceptionPrefix="can not find Converter for converting";
 		
@@ -201,7 +201,7 @@ public class TestDefaultWebObjectSource
 	
 	@SuppressWarnings("rawtypes")
 	@Test
-	public void getRawRequestParameterMap()
+	public void getRawRequestParameterMap() throws Exception
 	{
 		String value="12345";
 		request.setParameter("value", value);
@@ -214,7 +214,7 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetFromParam()
+	public void setAndGetFromParam() throws Exception
 	{
 		String value="12345";
 		
@@ -270,43 +270,43 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void getFromParamWithInvalidParamValue() throws Exception
+	public void getFromParamWithIllegalParamValue() throws Exception
 	{
-		String value="invalidValue";
+		String value="illegalValue";
 		
 		{
 			request.setParameter("value", value);
 			
-			ParamConvertException re=null;
+			ParamIllegalException re=null;
 			try
 			{
 				webObjectSource.get("param.value", int.class);
 			}
-			catch(ParamConvertException e)
+			catch(ParamIllegalException e)
 			{
 				re=e;
 			}
 			
 			Assert.assertEquals("value", re.getParamName());
-			Assert.assertEquals(value, re.getSourceObject());
+			Assert.assertEquals(value, re.getParamValue());
 			Assert.assertEquals(int.class, re.getTargetType());
 		}
 		
 		{
 			request.setParameter("my.set.value", value);
 			
-			ParamConvertException re=null;
+			ParamIllegalException re=null;
 			try
 			{
 				webObjectSource.get("param.my.set.value", Boolean.class);
 			}
-			catch(ParamConvertException e)
+			catch(ParamIllegalException e)
 			{
 				re=e;
 			}
 			
 			Assert.assertEquals("my.set.value", re.getParamName());
-			Assert.assertEquals(value, re.getSourceObject());
+			Assert.assertEquals(value, re.getParamValue());
 			Assert.assertEquals(Boolean.class, re.getTargetType());
 		}
 		
@@ -316,18 +316,18 @@ public class TestDefaultWebObjectSource
 			request.setParameter("yourBean.id", new String[]{value});
 			request.setParameter("yourBean.name", new String[]{"tom"});
 			
-			ParamConvertException re=null;
+			ParamIllegalException re=null;
 			try
 			{
 				webObjectSource.get("param", MyBean.class);
 			}
-			catch(ParamConvertException e)
+			catch(ParamIllegalException e)
 			{
 				re=e;
 			}
 			
 			Assert.assertEquals("yourBean.id", re.getParamName());
-			Assert.assertEquals(value, re.getSourceObject());
+			Assert.assertEquals(value, re.getParamValue());
 			Assert.assertEquals(Integer.class, re.getTargetType());
 		}
 		
@@ -337,30 +337,30 @@ public class TestDefaultWebObjectSource
 			request.setParameter("my.myBean.yourBean.id", new String[]{value});
 			request.setParameter("my.myBean.yourBean.name", new String[]{"tom"});
 			
-			ParamConvertException re=null;
+			ParamIllegalException re=null;
 			try
 			{
 				webObjectSource.get("param.my.myBean", MyBean.class);
 			}
-			catch(ParamConvertException e)
+			catch(ParamIllegalException e)
 			{
 				re=e;
 			}
 			
 			Assert.assertEquals("my.myBean.yourBean.id", re.getParamName());
-			Assert.assertEquals(value, re.getSourceObject());
+			Assert.assertEquals(value, re.getParamValue());
 			Assert.assertEquals(Integer.class, re.getTargetType());
 		}
 	}
 	
 	@Test
-	public void getFromParamWithNotExistParam()
+	public void getFromParamWithNotExistParam() throws Exception
 	{
 		webObjectSource.get("param.noValue", Integer.class);
 	}
 	
 	@Test
-	public void setAndGetFromRequest()
+	public void setAndGetFromRequest() throws Exception
 	{
 		String value="12345";
 		
@@ -407,7 +407,7 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetFromSession()
+	public void setAndGetFromSession() throws Exception
 	{
 		String value="12345";
 		
@@ -447,7 +447,7 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetFromApplication()
+	public void setAndGetFromApplication() throws Exception
 	{
 		String value="12345";
 		
@@ -487,7 +487,7 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetWithNotScopedKey()
+	public void setAndGetWithNotScopedKey() throws Exception
 	{
 		String value="12345";
 		
@@ -510,7 +510,7 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void setAndGetForUnknownScopeKey()
+	public void setAndGetForUnknownScopeKey() throws Exception
 	{
 		String value="12345";
 		

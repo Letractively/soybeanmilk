@@ -22,9 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.GenericType;
-import org.soybeanMilk.web.bean.ParamConvertException;
-import org.soybeanMilk.web.bean.ParamPropertyMap;
-import org.soybeanMilk.web.bean.ParamValue;
+import org.soybeanMilk.web.bean.MapConvertException;
+import org.soybeanMilk.web.bean.PropertyValueMap;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 
 import test.unit.core.MockGenericArrayType;
@@ -43,14 +42,14 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertSimple_arrayToNoArrayObject()
+	public void convertSimple_arrayToNoArrayObject() throws Exception
 	{
 		Integer dest=(Integer)converter.convert(new String[]{"12345", "56789"}, int.class);
 		Assert.assertEquals(12345, dest.intValue());
 	}
 	
 	@Test
-	public void convertSimple_arrayToNoArrayObject_1()
+	public void convertSimple_arrayToNoArrayObject_1() throws Exception
 	{
 		Integer dest=(Integer)converter.convert(new String[]{""}, Integer.class);
 		Assert.assertNull(dest);
@@ -90,13 +89,13 @@ public class TestWebGenericConverter
 		Map<String,Object> src=new HashMap<String, Object>();
 		src.put("javaBean.def", 356);
 		
-		GenericConvertException re=null;
+		Exception re=null;
 		
 		try
 		{
 			converter.convert(src, JavaBean2.class);
 		}
-		catch(GenericConvertException e)
+		catch(Exception e)
 		{
 			re=e;
 		}
@@ -259,7 +258,7 @@ public class TestWebGenericConverter
 	}
 
 	@Test
-	public void convertMap_toJavaBeanArray()
+	public void convertMap_toJavaBeanArray() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -395,69 +394,39 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertParamValue_toAtomic() throws Exception
-	{
-		ParamValue src=new ParamValue("id", "3");
-		
-		Integer re=(Integer)converter.convert(src, Integer.class);
-		
-		Assert.assertEquals(src.getValue(), re.toString());
-	}
-
-	@Test
-	public void convertParamValue_srcIsInvalidValue() throws Exception
-	{
-		ParamValue pv=new ParamValue("id", "invalidValue");
-		
-		ParamConvertException re=null;
-		try
-		{
-			converter.convert(pv, int.class);
-		}
-		catch(ParamConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertEquals("id", re.getParamName());
-		Assert.assertEquals("invalidValue", re.getSourceObject());
-		Assert.assertEquals(int.class, re.getTargetType());
-	}
-	
-	@Test
-	public void convertMap_toJavaBean_srcArrayPropertyContainInvalidValue() throws Exception
+	public void convertMap_toJavaBean_srcArrayPropertyContainIllegalValue() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
 		String[] id=new String[]{"1"};
 		String[] name=new String[]{"jack"};
-		String[] simpleCollectionProperty=new String[]{"1","invalidValue","9"};
+		String[] simpleCollectionProperty=new String[]{"1","illegalValue","9"};
 		
 		src.put("filter.id", id);
 		src.put("filter.name", name);
 		
 		src.put("filter.simpleArray", simpleCollectionProperty);
 		
-		ParamPropertyMap ppm=new ParamPropertyMap("filter");
-		ppm.filter(src);
+		PropertyValueMap ppm=new PropertyValueMap("filter");
+		ppm.resolve(src);
 		
-		ParamConvertException re=null;
+		MapConvertException re=null;
 		try
 		{
 			converter.convert(ppm, ComplexJavaBean.class);
 		}
-		catch(ParamConvertException e)
+		catch(MapConvertException e)
 		{
 			re=e;
 		}
 		
-		Assert.assertEquals("filter.simpleArray", re.getParamName());
-		Assert.assertEquals("invalidValue", re.getSourceObject());
+		Assert.assertEquals("filter.simpleArray", re.getKey());
+		Assert.assertEquals("illegalValue", re.getSourceObject());
 		Assert.assertEquals(Integer.class, re.getTargetType());
 	}
 	
 	@Test
-	public void convertMap_toJavaBean_srcComplexPropertyContainInvalidValue() throws Exception
+	public void convertMap_toJavaBean_srcComplexPropertyContainIllegalValue() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -465,7 +434,7 @@ public class TestWebGenericConverter
 		String[] name=new String[]{"jack"};
 		String[] simpleCollectionProperty=new String[]{"1","3","9"};
 		
-		String[] cmplexCollectionProperty_id=new String[]{"2","invalidValue","7"};
+		String[] cmplexCollectionProperty_id=new String[]{"2","illegalValue","7"};
 		String[] cmplexCollectionProperty_name=new String[]{"aaa","bbb","ccc"};
 		
 		src.put("filter.id", id);
@@ -478,21 +447,21 @@ public class TestWebGenericConverter
 		src.put("filter.javaBean2List.id", cmplexCollectionProperty_id);
 		src.put("filter.javaBean2List.name", cmplexCollectionProperty_name);
 		
-		ParamPropertyMap ppm=new ParamPropertyMap("filter");
-		ppm.filter(src);
+		PropertyValueMap ppm=new PropertyValueMap("filter");
+		ppm.resolve(src);
 		
-		ParamConvertException re=null;
+		MapConvertException re=null;
 		try
 		{
 			converter.convert(ppm, ComplexJavaBean.class);
 		}
-		catch(ParamConvertException e)
+		catch(MapConvertException e)
 		{
 			re=e;
 		}
 		
-		Assert.assertEquals("filter.javaBean2List.id", re.getParamName());
-		Assert.assertEquals("invalidValue", re.getSourceObject());
+		Assert.assertEquals("filter.javaBean2List.id", re.getKey());
+		Assert.assertEquals("illegalValue", re.getSourceObject());
 		Assert.assertEquals(int.class, re.getTargetType());
 	}
 	
@@ -630,175 +599,175 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanCollection_keyComplexSemantics_invalidValue() throws Exception
+	public void convertMap_toGeneric_JavaBeanCollection_keyComplexSemantics_illegalValue() throws Exception
 	{
 		{
 			Map<String,Object> src=new HashMap<String, Object>();
 			
-			src.put("0.simpleArray.0", "invalidValue");
+			src.put("0.simpleArray.0", "illegalValue");
 			
-			ParamConvertException re=null;
+			MapConvertException re=null;
 			try
 			{
 				converter.convert(src, ComplexJavaBean[].class);
 			}
-			catch(ParamConvertException e)
+			catch(MapConvertException e)
 			{
 				re=e;
 			}
 			
-			Assert.assertEquals(re.getParamName(), "0.simpleArray.0");
-			Assert.assertEquals(re.getSourceObject(), "invalidValue");
-			Assert.assertEquals(re.getTargetType(), Integer.class);
+			Assert.assertEquals("0.simpleArray.0", re.getKey());
+			Assert.assertEquals("illegalValue", re.getSourceObject());
+			Assert.assertEquals(Integer.class, re.getTargetType());
 		}
 		
 		{
 			Map<String,Object> src=new HashMap<String, Object>();
 			
-			src.put("0.simpleList.0", "invalidValue");
+			src.put("0.simpleList.0", "illegalValue");
 			
-			ParamConvertException re=null;
+			MapConvertException re=null;
 			try
 			{
 				converter.convert(src, ComplexJavaBean[].class);
 			}
-			catch(ParamConvertException e)
+			catch(MapConvertException e)
 			{
 				re=e;
 			}
 			
-			Assert.assertEquals(re.getParamName(), "0.simpleList.0");
-			Assert.assertEquals(re.getSourceObject(), "invalidValue");
-			Assert.assertEquals(re.getTargetType(), Integer.class);
+			Assert.assertEquals("0.simpleList.0", re.getKey());
+			Assert.assertEquals("illegalValue", re.getSourceObject());
+			Assert.assertEquals(Integer.class, re.getTargetType());
 		}
 		
 		{
 			Map<String,Object> src=new HashMap<String, Object>();
 			
-			src.put("0.simpleSet.0", "invalidValue");
+			src.put("0.simpleSet.0", "illegalValue");
 			
-			ParamConvertException re=null;
+			MapConvertException re=null;
 			try
 			{
 				converter.convert(src, ComplexJavaBean[].class);
 			}
-			catch(ParamConvertException e)
+			catch(MapConvertException e)
 			{
 				re=e;
 			}
 			
-			Assert.assertEquals(re.getParamName(), "0.simpleSet.0");
-			Assert.assertEquals(re.getSourceObject(), "invalidValue");
-			Assert.assertEquals(re.getTargetType(), Integer.class);
+			Assert.assertEquals("0.simpleSet.0", re.getKey());
+			Assert.assertEquals("illegalValue", re.getSourceObject());
+			Assert.assertEquals(Integer.class, re.getTargetType());
 		}
 
 		{
 			Map<String,Object> src=new HashMap<String, Object>();
 			
-			src.put("0.simpleMap.key", "invalidValue");
+			src.put("0.simpleMap.key", "illegalValue");
 			
-			ParamConvertException re=null;
+			MapConvertException re=null;
 			try
 			{
 				converter.convert(src, ComplexJavaBean[].class);
 			}
-			catch(ParamConvertException e)
+			catch(MapConvertException e)
 			{
 				re=e;
 			}
 			
-			Assert.assertEquals(re.getParamName(), "0.simpleMap.key");
-			Assert.assertEquals(re.getSourceObject(), "invalidValue");
-			Assert.assertEquals(re.getTargetType(), Integer.class);
+			Assert.assertEquals("0.simpleMap.key", re.getKey());
+			Assert.assertEquals("illegalValue", re.getSourceObject());
+			Assert.assertEquals(Integer.class, re.getTargetType());
 		}
 		
 		{
 			Map<String,Object> src=new HashMap<String, Object>();
 			
-			src.put("0.javaBean2Array.0.id", "invalidValue");
+			src.put("0.javaBean2Array.0.id", "illegalValue");
 			
-			ParamConvertException re=null;
+			MapConvertException re=null;
 			try
 			{
 				converter.convert(src, ComplexJavaBean[].class);
 			}
-			catch(ParamConvertException e)
+			catch(MapConvertException e)
 			{
 				re=e;
 			}
 			
-			Assert.assertEquals(re.getParamName(), "0.javaBean2Array.0.id");
-			Assert.assertEquals(re.getSourceObject(), "invalidValue");
-			Assert.assertEquals(re.getTargetType(), int.class);
+			Assert.assertEquals("0.javaBean2Array.0.id", re.getKey());
+			Assert.assertEquals("illegalValue", re.getSourceObject());
+			Assert.assertEquals(int.class, re.getTargetType());
 		}
 		
 		{
 			Map<String,Object> src=new HashMap<String, Object>();
 			
-			src.put("0.javaBean2List.0.id", "invalidValue");
+			src.put("0.javaBean2List.0.id", "illegalValue");
 			
-			ParamConvertException re=null;
+			MapConvertException re=null;
 			try
 			{
 				converter.convert(src, ComplexJavaBean[].class);
 			}
-			catch(ParamConvertException e)
+			catch(MapConvertException e)
 			{
 				re=e;
 			}
 			
-			Assert.assertEquals(re.getParamName(), "0.javaBean2List.0.id");
-			Assert.assertEquals(re.getSourceObject(), "invalidValue");
-			Assert.assertEquals(re.getTargetType(), int.class);
+			Assert.assertEquals("0.javaBean2List.0.id", re.getKey());
+			Assert.assertEquals("illegalValue",re.getSourceObject());
+			Assert.assertEquals(int.class, re.getTargetType());
 		}
 		
 		{
 			Map<String,Object> src=new HashMap<String, Object>();
 			
-			src.put("0.javaBean2Set.0.id", "invalidValue");
+			src.put("0.javaBean2Set.0.id", "illegalValue");
 			
-			ParamConvertException re=null;
+			MapConvertException re=null;
 			try
 			{
 				converter.convert(src, ComplexJavaBean[].class);
 			}
-			catch(ParamConvertException e)
+			catch(MapConvertException e)
 			{
 				re=e;
 			}
 			
-			Assert.assertEquals(re.getParamName(), "0.javaBean2Set.0.id");
-			Assert.assertEquals(re.getSourceObject(), "invalidValue");
-			Assert.assertEquals(re.getTargetType(), int.class);
+			Assert.assertEquals("0.javaBean2Set.0.id", re.getKey());
+			Assert.assertEquals("illegalValue", re.getSourceObject());
+			Assert.assertEquals(int.class, re.getTargetType());
 		}
 		
 		{
 			Map<String,Object> src=new HashMap<String, Object>();
 			
-			src.put("0.javaBean2Map.0.id", "invalidValue");
+			src.put("0.javaBean2Map.0.id", "illegalValue");
 			
-			ParamConvertException re=null;
+			MapConvertException re=null;
 			try
 			{
 				converter.convert(src, ComplexJavaBean[].class);
 			}
-			catch(ParamConvertException e)
+			catch(MapConvertException e)
 			{
 				re=e;
 			}
 			
-			Assert.assertEquals(re.getParamName(), "0.javaBean2Map.0.id");
-			Assert.assertEquals(re.getSourceObject(), "invalidValue");
-			Assert.assertEquals(re.getTargetType(), int.class);
+			Assert.assertEquals("0.javaBean2Map.0.id", re.getKey());
+			Assert.assertEquals("illegalValue", re.getSourceObject());
+			Assert.assertEquals(int.class, re.getTargetType());
 		}
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanCollection_keyComplexSemantics_invalidKey() throws Exception
+	public void convertMap_toGeneric_JavaBeanCollection_keyComplexSemantics_illegalKey() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
-		src.put("0.javaBean2Map.invalidKey.id", "1");
+		src.put("0.javaBean2Map.illegalKey.id", "1");
 		
 		GenericConvertException re=null;
 		try
@@ -810,7 +779,7 @@ public class TestWebGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue(( re.getMessage().startsWith("convert 'invalidKey' in param name '0.javaBean2Map.invalidKey' to Map key of type") ));
+		Assert.assertTrue(( re.getMessage().startsWith("convert 'illegalKey' in key '0.javaBean2Map.illegalKey' to Map key of type 'java.lang.Integer' failed") ));
 	}
 	
 	@Test
@@ -1486,7 +1455,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanIsGeneric()
+	public void convertMap_toGeneric_JavaBeanIsGeneric() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -1511,7 +1480,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toRawMap()
+	public void convertMap_toRawMap() throws Exception
 	{
 		HashMap<String,Integer> src=new HashMap<String, Integer>();
 		

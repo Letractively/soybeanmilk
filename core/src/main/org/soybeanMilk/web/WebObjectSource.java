@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.soybeanMilk.core.ObjectSource;
 
 /**
- * WEB对象源，它实例的生命周期应该与一次请求的生命周期相同
+ * Web对象源，它实例的生命周期应该与一次请求的生命周期相同
  * @author earthAngry@gmail.com
  * @date 2011-12-11
  */

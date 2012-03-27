@@ -16,7 +16,9 @@ package org.soybeanMilk.web.os;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -27,13 +29,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.ObjectSourceException;
+import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.WebObjectSource;
-import org.soybeanMilk.web.bean.ParamPropertyMap;
-import org.soybeanMilk.web.bean.ParamValue;
+import org.soybeanMilk.web.bean.MapConvertException;
 
 /**
  * 默认的{@linkplain WebObjectSource WEB对象源}实现。
@@ -202,7 +204,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	
 	//@Override
 	@SuppressWarnings("unchecked")
-	public Object get(Serializable key, Type expectType)
+	public Object get(Serializable key, Type expectType) throws ObjectSourceException
 	{
 		if(key == null)
 			throw new ObjectSourceException("[key] must not be null");
@@ -214,7 +216,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		
 		if(WebConstants.Scope.PARAM.equalsIgnoreCase(scopedKeys[0]))
 		{
-			result=getParameterByFilter(getRequest().getParameterMap(), (scopedKeys.length > 1 ? scopedKeys[1] : null));
+			result=getParamFilterValue(getRequest().getParameterMap(), (scopedKeys.length > 1 ? scopedKeys[1] : null));
 		}
 		else if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scopedKeys[0]))
 		{
@@ -240,7 +242,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scopedKeys[0]))
 		{
 			if(scopedKeys.length > 1)
-				throw new ObjectSourceException("key '"+key+"' is invalid, get object from "
+				throw new ObjectSourceException("key '"+key+"' is illegal, get object from "
 						+HttpServletResponse.class.getSimpleName()+" is not supported");
 			else
 				result=getResponse();
@@ -248,7 +250,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		else if(WebConstants.Scope.OBJECT_SOURCE.equalsIgnoreCase(scopedKeys[0]))
 		{
 			if(scopedKeys.length > 1)
-				throw new ObjectSourceException("key '"+key+"' is invalid, get object from "
+				throw new ObjectSourceException("key '"+key+"' is illegal, get object from "
 						+WebObjectSource.class.getSimpleName()+" is not supported");
 			else
 				result=this;
@@ -267,7 +269,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	}
 	
 	//@Override
-	public void set(Serializable key, Object obj)
+	public void set(Serializable key, Object obj)  throws ObjectSourceException
 	{
 		if(key == null)
 			throw new IllegalArgumentException("[key] must not be null");
@@ -280,7 +282,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 			if(scopedKeys.length > 1)
 				setServletObjAttrExpression(getRequest(), scopedKeys[1], obj, true);
 			else
-				throw new ObjectSourceException("key '"+key+"' is invalid, you can not replace '"
+				throw new ObjectSourceException("key '"+key+"' is illegal, you can not replace '"
 						+WebConstants.Scope.REQUEST+"' scope object");
 		}
 		else if(WebConstants.Scope.SESSION.equalsIgnoreCase(scopedKeys[0]))
@@ -288,7 +290,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 			if(scopedKeys.length > 1)
 				setServletObjAttrExpression(getRequest().getSession(), scopedKeys[1], obj, true);
 			else
-				throw new ObjectSourceException("key '"+key+"' is invalid, you can not replace '"
+				throw new ObjectSourceException("key '"+key+"' is illegal, you can not replace '"
 						+WebConstants.Scope.SESSION+"' scope object");
 		}
 		else if(WebConstants.Scope.APPLICATION.equalsIgnoreCase(scopedKeys[0]))
@@ -296,22 +298,22 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 			if(scopedKeys.length > 1)
 				setServletObjAttrExpression(getApplication(), scopedKeys[1], obj, true);
 			else
-				throw new ObjectSourceException("key '"+key+"' is invalid, you can not replace '"
+				throw new ObjectSourceException("key '"+key+"' is illegal, you can not replace '"
 						+WebConstants.Scope.APPLICATION+"' scope object");
 		}
 		else if(WebConstants.Scope.PARAM.equalsIgnoreCase(scopedKeys[0]))
 		{
-			throw new ObjectSourceException("key '"+key+"' is invalid, set object to '"
+			throw new ObjectSourceException("key '"+key+"' is illegal, set object to '"
 					+WebConstants.Scope.PARAM+"' scope is not supported");
 		}
 		else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scopedKeys[0]))
 		{
-			throw new ObjectSourceException("key '"+key+"' is invalid, set object to '"
+			throw new ObjectSourceException("key '"+key+"' is illegal, set object to '"
 					+WebConstants.Scope.RESPONSE+"' scope is not supported");
 		}
 		else if(WebConstants.Scope.OBJECT_SOURCE.equalsIgnoreCase(scopedKeys[0]))
 		{
-			throw new ObjectSourceException("key '"+key+"' is invalid, set object to '"
+			throw new ObjectSourceException("key '"+key+"' is illegal, set object to '"
 					+WebConstants.Scope.OBJECT_SOURCE+"' scope is not supported");
 		}
 		else
@@ -328,7 +330,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	 * @date 2012-3-24
 	 */
 	@SuppressWarnings("unchecked")
-	protected Object getObjectWithScopeUnknownKey(String key)
+	protected Object getObjectWithScopeUnknownKey(String key) throws ObjectSourceException
 	{
 		Object result=getServletObjAttrExpression(getRequest(), key);
 		
@@ -341,7 +343,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 				result=getServletObjAttrExpression(getApplication(), key);
 				
 				if(result == null)
-					result=getParameterByFilter(getRequest().getParameterMap(), key);
+					result=getParamFilterValue(getRequest().getParameterMap(), key);
 			}
 		}
 		return result;
@@ -353,7 +355,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	 * @param value
 	 * @date 2012-3-24
 	 */
-	protected void setObjectWithScopeUnknownKey(String key, Object value)
+	protected void setObjectWithScopeUnknownKey(String key, Object value) throws ObjectSourceException
 	{
 		boolean success=setServletObjAttrExpression(getRequest(), key, value, false);
 		
@@ -377,7 +379,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	 * @param attrExpression
 	 * @return
 	 */
-	protected Object getServletObjAttrExpression(Object servletObj, String attrExpression)
+	protected Object getServletObjAttrExpression(Object servletObj, String attrExpression) throws ObjectSourceException
 	{
 		if(attrExpression == null)
 			return null;
@@ -437,7 +439,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	 * @return 是否成功保存
 	 * @date 2012-3-25
 	 */
-	protected boolean setServletObjAttrExpression(Object servletObj, String attrExpression, Object value, boolean attrExpressionLiteral)
+	protected boolean setServletObjAttrExpression(Object servletObj, String attrExpression, Object value, boolean attrExpressionLiteral) throws ObjectSourceException
 	{
 		if(attrExpression == null)
 			return false;
@@ -497,30 +499,45 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		
 		return result;
 	}
-
+	
 	/**
-	 * 获取请求参数过滤后的对象。<br>
-	 * 如果<code>paramFilter</code>是一个明确的关键字（映射表中有该关键字的值），它将返回一个{@linkplain ParamValue}对象；<br>
-	 * 否则，它将返回一个以<code>paramFilter</code>作为过滤器的{@linkplain ParamPropertyMap}对象。
-	 * 
+	 * 获取请求参数过滤值对象。
 	 * @param paramMap 参数映射表
-	 * @param paramFilter 参数筛选器，只有以此筛选器开头的参数关键字才会被保留，如果为null，则表明不做筛选
+	 * @param filter 参数筛选器，只有以此筛选器开头的参数关键字才会被保留，如果为<code>null</code>或空，则表明不做筛选
 	 * @return
 	 */
-	protected Object getParameterByFilter(Map<String, ?> paramMap, String paramFilter)
+	protected ParamFilterValue getParamFilterValue(Map<String, ?> paramMap, String filter)
 	{
-		Object result=paramMap.get(paramFilter);
+		ParamFilterValue result=null;
 		
-		if(result != null)
+		if(filter==null || filter.length()==0)
 		{
-			result=new ParamValue(paramFilter, result);
+			result=new ParamFilterValue(filter, paramMap);
 		}
 		else
 		{
-			ParamPropertyMap ppm=new ParamPropertyMap(null, paramFilter);
-			ppm.filter(paramMap);
-			
-			result=ppm;
+			Object explictValue=paramMap.get(filter);
+			if(explictValue != null)
+			{
+				result=new ParamFilterValue(filter, explictValue);
+			}
+			else
+			{
+				//按照访问符表达式过滤
+				filter=filter+WebConstants.ACCESSOR;
+				Map<String, Object> fm=new HashMap<String, Object>();
+				int fl=filter.length();
+				
+				Set<String> keys=paramMap.keySet();
+				
+				for(String key : keys)
+				{
+					if(key!=null && key.length()>fl && key.startsWith(filter))
+						fm.put(key.substring(fl), paramMap.get(key));
+				}
+				
+				result=new ParamFilterValue(filter, (fm.size() == 0 ? null : fm));
+			}
 		}
 		
 		return result;
@@ -532,7 +549,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	 * @param attr 属性名
 	 * @date 2010-12-30
 	 */
-	protected Object getServletObjAttr(Object servletObj, String attr)
+	protected Object getServletObjAttr(Object servletObj, String attr) throws ObjectSourceException
 	{
 		if(servletObj instanceof HttpServletRequest)
 			return ((HttpServletRequest)servletObj).getAttribute(attr);
@@ -551,7 +568,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	 * @param value
 	 * @date 2010-12-30
 	 */
-	protected void setServletObjAttr(Object servletObj, String attr, Object value)
+	protected void setServletObjAttr(Object servletObj, String attr, Object value) throws ObjectSourceException
 	{
 		if(servletObj instanceof HttpServletRequest)
 			((HttpServletRequest)servletObj).setAttribute(attr, value);
@@ -564,15 +581,56 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	}
 	
 	/**
-	 * 将从对象源中获取的对象转换到目标类型的对象
+	 * 将从对象源中获取的对象转换为目标类型的对象
 	 * @param sourceObj
 	 * @param targetType
 	 * @return
-	 * @date 2012-3-24
+	 * @date 2012-3-27
 	 */
-	protected Object convertGotObject(Object sourceObj, Type targetType)
+	protected Object convertGotObject(Object sourceObj, Type targetType) throws ObjectSourceException
 	{
-		return getGenericConverter().convert(sourceObj, targetType);
+		Object result=null;
+		
+		if(sourceObj instanceof ParamFilterValue)
+		{
+			ParamFilterValue pfv=(ParamFilterValue)sourceObj;
+			
+			try
+			{
+				result=getGenericConverter().convert(pfv.getValue(), targetType);
+			}
+			catch(ConvertException e)
+			{
+				String paramName=pfv.getFilter();
+				
+				if(e instanceof MapConvertException)
+				{
+					String key=((MapConvertException)e).getKey();
+					
+					if(paramName == null)
+						paramName=key;
+					else if(key != null)
+					{
+						paramName+=key;
+					}
+				}
+				
+				throw new ParamIllegalException(paramName, e.getSourceObject(), e.getTargetType(), e);
+			}
+		}
+		else
+		{
+			try
+			{
+				result=getGenericConverter().convert(sourceObj, targetType);
+			}
+			catch(ConvertException e)
+			{
+				throw new ObjectSourceException(e);
+			}
+		}
+		
+		return result;
 	}
 	
 	/**
@@ -582,9 +640,16 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	 * @return
 	 * @date 2012-3-25
 	 */
-	protected Object getProperty(Object obj, String propExpression)
+	protected Object getProperty(Object obj, String propExpression) throws ObjectSourceException
 	{
-		return getGenericConverter().getProperty(obj, propExpression, null);
+		try
+		{
+			return getGenericConverter().getProperty(obj, propExpression, null);
+		}
+		catch(ConvertException e)
+		{
+			throw new ObjectSourceException(e);
+		}
 	}
 	
 	/**
@@ -594,8 +659,15 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	 * @param value
 	 * @date 2012-3-25
 	 */
-	protected void setProperty(Object obj, String propExpression, Object value)
+	protected void setProperty(Object obj, String propExpression, Object value) throws ObjectSourceException
 	{
-		getGenericConverter().setProperty(obj, propExpression, value);
+		try
+		{
+			getGenericConverter().setProperty(obj, propExpression, value);
+		}
+		catch(ConvertException e)
+		{
+			throw new ObjectSourceException(e);
+		}
 	}
 }

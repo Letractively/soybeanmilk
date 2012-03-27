@@ -19,7 +19,7 @@ package org.soybeanMilk.core;
  * @author earthAngry@gmail.com
  * @date 2010-10-28
  */
-public class ExecutableNotFoundException extends RuntimeException
+public class ExecutableNotFoundException extends Exception
 {
 	private static final long serialVersionUID = -1301466907843994358L;
 	

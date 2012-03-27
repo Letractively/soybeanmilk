@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.ObjectSourceException;
+import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.GenericConverter;
 
 
@@ -52,21 +53,10 @@ public class HashMapObjectSource extends ConvertableObjectSource
 	{
 		Object re = source.get(key);
 		
-		if(expectType != null)
-		{
-			GenericConverter cvt = getGenericConverter();
-			if(cvt == null)
-			{
-				if(re==null && SoybeanMilkUtils.isPrimitive(expectType))
-					throw new ObjectSourceException("the object of key '"+key+"' is null, but primitive type needed");
-				else
-					return re;
-			}
-			else
-				re = cvt.convert(re, expectType);
-		}
+		re=convertGotObject(re, expectType);
+		
 		if(log.isDebugEnabled())
-			log.debug("get '"+re+"' with key '"+key+"' from "+this);
+			log.debug("get object '"+SoybeanMilkUtils.toString(re)+"' from '"+SoybeanMilkUtils.toString(this)+"' with key '"+SoybeanMilkUtils.toString(key)+"'");
 		
 		return re;
 	}
@@ -77,6 +67,29 @@ public class HashMapObjectSource extends ConvertableObjectSource
 		source.put(key, obj);
 		
 		if(log.isDebugEnabled())
-			log.debug("save '"+obj+"' with key '"+key+"' into "+this);
+			log.debug("set object '"+SoybeanMilkUtils.toString(obj)+"' to '"+SoybeanMilkUtils.toString(this)+"' with key '"+SoybeanMilkUtils.toString(key)+"'");
+	}
+	
+	/**
+	 * 将从对象源中获取的对象转换到目标类型的对象
+	 * @param sourceObj
+	 * @param targetType
+	 * @return
+	 * @throws ObjectSourceException
+	 * @date 2012-3-27
+	 */
+	protected Object convertGotObject(Object sourceObj, Type targetType) throws ObjectSourceException
+	{
+		if(targetType == null)
+			return sourceObj;
+		
+		try
+		{
+			return getGenericConverter().convert(sourceObj, targetType);
+		}
+		catch(ConvertException e)
+		{
+			throw new ObjectSourceException(e);
+		}
 	}
 }

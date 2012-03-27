@@ -22,7 +22,7 @@ import java.lang.reflect.Type;
  * @date 2011-1-12
  *
  */
-public class ConvertException extends RuntimeException
+public class ConvertException extends Exception
 {
 	private static final long serialVersionUID = 5534640330364525246L;
 	

@@ -19,7 +19,7 @@ package org.soybeanMilk.core;
  * @author earthAngry@gmail.com
  * @date 2010-9-30
  */
-public class ObjectSourceException extends RuntimeException
+public class ObjectSourceException extends Exception
 {
 	private static final long serialVersionUID = 1061248512227569434L;
 
@@ -28,18 +28,18 @@ public class ObjectSourceException extends RuntimeException
 		super();
 	}
 
-	public ObjectSourceException(String arg0, Throwable arg1)
+	public ObjectSourceException(String message, Throwable cause)
 	{
-		super(arg0, arg1);
+		super(message, cause);
 	}
 
-	public ObjectSourceException(String arg0)
+	public ObjectSourceException(String message)
 	{
-		super(arg0);
+		super(message);
 	}
 
-	public ObjectSourceException(Throwable arg0)
+	public ObjectSourceException(Throwable cause)
 	{
-		super(arg0);
+		super(cause);
 	}
 }

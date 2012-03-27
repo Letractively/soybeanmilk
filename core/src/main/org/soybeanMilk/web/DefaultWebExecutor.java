@@ -139,7 +139,16 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 				for(int i=0;i<pathNodes.length;i++)
 				{
 					if(pathNodes[i].isVariable())
-						objSource.set(pathNodes[i].getNodeValue(), valuePath.getPathNode(i).getNodeValue());
+					{
+						try
+						{
+							objSource.set(pathNodes[i].getNodeValue(), valuePath.getPathNode(i).getNodeValue());
+						}
+						catch(Exception e)
+						{
+							throw new ExecuteException(e);
+						}
+					}
 				}
 			}
 		}

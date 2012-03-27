@@ -86,18 +86,15 @@ public class DefaultExecutor implements Executor
 		Execution context=null;
 		if(itptInfo!=null && itptInfo.getExecutionKey()!=null)
 		{
-			//它可能是持久存储的
-			context=(Execution)objSource.get(itptInfo.getExecutionKey(), null);
-			if(context == null)
+			context=new Execution(executable, objSource, null);
+			
+			try
 			{
-				context=new Execution(executable, objSource, null);
 				objSource.set(itptInfo.getExecutionKey(), context);
 			}
-			else
+			catch(Exception e)
 			{
-				context.setExecutable(executable);
-				context.setObjectSource(objSource);
-				context.setExecuteException(null);
+				throw new ExecuteException(e);
 			}
 		}
 		

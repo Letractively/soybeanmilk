@@ -503,40 +503,40 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	/**
 	 * 获取请求参数过滤值对象。
 	 * @param paramMap 参数映射表
-	 * @param filter 参数筛选器，只有以此筛选器开头的参数关键字才会被保留，如果为<code>null</code>或空，则表明不做筛选
+	 * @param paramNameFilter 参数名筛选器，只有以此筛选器开头的参数关键字才会被保留，如果为<code>null</code>或空，则表明不做筛选
 	 * @return
 	 */
-	protected ParamFilterValue getParamFilterValue(Map<String, ?> paramMap, String filter)
+	protected ParamFilterValue getParamFilterValue(Map<String, ?> paramMap, String paramNameFilter)
 	{
 		ParamFilterValue result=null;
 		
-		if(filter==null || filter.length()==0)
+		if(paramNameFilter==null || paramNameFilter.length()==0)
 		{
-			result=new ParamFilterValue(filter, paramMap);
+			result=new ParamFilterValue(paramNameFilter, paramMap);
 		}
 		else
 		{
-			Object explictValue=paramMap.get(filter);
+			Object explictValue=paramMap.get(paramNameFilter);
 			if(explictValue != null)
 			{
-				result=new ParamFilterValue(filter, explictValue);
+				result=new ParamFilterValue(paramNameFilter, explictValue);
 			}
 			else
 			{
 				//按照访问符表达式过滤
-				filter=filter+WebConstants.ACCESSOR;
+				paramNameFilter=paramNameFilter+WebConstants.ACCESSOR;
 				Map<String, Object> fm=new HashMap<String, Object>();
-				int fl=filter.length();
+				int fl=paramNameFilter.length();
 				
 				Set<String> keys=paramMap.keySet();
 				
 				for(String key : keys)
 				{
-					if(key!=null && key.length()>fl && key.startsWith(filter))
+					if(key!=null && key.length()>fl && key.startsWith(paramNameFilter))
 						fm.put(key.substring(fl), paramMap.get(key));
 				}
 				
-				result=new ParamFilterValue(filter, (fm.size() == 0 ? null : fm));
+				result=new ParamFilterValue(paramNameFilter, (fm.size() == 0 ? null : fm));
 			}
 		}
 		
@@ -591,32 +591,12 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	{
 		Object result=null;
 		
-		if(sourceObj instanceof ParamFilterValue)
+		if(targetType == null)
 		{
-			ParamFilterValue pfv=(ParamFilterValue)sourceObj;
-			
-			try
-			{
-				result=getGenericConverter().convert(pfv.getValue(), targetType);
-			}
-			catch(ConvertException e)
-			{
-				String paramName=pfv.getFilter();
-				
-				if(e instanceof MapConvertException)
-				{
-					String key=((MapConvertException)e).getKey();
-					
-					if(paramName == null)
-						paramName=key;
-					else if(key != null)
-					{
-						paramName+=key;
-					}
-				}
-				
-				throw new ParamIllegalException(paramName, e.getSourceObject(), e.getTargetType(), e);
-			}
+			if(sourceObj instanceof ParamFilterValue)
+				result=((ParamFilterValue)sourceObj).getValue();
+			else
+				result=sourceObj;
 		}
 		else
 		{
@@ -626,7 +606,26 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 			}
 			catch(ConvertException e)
 			{
-				throw new ObjectSourceException(e);
+				if(sourceObj instanceof ParamFilterValue)
+				{
+					ParamFilterValue pfv=(ParamFilterValue)sourceObj;
+					
+					String paramName=pfv.getFilter();
+					
+					if(e instanceof MapConvertException)
+					{
+						String key=((MapConvertException)e).getKey();
+						
+						if(paramName == null)
+							paramName=key;
+						else if(key != null)
+							paramName+=key;
+					}
+					
+					throw new ParamIllegalException(paramName, e.getSourceObject(), e.getTargetType(), e);
+				}
+				else
+					throw new ObjectSourceException(e);
 			}
 		}
 		

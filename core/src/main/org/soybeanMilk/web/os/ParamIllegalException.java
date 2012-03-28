@@ -6,7 +6,7 @@ import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.web.WebObjectSource;
 
 /**
- * Web对象源异常，{@linkplain WebObjectSource Web对象源}在将请求参数转换为某类型的对象时由于参数值非法而出现异常。
+ * 请求参数非法异常，{@linkplain WebObjectSource Web对象源}在将请求参数转换为某类型的对象时由于参数值非法而出现异常。
  * 
  * @author earthAngry@gmail.com
  * @date 2012-3-27
@@ -49,7 +49,7 @@ public class ParamIllegalException extends ObjectSourceException
 	}
 
 	/**
-	 * 获取参数名
+	 * 获取参数名。
 	 * @return
 	 * @date 2012-3-27
 	 */
@@ -62,7 +62,7 @@ public class ParamIllegalException extends ObjectSourceException
 	}
 
 	/**
-	 * 获取参数值，此异常即是由于这个参数值转换为目标类型时导致的
+	 * 获取参数值，此异常即是由于这个参数值无法转换为目标类型而导致的。
 	 * @return
 	 * @date 2012-3-27
 	 */
@@ -75,7 +75,7 @@ public class ParamIllegalException extends ObjectSourceException
 	}
 
 	/**
-	 * 获取参数目标类型，此异常即是由于参数值转换为这个类型的对象时导致的
+	 * 获取参数目标类型，此异常即是由于参数值无法转换为这个类型的对象而导致的。
 	 * @return
 	 * @date 2012-3-27
 	 */

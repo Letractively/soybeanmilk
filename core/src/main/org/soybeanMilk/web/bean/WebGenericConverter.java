@@ -20,6 +20,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +39,9 @@ import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.GenericType;
 import org.soybeanMilk.core.bean.PropertyInfo;
+import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.WebObjectSource;
+import org.soybeanMilk.web.os.ParamFilterValue;
 
 /**
  * WEB通用转换器，除了继承的转换支持，它还支持将参数映射表（{@link Map Map&lt;String, Object&gt;}）对象转换为JavaBean对象、
@@ -142,24 +145,15 @@ public class WebGenericConverter extends DefaultGenericConverter
 				log.debug("'"+SoybeanMilkUtils.toString(sourceObj)+"' is an array while the target not, so it's first element will be used for converting");
 			
 			sourceObj=(Array.getLength(sourceObj) == 0 ? null : Array.get(sourceObj, 0));
-			
 			result=convert(sourceObj, targetType);
 		}
-		else if(sourceObj instanceof Map)
+		else if(sourceObj instanceof ParamFilterValue)
 		{
-			PropertyValueMap pvm=null;
-			
-			if(sourceObj instanceof PropertyValueMap)
-			{
-				pvm=(PropertyValueMap)sourceObj;
-			}
-			else
-			{
-				pvm=new PropertyValueMap();
-				pvm.resolve((Map<String, Object>)sourceObj);
-			}
-			
-			result=convertPropertyValueMap(pvm, targetType);
+			result=convertParamFilterValue((ParamFilterValue)sourceObj, targetType);
+		}
+		else if(sourceObj instanceof Map<?, ?>)
+		{
+			result=convertMap((Map<String, ?>)sourceObj, targetType);
 		}
 		else if(sourceObj instanceof HttpServletRequest)
 		{
@@ -190,12 +184,40 @@ public class WebGenericConverter extends DefaultGenericConverter
 	}
 	
 	/**
-	 * 将属性值映射表转换成目标类型的对象
-	 * @param sourceMap 源属性值映射表
+	 * 转换请求参数过滤值
+	 * @param pfv
+	 * @param targetType
+	 * @return
+	 * @throws ConvertException
+	 * @date 2012-3-28
+	 */
+	@SuppressWarnings("unchecked")
+	protected Object convertParamFilterValue(ParamFilterValue pfv, Type targetType) throws ConvertException
+	{
+		Object result=null;
+		
+		String filter=pfv.getFilter();
+		Object value=pfv.getValue();
+		
+		if(value instanceof Map<?, ?>)
+		{
+			//过滤后的参数映射表必须是清洁的
+			value=new PropertyValueMap((Map<String, ?>)value, (filter!=null && filter.length()!=0));
+			result=convert(value, targetType);
+		}
+		else
+			result=convert(value, targetType);
+		
+		return result;
+	}
+	
+	/**
+	 * 将射表转换成目标类型的对象
+	 * @param sourceMap 源映射表
 	 * @param targetType
 	 * @return
 	 */
-	protected Object convertPropertyValueMap(PropertyValueMap sourceMap, Type targetType) throws ConvertException
+	protected Object convertMap(Map<String, ?> sourceMap, Type targetType) throws ConvertException
 	{
 		Object result = null;
 		
@@ -206,20 +228,27 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		else
 		{
+			PropertyValueMap pvm=null;
+			
+			if(sourceMap instanceof PropertyValueMap)
+				pvm=(PropertyValueMap)sourceMap;
+			else
+				pvm=new PropertyValueMap(sourceMap);
+			
 			if(targetType instanceof Class<?>)
 			{
-				result=convertPropertyValueMapToClass(sourceMap, (Class<?>)targetType);
+				result=convertPropertyValueMapToClass(pvm, (Class<?>)targetType);
 			}
 			else if(targetType instanceof GenericType)
 			{
-				result=convertPropertyValueMapToGenericType(sourceMap, (GenericType)targetType);
+				result=convertPropertyValueMapToGenericType(pvm, (GenericType)targetType);
 			}
 			else if(targetType instanceof ParameterizedType
 					|| targetType instanceof GenericArrayType
 					|| targetType instanceof TypeVariable<?>
 					|| targetType instanceof WildcardType)
 			{
-				result=convertPropertyValueMapToGenericType(sourceMap, GenericType.getGenericType(targetType, null));
+				result=convertPropertyValueMapToGenericType(pvm, GenericType.getGenericType(targetType, null));
 			}
 			else
 				throw new GenericConvertException("converting '"+SoybeanMilkUtils.toString(sourceMap)+"' to type '"+SoybeanMilkUtils.toString(targetType)+"' is not supported");
@@ -259,7 +288,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			for(String property : propertyKeys)
 			{
 				PropertyInfo propInfo=null;
-				if(sourceMap.isRoot())
+				if(!sourceMap.isCleaned())
 				{
 					propInfo=beanInfo.getSubPropertyInfo(property);
 					
@@ -440,7 +469,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 					continue;
 				
 				PropertyInfo propInfo=null;
-				if(sourceMap.isRoot())
+				if(!sourceMap.isCleaned())
 				{
 					propInfo=beanInfo.getSubPropertyInfo(property);
 					
@@ -637,5 +666,147 @@ public class WebGenericConverter extends DefaultGenericConverter
 			throw e;
 		else
 			throw new MapConvertException(paramPropertyMap.getPropertyNamePath(key), e.getSourceObject(), e.getTargetType(), e.getCause());
+	}
+	
+	/**
+	 * 属性值映射表，它是关键字为<i>访问符表达式</i>映射表的分解结果。<br>
+	 * 它的关键字表示某对象的某个属性名，而关键字对应的值则是这个对象该属性的值（或者是可以转换为该属性值的某个对象）。
+	 * 它有一个特殊用途的{@linkplain #clean}属性，用以标识属性值映射表是否是清洁的，清洁的属性值映射表在转换为某对象时，
+	 * 如果它的某个关键字找不到对应的对象属性名，转换将被终止；而如果属性值映射表不是清洁的，找不到对应对象属性名的关键字将被忽略。
+	 * 
+	 * @author earthAngry@gmail.com
+	 * @date 2012-3-27
+	 */
+	protected static class PropertyValueMap extends HashMap<String, Object>
+	{
+		private static final long serialVersionUID = 1L;
+		
+		/**此属性值映射表的属性名*/
+		private String propertyName;
+		
+		/**父属性值映射表*/
+		private PropertyValueMap parent;
+		
+		/**是否是清洁的*/
+		private boolean cleaned;
+		
+		/**
+		 * 由源映射表创建属性值映射表
+		 * @param map 源映射表，它是关键字具有<i>访问符表达式</i>语义
+		 */
+		public PropertyValueMap(Map<String, ?> map)
+		{
+			this(map, false);
+		}
+		
+		/**
+		 * 由源映射表创建属性值映射表
+		 * @param map 源映射表，它是关键字具有<i>访问符表达式</i>语义
+		 * @param cleaned 源映射表是否是清洁的
+		 */
+		public PropertyValueMap(Map<String, ?> map, boolean cleaned)
+		{
+			super();
+			
+			this.cleaned=cleaned;
+			this.resolve(map);
+		}
+		
+		/**
+		 * 内部使用的构造器
+		 */
+		private PropertyValueMap(String propertyName, PropertyValueMap parent)
+		{
+			super();
+			this.propertyName=propertyName;
+			this.parent = parent;
+			this.cleaned=true;
+		}
+		
+		/**
+		 * 获取某个属性的属性名路径。
+		 * @param propertyName
+		 * @return
+		 */
+		public String getPropertyNamePath(String propertyName)
+		{
+			String result=null;
+			
+			if(this.parent != null)
+				result=this.parent.getPropertyNamePath(this.propertyName);
+			else
+				result=this.propertyName;
+			
+			if(result==null || result.length()==0)
+				return propertyName;
+			else
+				return result+WebConstants.ACCESSOR+propertyName;
+		}
+		
+		public boolean isCleaned() {
+			return cleaned;
+		}
+
+		public void setCleaned(boolean cleaned) {
+			this.cleaned = cleaned;
+		}
+
+		public String getPropertyName() {
+			return propertyName;
+		}
+
+		public void setPropertyName(String propertyName) {
+			this.propertyName = propertyName;
+		}
+
+		public PropertyValueMap getParent() {
+			return parent;
+		}
+
+		public void setParent(PropertyValueMap parent) {
+			this.parent = parent;
+		}
+		
+		/**
+		 * 分解给定的关键字为<i>访问符表达式</i>的映射表。
+		 * @param map 映射表，它的关键字具有<i>访问符表达式</i>语义
+		 */
+		protected void resolve(Map<String, ?> map)
+		{
+			Set<String> keys=map.keySet();
+			
+			for(String key : keys)
+			{
+				String[] propKeys=SoybeanMilkUtils.splitAccessExpression(key);
+				
+				PropertyValueMap parent=this;
+				
+				for(int i=0; i<propKeys.length; i++)
+				{
+					if(i == propKeys.length-1)
+					{
+						parent.put(propKeys[i], map.get(key));
+					}
+					else
+					{
+						PropertyValueMap tmp=(PropertyValueMap)parent.get(propKeys[i]);
+						if(tmp == null)
+						{
+							tmp=new PropertyValueMap(propKeys[i], parent);
+							parent.put(propKeys[i], tmp);
+						}
+						
+						parent=tmp;
+					}
+				}
+			}
+		}
+		
+		@Override
+		public String toString()
+		{
+			return getClass().getSimpleName()+" [propertyName=" + getPropertyName()
+					+ ", cleaned="+cleaned+", " + super.toString() + "]";
+		}
 	}
 }

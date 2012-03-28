@@ -199,30 +199,6 @@ public class TestDefaultWebObjectSource
 		}
 	}
 	
-	@SuppressWarnings("rawtypes")
-	@Test
-	public void getRawRequestParameterMap() throws Exception
-	{
-		String value="12345";
-		request.setParameter("value", value);
-		
-		Map src=request.getParameterMap();
-		
-		{
-			Map dest=(Map)webObjectSource.get("param", Map.class);
-			
-			Assert.assertEquals(src.get(value), dest.get(value));
-			Assert.assertEquals(src, dest);
-		}
-		
-		{
-			Map dest=(Map)webObjectSource.get("param", null);
-			
-			Assert.assertEquals(src.get(value), dest.get(value));
-			Assert.assertEquals(src, dest);
-		}
-	}
-	
 	@Test
 	public void getFromParam() throws Exception
 	{
@@ -278,9 +254,80 @@ public class TestDefaultWebObjectSource
 			Assert.assertEquals("tom", dest.getYourBean().getName());
 		}
 	}
+
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void getFromParam_rawParameterMap() throws Exception
+	{
+		String value="12345";
+		request.setParameter("value", value);
+		
+		Map src=request.getParameterMap();
+		
+		{
+			Map dest=(Map)webObjectSource.get("param", Map.class);
+			
+			Assert.assertEquals(src, dest);
+			Assert.assertEquals(src.get(value), dest.get(value));
+		}
+		
+		{
+			Map dest=(Map)webObjectSource.get("param", null);
+			
+			Assert.assertEquals(src, dest);
+			Assert.assertEquals(src.get(value), dest.get(value));
+		}
+	}
 	
 	@Test
-	public void getFromParamWithIllegalParamValue() throws Exception
+	public void getFromParam_targetTypeIsNull_singleParamValue() throws Exception
+	{
+		String name="paramName";
+		String[] value={"value"};
+		
+		request.setParameter(name, value);
+		
+		Object re=webObjectSource.get("param."+name, null);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void getFromParam_targetTypeIsNull_mapParamValue() throws Exception
+	{
+		String[] value1={"value1"};
+		String[] value2={"value2"};
+		
+		request.setParameter("paramName.aaa", value1);
+		request.setParameter("paramName.bbb", value2);
+		
+		@SuppressWarnings("unchecked")
+		Map<String, ?> re=(Map<String, ?>)webObjectSource.get("param.paramName", null);
+		
+		Assert.assertEquals(2, re.size());
+		Assert.assertEquals(value1, re.get("aaa"));
+		Assert.assertEquals(value2, re.get("bbb"));
+	}
+	
+	@Test
+	public void getFromParam_targetTypeIsRawMap() throws Exception
+	{
+		String[] value1={"value1"};
+		String[] value2={"value2"};
+		
+		request.setParameter("paramName.aaa", value1);
+		request.setParameter("paramName.bbb", value2);
+		
+		@SuppressWarnings("unchecked")
+		Map<String, ?> re=(Map<String, ?>)webObjectSource.get("param.paramName", Map.class);
+		
+		Assert.assertEquals(2, re.size());
+		Assert.assertEquals(value1, re.get("aaa"));
+		Assert.assertEquals(value2, re.get("bbb"));
+	}
+	
+	@Test
+	public void getFromParam_paramValueIsIllegal() throws Exception
 	{
 		String value="illegalValue";
 		
@@ -364,7 +411,7 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void getFromParamWithNotExistParam() throws Exception
+	public void getFromParam_paramValueInexist() throws Exception
 	{
 		Object re=webObjectSource.get("param.noValue", Integer.class);
 		

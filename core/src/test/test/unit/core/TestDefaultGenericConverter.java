@@ -419,22 +419,43 @@ public class TestDefaultGenericConverter
 		Assert.assertNull(re);
 	}
 	
-	@Test(expected = GenericConvertException.class)
+	@Test
 	public void convertString_emptyStringToPrimitive() throws Exception
 	{
 		String src="";
-		Boolean re=(Boolean)converter.convert(src, boolean.class);
 		
-		Assert.assertNull(re);
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.convert(src, boolean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().endsWith("to primitive type 'boolean'")) );
 	}
 	
-	@Test(expected = ConvertException.class)
+	@Test
 	public void convertString_invalidStringToInteger() throws Exception
 	{
 		String src="sdf";
-		Integer re=(Integer)converter.convert(src, Integer.class);
 		
-		Assert.assertNull(re);
+		ConvertException re=null;
+		
+		try
+		{
+			converter.convert(src, Integer.class);
+		}
+		catch(ConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertEquals(src, re.getSourceObject());
+		Assert.assertEquals(Integer.class, re.getTargetType());
 	}
 	
 	@Test

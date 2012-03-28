@@ -1,8 +1,5 @@
 package test.unit.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import junit.framework.Assert;
 
 import org.apache.commons.logging.Log;
@@ -10,7 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.DefaultExecutor;
-import org.soybeanMilk.core.ExecuteException;
+import org.soybeanMilk.core.ExecutableNotFoundException;
 import org.soybeanMilk.core.Execution;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
@@ -41,207 +38,203 @@ public class TestDefaultExecutor
 		}
 	}
 	
-	/**
-	 * 测试拦截器
-	 */
 	@Test
-	public void interceptorExecution() throws Exception
+	public void execute_inexistentExecutableName() throws Exception
 	{
+		HashMapObjectSource os=new HashMapObjectSource();
+		
+		ExecutableNotFoundException re=null;
+		
+		try
 		{
-			HashMapObjectSource os=new HashMapObjectSource();
-			
-			try
-			{
-				executor.execute(KEY_EXE_HELLO, os);
-			}
-			catch(Exception e)
-			{
-				log.error("",e);
-			}
-			
-			Assert.assertNotNull(os.get(KEY_EXECUTION, null));
+			executor.execute("inexistentExe", os);
+		}
+		catch(ExecutableNotFoundException e)
+		{
+			re=e;
 		}
 		
-		{
-			executor.getConfiguration().getInterceptorInfo().setExecutionKey(null);
-			
-			HashMapObjectSource os=new HashMapObjectSource();
-			
-			try
-			{
-				executor.execute(KEY_EXE_HELLO, os);
-			}
-			catch(Exception e)
-			{
-				log.error("",e);
-			}
-			
-			Assert.assertNull(os.get(KEY_EXECUTION, null));
-		}
+		Assert.assertEquals("inexistentExe", re.getExecutableName());
 	}
 	
 	@Test
-	public void interceptorBefore() throws Exception
+	public void execute_setGenericConverterToObjectSource_autoIfConvertableObjectSource() throws Exception
 	{
-		{
-			HashMapObjectSource os=new HashMapObjectSource();
-			
-			try
-			{
-				executor.execute(KEY_EXE_HELLO, os);
-			}
-			catch(Exception e)
-			{
-				log.error("",e);
-			}
-			
-			Execution execution=(Execution)os.get(KEY_EXECUTION, null);
-			Assert.assertEquals(execution.toString(), os.get("before", null));
-		}
+		HashMapObjectSource os=new HashMapObjectSource();
 		
-		{
-			executor.getConfiguration().getInterceptorInfo().setBeforeHandler(null);
-			
-			HashMapObjectSource os=new HashMapObjectSource();
-			try
-			{
-				executor.execute(KEY_EXE_HELLO, os);
-			}
-			catch(Exception e)
-			{
-				log.error("",e);
-			}
-			
-			Assert.assertNull(os.get("before", null));
-		}
+		executor.execute(KEY_EXE_HELLO, os);
+		
+		Assert.assertTrue((executor.getConfiguration().getGenericConverter() == os.getGenericConverter()));
 	}
 	
 	@Test
-	public void interceptorAfter() throws Exception
+	public void execute_executionIsCreated() throws Exception
 	{
-		{
-			HashMapObjectSource os=new HashMapObjectSource();
-			
-			try
-			{
-				executor.execute(KEY_EXE_HELLO, os);
-			}
-			catch(Exception e)
-			{
-				log.error("",e);
-			}
-			
-			Execution execution=(Execution)os.get(KEY_EXECUTION, null);
-			Assert.assertEquals(execution.toString(), os.get("after", null));
-		}
+		HashMapObjectSource os=new HashMapObjectSource();
+		executor.execute(KEY_EXE_HELLO, os);
 		
-		{
-			executor.getConfiguration().getInterceptorInfo().setAfterHandler(null);
-			
-			HashMapObjectSource os=new HashMapObjectSource();
-			try
-			{
-				executor.execute(KEY_EXE_HELLO, os);
-			}
-			catch(Exception e)
-			{
-				log.error("",e);
-			}
-			
-			Assert.assertNull(os.get("after", null));
-		}
+		Execution re=(Execution)os.get(KEY_EXECUTION, null);
+		
+		Assert.assertEquals(os, re.getObjectSource());
+		Assert.assertEquals(KEY_EXE_HELLO, re.getExecutable().getName());
+		Assert.assertNull(re.getExecuteException());
 	}
 	
 	@Test
-	public void interceptorException() throws Exception
+	public void execute_executionIsCreatedEachExecute() throws Exception
 	{
-		{
-			HashMapObjectSource os=new HashMapObjectSource();
-			
-			try
-			{
-				executor.execute("helloThrow", os);
-			}
-			catch(Exception e)
-			{
-				log.error("",e);
-			}
-			
-			Execution execution=(Execution)os.get(KEY_EXECUTION, null);
-			
-			Assert.assertEquals(execution.toString(), os.get("exception", null));
-		}
+		Execution re0=null;
+		Execution re1=null;
 		
-		{
-			executor.getConfiguration().getInterceptorInfo().setExceptionHandler(null);
-			
-			HashMapObjectSource os=new HashMapObjectSource();
-			try
-			{
-				executor.execute("helloThrow", os);
-			}
-			catch(Exception e){}
-			
-			Assert.assertNull(os.get("exception", null));
-		}
+		HashMapObjectSource os=new HashMapObjectSource();
+		
+		executor.execute(KEY_EXE_HELLO, os);
+		re0=(Execution)os.get(KEY_EXECUTION, null);
+		
+		executor.execute(KEY_EXE_HELLO, os);
+		re1=(Execution)os.get(KEY_EXECUTION, null);
+		
+		Assert.assertTrue( re0!=null && re1!=null && re0!=re1 );
 	}
 	
 	@Test
-	public void testInterceptorRuntimeException() throws Exception
+	public void execute_executionNotCreatedIfExecutionKeyIsNull() throws Exception
 	{
+		executor.getConfiguration().getInterceptorInfo().setExecutionKey(null);
+		
+		HashMapObjectSource os=new HashMapObjectSource();
+		
+		executor.execute(KEY_EXE_HELLO, os);
+		
+		Assert.assertNull(os.get(KEY_EXECUTION, null));
+	}
+	
+	@Test
+	public void execute_beforeInterceptorNotNull() throws Exception
+	{
+		HashMapObjectSource os=new HashMapObjectSource();
+		
+		executor.execute(KEY_EXE_HELLO, os);
+		
+		Assert.assertEquals(ResolverForTest.beforeResultVal, os.get(ResolverForTest.beforeResultKey, null));
+	}
+	
+	@Test
+	public void execute_beforeInterceptorIsNull() throws Exception
+	{
+		executor.getConfiguration().getInterceptorInfo().setBeforeHandler(null);
+		
+		HashMapObjectSource os=new HashMapObjectSource();
+		
+		executor.execute(KEY_EXE_HELLO, os);
+		
+		Assert.assertNull(os.get(ResolverForTest.beforeResultKey, null));
+	}
+	
+	@Test
+	public void execute_afterInterceptorNotNull() throws Exception
+	{
+		HashMapObjectSource os=new HashMapObjectSource();
+		
+		executor.execute(KEY_EXE_HELLO, os);
+		
+		Assert.assertEquals(ResolverForTest.afterResultVal, os.get(ResolverForTest.afterResultKey, null));
+	}
+	
+	@Test
+	public void execute_afterInterceptorIsNull() throws Exception
+	{
+		executor.getConfiguration().getInterceptorInfo().setAfterHandler(null);
+		
+		HashMapObjectSource os=new HashMapObjectSource();
+		
+		executor.execute(KEY_EXE_HELLO, os);
+		
+		Assert.assertNull(os.get(ResolverForTest.afterResultKey, null));
+	}
+	
+	@Test
+	public void execute_exceptionInterceptorNotNull() throws Exception
+	{
+		HashMapObjectSource os=new HashMapObjectSource();
+		
+		executor.execute("helloThrow", os);
+		
+		Assert.assertEquals(ResolverForTest.exceptionResultVal, os.get(ResolverForTest.exceptionResultKey, null));
+	}
+	
+	@Test
+	public void execute_exceptionInterceptorIsNull() throws Exception
+	{
+		executor.getConfiguration().getInterceptorInfo().setExceptionHandler(null);
+		
 		HashMapObjectSource os=new HashMapObjectSource();
 		
 		try
 		{
-			executor.execute("helloThrowRuntime", os);
+			executor.execute("helloThrow", os);
 		}
-		catch(ExecuteException e)
-		{
-			log.error("",e);
-		}
+		catch(InvocationExecuteException e){}
 		
-		ExecuteException execution=(ExecuteException)((Execution)os.get(KEY_EXECUTION, null)).getExecuteException();
-		
-		Assert.assertTrue( execution instanceof InvocationExecuteException );
+		Assert.assertNull(os.get(ResolverForTest.exceptionResultKey, null));
 	}
 	
 	@Test
-	public void execute() throws Exception
+	public void execute_exceptionIsThrownIfNoExceptionInterceptor() throws Exception
 	{
-		//参数化类型，默认不支持
+		executor.getConfiguration().getInterceptorInfo().setExceptionHandler(null);
+		
+		HashMapObjectSource os=new HashMapObjectSource();
+		
+		InvocationExecuteException re=null;
+		try
 		{
-			HashMapObjectSource os=new HashMapObjectSource();
-			os.set("list", new ArrayList<String>());
-			
-			Exception re=null;
-			try
-			{
-				executor.execute("helloParameterized", os);
-			}
-			catch(Exception e1)
-			{
-				re=e1;
-			}
-			
-			Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting '") );
+			executor.execute("helloThrow", os);
 		}
+		catch(InvocationExecuteException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getCause() instanceof UnsupportedOperationException) );
+	}
+	
+	@Test
+	public void execute_exceptionIsCaughtIfExceptionInterceptorNotNull() throws Exception
+	{
+		HashMapObjectSource os=new HashMapObjectSource();
+		
+		executor.execute("helloThrow", os);
+		
+		Execution re=(Execution)os.get(KEY_EXECUTION, null);
+		
+		Assert.assertTrue( (re.getExecuteException().getCause() instanceof UnsupportedOperationException) );
 	}
 	
 	public static class ResolverForTest
 	{
-		public String before(Execution execution)
+		public static final String beforeResultKey="before";
+		public static final String beforeResultVal="beforeRe";
+		
+		public static final String afterResultKey="after";
+		public static final String afterResultVal="afterRe";
+		
+		public static final String exceptionResultKey="exception";
+		public static final String exceptionResultVal="exceptionRe";
+		
+		public String before()
 		{
-			return execution==null ? null : execution.toString();
+			return beforeResultVal;
 		}
 		
-		public String after(Execution execution)
+		public String after()
 		{
-			return execution==null ? null : execution.toString();
+			return afterResultVal;
 		}
 		
-		public String exception(Execution execution)
+		public String exception()
 		{
-			return execution==null ? null : execution.toString();
+			return exceptionResultVal;
 		}
 		
 		public void hello(){}
@@ -250,12 +243,5 @@ public class TestDefaultExecutor
 		{
 			throw new UnsupportedOperationException();
 		}
-		
-		public void helloThrowRuntime()
-		{
-			throw new NullPointerException("helloThrowRuntime");
-		}
-		
-		public void helloParameterized(List<String> list){}
 	}
 }

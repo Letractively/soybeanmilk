@@ -16,15 +16,15 @@
 	<executables>
 		
 		<invoke name="before">
-			before=resolver.before(execution);
+			before=resolver.before();
 		</invoke>
 		
 		<invoke name="after">
-			after=resolver.after(execution);
+			after=resolver.after();
 		</invoke>
 		
 		<invoke name="exception">
-			exception=resolver.exception(execution);
+			exception=resolver.exception();
 		</invoke>
 		
 		<action name="hello">
@@ -36,18 +36,6 @@
 		<action name="helloThrow">
 			<invoke>
 				resolver.helloThrow();
-			</invoke>
-		</action>
-		
-		<action name="helloThrowRuntime">
-			<invoke>
-				resolver.helloThrowRuntime();
-			</invoke>
-		</action>
-		
-		<action name="helloParameterized">
-			<invoke>
-				resolver.helloParameterized(list);
 			</invoke>
 		</action>
 		

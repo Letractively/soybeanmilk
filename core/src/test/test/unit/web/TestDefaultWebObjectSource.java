@@ -1,6 +1,5 @@
 package test.unit.web;
 
-import java.lang.reflect.Type;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -12,17 +11,14 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.soybeanMilk.core.bean.Converter;
-import org.soybeanMilk.core.bean.GenericConverter;
-import org.soybeanMilk.web.WebObjectSource;
+import org.soybeanMilk.core.ObjectSource;
+import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 import org.soybeanMilk.web.os.DefaultWebObjectSource;
 import org.soybeanMilk.web.os.ParamIllegalException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
-
-import test.unit.web.TestWebGenericConverter.JavaBean;
 
 public class TestDefaultWebObjectSource
 {
@@ -79,29 +75,21 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void get_paramScope_keyHasMultiValue() throws Exception
+	public void get_paramScope_keyHasMultiValue_targetIsRawMap() throws Exception
 	{
 		request.setParameter("key.k0", "v0");
-		request.setParameter("key.k1", "v1");
+		request.setParameter("key.k1.k11", "v1");
 		request.setParameter("ignored", "111");
 		
-		Map<String, String[]> re=webObjectSource.get("param.key", null);
+		Map<String, String[]> re=webObjectSource.get("param.key", Map.class);
 		
 		Assert.assertEquals("2", re.size()+"");
 		Assert.assertEquals("v0", re.get("k0")[0]);
-		Assert.assertEquals("v1", re.get("k1")[0]);
+		Assert.assertEquals("v1", re.get("k1.k11")[0]);
 	}
 	
 	@Test
-	public void get_paramScope_keyHasNoValue() throws Exception
-	{
-		Object re=webObjectSource.get("param.key", Integer.class);
-		
-		Assert.assertNull(re);
-	}
-	
-	@Test
-	public void get_paramScope_expectTypeNotNull() throws Exception
+	public void get_paramScope_keyHasMultiValue_targetTypeIsJavaBean() throws Exception
 	{
 		request.setParameter("my.myBean.id", new String[]{"1"});
 		request.setParameter("my.myBean.name", new String[]{"jack"});
@@ -114,6 +102,14 @@ public class TestDefaultWebObjectSource
 		Assert.assertEquals("jack", dest.getName());
 		Assert.assertEquals(2, dest.getYourBean().getId().intValue());
 		Assert.assertEquals("tom", dest.getYourBean().getName());
+	}
+	
+	@Test
+	public void get_paramScope_keyHasNoValue() throws Exception
+	{
+		Object re=webObjectSource.get("param.key", Integer.class);
+		
+		Assert.assertNull(re);
 	}
 	
 	@Test
@@ -167,39 +163,59 @@ public class TestDefaultWebObjectSource
 	@Test
 	public void get_requestScope_keyIsScope() throws Exception
 	{
-		HttpServletRequest re=webObjectSource.get("rEqueSt", null);
+		HttpServletRequest re=webObjectSource.get("rEqueSt", HttpServletRequest.class);
 		
 		Assert.assertTrue( (re == request) );
 	}
 	
 	@Test
-	public void get_requestScope_keyNotAccessorExpression() throws Exception
+	public void get_requestScope_keyIsNotAccessorExpression() throws Exception
 	{
 		String key="requestKey";
 		Integer value=1235;
 		
 		request.setAttribute(key, value);
 		
-		Integer re=webObjectSource.get("request."+key, null);
+		Integer re=webObjectSource.get("request."+key, Integer.class);
 		
 		Assert.assertEquals(value, re);
 	}
 	
 	@Test
-	public void get_requestScope_keyIsObjectAttrProperty_noObject() throws Exception
+	public void get_requestScope_keyIsAccessorExpression_noObjectForSubKey() throws Exception
 	{
 		String key="key0.key1.key2";
 		Integer value=1235;
 		
 		request.setAttribute(key, value);
 		
-		Integer re=webObjectSource.get("request."+key, null);
+		Integer re=webObjectSource.get("request."+key, Integer.class);
 		
 		Assert.assertEquals(value, re);
 	}
 	
 	@Test
-	public void get_requestScope_keyIsObjectAttrProperty_hasObject() throws Exception
+	public void get_requestScope_keyIsAccessorExpression_hasObjectForSubKey() throws Exception
+	{
+		Integer id=1235;
+		YourBean yb=new YourBean();
+		yb.setId(id);
+		
+		MyBean src=new MyBean();
+		src.setId(id);
+		src.setYourBean(yb);
+		
+		request.setAttribute("key.myBean", src);
+		
+		Integer re0=webObjectSource.get("request.key.myBean.id", Integer.class);
+		Integer re1=webObjectSource.get("request.key.myBean.yourBean.id", Integer.class);
+		
+		Assert.assertEquals(id, re0);
+		Assert.assertEquals(id, re1);
+	}
+	
+	@Test
+	public void get_requestScope_keyIsAccessorExpression_hasObjectForEntireKey() throws Exception
 	{
 		Integer id=1235;
 		
@@ -208,345 +224,606 @@ public class TestDefaultWebObjectSource
 		
 		request.setAttribute("key.myBean", src);
 		
-		Integer re=webObjectSource.get("request.key.myBean.id", null);
+		MyBean re=webObjectSource.get("request.key.myBean", MyBean.class);
 		
-		Assert.assertEquals(id, re);
+		Assert.assertTrue( (src==re) );
 	}
 	
 	@Test
-	public void get_servletObjectRaw() throws Exception
+	public void get_sessionScope_keyIsScope() throws Exception
 	{
-		//request
-		{
-			Object dest=webObjectSource.get("request", HttpServletRequest.class);
-			Assert.assertTrue(request == dest);
-		}
-		{
-			Object dest=webObjectSource.get("request", null);
-			Assert.assertTrue(request == dest);
-		}
+		HttpSession re=webObjectSource.get("sEssIon", HttpSession.class);
 		
-		//response
-		{
-			Object dest=webObjectSource.get("response", HttpServletResponse.class);
-			Assert.assertTrue(response == dest);
-		}
-		{
-			Object dest=webObjectSource.get("response", null);
-			Assert.assertTrue(response == dest);
-		}
-		
-		//session
-		{
-			Object dest=webObjectSource.get("session", HttpSession.class);
-			Assert.assertTrue(request.getSession() == dest);
-		}
-		{
-			Object dest=webObjectSource.get("session", null);
-			Assert.assertTrue(request.getSession() == dest);
-		}
-		
-		//application
-		{
-			Object dest=webObjectSource.get("application", ServletContext.class);
-			Assert.assertTrue(application == dest);
-		}
-		{
-			Object dest=webObjectSource.get("application", null);
-			Assert.assertTrue(application == dest);
-		}
-		
-		//objectSource
-		{
-			Object dest=webObjectSource.get("objectSource", WebObjectSource.class);
-			Assert.assertTrue(webObjectSource == dest);
-		}
-		{
-			Object dest=webObjectSource.get("objectSource", null);
-			Assert.assertTrue(webObjectSource == dest);
-		}
+		Assert.assertTrue( (re == request.getSession()) );
 	}
 	
 	@Test
-	public void get_ServletObjectWithTargetType() throws Exception
+	public void get_sessionScope_keyIsNotAccessorExpression() throws Exception
 	{
-		final JavaBean staticJavaBean=new JavaBean();
+		String key="sessionKey";
+		Integer value=1235;
 		
-		GenericConverter genericConverter=webObjectSource.getGenericConverter();
+		request.getSession().setAttribute(key, value);
 		
-		Converter converter=new Converter()
-		{
-			//@Override
-			@SuppressWarnings("unchecked")
-			public <T> T convert(Object sourceObj, Type targetClass) 
-			{
-				return (T)staticJavaBean;
-			}
-		};
+		Integer re=webObjectSource.get("session."+key, Integer.class);
 		
-		{
-			genericConverter.addConverter(HttpServletRequest.class, JavaBean.class, converter);
-			Object dest=webObjectSource.get("request", JavaBean.class);
-			Assert.assertTrue( dest == staticJavaBean);
-		}
-		
-		{
-			genericConverter.addConverter(HttpSession.class, JavaBean.class, converter);
-			Object dest=webObjectSource.get("session", JavaBean.class);
-			Assert.assertTrue( dest == staticJavaBean);
-		}
-		
-		{
-			genericConverter.addConverter(HttpServletResponse.class, JavaBean.class, converter);
-			Object dest=webObjectSource.get("response", JavaBean.class);
-			Assert.assertTrue( dest == staticJavaBean);
-		}
-		
-		{
-			genericConverter.addConverter(ServletContext.class, JavaBean.class, converter);
-			Object dest=webObjectSource.get("application", JavaBean.class);
-			Assert.assertTrue( dest == staticJavaBean);
-		}
+		Assert.assertEquals(value, re);
 	}
 	
 	@Test
-	public void getFromParam() throws Exception
+	public void get_sessionScope_keyIsAccessorExpression_noObjectForSubKey() throws Exception
 	{
-		String value="12345";
+		String key="key0.key1.key2";
+		Integer value=1235;
 		
-		{
-			request.setParameter("value", value);
-			Assert.assertEquals(value, webObjectSource.get("param.value", String.class));
-		}
-		{
-			request.setParameter("my.set.value", value);
-			Assert.assertEquals(value, webObjectSource.get("param.my.set.value", String.class));
-		}
-		{
-			request.setParameter("id", new String[]{"1"});
-			request.setParameter("name", new String[]{"jack"});
-			request.setParameter("yourBean.id", new String[]{"2"});
-			request.setParameter("yourBean.name", new String[]{"tom"});
-			
-			MyBean dest=webObjectSource.get("param", MyBean.class);
-			
-			Assert.assertEquals(1, dest.getId().intValue());
-			Assert.assertEquals("jack", dest.getName());
-			Assert.assertEquals(2, dest.getYourBean().getId().intValue());
-			Assert.assertEquals("tom", dest.getYourBean().getName());
-		}
+		request.getSession().setAttribute(key, value);
 		
-		{
-			request.setParameter("my.myBean.id", new String[]{"1"});
-			request.setParameter("my.myBean.name", new String[]{"jack"});
-			request.setParameter("my.myBean.yourBean.id", new String[]{"2"});
-			request.setParameter("my.myBean.yourBean.name", new String[]{"tom"});
-			
-			MyBean dest=webObjectSource.get("param.my.myBean", MyBean.class);
-			
-			Assert.assertEquals(1, dest.getId().intValue());
-			Assert.assertEquals("jack", dest.getName());
-			Assert.assertEquals(2, dest.getYourBean().getId().intValue());
-			Assert.assertEquals("tom", dest.getYourBean().getName());
-		}
+		Integer re=webObjectSource.get("session."+key, Integer.class);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void get_sessionScope_keyIsAccessorExpression_hasObjectForSubKey() throws Exception
+	{
+		Integer id=1235;
+		YourBean yb=new YourBean();
+		yb.setId(id);
+		
+		MyBean src=new MyBean();
+		src.setId(id);
+		src.setYourBean(yb);
+		
+		request.getSession().setAttribute("key.myBean", src);
+		
+		Integer re0=webObjectSource.get("session.key.myBean.id", Integer.class);
+		Integer re1=webObjectSource.get("session.key.myBean.yourBean.id", Integer.class);
+		
+		Assert.assertEquals(id, re0);
+		Assert.assertEquals(id, re1);
+	}
+	
+	@Test
+	public void get_sessionScope_keyIsAccessorExpression_hasObjectForEntireKey() throws Exception
+	{
+		Integer id=1235;
+		
+		MyBean src=new MyBean();
+		src.setId(id);
+		
+		request.getSession().setAttribute("key.myBean", src);
+		
+		MyBean re=webObjectSource.get("session.key.myBean", MyBean.class);
+		
+		Assert.assertTrue( (src==re) );
+	}
 
-		{
-			request.setParameter("my.myBean.id", new String[]{"1"});
-			request.setParameter("my.myBean.name", new String[]{"jack"});
-			request.setParameter("my.myBean.yourBean.id", new String[]{"2"});
-			request.setParameter("my.myBean.yourBean.name", new String[]{"tom"});
-			
-			MyBean dest=webObjectSource.get("param.my.myBean", MyBean.class);
-			
-			Assert.assertEquals(1, dest.getId().intValue());
-			Assert.assertEquals("jack", dest.getName());
-			Assert.assertEquals(2, dest.getYourBean().getId().intValue());
-			Assert.assertEquals("tom", dest.getYourBean().getName());
-		}
+	@Test
+	public void get_applicationScope_keyIsScope() throws Exception
+	{
+		ServletContext re=webObjectSource.get("appLicaTion", ServletContext.class);
+		
+		Assert.assertTrue( (re == application) );
 	}
 	
 	@Test
-	public void setAndGetFromRequest() throws Exception
+	public void get_applicationScope_keyIsNotAccessorExpression() throws Exception
 	{
-		String value="12345";
+		String key="requestKey";
+		Integer value=1235;
 		
-		{
-			webObjectSource.set("value", value);
-			Assert.assertEquals(value, request.getAttribute("value"));
-			
-			Object dest=webObjectSource.get("request.value", String.class);
-			Assert.assertEquals(value, dest);
-		}
-		{
-			webObjectSource.set("request.value", value);
-			Assert.assertEquals(value, request.getAttribute("value"));
-			
-			Object dest=webObjectSource.get("request.value", String.class);
-			Assert.assertEquals(value, dest);
-		}
-		{
-			webObjectSource.set("request.my.value", value);
-			Assert.assertEquals(value, request.getAttribute("my.value"));
-			
-			Object dest=webObjectSource.get("request.my.value", String.class);
-			Assert.assertEquals(value, dest);
-		}
-		{
-			MyBean myBean=new MyBean();
-			
-			webObjectSource.set("request.myBean",myBean);
-			Assert.assertTrue( request.getAttribute("myBean")==myBean );
-			Assert.assertTrue( webObjectSource.get("request.myBean", null)==myBean );
-			
-			webObjectSource.set("request.myBean.id", 7);
-			Assert.assertEquals(7, myBean.getId().intValue());
-			Assert.assertEquals(7, webObjectSource.get("request.myBean.id", null));
-			
-			webObjectSource.set("request.myBean.name", "name");
-			Assert.assertEquals("name", myBean.getName());
-			Assert.assertEquals("name", webObjectSource.get("request.myBean.name", null));
-			
-			webObjectSource.set("request.myBean.yourBean.id", 8);
-			Assert.assertEquals(8, myBean.getYourBean().getId().intValue());
-			Assert.assertEquals(8, webObjectSource.get("request.myBean.yourBean.id", null));
-		}
+		application.setAttribute(key, value);
+		
+		Integer re=webObjectSource.get("application."+key, Integer.class);
+		
+		Assert.assertEquals(value, re);
 	}
 	
 	@Test
-	public void setAndGetFromSession() throws Exception
+	public void get_applicationScope_keyIsAccessorExpression_noObjectForSubKey() throws Exception
 	{
-		String value="12345";
+		String key="key0.key1.key2";
+		Integer value=1235;
 		
-		{
-			webObjectSource.set("session.value", value);
-			Assert.assertEquals(request.getSession().getAttribute("value"), value);
-			
-			Object dest=webObjectSource.get("session.value", String.class);
-			Assert.assertEquals(value, dest);
-		}
-		{
-			webObjectSource.set("session.my.value", value);
-			Assert.assertEquals(request.getSession().getAttribute("my.value"), value);
-			
-			Object dest=webObjectSource.get("session.my.value", String.class);
-			Assert.assertEquals(value, dest);
-		}
-		{
-			MyBean myBean=new MyBean();
-			
-			webObjectSource.set("session.myBean",myBean);
-			Assert.assertTrue( request.getSession().getAttribute("myBean")==myBean );
-			Assert.assertTrue( webObjectSource.get("session.myBean", null)==myBean );
-			
-			webObjectSource.set("session.myBean.id", 7);
-			Assert.assertEquals(7, myBean.getId().intValue());
-			Assert.assertEquals(7, webObjectSource.get("session.myBean.id", null));
-			
-			webObjectSource.set("session.myBean.name", "name");
-			Assert.assertEquals("name", myBean.getName());
-			Assert.assertEquals("name", webObjectSource.get("session.myBean.name", null));
-			
-			webObjectSource.set("session.myBean.yourBean.id", 8);
-			Assert.assertEquals(8, myBean.getYourBean().getId().intValue());
-			Assert.assertEquals(8, webObjectSource.get("session.myBean.yourBean.id", null));
-		}
+		application.setAttribute(key, value);
+		
+		Integer re=webObjectSource.get("application."+key, Integer.class);
+		
+		Assert.assertEquals(value, re);
 	}
 	
 	@Test
-	public void setAndGetFromApplication() throws Exception
+	public void get_applicationScope_keyIsAccessorExpression_hasObjectForSubKey() throws Exception
 	{
-		String value="12345";
+		Integer id=1235;
+		YourBean yb=new YourBean();
+		yb.setId(id);
 		
-		{
-			webObjectSource.set("application.value", value);
-			Assert.assertEquals(application.getAttribute("value"), value);
-			
-			Object dest=webObjectSource.get("application.value", String.class);
-			Assert.assertEquals(value, dest);
-		}
-		{
-			webObjectSource.set("application.my.value", value);
-			Assert.assertEquals(application.getAttribute("my.value"), value);
-			
-			Object dest=webObjectSource.get("application.my.value", String.class);
-			Assert.assertEquals(value, dest);
-		}
-		{
-			MyBean myBean=new MyBean();
-			
-			webObjectSource.set("application.myBean",myBean);
-			Assert.assertTrue( application.getAttribute("myBean")==myBean );
-			Assert.assertTrue( webObjectSource.get("application.myBean", null)==myBean );
-			
-			webObjectSource.set("application.myBean.id", 7);
-			Assert.assertEquals(7, myBean.getId().intValue());
-			Assert.assertEquals(7, webObjectSource.get("application.myBean.id", null));
-			
-			webObjectSource.set("application.myBean.name", "name");
-			Assert.assertEquals("name", myBean.getName());
-			Assert.assertEquals("name", webObjectSource.get("application.myBean.name", null));
-			
-			webObjectSource.set("application.myBean.yourBean.id", 8);
-			Assert.assertEquals(8, myBean.getYourBean().getId().intValue());
-			Assert.assertEquals(8, webObjectSource.get("application.myBean.yourBean.id", null));
-		}
+		MyBean src=new MyBean();
+		src.setId(id);
+		src.setYourBean(yb);
+		
+		application.setAttribute("key.myBean", src);
+		
+		Integer re0=webObjectSource.get("application.key.myBean.id", Integer.class);
+		Integer re1=webObjectSource.get("application.key.myBean.yourBean.id", Integer.class);
+		
+		Assert.assertEquals(id, re0);
+		Assert.assertEquals(id, re1);
 	}
 	
 	@Test
-	public void setAndGetWithNoAccessorKey() throws Exception
+	public void get_applicationScope_keyIsAccessorExpression_hasObjectForEntireKey() throws Exception
 	{
-		String key="simpleKey";
-		String value="12345";
+		Integer id=1235;
 		
-		//以这个关键字存储,则同样可以以这个关键字获取
-		{
-			request.setParameter(key, value);
-			
-			Object dest=webObjectSource.get(key, String.class);
-			Assert.assertEquals(value, dest);
-		}
+		MyBean src=new MyBean();
+		src.setId(id);
 		
-		//默认应该保存到request中
-		{
-			webObjectSource.set(key, value);
-			
-			Assert.assertEquals(value, request.getAttribute(key));
-			
-			Object dest=webObjectSource.get("request."+key, String.class);
-			Assert.assertEquals(value, dest);
-		}
+		application.setAttribute("key.myBean", src);
+		
+		MyBean re=webObjectSource.get("application.key.myBean", MyBean.class);
+		
+		Assert.assertTrue( (src==re) );
 	}
 	
 	@Test
-	public void setAndGetForUnknownScopeKey() throws Exception
+	public void get_responseScope_keyIsScope() throws Exception
 	{
-		String key="unknownScope.someName0.someName1";
+		HttpServletResponse re=webObjectSource.get("ResPonse", null);
+		
+		Assert.assertTrue( (re == response) );
+	}
+	
+	@Test
+	public void get_responseScope_keyInScope() throws Exception
+	{
+		ObjectSourceException re=null;
+		
+		try
+		{
+			webObjectSource.get("response.obj", null);
+		}
+		catch(ObjectSourceException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("key 'response.obj' is illegal")) );
+	}
+	
+	@Test
+	public void get_objectSourceScope_keyIsScope() throws Exception
+	{
+		ObjectSource re=webObjectSource.get("objEctSource", null);
+		
+		Assert.assertTrue( (re == webObjectSource) );
+	}
+	
+	@Test
+	public void get_objectSourceScope_keyInScope() throws Exception
+	{
+		ObjectSourceException re=null;
+		
+		try
+		{
+			webObjectSource.get("objectSource.obj", null);
+		}
+		catch(ObjectSourceException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("key 'objectSource.obj' is illegal")) );
+	}
+	
+	@Test
+	public void get_unknownScope_keyValueInRequest() throws Exception
+	{
+		String key="key0";
+		Integer value=12345;
+		
+		request.setAttribute(key, value);
+		
+		Integer re=webObjectSource.get(key, Integer.class);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void get_unknownScope_keyValueInSession() throws Exception
+	{
+		String key="key";
+		Integer value=12345;
+		
+		request.getSession().setAttribute(key, value);
+		
+		Integer re=webObjectSource.get(key, Integer.class);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void get_unknownScope_keyValueInApplication() throws Exception
+	{
+		String key="key";
+		Integer value=12345;
+		
+		application.setAttribute(key, value);
+		
+		Integer re=webObjectSource.get(key, Integer.class);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void get_unknownScope_keyValueInParam() throws Exception
+	{
+		String key="key";
 		String value="12345";
 		
+		request.setParameter(key, value);
+		
+		String re=webObjectSource.get(key, String.class);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void set_requestScope_keyIsScope() throws Exception
+	{
+		ObjectSourceException re=null;
+		
+		try
 		{
-			Object re=webObjectSource.get(key, String.class);
-			
-			Assert.assertNull(re);
+			webObjectSource.set("request", "v");
+		}
+		catch(ObjectSourceException e)
+		{
+			re=e;
 		}
 		
-		//以这个关键字存储,则同样可以以这个关键字获取
+		Assert.assertTrue( (re.getMessage().startsWith("key 'request' is illegal")) );
+	}
+	
+	@Test
+	public void set_requestScope_keyIsNotAccessorExpression() throws Exception
+	{
+		String key="requestKey";
+		Integer value=1235;
+		
+		webObjectSource.set("request."+key, value);
+		
+		Integer re=(Integer)request.getAttribute(key);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void set_requestScope_keyIsAccessorExpression_noObjectForSubKey() throws Exception
+	{
+		String key="key0.key1.key2";
+		Integer value=1235;
+		
+		webObjectSource.set("request."+key, value);
+		
+		Integer re=(Integer)request.getAttribute(key);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void set_requestScope_keyIsAccessorExpression_hasObjectForSubKey() throws Exception
+	{
+		String id="1235";
+		
+		MyBean bean=new MyBean();
+		
+		request.setAttribute("key.myBean", bean);
+		
+		webObjectSource.set("request.key.myBean.id", id);
+		webObjectSource.set("request.key.myBean.yourBean.id", id);
+		
+		MyBean re=(MyBean)request.getAttribute("key.myBean");
+		
+		Assert.assertEquals(id, re.getId().toString());
+		Assert.assertEquals(id, re.getYourBean().getId().toString());
+	}
+	
+	@Test
+	public void set_requestScope_keyIsAccessorExpression_hasObjectForEntireKey() throws Exception
+	{
+		Integer id=1235;
+		
+		MyBean src=new MyBean();
+		src.setId(id);
+		
+		webObjectSource.set("request.key.myBean", src);
+		
+		MyBean re=(MyBean)request.getAttribute("key.myBean");
+		
+		Assert.assertTrue( (src==re) );
+	}
+	
+	@Test
+	public void set_sessionScope_keyIsScope() throws Exception
+	{
+		ObjectSourceException re=null;
+		
+		try
 		{
-			webObjectSource.set(key, value);
-			
-			Object re=webObjectSource.get(key, String.class);
-			
-			Assert.assertEquals(value, re);
+			webObjectSource.set("sessIon", "v");
+		}
+		catch(ObjectSourceException e)
+		{
+			re=e;
 		}
 		
-		//默认应该保存到request中
+		Assert.assertTrue( (re.getMessage().startsWith("key 'sessIon' is illegal")) );
+	}
+	
+	@Test
+	public void set_sessionScope_keyIsNotAccessorExpression() throws Exception
+	{
+		String key="sessionKey";
+		Integer value=1235;
+		
+		webObjectSource.set("session."+key, value);
+		
+		Integer re=(Integer)request.getSession().getAttribute(key);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void set_sessionScope_keyIsAccessorExpression_noObjectForSubKey() throws Exception
+	{
+		String key="key0.key1.key2";
+		Integer value=1235;
+		
+		webObjectSource.set("session."+key, value);
+		
+		Integer re=(Integer)request.getSession().getAttribute(key);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void set_sessionScope_keyIsAccessorExpression_hasObjectForSubKey() throws Exception
+	{
+		String id="1235";
+		
+		MyBean bean=new MyBean();
+		
+		request.getSession().setAttribute("key.myBean", bean);
+		
+		webObjectSource.set("session.key.myBean.id", id);
+		webObjectSource.set("session.key.myBean.yourBean.id", id);
+		
+		MyBean re=(MyBean)request.getSession().getAttribute("key.myBean");
+		
+		Assert.assertEquals(id, re.getId().toString());
+		Assert.assertEquals(id, re.getYourBean().getId().toString());
+	}
+	
+	@Test
+	public void set_sessionScope_keyIsAccessorExpression_hasObjectForEntireKey() throws Exception
+	{
+		Integer id=1235;
+		
+		MyBean src=new MyBean();
+		src.setId(id);
+		
+		webObjectSource.set("session.key.myBean", src);
+		
+		MyBean re=(MyBean)request.getSession().getAttribute("key.myBean");
+		
+		Assert.assertTrue( (src==re) );
+	}
+	
+	@Test
+	public void set_applicationScope_keyIsScope() throws Exception
+	{
+		ObjectSourceException re=null;
+		
+		try
 		{
-			webObjectSource.set(key, value);
-			
-			Assert.assertEquals(value, request.getAttribute(key));
-			
-			Object dest=webObjectSource.get("request."+key, String.class);
-			Assert.assertEquals(value, dest);
+			webObjectSource.set("appLication", "v");
 		}
+		catch(ObjectSourceException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("key 'appLication' is illegal")) );
+	}
+	
+	@Test
+	public void set_applicationScope_keyIsNotAccessorExpression() throws Exception
+	{
+		String key="sessionKey";
+		Integer value=1235;
+		
+		webObjectSource.set("application."+key, value);
+		
+		Integer re=(Integer)application.getAttribute(key);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void set_applicationScope_keyIsAccessorExpression_noObjectForSubKey() throws Exception
+	{
+		String key="key0.key1.key2";
+		Integer value=1235;
+		
+		webObjectSource.set("application."+key, value);
+		
+		Integer re=(Integer)application.getAttribute(key);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void set_applicationScope_keyIsAccessorExpression_hasObjectForSubKey() throws Exception
+	{
+		String id="1235";
+		
+		MyBean bean=new MyBean();
+		
+		application.setAttribute("key.myBean", bean);
+		
+		webObjectSource.set("application.key.myBean.id", id);
+		webObjectSource.set("application.key.myBean.yourBean.id", id);
+		
+		MyBean re=(MyBean)application.getAttribute("key.myBean");
+		
+		Assert.assertEquals(id, re.getId().toString());
+		Assert.assertEquals(id, re.getYourBean().getId().toString());
+	}
+	
+	@Test
+	public void set_applicationScope_keyIsAccessorExpression_hasObjectForEntireKey() throws Exception
+	{
+		Integer id=1235;
+		
+		MyBean src=new MyBean();
+		src.setId(id);
+		
+		webObjectSource.set("application.key.myBean", src);
+		
+		MyBean re=(MyBean)application.getAttribute("key.myBean");
+		
+		Assert.assertTrue( (src==re) );
+	}
+	
+	@Test
+	public void set_paramScope_keyIsScope() throws Exception
+	{
+		ObjectSourceException re=null;
+		
+		try
+		{
+			webObjectSource.set("paRam", "v");
+		}
+		catch(ObjectSourceException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("key 'paRam' is illegal")) );
+	}
+	
+	@Test
+	public void set_responseScope_keyIsScope() throws Exception
+	{
+		ObjectSourceException re=null;
+		
+		try
+		{
+			webObjectSource.set("resPonse", "v");
+		}
+		catch(ObjectSourceException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("key 'resPonse' is illegal")) );
+	}
+	
+	@Test
+	public void set_objectSourceScope_keyIsScope() throws Exception
+	{
+		ObjectSourceException re=null;
+		
+		try
+		{
+			webObjectSource.set("objeCtSource", "v");
+		}
+		catch(ObjectSourceException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("key 'objeCtSource' is illegal")) );
+	}
+	
+	@Test
+	public void set_unknownScope_keyIsNotAccessExpresion() throws Exception
+	{
+		Integer src=123465;
+		
+		webObjectSource.set("key", src);
+		
+		Integer re=(Integer)request.getAttribute("key");
+		
+		Assert.assertEquals(src, re);
+	}
+	
+	@Test
+	public void set_unknownScope_keyIsAccessExpresion() throws Exception
+	{
+		Integer src=123465;
+		
+		webObjectSource.set("key0.key1", src);
+		
+		Integer re=(Integer)request.getAttribute("key0.key1");
+		
+		Assert.assertEquals(src, re);
+	}
+	
+	@Test
+	public void set_unknownScope_keyIsAccessorExpression_hasObjectForSubKeyInRequest() throws Exception
+	{
+		String id="1235";
+		
+		MyBean bean=new MyBean();
+		
+		request.setAttribute("key.myBean", bean);
+		
+		webObjectSource.set("key.myBean.id", id);
+		webObjectSource.set("key.myBean.yourBean.id", id);
+		
+		MyBean re=(MyBean)request.getAttribute("key.myBean");
+		
+		Assert.assertEquals(id, re.getId().toString());
+		Assert.assertEquals(id, re.getYourBean().getId().toString());
+	}
+	
+	@Test
+	public void set_unknownScope_keyIsAccessorExpression_hasObjectForSubKeyInSession() throws Exception
+	{
+		String id="1235";
+		
+		MyBean bean=new MyBean();
+		
+		request.getSession().setAttribute("key.myBean", bean);
+		
+		webObjectSource.set("key.myBean.id", id);
+		webObjectSource.set("key.myBean.yourBean.id", id);
+		
+		MyBean re=(MyBean)request.getSession().getAttribute("key.myBean");
+		
+		Assert.assertEquals(id, re.getId().toString());
+		Assert.assertEquals(id, re.getYourBean().getId().toString());
+	}
+	
+	@Test
+	public void set_unknownScope_keyIsAccessorExpression_hasObjectForSubKeyInApplication() throws Exception
+	{
+		String id="1235";
+		
+		MyBean bean=new MyBean();
+		
+		application.setAttribute("key.myBean", bean);
+		
+		webObjectSource.set("key.myBean.id", id);
+		webObjectSource.set("key.myBean.yourBean.id", id);
+		
+		MyBean re=(MyBean)application.getAttribute("key.myBean");
+		
+		Assert.assertEquals(id, re.getId().toString());
+		Assert.assertEquals(id, re.getYourBean().getId().toString());
 	}
 	
 	public static class MyBean

@@ -435,14 +435,14 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	 * @param servletObj
 	 * @param attrExpression
 	 * @param value
-	 * @param attrExpressionLiteral
+	 * @param force 强制保存，返回结果将始终为<code>true</code>
 	 * @return 是否成功保存
 	 * @date 2012-3-25
 	 */
-	protected boolean setServletObjAttrExpression(Object servletObj, String attrExpression, Object value, boolean attrExpressionLiteral) throws ObjectSourceException
+	protected boolean setServletObjAttrExpression(Object servletObj, String attrExpression, Object value, boolean force) throws ObjectSourceException
 	{
 		if(attrExpression == null)
-			return false;
+			return force;
 		
 		boolean result=false;
 		
@@ -490,7 +490,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 				setProperty(attrObj, nameCache.toString(), value);
 				result=true;
 			}
-			else if(attrExpressionLiteral)
+			else if(force)
 			{
 				setServletObjAttr(servletObj, attrExpression, value);
 				result=true;

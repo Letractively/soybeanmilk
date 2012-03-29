@@ -199,7 +199,9 @@ public class WebGenericConverter extends DefaultGenericConverter
 		String filter=pfv.getFilter();
 		Object value=pfv.getValue();
 		
-		if(value instanceof Map<?, ?>)
+		if(SoybeanMilkUtils.isInstanceOf(value, SoybeanMilkUtils.toWrapperType(targetType)))
+			return value;
+		else if(value instanceof Map<?, ?>)
 		{
 			//过滤后的参数映射表必须是清洁的
 			value=new PropertyValueMap((Map<String, ?>)value, (filter!=null && filter.length()!=0));

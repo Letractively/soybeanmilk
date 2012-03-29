@@ -42,7 +42,179 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void getServletObject() throws Exception
+	public void get_paramScope_keyIsScope_expectTypeIsNull() throws Exception
+	{
+		request.setParameter("key", "value");
+		
+		Map<String, String[]> re=webObjectSource.get("ParaM", null);
+		
+		Assert.assertEquals(request.getParameterMap().size(), re.size());
+		Assert.assertEquals(request.getParameterMap().get("key"), re.get("key"));
+	}
+	
+	@Test
+	public void get_paramScope_keyIsScope_expectTypeIsRawMap() throws Exception
+	{
+		String[] value1={"value1"};
+		String[] value2={"value2"};
+		
+		request.setParameter("paramName.aaa", value1);
+		request.setParameter("paramName.bbb", value2);
+		
+		Map<String, ?> re=webObjectSource.get("param.paramName", Map.class);
+		
+		Assert.assertEquals(2, re.size());
+		Assert.assertEquals(value1, re.get("aaa"));
+		Assert.assertEquals(value2, re.get("bbb"));
+	}
+	
+	@Test
+	public void get_paramScope_keyHasExplicitValue() throws Exception
+	{
+		request.setParameter("key", "value");
+		
+		String re=webObjectSource.get("param.key", String.class);
+		
+		Assert.assertEquals("value", re);
+	}
+	
+	@Test
+	public void get_paramScope_keyHasMultiValue() throws Exception
+	{
+		request.setParameter("key.k0", "v0");
+		request.setParameter("key.k1", "v1");
+		request.setParameter("ignored", "111");
+		
+		Map<String, String[]> re=webObjectSource.get("param.key", null);
+		
+		Assert.assertEquals("2", re.size()+"");
+		Assert.assertEquals("v0", re.get("k0")[0]);
+		Assert.assertEquals("v1", re.get("k1")[0]);
+	}
+	
+	@Test
+	public void get_paramScope_keyHasNoValue() throws Exception
+	{
+		Object re=webObjectSource.get("param.key", Integer.class);
+		
+		Assert.assertNull(re);
+	}
+	
+	@Test
+	public void get_paramScope_expectTypeNotNull() throws Exception
+	{
+		request.setParameter("my.myBean.id", new String[]{"1"});
+		request.setParameter("my.myBean.name", new String[]{"jack"});
+		request.setParameter("my.myBean.yourBean.id", new String[]{"2"});
+		request.setParameter("my.myBean.yourBean.name", new String[]{"tom"});
+		
+		MyBean dest=webObjectSource.get("param.my.myBean", MyBean.class);
+		
+		Assert.assertEquals(1, dest.getId().intValue());
+		Assert.assertEquals("jack", dest.getName());
+		Assert.assertEquals(2, dest.getYourBean().getId().intValue());
+		Assert.assertEquals("tom", dest.getYourBean().getName());
+	}
+	
+	@Test
+	public void get_paramScope_paramValueIllegal_explicitParam() throws Exception
+	{
+		String name="paramName";
+		String value="illegalValue";
+		
+		request.setParameter(name, value);
+		
+		ParamIllegalException re=null;
+		try
+		{
+			webObjectSource.get("param."+name, int.class);
+		}
+		catch(ParamIllegalException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertEquals(name, re.getParamName());
+		Assert.assertEquals(value, re.getParamValue());
+		Assert.assertEquals(int.class, re.getTargetType());
+	}
+	
+	@Test
+	public void get_paramScope_paramValueIllegal_mapParam() throws Exception
+	{
+		String value="illegalValue";
+		
+		request.setParameter("my.myBean.id", new String[]{"1"});
+		request.setParameter("my.myBean.name", new String[]{"jack"});
+		request.setParameter("my.myBean.yourBean.id", new String[]{value});
+		request.setParameter("my.myBean.yourBean.name", new String[]{"tom"});
+		
+		ParamIllegalException re=null;
+		try
+		{
+			webObjectSource.get("param.my.myBean", MyBean.class);
+		}
+		catch(ParamIllegalException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertEquals("my.myBean.yourBean.id", re.getParamName());
+		Assert.assertEquals(value, re.getParamValue());
+		Assert.assertEquals(Integer.class, re.getTargetType());
+	}
+	
+	@Test
+	public void get_requestScope_keyIsScope() throws Exception
+	{
+		HttpServletRequest re=webObjectSource.get("rEqueSt", null);
+		
+		Assert.assertTrue( (re == request) );
+	}
+	
+	@Test
+	public void get_requestScope_keyNotAccessorExpression() throws Exception
+	{
+		String key="requestKey";
+		Integer value=1235;
+		
+		request.setAttribute(key, value);
+		
+		Integer re=webObjectSource.get("request."+key, null);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void get_requestScope_keyIsObjectAttrProperty_noObject() throws Exception
+	{
+		String key="key0.key1.key2";
+		Integer value=1235;
+		
+		request.setAttribute(key, value);
+		
+		Integer re=webObjectSource.get("request."+key, null);
+		
+		Assert.assertEquals(value, re);
+	}
+	
+	@Test
+	public void get_requestScope_keyIsObjectAttrProperty_hasObject() throws Exception
+	{
+		Integer id=1235;
+		
+		MyBean src=new MyBean();
+		src.setId(id);
+		
+		request.setAttribute("key.myBean", src);
+		
+		Integer re=webObjectSource.get("request.key.myBean.id", null);
+		
+		Assert.assertEquals(id, re);
+	}
+	
+	@Test
+	public void get_servletObjectRaw() throws Exception
 	{
 		//request
 		{
@@ -96,7 +268,7 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
-	public void convertServletObject() throws Exception
+	public void get_ServletObjectWithTargetType() throws Exception
 	{
 		final JavaBean staticJavaBean=new JavaBean();
 		
@@ -134,69 +306,6 @@ public class TestDefaultWebObjectSource
 			genericConverter.addConverter(ServletContext.class, JavaBean.class, converter);
 			Object dest=webObjectSource.get("application", JavaBean.class);
 			Assert.assertTrue( dest == staticJavaBean);
-		}
-	}
-	
-	@Test
-	public void convertServletObjectThrow() throws Exception
-	{
-		String exceptionPrefix="can not find Converter for converting";
-		
-		{
-			Exception re=null;
-			
-			try
-			{
-				webObjectSource.get("request", JavaBean.class);
-			}
-			catch(Exception e)
-			{
-				re=e;
-			}
-			
-			Assert.assertTrue( re.getMessage().startsWith(exceptionPrefix) );
-		}
-		{
-			Exception re=null;
-			
-			try
-			{
-				webObjectSource.get("session", JavaBean.class);
-			}
-			catch(Exception e)
-			{
-				re=e;
-			}
-			
-			Assert.assertTrue( re.getMessage().startsWith(exceptionPrefix) );
-		}
-		{
-			Exception re=null;
-			
-			try
-			{
-				webObjectSource.get("response", JavaBean.class);
-			}
-			catch(Exception e)
-			{
-				re=e;
-			}
-			
-			Assert.assertTrue( re.getMessage().startsWith(exceptionPrefix) );
-		}
-		{
-			Exception re=null;
-			
-			try
-			{
-				webObjectSource.get("application", JavaBean.class);
-			}
-			catch(Exception e)
-			{
-				re=e;
-			}
-			
-			Assert.assertTrue( re.getMessage().startsWith(exceptionPrefix) );
 		}
 	}
 	
@@ -254,167 +363,6 @@ public class TestDefaultWebObjectSource
 			Assert.assertEquals(2, dest.getYourBean().getId().intValue());
 			Assert.assertEquals("tom", dest.getYourBean().getName());
 		}
-	}
-
-	@SuppressWarnings("rawtypes")
-	@Test
-	public void getFromParam_rawParameterMap() throws Exception
-	{
-		String value="12345";
-		request.setParameter("value", value);
-		
-		Map src=request.getParameterMap();
-		
-		{
-			Map dest=webObjectSource.get("param", Map.class);
-			
-			Assert.assertEquals(src, dest);
-			Assert.assertEquals(src.get(value), dest.get(value));
-		}
-		
-		{
-			Map dest=webObjectSource.get("param", null);
-			
-			Assert.assertEquals(src, dest);
-			Assert.assertEquals(src.get(value), dest.get(value));
-		}
-	}
-	
-	@Test
-	public void getFromParam_targetTypeIsNull_singleParamValue() throws Exception
-	{
-		String name="paramName";
-		String[] value={"value"};
-		
-		request.setParameter(name, value);
-		
-		Object re=webObjectSource.get("param."+name, null);
-		
-		Assert.assertEquals(value, re);
-	}
-	
-	@Test
-	public void getFromParam_targetTypeIsNull_mapParamValue() throws Exception
-	{
-		String[] value1={"value1"};
-		String[] value2={"value2"};
-		
-		request.setParameter("paramName.aaa", value1);
-		request.setParameter("paramName.bbb", value2);
-		
-		Map<String, ?> re=webObjectSource.get("param.paramName", null);
-		
-		Assert.assertEquals(2, re.size());
-		Assert.assertEquals(value1, re.get("aaa"));
-		Assert.assertEquals(value2, re.get("bbb"));
-	}
-	
-	@Test
-	public void getFromParam_targetTypeIsRawMap() throws Exception
-	{
-		String[] value1={"value1"};
-		String[] value2={"value2"};
-		
-		request.setParameter("paramName.aaa", value1);
-		request.setParameter("paramName.bbb", value2);
-		
-		Map<String, ?> re=webObjectSource.get("param.paramName", Map.class);
-		
-		Assert.assertEquals(2, re.size());
-		Assert.assertEquals(value1, re.get("aaa"));
-		Assert.assertEquals(value2, re.get("bbb"));
-	}
-	
-	@Test
-	public void getFromParam_paramValueIsIllegal() throws Exception
-	{
-		String value="illegalValue";
-		
-		{
-			request.setParameter("value", value);
-			
-			ParamIllegalException re=null;
-			try
-			{
-				webObjectSource.get("param.value", int.class);
-			}
-			catch(ParamIllegalException e)
-			{
-				re=e;
-			}
-			
-			Assert.assertEquals("value", re.getParamName());
-			Assert.assertEquals(value, re.getParamValue());
-			Assert.assertEquals(int.class, re.getTargetType());
-		}
-		
-		{
-			request.setParameter("my.set.value", value);
-			
-			ParamIllegalException re=null;
-			try
-			{
-				webObjectSource.get("param.my.set.value", Boolean.class);
-			}
-			catch(ParamIllegalException e)
-			{
-				re=e;
-			}
-			
-			Assert.assertEquals("my.set.value", re.getParamName());
-			Assert.assertEquals(value, re.getParamValue());
-			Assert.assertEquals(Boolean.class, re.getTargetType());
-		}
-		
-		{
-			request.setParameter("id", new String[]{"1"});
-			request.setParameter("name", new String[]{"jack"});
-			request.setParameter("yourBean.id", new String[]{value});
-			request.setParameter("yourBean.name", new String[]{"tom"});
-			
-			ParamIllegalException re=null;
-			try
-			{
-				webObjectSource.get("param", MyBean.class);
-			}
-			catch(ParamIllegalException e)
-			{
-				re=e;
-			}
-			
-			Assert.assertEquals("yourBean.id", re.getParamName());
-			Assert.assertEquals(value, re.getParamValue());
-			Assert.assertEquals(Integer.class, re.getTargetType());
-		}
-		
-		{
-			request.setParameter("my.myBean.id", new String[]{"1"});
-			request.setParameter("my.myBean.name", new String[]{"jack"});
-			request.setParameter("my.myBean.yourBean.id", new String[]{value});
-			request.setParameter("my.myBean.yourBean.name", new String[]{"tom"});
-			
-			ParamIllegalException re=null;
-			try
-			{
-				webObjectSource.get("param.my.myBean", MyBean.class);
-			}
-			catch(ParamIllegalException e)
-			{
-				re=e;
-			}
-			
-			Assert.assertEquals("my.myBean.yourBean.id", re.getParamName());
-			Assert.assertEquals(value, re.getParamValue());
-			Assert.assertEquals(Integer.class, re.getTargetType());
-		}
-	}
-	
-	@Test
-	public void getFromParam_paramValueInexist() throws Exception
-	{
-		Object re=webObjectSource.get("param.noValue", Integer.class);
-		
-		Assert.assertNull(re);
 	}
 	
 	@Test

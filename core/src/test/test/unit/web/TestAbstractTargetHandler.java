@@ -74,7 +74,7 @@ public class TestAbstractTargetHandler
 		Assert.assertEquals("v0/v1/aaa/v2/bbb.jsp", abstractTargetHandler.getActualTargetUrl(webAction, os));
 	}
 	
-	protected WebObjectSource createWebObjectSource()
+	private WebObjectSource createWebObjectSource()
 	{
 		MockHttpServletRequest request=new MockHttpServletRequest();
 		MockHttpServletResponse response=new MockHttpServletResponse();

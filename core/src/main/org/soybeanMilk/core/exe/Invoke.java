@@ -82,7 +82,7 @@ public class Invoke extends AbstractExecutable
 		if(resObj == null)
 			throw new IllegalArgumentException("resolver object must not be null");
 		
-		int argNums= args==null ? 0 : args.length;
+		int argNums=(args==null ? 0 : args.length);
 		
 		init(name, SoybeanMilkUtils.findMethodThrow(resolverProvider.getResolver().getClass(), methodName, argNums), args, resultKey, resolverProvider);
 	}

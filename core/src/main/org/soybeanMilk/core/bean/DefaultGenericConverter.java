@@ -128,7 +128,7 @@ public class DefaultGenericConverter implements GenericConverter
 				|| (sourceObj instanceof String && ((String)sourceObj).length()==0))
 		{
 			if(SoybeanMilkUtils.isPrimitive(targetType))
-				throw new GenericConvertException("can not convert '"+SoybeanMilkUtils.toString(sourceObj)+"' to primitive type '"+targetType+"'");
+				throw new GenericConvertException("can not convert '"+SoybeanMilkUtils.toString(sourceObj)+"' to primitive type '"+SoybeanMilkUtils.toString(targetType)+"'");
 			else
 				result=null;
 		}
@@ -136,10 +136,10 @@ public class DefaultGenericConverter implements GenericConverter
 		{
 			Converter converter = getConverter(sourceObj.getClass(), targetType);
 			
-			if(converter == null)
-				result=convertWhenNoSupportConverter(sourceObj, targetType);
-			else
+			if(converter != null)
 				result=doConvert(converter, sourceObj, targetType);
+			else
+				result=convertWhenNoSupportConverter(sourceObj, targetType);
 		}
 		
 		return (T)result;

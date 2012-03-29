@@ -43,7 +43,7 @@ public class TestDefaultWebExecutor
 	}
 
 	@Test
-	public void testExecute_forwardTarget() throws Exception
+	public void execute_forwardTarget() throws Exception
 	{
 		WebObjectSource os=createWebObjectSource();
 		webExecutor.execute("exe0", os);
@@ -52,7 +52,7 @@ public class TestDefaultWebExecutor
 	}
 	
 	@Test
-	public void testExecute_redirectTarget() throws Exception
+	public void execute_redirectTarget() throws Exception
 	{
 		WebObjectSource os=createWebObjectSource();
 		webExecutor.execute("exe1", os);
@@ -61,7 +61,7 @@ public class TestDefaultWebExecutor
 	}
 
 	@Test
-	public void testExecute_customizedTarget() throws Exception
+	public void execute_customizedTarget() throws Exception
 	{
 		WebObjectSource os=createWebObjectSource();
 		webExecutor.execute("exe2", os);
@@ -72,7 +72,7 @@ public class TestDefaultWebExecutor
 	}
 	
 	@Test
-	public void testExecute_targetTypeIgnoreCase() throws Exception
+	public void execute_targetTypeIgnoreCase() throws Exception
 	{
 		WebObjectSource os=createWebObjectSource();
 		webExecutor.execute("exe3", os);
@@ -81,7 +81,7 @@ public class TestDefaultWebExecutor
 	}
 	
 	@Test
-	public void testExecute_restful() throws Exception
+	public void execute_restful() throws Exception
 	{
 		WebObjectSource os=createWebObjectSource();
 		webExecutor.execute("test/aaa/1/bbb", os);
@@ -92,7 +92,7 @@ public class TestDefaultWebExecutor
 	}
 	
 	@Test
-	public void testExecute_resolverClass_typeVariable() throws Exception
+	public void execute_resolverClass_typeVariable() throws Exception
 	{
 		WebObjectSource os=createWebObjectSource();
 		MockHttpServletRequest request=(MockHttpServletRequest)os.getRequest();
@@ -112,7 +112,7 @@ public class TestDefaultWebExecutor
 	}
 	
 	@Test
-	public void testExecute_resolverClass_genericArray() throws Exception
+	public void execute_resolverClass_genericArray() throws Exception
 	{
 		WebObjectSource os=createWebObjectSource();
 		MockHttpServletRequest request=(MockHttpServletRequest)os.getRequest();
@@ -139,7 +139,7 @@ public class TestDefaultWebExecutor
 	}
 	
 	@Test
-	public void testExecute_resolverClass_parameterizedType() throws Exception
+	public void execute_resolverClass_parameterizedType() throws Exception
 	{
 		WebObjectSource os=createWebObjectSource();
 		MockHttpServletRequest request=(MockHttpServletRequest)os.getRequest();
@@ -166,7 +166,7 @@ public class TestDefaultWebExecutor
 	}
 	
 	
-	protected WebObjectSource createWebObjectSource()
+	private WebObjectSource createWebObjectSource()
 	{
 		MockHttpServletRequest request=new MockHttpServletRequest();
 		MockHttpServletResponse response=new MockHttpServletResponse();

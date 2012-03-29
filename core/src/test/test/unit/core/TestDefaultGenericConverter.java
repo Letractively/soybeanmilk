@@ -5,13 +5,16 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
@@ -38,7 +41,75 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toBigDecimal() throws Exception
+	public void convert_sourceIsIntanceOfTargetType() throws Exception
+	{
+		Map<String, Object> src=new HashMap<String, Object>();
+		
+		Map<String, Object> result=converter.convert(src, Map.class);
+		
+		Assert.assertTrue( (src == result) );
+	}
+	
+	@Test
+	public void convert_nullToPrimitive() throws Exception
+	{
+		String src=null;
+		
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.convert(src, int.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().endsWith("' to primitive type '"+SoybeanMilkUtils.toString(int.class)+"'")) );
+	}
+	
+	@Test
+	public void convert_nullToObject() throws Exception
+	{
+		String src=null;
+		
+		Integer re=converter.convert(src, Integer.class);
+		
+		Assert.assertNull(re);
+	}
+	
+	@Test
+	public void convert_emptyStringToPrimitive() throws Exception
+	{
+		String src="";
+		
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.convert(src, int.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().endsWith("' to primitive type '"+SoybeanMilkUtils.toString(int.class)+"'")) );
+	}
+	
+	@Test
+	public void convert_emptyStringToObject() throws Exception
+	{
+		String src="";
+		
+		Integer re=converter.convert(src, Integer.class);
+		
+		Assert.assertNull(re);
+	}
+	
+	@Test
+	public void convert_stringToBigDecimal() throws Exception
 	{
 		String src = "1254324.3823823";
 		
@@ -48,7 +119,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toBigInteger() throws Exception
+	public void convert_stringToBigInteger() throws Exception
 	{
 		String src = "12349787293841930481029348234242134";
 		
@@ -58,7 +129,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toBoolean() throws Exception
+	public void convert_stringToBoolean() throws Exception
 	{
 		{
 			String src = "true";
@@ -118,7 +189,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toByte() throws Exception
+	public void convert_stringToByte() throws Exception
 	{
 		{
 			String src = "5";
@@ -136,7 +207,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toCharacter() throws Exception
+	public void convert_stringToCharacter() throws Exception
 	{
 		{
 			String src = "2";
@@ -154,7 +225,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toDate() throws Exception
+	public void convert_stringToDate() throws Exception
 	{
 		{
 			String src = "2010";
@@ -207,7 +278,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toDouble() throws Exception
+	public void convert_stringToDouble() throws Exception
 	{
 		{
 			String src = "1";
@@ -243,7 +314,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toEnum() throws Exception
+	public void convert_stringToEnum() throws Exception
 	{
 		{
 			String src="ENUM_1";
@@ -260,7 +331,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toFloat() throws Exception
+	public void convert_stringToFloat() throws Exception
 	{
 		{
 			String src = "1";
@@ -288,7 +359,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toInteger() throws Exception
+	public void convert_stringToInteger() throws Exception
 	{
 		String src = "1";
 		
@@ -304,7 +375,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toLong() throws Exception
+	public void convert_stringToLong() throws Exception
 	{
 		String src = "13424235532342";
 		
@@ -319,27 +390,10 @@ public class TestDefaultGenericConverter
 		}
 	}
 	
-	@Test
-	public void convertStringArray_toLongArray() throws Exception
-	{
-		String[] src=new String[]{"2342353413241234", "1342413542348779"};
-		{
-			long[] dest = converter.convert(src, long[].class);
-			
-			Assert.assertEquals(Long.parseLong(src[0]), dest[0]);
-			Assert.assertEquals(Long.parseLong(src[1]), dest[1]);
-		}
-		
-		{
-			Long[] dest = converter.convert(src, Long[].class);
-			
-			Assert.assertEquals(new Long(src[0]), dest[0]);
-			Assert.assertEquals(new Long(src[1]), dest[1]);
-		}
-	}
+	
 	
 	@Test
-	public void convertString_toShort() throws Exception
+	public void convert_stringToShort() throws Exception
 	{
 		String src = "1342";
 		
@@ -355,7 +409,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toSqlDate() throws Exception
+	public void convert_stringToSqlDate() throws Exception
 	{
 		{
 			String src = "2010-10-12";
@@ -366,7 +420,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toSqlTime() throws Exception
+	public void convert_stringToSqlTime() throws Exception
 	{
 		{
 			String src = "15:30:20";
@@ -384,7 +438,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toSqlTimestamp() throws Exception
+	public void convert_stringToSqlTimestamp() throws Exception
 	{
 		{
 			String src = "2010-10-12 13:00:00";
@@ -403,174 +457,27 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertString_toString() throws Exception
+	public void convert_noSupportConverter_targetTypeIsString() throws Exception
 	{
-		String src = "string_abc";
-		String dest = converter.convert(src, String.class);
+		Integer src=123456;
 		
-		Assert.assertEquals(src, dest);
+		String re=converter.convert(src, String.class);
+		
+		Assert.assertEquals(src.toString(), re);
 	}
 	
 	@Test
-	public void convertString_toAncestorType() throws Exception
+	public void convert_noSupportConverter_targetTypeIsEnum() throws Exception
 	{
-		String src = "string_abc";
-		String dest = converter.convert(src, Object.class);
+		String src="ENUM_1";
 		
-		Assert.assertEquals(src, dest);
+		TestEnum re=converter.convert(src, TestEnum.class);
+		
+		Assert.assertEquals(TestEnum.ENUM_1, re);
 	}
-	
+
 	@Test
-	public void convertString_emptyStringToObject() throws Exception
-	{
-		String src="";
-		Integer re=converter.convert(src, Integer.class);
-		
-		Assert.assertNull(re);
-	}
-	
-	@Test
-	public void convertString_emptyStringToPrimitive() throws Exception
-	{
-		String src="";
-		
-		GenericConvertException re=null;
-		
-		try
-		{
-			converter.convert(src, boolean.class);
-		}
-		catch(GenericConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertTrue( (re.getMessage().endsWith("to primitive type 'boolean'")) );
-	}
-	
-	@Test
-	public void convertString_invalidStringToInteger() throws Exception
-	{
-		String src="sdf";
-		
-		ConvertException re=null;
-		
-		try
-		{
-			converter.convert(src, Integer.class);
-		}
-		catch(ConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertEquals(src, re.getSourceObject());
-		Assert.assertEquals(Integer.class, re.getTargetType());
-	}
-	
-	@Test
-	public void convertString_toGeneric_TypeVariable() throws Exception
-	{
-		String src="33";
-		
-		@SuppressWarnings("rawtypes")
-		Type type=new MockTypeVariable("T", new Type[]{Integer.class});
-		
-		Integer re=converter.convert(src, type);
-		
-		Assert.assertEquals(new Integer(src), re);
-	}
-	
-	@Test
-	public void convertString_toGeneric_ParameterizedType() throws Exception
-	{
-		String src="33";
-		
-		Type type=new MockParameterizedType(Integer.class, new Type[]{Double.class});
-		
-		Exception re=null;
-		
-		try
-		{
-			converter.convert(src, type);
-		}
-		catch(GenericConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
-	}
-	
-	@Test
-	public void convertString_toGeneric_GenericArrayType() throws Exception
-	{
-		String src="33";
-		
-		Type type=new MockGenericArrayType(Integer.class);
-		
-		Exception re=null;
-		
-		try
-		{
-			converter.convert(src, type);
-		}
-		catch(GenericConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
-	}
-	
-	@Test
-	public void convertString_toGeneric_WildCardType() throws Exception
-	{
-		String src="33";
-		
-		MockWildcardType type=new MockWildcardType();
-		type.setUpperBounds(new Type[]{Integer.class});
-		
-		Integer re=converter.convert(src, type);
-		
-		Assert.assertEquals(new Integer(src), re);
-	}
-	
-	@Test
-	public void convertString_toGeneric_GenericType() throws Exception
-	{
-		String src="33";
-		
-		MockWildcardType type=new MockWildcardType();
-		type.setUpperBounds(new Type[]{Integer.class});
-		Type tp=GenericType.getGenericType(type,null);
-		
-		Integer re=converter.convert(src, tp);
-		
-		Assert.assertEquals(new Integer(src), re);
-	}
-	
-	@Test
-	public void convertNull_toPrimitive() throws Exception
-	{
-		Object src = null;
-		
-		GenericConvertException re=null;
-		
-		try
-		{
-			converter.convert(src, int.class);
-		}
-		catch(GenericConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertTrue(( re.getMessage().startsWith("can not convert '"+src+"' to primitive type") ));
-	}
-	
-	@Test
-	public void convertStringArray_toStringArray() throws Exception
+	public void convert_noSupportConverter_stringArrayToStringArray() throws Exception
 	{
 		String[] src = new String[]{"1254324.3823823","2342.23879102348"};
 		
@@ -581,7 +488,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toBooleanArray() throws Exception
+	public void convert_noSupportConverter_stringArrayToBooleanArray() throws Exception
 	{
 		{
 			String[] src = new String[]{"true","1","false","0"};
@@ -605,7 +512,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toGeneric_TypeVariable() throws Exception
+	public void convert_noSupportConverter_stringArrayToGeneric_TypeVariable() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -619,7 +526,108 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toGeneric_ParameterizedType_List() throws Exception
+	public void convert_noSupportConverter_stringArray_toLongArray() throws Exception
+	{
+		String[] src=new String[]{"2342353413241234", "1342413542348779"};
+		{
+			long[] dest = converter.convert(src, long[].class);
+			
+			Assert.assertEquals(Long.parseLong(src[0]), dest[0]);
+			Assert.assertEquals(Long.parseLong(src[1]), dest[1]);
+		}
+		
+		{
+			Long[] dest = converter.convert(src, Long[].class);
+			
+			Assert.assertEquals(new Long(src[0]), dest[0]);
+			Assert.assertEquals(new Long(src[1]), dest[1]);
+		}
+	}
+	
+	@Test
+	public void convert_noSupportConverter_stringToGeneric_TypeVariable() throws Exception
+	{
+		String src="33";
+		
+		@SuppressWarnings("rawtypes")
+		Type type=new MockTypeVariable("T", new Type[]{Integer.class});
+		
+		Integer re=converter.convert(src, type);
+		
+		Assert.assertEquals(new Integer(src), re);
+	}
+	
+	@Test
+	public void convert_noSupportConverter_stringToGeneric_ParameterizedType() throws Exception
+	{
+		String src="33";
+		
+		Type type=new MockParameterizedType(Integer.class, new Type[]{Double.class});
+		
+		Exception re=null;
+		
+		try
+		{
+			converter.convert(src, type);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
+	}
+	
+	@Test
+	public void convert_noSupportConverter_stringToGeneric_GenericArrayType() throws Exception
+	{
+		String src="33";
+		
+		Type type=new MockGenericArrayType(Integer.class);
+		
+		Exception re=null;
+		
+		try
+		{
+			converter.convert(src, type);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
+	}
+	
+	@Test
+	public void convert_noSupportConverter_stringToGeneric_WildCardType() throws Exception
+	{
+		String src="33";
+		
+		MockWildcardType type=new MockWildcardType();
+		type.setUpperBounds(new Type[]{Integer.class});
+		
+		Integer re=converter.convert(src, type);
+		
+		Assert.assertEquals(new Integer(src), re);
+	}
+	
+	@Test
+	public void convert_noSupportConverter_stringToGeneric_GenericType() throws Exception
+	{
+		String src="33";
+		
+		MockWildcardType type=new MockWildcardType();
+		type.setUpperBounds(new Type[]{Integer.class});
+		Type tp=GenericType.getGenericType(type,null);
+		
+		Integer re=converter.convert(src, tp);
+		
+		Assert.assertEquals(new Integer(src), re);
+	}
+	
+	@Test
+	public void convert_noSupportConverter_stringArrayToGeneric_ParameterizedType_List() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -633,7 +641,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toGeneric_ParameterizedType_Set() throws Exception
+	public void convert_noSupportConverter_stringArrayToGeneric_ParameterizedType_Set() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -644,7 +652,7 @@ public class TestDefaultGenericConverter
 	}
 
 	@Test
-	public void convertStringArray_toGeneric_ParameterizedType_notSupported() throws Exception
+	public void convert_noSupportConverter_stringArrayToGeneric_ParameterizedType_notSupported() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -665,7 +673,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toGeneric_GenericArrayType() throws Exception
+	public void convert_noSupportConverter_stringArrayToGeneric_GenericArrayType() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -677,7 +685,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toGeneric_WildCardType() throws Exception
+	public void convert_noSupportConverter_stringArrayToGeneric_WildCardType() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -691,7 +699,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toGeneric_GenericType() throws Exception
+	public void convert_noSupportConverter_stringArrayToGeneric_GenericType() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -703,7 +711,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toNormalList() throws Exception
+	public void convert_noSupportConverter_stringArrayToNormalList() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -722,7 +730,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convertStringArray_toNormalSet() throws Exception
+	public void convert_noSupportConverter_stringArrayToNormalSet() throws Exception
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
@@ -739,9 +747,9 @@ public class TestDefaultGenericConverter
 		
 		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
 	}
-	
+
 	@Test
-	public void convert_notSupported() throws Exception
+	public void convert_noSupportConverter_notSupported() throws Exception
 	{
 		int src=3355;
 		
@@ -758,6 +766,28 @@ public class TestDefaultGenericConverter
 		
 		Assert.assertTrue( re.getMessage().startsWith("can not find Converter for converting") );
 	}
+	
+	@Test
+	public void convert_convertException() throws Exception
+	{
+		String src="sdf";
+		
+		ConvertException re=null;
+		
+		try
+		{
+			converter.convert(src, Integer.class);
+		}
+		catch(ConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertEquals(src, re.getSourceObject());
+		Assert.assertEquals(Integer.class, re.getTargetType());
+	}
+	
+	
 	
 	@Test
 	public void getProperty() throws Exception
@@ -808,11 +838,13 @@ public class TestDefaultGenericConverter
 	@Test
 	public void getProperty_nullInput() throws Exception
 	{
-		converter.getProperty(null, "age.size", null);
+		Object re=converter.getProperty(null, "age.size", Integer.class);
+		
+		Assert.assertNull(re);
 	}
 	
 	@Test
-	public void getProperty_notExistProperty() throws Exception
+	public void getProperty_inexistentProperty() throws Exception
 	{
 		MyBean bean=new MyBean();
 		bean.setId("111");

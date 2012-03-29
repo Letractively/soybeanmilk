@@ -10,8 +10,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.DefaultExecutor;
 import org.soybeanMilk.core.ObjectSource;
+import org.soybeanMilk.core.ObjectSourceException;
+import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
+import org.soybeanMilk.core.exe.ArgPrepareExecuteException;
+import org.soybeanMilk.core.exe.InvocationExecuteException;
+import org.soybeanMilk.core.exe.Invoke;
+import org.soybeanMilk.core.exe.Invoke.Arg;
+import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
+import org.soybeanMilk.core.exe.resolver.ObjectResolverProvider;
 import org.soybeanMilk.core.os.HashMapObjectSource;
 
 public class TestInvoke
@@ -43,7 +51,63 @@ public class TestInvoke
 	}
 	
 	@Test
-	public void testBreaker() throws Exception
+	public void init_byResolverProvider() throws Exception
+	{
+		Arg[] args=new Arg[]{
+				new Arg("aaa"),
+				new Arg("bbb"),
+		};
+		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		
+		Invoke re=new Invoke("test", "test1", args, RESULT_KEY, rp);
+		
+		Assert.assertEquals(re.getName(), "test");
+		Assert.assertEquals(re.getResultKey(), RESULT_KEY);
+		Assert.assertEquals(re.getResolverProvider(), rp);
+		Assert.assertEquals(re.getResolverClass(), TestResolver.class);
+		Assert.assertTrue( (re.getArgs()[0]==args[0] && re.getArgs()[0].getType()==String.class) );
+		Assert.assertTrue( (re.getArgs()[1]==args[1] && re.getArgs()[1].getType()==Integer.class) );
+	}
+	
+	@Test
+	public void init_byResolverClass() throws Exception
+	{
+		Arg[] args=new Arg[]{
+				new Arg("aaa"),
+				new Arg("bbb"),
+		};
+		
+		Invoke re=new Invoke("test", "test1", args, RESULT_KEY, TestResolver.class);
+		
+		Assert.assertEquals(re.getName(), "test");
+		Assert.assertEquals(re.getResultKey(), RESULT_KEY);
+		Assert.assertEquals(re.getResolverClass(), TestResolver.class);
+		Assert.assertTrue( (re.getArgs()[0]==args[0] && re.getArgs()[0].getType()==String.class) );
+		Assert.assertTrue( (re.getArgs()[1]==args[1] && re.getArgs()[1].getType()==Integer.class) );
+	}
+	
+	@Test
+	public void execute() throws Exception
+	{
+		Arg[] args=new Arg[]{
+				new Arg("arg0"),
+				new Arg("arg1"),
+		};
+		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		
+		Invoke invoke=new Invoke("test", "test1", args, RESULT_KEY, rp);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("arg0", "arg0");
+		os.set("arg1", "1111");
+		
+		invoke.execute(os);
+		
+		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY, null));
+	}
+	
+	@Test
+	public void execute_breakerNoValue() throws Exception
 	{
 		//无breaker
 		{
@@ -52,7 +116,11 @@ public class TestInvoke
 			
 			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
 		}
-		
+	}
+	
+	@Test
+	public void execute_breakerValueIsNull() throws Exception
+	{
 		//breaker关键字的值为null
 		{
 			ObjectSource objSource=new HashMapObjectSource();
@@ -60,7 +128,11 @@ public class TestInvoke
 			
 			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
 		}
-		
+	}
+	
+	@Test
+	public void execute_breakerValueIsFalse() throws Exception
+	{
 		//breaker关键字的值为false
 		{
 			ObjectSource objSource=new HashMapObjectSource();
@@ -69,7 +141,11 @@ public class TestInvoke
 			
 			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
 		}
-
+	}
+	
+	@Test
+	public void execute_breakerValueIsTrue() throws Exception
+	{
 		//breaker关键字的值为true
 		{
 			ObjectSource objSource=new HashMapObjectSource();
@@ -78,7 +154,11 @@ public class TestInvoke
 			
 			Assert.assertNull(objSource.get(RESULT_KEY, null));
 		}
-		
+	}
+	
+	@Test
+	public void execute_breakerIsLiteralTrue() throws Exception
+	{
 		//breaker为"true"
 		{
 			ObjectSource objSource=new HashMapObjectSource();
@@ -86,15 +166,7 @@ public class TestInvoke
 			
 			Assert.assertNull(objSource.get(RESULT_KEY, null));
 		}
-
-		//breaker为"false"
-		{
-			ObjectSource objSource=new HashMapObjectSource();
-			executor.execute("testBreaker_3", objSource);
-			
-			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
-		}
-
+		
 		//breaker为"TRUE"
 		{
 			ObjectSource objSource=new HashMapObjectSource();
@@ -102,7 +174,19 @@ public class TestInvoke
 			
 			Assert.assertNull(objSource.get(RESULT_KEY, null));
 		}
+	}
 
+	@Test
+	public void execute_breakerIsLiteralFalse() throws Exception
+	{
+		//breaker为"false"
+		{
+			ObjectSource objSource=new HashMapObjectSource();
+			executor.execute("testBreaker_3", objSource);
+			
+			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
+		}
+		
 		//breaker为"FALSE"
 		{
 			ObjectSource objSource=new HashMapObjectSource();
@@ -111,7 +195,57 @@ public class TestInvoke
 			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
 		}
 	}
-
+	
+	@Test
+	public void execute_exception_ArgPrepareExecuteException() throws Exception
+	{
+		Arg[] args=new Arg[]{
+				new Arg("arg0"),
+				new Arg("arg1"),
+		};
+		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		
+		Invoke invoke=new Invoke("test", "test1", args, RESULT_KEY, rp);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("arg0", "arg0");
+		os.set("arg1", "arg1");
+		
+		ArgPrepareExecuteException re=null;
+		try
+		{
+			invoke.execute(os);
+		}
+		catch(ArgPrepareExecuteException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getInvoke() == invoke) );
+		Assert.assertTrue( (re.getArg() == args[1]) );
+		Assert.assertTrue( (re.getCause() instanceof ObjectSourceException) );
+	}
+	
+	@Test
+	public void execute_exception_InvocationExecuteException() throws Exception
+	{
+		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		
+		Invoke invoke=new Invoke("test", "testThrow", null, RESULT_KEY, rp);
+		
+		InvocationExecuteException re=null;
+		try
+		{
+			invoke.execute(new HashMapObjectSource());
+		}
+		catch(InvocationExecuteException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getCause() instanceof NullPointerException) );
+	}
+	
 	public static class TestResolver
 	{
 		public static final String RESULT="result";
@@ -119,6 +253,16 @@ public class TestInvoke
 		public String test()
 		{
 			return RESULT;
+		}
+		
+		public String test1(String arg0, Integer arg1)
+		{
+			return RESULT;
+		}
+		
+		public String testThrow()
+		{
+			throw new NullPointerException();
 		}
 	}
 }

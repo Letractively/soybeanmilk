@@ -42,7 +42,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertArray_toNotArrayObject() throws Exception
+	public void convert_arrayToNotArrayObject() throws Exception
 	{
 		String[] src=new String[]{"12345", "56789"};
 		
@@ -51,7 +51,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertArray_toNotArrayObject_srcArrayEmpty() throws Exception
+	public void convert_arrayToNotArrayObject_srcArrayEmpty() throws Exception
 	{
 		String[] src=new String[0];
 		
@@ -60,7 +60,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertParamFilterValue_valueIsSimpleObject() throws Exception
+	public void convert_paramFilterValue_valueIsSimpleObject() throws Exception
 	{
 		ParamFilterValue pfv=new ParamFilterValue("paramName", "12345");
 		
@@ -70,7 +70,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertParamFilterValue_valueIsMap() throws Exception
+	public void convert_paramFilterValue_valueIsMap() throws Exception
 	{
 		Map<String,Object> paramMap=new HashMap<String, Object>();
 		
@@ -92,7 +92,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertParamFilterValue_valueIsMap_containInexistentJavaBeanProperty_filterIsNull() throws Exception
+	public void convert_paramFilterValue_valueIsMap_containInexistentJavaBeanProperty_filterIsNull() throws Exception
 	{
 		Map<String,Object> paramMap=new HashMap<String, Object>();
 		
@@ -116,7 +116,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertParamFilterValue_valueIsMap_containInexistentJavaBeanProperty_filterIsEmpty() throws Exception
+	public void convert_paramFilterValue_valueIsMap_containInexistentJavaBeanProperty_filterIsEmpty() throws Exception
 	{
 		Map<String,Object> paramMap=new HashMap<String, Object>();
 		
@@ -140,7 +140,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertParamFilterValue_valueIsMap_containInexistentJavaBeanProperty_filterNotEmpty() throws Exception
+	public void convert_paramFilterValue_valueIsMap_containInexistentJavaBeanProperty_filterNotEmpty() throws Exception
 	{
 		Map<String,Object> paramMap=new HashMap<String, Object>();
 		
@@ -172,14 +172,14 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toJavaBean_srcIsNull() throws Exception
+	public void convert_mapToJavaBean_srcIsNull() throws Exception
 	{
 		Object dest = converter.convert(null, JavaBean.class);
 		Assert.assertNull(dest);
 	}
 	
 	@Test
-	public void convertMap_toJavaBean_srcIsEmpty() throws Exception
+	public void convert_mapToJavaBean_srcIsEmpty() throws Exception
 	{
 		//源为空
 		Map<String,Object> src=new HashMap<String, Object>();
@@ -189,7 +189,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toJavaBean_srcContainInexistentJavaBeanProperty() throws Exception
+	public void convert_mapToJavaBean_srcContainInexistentJavaBeanProperty() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		src.put("abc", 356);
@@ -200,7 +200,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toJavaBean_srcContainInexistentSubJavaBeanProperty() throws Exception
+	public void convert_mapToJavaBean_srcContainInexistentSubJavaBeanProperty() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		src.put("javaBean.def", 356);
@@ -220,7 +220,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toJavaBean_srcContainInexistentSubJavaBeanProperty_inSubArrayProperty() throws Exception
+	public void convert_mapToJavaBean_srcContainInexistentSubJavaBeanProperty_inSubArrayProperty() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		String[] id=new String[]{"1"};
@@ -250,7 +250,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toJavaBean_srcHasInexistentPropertyContainInSubListProperty() throws Exception
+	public void convert_mapToJavaBean_srcHasInexistentPropertyContainInSubListProperty() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		String[] id=new String[]{"1"};
@@ -281,7 +281,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toJavaBean_srcHasInexistentPropertyContainInSubSetProperty() throws Exception
+	public void convert_mapToJavaBean_srcHasInexistentPropertyContainInSubSetProperty() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		String[] id=new String[]{"1"};
@@ -312,7 +312,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toJavaBean_srcElementString() throws Exception
+	public void convert_mapToJavaBean_srcElementString() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -332,7 +332,7 @@ public class TestWebGenericConverter
 	}
 
 	@Test
-	public void convertMap_toJavaBean_srcElementSingleStringArray() throws Exception
+	public void convert_mapToJavaBean_srcElementSingleStringArray() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -352,7 +352,7 @@ public class TestWebGenericConverter
 	}
 
 	@Test
-	public void convertMap_toJavaBean_srcElementMultiStringArray() throws Exception
+	public void convert_mapToJavaBean_srcElementMultiStringArray() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -372,7 +372,7 @@ public class TestWebGenericConverter
 	}
 
 	@Test
-	public void convertMap_toJavaBeanArray() throws Exception
+	public void convert_mapToJavaBeanArray() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -399,7 +399,7 @@ public class TestWebGenericConverter
 	}
 
 	@Test
-	public void convertMap_toJavaBean_collectionProperty_simpleKeyArrayValueMap() throws Exception
+	public void convert_mapToJavaBean_collectionProperty_simpleKeyArrayValueMap() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -508,7 +508,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toJavaBean_srcArrayPropertyContainIllegalValue() throws Exception
+	public void convert_mapToJavaBean_srcArrayPropertyContainIllegalValue() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -537,7 +537,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toJavaBean_srcComplexPropertyContainIllegalValue() throws Exception
+	public void convert_mapToJavaBean_srcComplexPropertyContainIllegalValue() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -574,7 +574,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_TypeVariable() throws Exception
+	public void convert_mapToGeneric_TypeVariable() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -597,13 +597,13 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_ParameterizedType() throws Exception
+	public void convert_mapToGeneric_ParameterizedType() throws Exception
 	{
-		convertMap_toJavaBeanList(List.class);
+		convert_mapToJavaBeanList(List.class);
 	}
 
 	@Test
-	public void convertMap_toGeneric_ParameterizedType_notSupported() throws Exception
+	public void convert_mapToGeneric_ParameterizedType_notSupported() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -631,7 +631,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_GenericArrayType() throws Exception
+	public void convert_mapToGeneric_GenericArrayType() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -659,7 +659,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_WildcardType() throws Exception
+	public void convert_mapToGeneric_WildcardType() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -682,7 +682,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_GenericType() throws Exception
+	public void convert_mapToGeneric_GenericType() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -707,7 +707,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanCollection_keyComplexSemantics_illegalValue() throws Exception
+	public void convert_mapToGeneric_JavaBeanCollection_keyComplexSemantics_illegalValue() throws Exception
 	{
 		{
 			Map<String,Object> src=new HashMap<String, Object>();
@@ -871,7 +871,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanCollection_keyComplexSemantics_illegalKey() throws Exception
+	public void convert_mapToGeneric_JavaBeanCollection_keyComplexSemantics_illegalKey() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -891,7 +891,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanArray_keyComplexSemantics() throws Exception
+	public void convert_mapToGeneric_JavaBeanArray_keyComplexSemantics() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -1083,7 +1083,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanList_keyComplexSemantics() throws Exception
+	public void convert_mapToGeneric_JavaBeanList_keyComplexSemantics() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -1277,7 +1277,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanSet_keyComplexSemantics() throws Exception
+	public void convert_mapToGeneric_JavaBeanSet_keyComplexSemantics() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -1473,61 +1473,61 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanList() throws Exception
+	public void convert_mapToGeneric_JavaBeanList() throws Exception
 	{
-		convertMap_toJavaBeanList(List.class);
+		convert_mapToJavaBeanList(List.class);
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanArrayList() throws Exception
+	public void convert_mapToGeneric_JavaBeanArrayList() throws Exception
 	{
-		convertMap_toJavaBeanList(ArrayList.class);
+		convert_mapToJavaBeanList(ArrayList.class);
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanLinkedList() throws Exception
+	public void convert_mapToGeneric_JavaBeanLinkedList() throws Exception
 	{
-		convertMap_toJavaBeanList(LinkedList.class);
+		convert_mapToJavaBeanList(LinkedList.class);
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanVector() throws Exception
+	public void convert_mapToGeneric_JavaBeanVector() throws Exception
 	{
-		convertMap_toJavaBeanList(Vector.class);
+		convert_mapToJavaBeanList(Vector.class);
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanStack() throws Exception
+	public void convert_mapToGeneric_JavaBeanStack() throws Exception
 	{
-		convertMap_toJavaBeanList(Stack.class);
+		convert_mapToJavaBeanList(Stack.class);
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanSet() throws Exception
+	public void convert_mapToGeneric_JavaBeanSet() throws Exception
 	{
-		convertMap_toJavaBeanSet(Set.class);
+		convert_mapToJavaBeanSet(Set.class);
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBean_HashSet() throws Exception
+	public void convert_mapToGeneric_JavaBean_HashSet() throws Exception
 	{
-		convertMap_toJavaBeanSet(HashSet.class);
+		convert_mapToJavaBeanSet(HashSet.class);
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanTreeSet() throws Exception
+	public void convert_mapToGeneric_JavaBeanTreeSet() throws Exception
 	{
-		convertMap_toJavaBeanSet(TreeSet.class);
+		convert_mapToJavaBeanSet(TreeSet.class);
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanLinkedHashSet() throws Exception
+	public void convert_mapToGeneric_JavaBeanLinkedHashSet() throws Exception
 	{
-		convertMap_toJavaBeanSet(LinkedHashSet.class);
+		convert_mapToJavaBeanSet(LinkedHashSet.class);
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanMap() throws Exception
+	public void convert_mapToGeneric_JavaBeanMap() throws Exception
 	{
 		Map<String, String> src=new HashMap<String, String>();
 		
@@ -1563,7 +1563,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toGeneric_JavaBeanIsGeneric() throws Exception
+	public void convert_mapToGeneric_JavaBeanIsGeneric() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -1588,7 +1588,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toRawMap() throws Exception
+	public void convert_mapToRawMap() throws Exception
 	{
 		HashMap<String,Integer> src=new HashMap<String, Integer>();
 		
@@ -1598,7 +1598,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convertMap_toRawList() throws Exception
+	public void convert_mapToRawList() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -1625,7 +1625,7 @@ public class TestWebGenericConverter
 	}
 
 	@Test
-	public void convertMap_toRawSet() throws Exception
+	public void convert_mapToRawSet() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -1652,7 +1652,7 @@ public class TestWebGenericConverter
 	}
 
 	@SuppressWarnings("rawtypes")
-	private void convertMap_toJavaBeanList(Class<? extends List> listClass) throws Exception
+	private void convert_mapToJavaBeanList(Class<? extends List> listClass) throws Exception
 	{
 		//使用List接口
 		{
@@ -1689,7 +1689,7 @@ public class TestWebGenericConverter
 	}
 
 	@SuppressWarnings("rawtypes")
-	private void convertMap_toJavaBeanSet(Class<? extends Set> setClass) throws Exception
+	private void convert_mapToJavaBeanSet(Class<? extends Set> setClass) throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -1730,7 +1730,7 @@ public class TestWebGenericConverter
 		}
 	}
 	
-	protected Integer[] stringArrayToIntArray(String[] strs)
+	private Integer[] stringArrayToIntArray(String[] strs)
 	{
 		Integer[] re=new Integer[strs.length];
 		

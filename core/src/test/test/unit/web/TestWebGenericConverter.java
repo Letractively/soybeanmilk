@@ -46,7 +46,7 @@ public class TestWebGenericConverter
 	{
 		String[] src=new String[]{"12345", "56789"};
 		
-		Integer dest=(Integer)converter.convert(src, int.class);
+		Integer dest=converter.convert(src, int.class);
 		Assert.assertEquals(src[0], dest.toString());
 	}
 	
@@ -55,7 +55,7 @@ public class TestWebGenericConverter
 	{
 		String[] src=new String[0];
 		
-		Integer dest=(Integer)converter.convert(src, Integer.class);
+		Integer dest=converter.convert(src, Integer.class);
 		Assert.assertNull(dest);
 	}
 	
@@ -64,7 +64,7 @@ public class TestWebGenericConverter
 	{
 		ParamFilterValue pfv=new ParamFilterValue("paramName", "12345");
 		
-		Integer dest=(Integer)converter.convert(pfv, Integer.class);
+		Integer dest=converter.convert(pfv, Integer.class);
 		
 		Assert.assertEquals(pfv.getValue(), dest.toString());
 	}
@@ -84,7 +84,7 @@ public class TestWebGenericConverter
 		
 		ParamFilterValue pfv=new ParamFilterValue("paramName", paramMap);
 		
-		JavaBean dest=(JavaBean)converter.convert(pfv, JavaBean.class);
+		JavaBean dest=converter.convert(pfv, JavaBean.class);
 		
 		Assert.assertEquals(name, dest.getName());
 		Assert.assertEquals(age, dest.getAge().toString());
@@ -108,7 +108,7 @@ public class TestWebGenericConverter
 		
 		ParamFilterValue pfv=new ParamFilterValue(null, paramMap);
 		
-		JavaBean dest=(JavaBean)converter.convert(pfv, JavaBean.class);
+		JavaBean dest=converter.convert(pfv, JavaBean.class);
 		
 		Assert.assertEquals(name, dest.getName());
 		Assert.assertEquals(age, dest.getAge().toString());
@@ -132,7 +132,7 @@ public class TestWebGenericConverter
 		
 		ParamFilterValue pfv=new ParamFilterValue("", paramMap);
 		
-		JavaBean dest=(JavaBean)converter.convert(pfv, JavaBean.class);
+		JavaBean dest=converter.convert(pfv, JavaBean.class);
 		
 		Assert.assertEquals(name, dest.getName());
 		Assert.assertEquals(age, dest.getAge().toString());
@@ -324,7 +324,7 @@ public class TestWebGenericConverter
 		src.put("age", age);
 		src.put("birth", birth);
 		
-		JavaBean dest=(JavaBean)converter.convert(src, JavaBean.class);
+		JavaBean dest=converter.convert(src, JavaBean.class);
 		
 		Assert.assertEquals(name, dest.getName());
 		Assert.assertEquals(new Integer(age), dest.getAge());
@@ -344,7 +344,7 @@ public class TestWebGenericConverter
 		src.put("age", age);
 		src.put("birth", birth);
 		
-		JavaBean dest=(JavaBean)converter.convert(src, JavaBean.class);
+		JavaBean dest=converter.convert(src, JavaBean.class);
 		
 		Assert.assertEquals(name[0], dest.getName());
 		Assert.assertEquals(new Integer(age[0]), dest.getAge());
@@ -364,7 +364,7 @@ public class TestWebGenericConverter
 		src.put("age", age);
 		src.put("birth", birth);
 		
-		JavaBean dest=(JavaBean)converter.convert(src, JavaBean.class);
+		JavaBean dest=converter.convert(src, JavaBean.class);
 		
 		Assert.assertEquals("jack", dest.getName());
 		Assert.assertEquals(age[0], dest.getAge().toString());
@@ -384,7 +384,7 @@ public class TestWebGenericConverter
 		src.put("age", ages);
 		src.put("birth", births);
 		
-		JavaBean[] dest=(JavaBean[])converter.convert(src, JavaBean[].class);
+		JavaBean[] dest=converter.convert(src, JavaBean[].class);
 		
 		Assert.assertTrue( dest.length == names.length);
 		
@@ -435,7 +435,7 @@ public class TestWebGenericConverter
 		src.put("javaBean2Set.javaBean.name", propsJavaBean2Collection_propsJavaBean_name);
 		src.put("javaBean2Set.javaBean.age", propsJavaBean2Collection_propsJavaBean_age);
 		
-		ComplexJavaBean dest=(ComplexJavaBean)converter.convert(src, ComplexJavaBean.class);
+		ComplexJavaBean dest=converter.convert(src, ComplexJavaBean.class);
 		
 		Assert.assertEquals(Integer.parseInt(id[0]), dest.getId());
 		Assert.assertEquals(name[0], dest.getName());
@@ -589,7 +589,7 @@ public class TestWebGenericConverter
 		@SuppressWarnings("rawtypes")
 		Type type=new MockTypeVariable("T", new Type[]{JavaBean.class});
 		
-		JavaBean dest=(JavaBean)converter.convert(src, type);
+		JavaBean dest=converter.convert(src, type);
 		
 		Assert.assertEquals(name, dest.getName());
 		Assert.assertEquals(new Integer(age), dest.getAge());
@@ -644,7 +644,7 @@ public class TestWebGenericConverter
 		src.put("birth", births);
 		
 		Type type=new MockGenericArrayType(JavaBean.class);
-		JavaBean[] dest=(JavaBean[])converter.convert(src, type);
+		JavaBean[] dest=converter.convert(src, type);
 		
 		Assert.assertTrue( dest.length == names.length);
 		
@@ -674,7 +674,7 @@ public class TestWebGenericConverter
 		MockWildcardType type=new MockWildcardType();
 		type.setUpperBounds(new Type[]{JavaBean.class});
 		
-		JavaBean dest=(JavaBean)converter.convert(src, type);
+		JavaBean dest=converter.convert(src, type);
 		
 		Assert.assertEquals(name, dest.getName());
 		Assert.assertEquals(new Integer(age), dest.getAge());
@@ -699,7 +699,7 @@ public class TestWebGenericConverter
 		
 		Type type=GenericType.getGenericType(tp, null);
 		
-		JavaBean dest=(JavaBean)converter.convert(src, type);
+		JavaBean dest=converter.convert(src, type);
 		
 		Assert.assertEquals(name, dest.getName());
 		Assert.assertEquals(new Integer(age), dest.getAge());
@@ -1012,7 +1012,7 @@ public class TestWebGenericConverter
 			}
 		}
 		
-		ComplexJavaBean[] re=(ComplexJavaBean[])converter.convert(src, ComplexJavaBean[].class);
+		ComplexJavaBean[] re=converter.convert(src, ComplexJavaBean[].class);
 		
 		Assert.assertEquals(ids.length, re.length);
 		
@@ -1205,8 +1205,8 @@ public class TestWebGenericConverter
 		}
 		
 		Type listType=new MockParameterizedType(List.class, ComplexJavaBean.class);
-		@SuppressWarnings("unchecked")
-		List<ComplexJavaBean> re=(List<ComplexJavaBean>)converter.convert(src, listType);
+		
+		List<ComplexJavaBean> re=converter.convert(src, listType);
 		
 		Assert.assertEquals(ids.length, re.size());
 		
@@ -1399,8 +1399,8 @@ public class TestWebGenericConverter
 		}
 		
 		Type setType=new MockParameterizedType(Set.class, ComplexJavaBean.class);
-		@SuppressWarnings("unchecked")
-		Set<ComplexJavaBean> re=(Set<ComplexJavaBean>)converter.convert(src, setType);
+
+		Set<ComplexJavaBean> re=converter.convert(src, setType);
 		re=new TreeSet<ComplexJavaBean>(re);
 		
 		Assert.assertEquals(ids.length, re.size());
@@ -1550,8 +1550,8 @@ public class TestWebGenericConverter
 		}
 		
 		Type mapType=new MockParameterizedType(Map.class, String.class, JavaBean.class);
-		@SuppressWarnings("unchecked")
-		Map<String, JavaBean> dest=(Map<String, JavaBean>)converter.convert(src, mapType);
+		
+		Map<String, JavaBean> dest=converter.convert(src, mapType);
 		
 		for(int i=0; i<keys.length; i++)
 		{
@@ -1575,7 +1575,7 @@ public class TestWebGenericConverter
 		src.put("array", property);
 		src.put("obj", property[0]);
 		
-		GenericJavaBeanSub dest=(GenericJavaBeanSub)converter.convert(src, GenericJavaBeanSub.class);
+		GenericJavaBeanSub dest=converter.convert(src, GenericJavaBeanSub.class);
 		
 		Assert.assertEquals(new Integer(id[0]), dest.getId());
 		Assert.assertEquals(new Double(property[0]), dest.getObj());
@@ -1597,7 +1597,6 @@ public class TestWebGenericConverter
 		Assert.assertTrue(src == dest);
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void convertMap_toRawList() throws Exception
 	{
@@ -1614,7 +1613,7 @@ public class TestWebGenericConverter
 		Exception re=null;
 		try
 		{
-			List<JavaBean> dest=(List<JavaBean>)converter.convert(src, List.class);
+			List<JavaBean> dest=converter.convert(src, List.class);
 			dest.size();
 		}
 		catch(Exception e)
@@ -1625,7 +1624,6 @@ public class TestWebGenericConverter
 		Assert.assertTrue( re.getMessage().endsWith("it has no javaBean property") );
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void convertMap_toRawSet() throws Exception
 	{
@@ -1642,7 +1640,7 @@ public class TestWebGenericConverter
 		Exception re=null;
 		try
 		{
-			Set<JavaBean> dest=(Set<JavaBean>)converter.convert(src, Set.class);
+			Set<JavaBean> dest=converter.convert(src, Set.class);
 			dest.size();
 		}
 		catch(Exception e)
@@ -1653,7 +1651,7 @@ public class TestWebGenericConverter
 		Assert.assertTrue( re.getMessage().endsWith("it has no javaBean property") );
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("rawtypes")
 	private void convertMap_toJavaBeanList(Class<? extends List> listClass) throws Exception
 	{
 		//使用List接口
@@ -1669,7 +1667,7 @@ public class TestWebGenericConverter
 			src.put("birth", births);
 			
 			Type type=new MockParameterizedType(listClass, new Type[]{JavaBean.class});
-			List<JavaBean> dest=(List<JavaBean>)converter.convert(src, type);
+			List<JavaBean> dest=converter.convert(src, type);
 			
 			Assert.assertTrue( dest.size() == names.length);
 			
@@ -1690,7 +1688,7 @@ public class TestWebGenericConverter
 		}
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("rawtypes")
 	private void convertMap_toJavaBeanSet(Class<? extends Set> setClass) throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
@@ -1705,7 +1703,7 @@ public class TestWebGenericConverter
 		
 		Type type=new MockParameterizedType(setClass, new Type[]{JavaBean.class});
 		
-		Set<JavaBean> dest=(Set<JavaBean>)converter.convert(src, type);
+		Set<JavaBean> dest=converter.convert(src, type);
 		
 		Assert.assertTrue( dest.size() == names.length);
 		

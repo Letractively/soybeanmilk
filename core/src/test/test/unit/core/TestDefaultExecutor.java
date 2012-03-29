@@ -73,7 +73,7 @@ public class TestDefaultExecutor
 		HashMapObjectSource os=new HashMapObjectSource();
 		executor.execute(KEY_EXE_HELLO, os);
 		
-		Execution re=(Execution)os.get(KEY_EXECUTION, null);
+		Execution re=os.get(KEY_EXECUTION, null);
 		
 		Assert.assertEquals(os, re.getObjectSource());
 		Assert.assertEquals(KEY_EXE_HELLO, re.getExecutable().getName());
@@ -89,10 +89,10 @@ public class TestDefaultExecutor
 		HashMapObjectSource os=new HashMapObjectSource();
 		
 		executor.execute(KEY_EXE_HELLO, os);
-		re0=(Execution)os.get(KEY_EXECUTION, null);
+		re0=os.get(KEY_EXECUTION, null);
 		
 		executor.execute(KEY_EXE_HELLO, os);
-		re1=(Execution)os.get(KEY_EXECUTION, null);
+		re1=os.get(KEY_EXECUTION, null);
 		
 		Assert.assertTrue( re0!=null && re1!=null && re0!=re1 );
 	}
@@ -206,7 +206,7 @@ public class TestDefaultExecutor
 		
 		executor.execute("helloThrow", os);
 		
-		Execution re=(Execution)os.get(KEY_EXECUTION, null);
+		Execution re=os.get(KEY_EXECUTION, null);
 		
 		Assert.assertTrue( (re.getExecuteException().getCause() instanceof UnsupportedOperationException) );
 	}

@@ -49,7 +49,8 @@ public class HashMapObjectSource extends ConvertableObjectSource
 	}
 
 	//@Override
-	public Object get(Serializable key, Type expectType) throws ObjectSourceException
+	@SuppressWarnings("unchecked")
+	public <T> T get(Serializable key, Type expectType) throws ObjectSourceException
 	{
 		Object re = source.get(key);
 		
@@ -58,7 +59,7 @@ public class HashMapObjectSource extends ConvertableObjectSource
 		if(log.isDebugEnabled())
 			log.debug("get object '"+SoybeanMilkUtils.toString(re)+"' from '"+SoybeanMilkUtils.toString(this)+"' with key '"+SoybeanMilkUtils.toString(key)+"'");
 		
-		return re;
+		return (T)re;
 	}
 	
 	//@Override

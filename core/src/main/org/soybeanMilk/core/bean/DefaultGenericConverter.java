@@ -112,36 +112,42 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	//@Override
-	public Object convert(Object sourceObj, Type targetType) throws ConvertException
+	@SuppressWarnings("unchecked")
+	public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
 	{
 		if(log.isDebugEnabled())
 			log.debug("start converting '"+SoybeanMilkUtils.toString(sourceObj)+"' to type '"+SoybeanMilkUtils.toString(targetType)+"'");
 		
+		Object result=null;
+		
 		if(targetType == null)
-			return sourceObj;
+			result=sourceObj;
 		else if(SoybeanMilkUtils.isInstanceOf(sourceObj, SoybeanMilkUtils.toWrapperType(targetType)))
-			return sourceObj;
+			result=sourceObj;
 		else if(sourceObj==null
 				|| (sourceObj instanceof String && ((String)sourceObj).length()==0))
 		{
 			if(SoybeanMilkUtils.isPrimitive(targetType))
 				throw new GenericConvertException("can not convert '"+SoybeanMilkUtils.toString(sourceObj)+"' to primitive type '"+targetType+"'");
 			else
-				return null;
+				result=null;
 		}
 		else
 		{
 			Converter converter = getConverter(sourceObj.getClass(), targetType);
 			
 			if(converter == null)
-				return convertWhenNoSupportConverter(sourceObj, targetType);
+				result=convertWhenNoSupportConverter(sourceObj, targetType);
 			else
-				return doConvert(converter, sourceObj, targetType);
+				result=doConvert(converter, sourceObj, targetType);
 		}
+		
+		return (T)result;
 	}
 	
 	//@Override
-	public Object getProperty(Object srcObj, String propertyExpression, Type expectType) throws ConvertException
+	@SuppressWarnings("unchecked")
+	public <T> T getProperty(Object srcObj, String propertyExpression, Type expectType) throws ConvertException
 	{
 		if(srcObj == null)
 			return null;
@@ -171,7 +177,7 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		result=(expectType == null ? parent : convert(parent, expectType));
 		
-		return result;
+		return (T)result;
 	}
 	
 	//@Override

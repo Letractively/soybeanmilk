@@ -31,7 +31,7 @@ public interface ObjectSource
 	 * @return
 	 * @throws ObjectSourceException
 	 */
-	Object get(Serializable key, Type expectType) throws ObjectSourceException;
+	<T> T get(Serializable key, Type expectType) throws ObjectSourceException;
 	
 	/**
 	 * 保存对象

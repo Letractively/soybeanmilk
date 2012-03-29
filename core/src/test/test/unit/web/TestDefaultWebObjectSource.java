@@ -105,9 +105,10 @@ public class TestDefaultWebObjectSource
 		Converter converter=new Converter()
 		{
 			//@Override
-			public Object convert(Object sourceObj, Type targetClass) 
+			@SuppressWarnings("unchecked")
+			public <T> T convert(Object sourceObj, Type targetClass) 
 			{
-				return staticJavaBean;
+				return (T)staticJavaBean;
 			}
 		};
 		
@@ -218,7 +219,7 @@ public class TestDefaultWebObjectSource
 			request.setParameter("yourBean.id", new String[]{"2"});
 			request.setParameter("yourBean.name", new String[]{"tom"});
 			
-			MyBean dest=(MyBean)webObjectSource.get("param", MyBean.class);
+			MyBean dest=webObjectSource.get("param", MyBean.class);
 			
 			Assert.assertEquals(1, dest.getId().intValue());
 			Assert.assertEquals("jack", dest.getName());
@@ -232,7 +233,7 @@ public class TestDefaultWebObjectSource
 			request.setParameter("my.myBean.yourBean.id", new String[]{"2"});
 			request.setParameter("my.myBean.yourBean.name", new String[]{"tom"});
 			
-			MyBean dest=(MyBean)webObjectSource.get("param.my.myBean", MyBean.class);
+			MyBean dest=webObjectSource.get("param.my.myBean", MyBean.class);
 			
 			Assert.assertEquals(1, dest.getId().intValue());
 			Assert.assertEquals("jack", dest.getName());
@@ -246,7 +247,7 @@ public class TestDefaultWebObjectSource
 			request.setParameter("my.myBean.yourBean.id", new String[]{"2"});
 			request.setParameter("my.myBean.yourBean.name", new String[]{"tom"});
 			
-			MyBean dest=(MyBean)webObjectSource.get("param.my.myBean", MyBean.class);
+			MyBean dest=webObjectSource.get("param.my.myBean", MyBean.class);
 			
 			Assert.assertEquals(1, dest.getId().intValue());
 			Assert.assertEquals("jack", dest.getName());
@@ -265,14 +266,14 @@ public class TestDefaultWebObjectSource
 		Map src=request.getParameterMap();
 		
 		{
-			Map dest=(Map)webObjectSource.get("param", Map.class);
+			Map dest=webObjectSource.get("param", Map.class);
 			
 			Assert.assertEquals(src, dest);
 			Assert.assertEquals(src.get(value), dest.get(value));
 		}
 		
 		{
-			Map dest=(Map)webObjectSource.get("param", null);
+			Map dest=webObjectSource.get("param", null);
 			
 			Assert.assertEquals(src, dest);
 			Assert.assertEquals(src.get(value), dest.get(value));
@@ -301,8 +302,7 @@ public class TestDefaultWebObjectSource
 		request.setParameter("paramName.aaa", value1);
 		request.setParameter("paramName.bbb", value2);
 		
-		@SuppressWarnings("unchecked")
-		Map<String, ?> re=(Map<String, ?>)webObjectSource.get("param.paramName", null);
+		Map<String, ?> re=webObjectSource.get("param.paramName", null);
 		
 		Assert.assertEquals(2, re.size());
 		Assert.assertEquals(value1, re.get("aaa"));
@@ -318,8 +318,7 @@ public class TestDefaultWebObjectSource
 		request.setParameter("paramName.aaa", value1);
 		request.setParameter("paramName.bbb", value2);
 		
-		@SuppressWarnings("unchecked")
-		Map<String, ?> re=(Map<String, ?>)webObjectSource.get("param.paramName", Map.class);
+		Map<String, ?> re=webObjectSource.get("param.paramName", Map.class);
 		
 		Assert.assertEquals(2, re.size());
 		Assert.assertEquals(value1, re.get("aaa"));

@@ -175,7 +175,7 @@ public abstract class AbstractTargetHandler implements TargetHandler
 				{
 					try
 					{
-						String value=(String)objectSource.get(var, String.class);
+						String value=objectSource.get(var, String.class);
 						result.append(value==null ? "null" : value);
 					}
 					catch(Exception e)

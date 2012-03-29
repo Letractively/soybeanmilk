@@ -204,7 +204,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	
 	//@Override
 	@SuppressWarnings("unchecked")
-	public Object get(Serializable key, Type expectType) throws ObjectSourceException
+	public <T> T get(Serializable key, Type expectType) throws ObjectSourceException
 	{
 		if(key == null)
 			throw new ObjectSourceException("[key] must not be null");
@@ -265,7 +265,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		if(log.isDebugEnabled())
 			log.debug("get object '"+SoybeanMilkUtils.toString(result)+"' from '"+SoybeanMilkUtils.toString(this)+"' with key '"+SoybeanMilkUtils.toString(strKey)+"'");
 		
-		return result;
+		return (T)result;
 	}
 	
 	//@Override

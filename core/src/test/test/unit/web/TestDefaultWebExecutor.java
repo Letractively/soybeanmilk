@@ -105,7 +105,7 @@ public class TestDefaultWebExecutor
 		
 		webExecutor.execute("typeVariableTest", os);
 		
-		TestBeanSub result=(TestBeanSub)os.get("request.testResult", null);
+		TestBeanSub result=os.get("request.testResult", null);
 		
 		Assert.assertEquals(result.getId(), id);
 		Assert.assertEquals(result.getName(), name);
@@ -125,7 +125,7 @@ public class TestDefaultWebExecutor
 		
 		webExecutor.execute("genericArrayTest", os);
 		
-		TestBeanSub[] result=(TestBeanSub[])os.get("request.testResult", null);
+		TestBeanSub[] result=os.get("request.testResult", null);
 		
 		Assert.assertEquals(id.length, result.length);
 		
@@ -152,8 +152,7 @@ public class TestDefaultWebExecutor
 		
 		webExecutor.execute("parameterizedTypeTest", os);
 		
-		@SuppressWarnings("unchecked")
-		List<TestBeanSub> result=(List<TestBeanSub>)os.get("request.testResult", null);
+		List<TestBeanSub> result=os.get("request.testResult", null);
 		
 		Assert.assertEquals(id.length, result.size());
 		

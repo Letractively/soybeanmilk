@@ -58,5 +58,5 @@ public interface GenericConverter extends Converter
 	 * @throws ConvertException
 	 * @date 2010-12-28
 	 */
-	Object getProperty(Object srcObj, String propertyExpression, Type expectType) throws ConvertException;
+	<T> T getProperty(Object srcObj, String propertyExpression, Type expectType) throws ConvertException;
 }

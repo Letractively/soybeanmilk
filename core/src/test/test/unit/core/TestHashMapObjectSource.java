@@ -26,7 +26,7 @@ public class TestHashMapObjectSource
 			String src="1";
 			
 			objSource.set("key", src);
-			Integer dest=(Integer)objSource.get("key", int.class);
+			Integer dest=objSource.get("key", int.class);
 			Assert.assertEquals(Integer.parseInt(src), dest.intValue());
 		}
 		
@@ -34,7 +34,7 @@ public class TestHashMapObjectSource
 			String[] src=new String[]{"1","2"};
 			objSource.set("key", src);
 			
-			int[] dest=(int[])objSource.get("key", int[].class);
+			int[] dest=objSource.get("key", int[].class);
 			
 			Assert.assertEquals(Integer.parseInt(src[0]), dest[0]);
 			Assert.assertEquals(Integer.parseInt(src[1]), dest[1]);

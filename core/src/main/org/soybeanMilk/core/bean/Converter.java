@@ -30,5 +30,5 @@ public interface Converter
 	 * @return 目标类型的对象
 	 * @throws ConvertException
 	 */
-	Object convert(Object sourceObj, Type targetType) throws ConvertException;
+	<T> T convert(Object sourceObj, Type targetType) throws ConvertException;
 }

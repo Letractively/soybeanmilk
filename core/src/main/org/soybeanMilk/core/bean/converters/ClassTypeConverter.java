@@ -28,19 +28,24 @@ import org.soybeanMilk.core.bean.Converter;
 public abstract class ClassTypeConverter implements Converter
 {
 	//@Override
-	public Object convert(Object sourceObj, Type targetType) throws ConvertException
+	@SuppressWarnings("unchecked")
+	public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
 	{
+		Object result=null;
+		
 		if(targetType == null)
-			return sourceObj;
+			result=sourceObj;
 		
 		try
 		{
-			return convertToClass(sourceObj, SoybeanMilkUtils.narrowToClassType(targetType));
+			result=convertToClass(sourceObj, SoybeanMilkUtils.narrowToClassType(targetType));
 		}
 		catch(Exception e)
 		{
 			throw new ConvertException(sourceObj, targetType, e);
 		}
+		
+		return (T)result;
 	}
 	
 	/**

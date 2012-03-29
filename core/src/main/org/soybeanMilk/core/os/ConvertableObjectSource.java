@@ -48,7 +48,7 @@ public abstract class ConvertableObjectSource implements ObjectSource
 	}
 	
 	//@Override
-	public abstract Object get(Serializable key, Type expectType) throws ObjectSourceException;
+	public abstract <T> T get(Serializable key, Type expectType) throws ObjectSourceException;
 	
 	//@Override
 	public abstract void set(Serializable key, Object obj) throws ObjectSourceException;

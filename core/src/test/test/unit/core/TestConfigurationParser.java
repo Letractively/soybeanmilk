@@ -160,7 +160,7 @@ public class TestConfigurationParser
 	
 	public static class TestConverter implements Converter
 	{
-		public Object convert(Object sourceObj, Type targetType)
+		public <T> T convert(Object sourceObj, Type targetType)
 		{
 			return null;
 		}

@@ -16,15 +16,27 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.soybeanMilk.core.bean.ConvertException;
+import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.GenericType;
+import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.bean.MapConvertException;
 import org.soybeanMilk.web.bean.WebGenericConverter;
+import org.soybeanMilk.web.os.DefaultWebObjectSource;
 import org.soybeanMilk.web.os.ParamFilterValue;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockServletContext;
 
 import test.unit.core.MockGenericArrayType;
 import test.unit.core.MockParameterizedType;
@@ -70,25 +82,56 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convert_paramFilterValue_valueIsMap() throws Exception
+	public void convert_paramFilterValue_valueIsMap_toRawMap() throws Exception
 	{
 		Map<String,Object> paramMap=new HashMap<String, Object>();
 		
-		String name="jack";
-		String age="15";
-		String birth="1900-10-21";
+		String id="15";
+		String name="javaBean2";
+		String javaBean_name="javaBean";
+		String javaBean_age="13";
 		
+		paramMap.put("id", id);
 		paramMap.put("name", name);
-		paramMap.put("age", age);
-		paramMap.put("birth", birth);
+		paramMap.put("javaBean.name", javaBean_name);
+		paramMap.put("javaBean.age", javaBean_age);
 		
 		ParamFilterValue pfv=new ParamFilterValue("paramName", paramMap);
 		
-		JavaBean dest=converter.convert(pfv, JavaBean.class);
+		Map<String, String[]> dest=converter.convert(pfv, Map.class);
 		
+		Assert.assertEquals(paramMap.size(), dest.size());
+		
+		Assert.assertEquals(id, dest.get("id"));
+		Assert.assertEquals(name, dest.get("name"));
+		Assert.assertEquals(javaBean_name, dest.get("javaBean.name"));
+		Assert.assertEquals(javaBean_age, dest.get("javaBean.age"));
+	}
+	
+
+	@Test
+	public void convert_paramFilterValue_valueIsMap_toJavaBean() throws Exception
+	{
+		Map<String,Object> paramMap=new HashMap<String, Object>();
+		
+		String id="15";
+		String name="javaBean2";
+		String javaBean_name="javaBean";
+		String javaBean_age="13";
+		
+		paramMap.put("id", id);
+		paramMap.put("name", name);
+		paramMap.put("javaBean.name", javaBean_name);
+		paramMap.put("javaBean.age", javaBean_age);
+		
+		ParamFilterValue pfv=new ParamFilterValue("paramName", paramMap);
+		
+		JavaBean2 dest=converter.convert(pfv, JavaBean2.class);
+		
+		Assert.assertEquals(id, dest.getId()+"");
 		Assert.assertEquals(name, dest.getName());
-		Assert.assertEquals(age, dest.getAge().toString());
-		Assert.assertEquals(birth, new SimpleDateFormat("yyyy-MM-dd").format(dest.getBirth()));
+		Assert.assertEquals(javaBean_name, dest.getJavaBean().getName());
+		Assert.assertEquals(javaBean_age, dest.getJavaBean().getAge()+"");
 	}
 	
 	@Test
@@ -1649,6 +1692,186 @@ public class TestWebGenericConverter
 		}
 		
 		Assert.assertTrue( re.getMessage().endsWith("it has no javaBean property") );
+	}
+	
+	@Test
+	public void convert_requestToTarget_noConverter() throws Exception
+	{
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.convert(new MockHttpServletRequest(), JavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'javax.servlet.http.HttpServletRequest'")) );
+	}
+	
+	@Test
+	public void convert_requestToTarget_hasConverter() throws Exception
+	{
+		final JavaBean bean=new JavaBean();
+		
+		converter.addConverter(HttpServletRequest.class, JavaBean.class, new Converter()
+		{
+			@SuppressWarnings("unchecked")
+			public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
+			{
+				return (T)bean;
+			}
+		});
+		
+		JavaBean re=converter.convert(new MockHttpServletRequest(), JavaBean.class);
+		
+		Assert.assertTrue( (re == bean) );
+	}
+	
+	@Test
+	public void convert_sessionToTarget_noConverter() throws Exception
+	{
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.convert(new MockHttpServletRequest().getSession(), JavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'javax.servlet.http.HttpSession'")) );
+	}
+	
+	@Test
+	public void convert_sessionToTarget_hasConverter() throws Exception
+	{
+		final JavaBean bean=new JavaBean();
+		
+		converter.addConverter(HttpSession.class, JavaBean.class, new Converter()
+		{
+			@SuppressWarnings("unchecked")
+			public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
+			{
+				return (T)bean;
+			}
+		});
+		
+		JavaBean re=converter.convert(new MockHttpServletRequest().getSession(), JavaBean.class);
+		
+		Assert.assertTrue( (re == bean) );
+	}
+	
+	@Test
+	public void convert_servletContextToTarget_noConverter() throws Exception
+	{
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.convert(new MockServletContext(), JavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'javax.servlet.ServletContext'")) );
+	}
+	
+	@Test
+	public void convert_servletContextToTarget_hasConverter() throws Exception
+	{
+		final JavaBean bean=new JavaBean();
+		
+		converter.addConverter(ServletContext.class, JavaBean.class, new Converter()
+		{
+			@SuppressWarnings("unchecked")
+			public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
+			{
+				return (T)bean;
+			}
+		});
+		
+		JavaBean re=converter.convert(new MockServletContext(), JavaBean.class);
+		
+		Assert.assertTrue( (re == bean) );
+	}
+	
+	@Test
+	public void convert_responseToTarget_noConverter() throws Exception
+	{
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.convert(new MockHttpServletResponse(), JavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'javax.servlet.http.HttpServletResponse'")) );
+	}
+	
+	@Test
+	public void convert_responseToTarget_hasConverter() throws Exception
+	{
+		final JavaBean bean=new JavaBean();
+		
+		converter.addConverter(HttpServletResponse.class, JavaBean.class, new Converter()
+		{
+			@SuppressWarnings("unchecked")
+			public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
+			{
+				return (T)bean;
+			}
+		});
+		
+		JavaBean re=converter.convert(new MockHttpServletResponse(), JavaBean.class);
+		
+		Assert.assertTrue( (re == bean) );
+	}
+	
+	@Test
+	public void convert_objectSourceToTarget_noConverter() throws Exception
+	{
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.convert(new DefaultWebObjectSource(), JavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'org.soybeanMilk.web.WebObjectSource'")) );
+	}
+	
+	@Test
+	public void convert_objectSourceToTarget_hasConverter() throws Exception
+	{
+		final JavaBean bean=new JavaBean();
+		
+		converter.addConverter(WebObjectSource.class, JavaBean.class, new Converter()
+		{
+			@SuppressWarnings("unchecked")
+			public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
+			{
+				return (T)bean;
+			}
+		});
+		
+		JavaBean re=converter.convert(new DefaultWebObjectSource(), JavaBean.class);
+		
+		Assert.assertTrue( (re == bean) );
 	}
 
 	@SuppressWarnings("rawtypes")

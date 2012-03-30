@@ -159,10 +159,6 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			result=getConverterNotNull(HttpServletRequest.class, targetType).convert(sourceObj, targetType);
 		}
-		else if(sourceObj instanceof HttpServletResponse)
-		{
-			result=getConverterNotNull(HttpServletResponse.class, targetType).convert(sourceObj, targetType);
-		}
 		else if(sourceObj instanceof HttpSession)
 		{
 			result=getConverterNotNull(HttpSession.class, targetType).convert(sourceObj, targetType);
@@ -170,6 +166,10 @@ public class WebGenericConverter extends DefaultGenericConverter
 		else if(sourceObj instanceof ServletContext)
 		{
 			result=getConverterNotNull(ServletContext.class, targetType).convert(sourceObj, targetType);
+		}
+		else if(sourceObj instanceof HttpServletResponse)
+		{
+			result=getConverterNotNull(HttpServletResponse.class, targetType).convert(sourceObj, targetType);
 		}
 		else if(sourceObj instanceof WebObjectSource)
 		{

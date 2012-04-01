@@ -37,7 +37,7 @@ import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.config.Configuration;
-import org.soybeanMilk.core.config.InterceptorInfo;
+import org.soybeanMilk.core.config.Interceptors;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
@@ -440,15 +440,15 @@ public class ConfigurationParser
 		
 		assertNotEmpty(executionKey, "<"+TAG_INTERCEPROT+"> attribute ["+TAG_INTERCEPROT_ATTR_EXECUTION_KEY+"] must not be empty");
 		
-		InterceptorInfo ii=createInterceptorInfoInstance();
+		Interceptors ii=createInterceptorInfoInstance();
 		ii.setExecutionKey(executionKey);
 		
 		if(before != null)
-			ii.setBeforeHandler(new ExecutableRefProxy(before, getCurrentExecutablePrefix()));
+			ii.setBefore(new ExecutableRefProxy(before, getCurrentExecutablePrefix()));
 		if(after != null)
-			ii.setAfterHandler(new ExecutableRefProxy(after, getCurrentExecutablePrefix()));
+			ii.setAfter(new ExecutableRefProxy(after, getCurrentExecutablePrefix()));
 		if(exception != null)
-			ii.setExceptionHandler(new ExecutableRefProxy(exception, getCurrentExecutablePrefix()));
+			ii.setException(new ExecutableRefProxy(exception, getCurrentExecutablePrefix()));
 		
 		getConfiguration().setInterceptorInfo(ii);
 	}
@@ -669,43 +669,43 @@ public class ConfigurationParser
 	 */
 	protected void processInterceptorInfoRefs()
 	{
-		InterceptorInfo ii=getConfiguration().getInterceptorInfo();
+		Interceptors ii=getConfiguration().getInterceptorInfo();
 		if(ii == null)
 			return;
 		
 		{
-			Executable before=ii.getBeforeHandler();
+			Executable before=ii.getBefore();
 			if(before instanceof ExecutableRefProxy)
 			{
 				Executable targetExe=getTargetRefExecutable((ExecutableRefProxy)before);
 				if(targetExe == null)
 					throw new ParseException("can not find 'before' interceptor named '"+((ExecutableRefProxy)before).getRefName()+"'");
 				
-				ii.setBeforeHandler(targetExe);
+				ii.setBefore(targetExe);
 			}
 		}
 		
 		{
-			Executable after=ii.getAfterHandler();
+			Executable after=ii.getAfter();
 			if(after instanceof ExecutableRefProxy)
 			{
 				Executable targetExe=getTargetRefExecutable((ExecutableRefProxy)after);
 				if(targetExe == null)
 					throw new ParseException("can not find 'after' interceptor named '"+((ExecutableRefProxy)after).getRefName()+"'");
 				
-				ii.setAfterHandler(targetExe);
+				ii.setAfter(targetExe);
 			}
 		}
 		
 		{
-			Executable exception=ii.getExceptionHandler();
+			Executable exception=ii.getException();
 			if(exception instanceof ExecutableRefProxy)
 			{
 				Executable targetExe=getTargetRefExecutable((ExecutableRefProxy)exception);
 				if(targetExe == null)
 					throw new ParseException("can not find 'exception' interceptor named '"+((ExecutableRefProxy)exception).getRefName()+"'");
 				
-				ii.setExceptionHandler(targetExe);
+				ii.setException(targetExe);
 			}
 		}
 	}
@@ -1092,9 +1092,9 @@ public class ConfigurationParser
 	 * 创建空的拦截器信息对象，用于设置其属性
 	 * @return
 	 */
-	protected InterceptorInfo createInterceptorInfoInstance()
+	protected Interceptors createInterceptorInfoInstance()
 	{
-		return new InterceptorInfo();
+		return new Interceptors();
 	}
 	
 	/**

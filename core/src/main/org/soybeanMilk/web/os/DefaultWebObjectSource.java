@@ -30,106 +30,72 @@ import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.ConvertException;
-import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.bean.MapConvertException;
+import org.soybeanMilk.web.bean.WebGenericConverter;
 
 /**
- * 默认的{@linkplain WebObjectSource WEB对象源}实现。
- * <br>
- * 传递给它的关键字会被理解为由两个部分组成：“[scope].[keyInScope]”，其中
- * “[scope]”表示作用域，“[keyInScope]”则是真正的该作用域下的关键字。
- * <br>
- * 它目前所支持的关键字格式及其说明如下：
+ * 默认Web对象源，它是{@linkplain WebObjectSource Web对象源}的一个默认实现，
+ * 使用Servlet环境的{@linkplain HttpServletRequest}、{@linkplain HttpSession}、{@linkplain ServletContext}作为底层对象源。
+ * <p>
+ * 当从默认Web对象源获取某个关键字对应的对象时，它会依次从这三个底层对象源中查找对象，如果在任意一个中找到匹配，那个匹配对象将被返回，否则，它会把这个关键字理解为请求
+ * 参数过滤器，然后从请求参数中过滤和获取对象并返回。
+ * </p>
+ * <p>
+ * 在从请求参数获取对象时，它会做一些特殊的处理：如果这个关键字直接对应某个请求参数，那么那个请求参数的值将被返回；否则，它会以“[关键字].”作为过滤器（加一个'.'字符），
+ * 筛选请求参数映射表中仅以这个过滤器开头的项，生成一个新的映射表并将它返回，并且这个新映射表的关键字将只是原请求参数映射表关键字的这个过滤器之后的部分。
+ * 比如有一个参数名为“somePrefix.someParam.someValue”的请求参数，那么在以“somePrefix.someParam”为关键字从默认Web对象源获取之后，新的映射表关键字
+ * 将变为“someValue”。
+ * </p>
+ * <p>
+ * 另外，你也可以使用“someObj.someProperty”形式的关键字，来获取已存在于底层对象源的“someObj”对象的“someProperty”属性值，而如果“someObj”对象不存在，
+ * “someObj.someProperty”将被认为仅仅是一个普通形式的关键字而重新查找。
+ * </p>
+ * <p>
+ * 如果默认Web对象源从底层对象源中获取的对象与期望的对象类型不匹配，它将会使用{@linkplain WebGenericConverter Web通用转换器}将这个对象转换为期望类型的对象。
+ * </p>
+ * <p>
+ * 当将对象保存到默认Web对象源时，对象将会被直接保存到{@linkplain HttpServletRequest}中，而如果是要将对象保存到已存在于底层对象源的某个对象的某个属性中，
+ * 比如以关键字“someObj.someProperty”，那么默认Web对象源会从三个底层对象源查找“someObj”对象，并设置它的“someProperty”属性的值，而如果“someObj”对象不存在，
+ * “someObj.someProperty”将被认为仅仅是一个普通形式的关键字，而保存到{@linkplain HttpServletRequest}中。
+ * </p>
+ * <p>
+ * 默认Web对象源还提供了一些用于标识作用域的特殊关键字，包括“param”、“request”、“session”、“application”、“response”、“objectSource”：
  * <ul>
- * 	<li>
- *   set
- *   <ul>
- *  	<li>
- *  		<span class="tagValue">keyInScope</span> <br/>
- *  		结果将以“<span class="var">keyInScope</span>”关键字被保存到“<span class="var">request</span>”作用域中
- *  	</li>
- *  	<li>
- *  		<span class="tagValue">request.keyInScope</span> <br/>
- *  		同上
- *  	</li>
- *  	<li>
- *  		<span class="tagValue">session.keyInScope</span> <br/>
- *  		结果将以“<span class="var">keyInScope</span>”关键字被保存到“<span class="var">session</span>”作用域中
- *  	</li>
- *  	<li>
- *  		<span class="tagValue">application.keyInScope</span> <br/>
- *  		结果将以“<span class="var">keyInScope</span>”关键字被保存到“<span class="var">application</span>”作用域中
- *  	</li>
- *   </ul>
- *  </li>
- *  <li>
- *  	get
- *  	<ul>
- *  	<li>
- *  		<span class="tagValue">param</span> <br/>
- *  		整个请求参数映射表。如果目标类型是<span class="var">java.util.Map</span>，
- *  		那么它不会做任何处理而直接返回整个参数映射表；如果是其他类型，它会首先将此映射表转换为这个类型的对象，然后返回此对象。
- *  	</li>
- *  	<li>
- *  		<span class="tagValue">keyInScope</span> <br/>
- *  		请求参数映射表中以“<span class="var">keyInScope</span>”开头的请求参数。
- *  		如果这个参数有明确的值，它将对这个值进行类型转换（需要的话），然后返回转换后的对象；否则，就根据“<span class="var">keyInScope</span>”来对参数映射表进行过滤，
- *  		产生一个新的映射表（它的主键是原始关键字“<span class="var">keyInScope.</span>”之后的部分，比如由“<span class="var">beanName.propertyName</span>”变为“<span class="var">propertyName</span>”），
- *  		然后，与上面提到的一样，根据目标类型直接返回这个新映射表或者返回转换后的对象。
- *  	</li>
- *  	<li>
- *  		<span class="tagValue">param.keyInScope</span> <br/>
- *  		同上。
- *  	</li>
- *  	<li>
- *  		<span class="tagValue">request</span> <br/>
- *  		请求HttpServletRequest对象。框架本身并没有提供它的转换器，如果目标类型不是“<span class="var">HttpServletRequest</span>”，
- *  		那么你需要为此对象源的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletRequest</span>”到目标类型的辅助{@linkplain Converter 转换器}。
- *  	</li>
- *  	<li>
- *  		<span class="tagValue">request.keyInScope</span> <br/>
- *  		请求属性中的“<span class="var">keyInScope</span>”关键字对应的对象。如果目标类型与此对象不一致，框架将尝试执行类型转换。
- *  	</li>
- *  	<li>
- *  		<span class="tagValue">session</span> <br/>
- *  		会话HttpSession对象。框架本身并没有提供它的转换器，如果目标类型不是“<span class="var">HttpSession</span>”，
- *  		那么你需要为此对象源的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpSession</span>”到目标类型的辅助{@linkplain Converter 转换器}。
- *  	</li>
- *  	<li>
- *  		<span class="tagValue">session.keyInScope</span> <br/>
- *  		会话属性中的“<span class="var">keyInScope</span>”关键字对应的对象。如果目标类型与此对象不一致，框架将尝试执行类型转换。
- *  	</li>
- *  	<li>
- *  		<span class="tagValue">application</span> <br/>
- *  		应用ServletContext对象。如果目标类型不是“<span class="var">ServletContext</span>”，
- *  		那么你需要为此对象源的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.ServletContext</span>”到目标类型的辅助{@linkplain Converter 转换器}。
- *  	</li>
- *  	<li>
- *  		<span class="tagValue">application.keyInScope</span> <br/>
- *  		应用属性中的“<span class="var">keyInScope</span>”关键字对应的对象。如果目标类型与此对象不一致，框架将尝试执行类型转换。
- *  	</li>
- *  	<li>
- *  		<span class="tagValue">response</span> <br/>
- *  		响应HttpServletResponse对象。如果目标类型不是“<span class="var">HttpServletResponse</span>”，
- *  		那么你需要为此对象源的{@linkplain GenericConverter 通用转换器}添加“<span class="var">javax.servlet.http.HttpServletResponse</span>”到目标类型辅助{@linkplain Converter 转换器}。
- *  	</li>
- *  	<li>
- *  		<span class="tagValue">objectSource</span> <br/>
- *  		当前的{@linkplain DefaultWebObjectSource}对象，你可以使用它来获取所有servlet对象。如果目标类型不是“<span class="var">WebObjectSource</span>”，
- *  		那么你需要为此对象源的{@linkplain GenericConverter 通用转换器}添加“<span class="var">org.soybeanMilk.web.os.WebObjectSource</span>”到目标类型辅助{@linkplain Converter 转换器}。
- *  	</li>
- *   </ul>
- *  </li>
+ *     <li>
+ *         param<br>
+ *         表示整个请求参数映射表，使用它可以从默认Web对象源获取整个请求参数映射表，也可以使用“param.someKey”的形式，指明是从请求参数中过滤和获取对象。
+ *     </li>
+ *     <li>
+ *         request<br>
+ *         表示{@linkplain HttpServletRequest}对象，使用它可以从默认Web对象源获取当前请求对象，
+ *         也可以使用“request.someKey”的形式，指明是从当前请求对象属性中获取对象或者将对象保存到请求对象属性中。
+ *     </li>
+ *     <li>
+ *         session<br>
+ *         表示{@linkplain HttpSession}对象，使用它可以从默认Web对象源获取当前会话对象，
+ *         也可以使用“session.someKey”的形式，指明是当前从会话对象属性中获取对象或者将对象保存到会话对象属性中。
+ *     </li>
+ *     <li>
+ *         application<br>
+ *         表示{@linkplain ServletContext}对象，使用它可以从默认Web对象源获取当前应用对象，
+ *         也可以使用“application.someKey”的形式，指明是从当前应用对象属性中获取对象或者将对象保存到应用对象属性中。
+ *     </li>
+ *     <li>
+ *         response<br>
+ *         表示{@linkplain HttpServletResponse}对象，使用它可以从默认Web对象源获取当前响应对象。
+ *     </li>
+ *     <li>
+ *         objectSource<br>
+ *         表示{@linkplain WebObjectSource Web对象源}本身，使用它可以获取当前的Web对象源引用。
+ *     </li>
  * </ul>
- * <br>
- * 另外，如果“request”、“session”、“application”作用域的“[keyInScope]”中包含访问符“.”，比如“request.yourBean.property”，
- * 它会认为你是想要取得或设置“request”作用域内“yourBean”对象的“property”属性，并按此处理（如果“yourBean”对象存在的话）。
- * <br>
- * 实际上，你在配置文件中定义的&lt;arg&gt;关键字的格式就是由这个类决定的。
+ * 注意，如果你是要从默认Web对象源获取“request”、“session”、“application”、“response”、“objectSource”这些对象，而期望类型与与它们的类型不同，
+ * 那么你需要为默认Web对象源使用的{@linkplain WebGenericConverter Web通用转换器}添加这些对象表示的类型到你所期望类型的辅助转换器。
+ * </p>
  * @author earthAngry@gmail.com
  * @date 2010-7-19
  */

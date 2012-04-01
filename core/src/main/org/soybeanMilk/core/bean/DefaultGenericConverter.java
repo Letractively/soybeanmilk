@@ -57,7 +57,8 @@ import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
  *   	<td>
  *   		boolean, Boolean; byte, Byte; char, Character; double, Double; float, Float;<br>
  *   		int, Integer; long, Long; short, Short;<br>
- *   		java.math.BigDecimal; java.math.BigInteger; java.util.Date; java.sql.Date; java.sql.Time; java.sql.Timestamp
+ *   		java.math.BigDecimal; java.math.BigInteger; java.util.Date; java.sql.Date; java.sql.Time; java.sql.Timestamp;<br>
+ *   		enum
  *   	</td>
  *   </tr>
  *   
@@ -69,9 +70,10 @@ import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
  *   		比如“int[]”、“boolean[]”、“Short[]”、List&lt;Integer&gt;、List&lt;Date&gt;、Set&lt;Integer&gt;、Set&lt;Date&gt; <br>
  *   </td></tr>
  * </table>
- * <br>
+ * <p>
  * 另外，如果目标类型为<code>String</code>，而你没有添加对象到<code>String</code>类型的辅助转换器，那么它将返回此对象的<code>toString()</code>结果。<br>
  * 你也可以通过{@link #addConverter(Type, Type, Converter)}为它添加更多辅助转换器，使其支持更多的类型转换。
+ * </p>
  * @author earthAngry@gmail.com
  * @date 2010-10-6
  */

@@ -358,7 +358,7 @@ public class Invoke extends AbstractExecutable
 	 * 从对象源中取得方法的参数值数组
 	 * @param objectSource
 	 * @return
-	 * @throws ArgPrepareExecuteException
+	 * @throws ExecuteException
 	 * @date 2011-1-11
 	 */
 	protected Object[] prepareMethodArguments(ObjectSource objectSource) throws ExecuteException
@@ -392,7 +392,7 @@ public class Invoke extends AbstractExecutable
 	 * @param argIdx
 	 * @param objectSource
 	 * @return
-	 * @throws ArgPrepareExecuteException
+	 * @throws ExecuteException
 	 * @date 2011-4-11
 	 */
 	protected Object getArgValueFromObjectSource(Arg[] args, int argIdx, ObjectSource objectSource) throws ExecuteException

@@ -15,7 +15,7 @@
 package org.soybeanMilk.core;
 
 import org.soybeanMilk.core.config.Configuration;
-import org.soybeanMilk.core.config.InterceptorInfo;
+import org.soybeanMilk.core.config.Interceptors;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 
 /**
@@ -80,7 +80,7 @@ public class DefaultExecutor implements Executor
 				cvtObjSource.setGenericConverter(getConfiguration().getGenericConverter());
 		}
 		
-		InterceptorInfo itptInfo = getConfiguration().getInterceptorInfo();
+		Interceptors itptInfo = getConfiguration().getInterceptorInfo();
 		
 		//保存执行语境信息
 		Execution context=null;
@@ -101,14 +101,14 @@ public class DefaultExecutor implements Executor
 		try
 		{
 			//before
-			if(itptInfo!=null && itptInfo.getBeforeHandler()!=null)
-				executeInterceptor(itptInfo.getBeforeHandler(), objSource);
+			if(itptInfo!=null && itptInfo.getBefore()!=null)
+				executeInterceptor(itptInfo.getBefore(), objSource);
 			
 			executeTargetExecutable(executable, objSource);
 			
 			//after
-			if(itptInfo!=null && itptInfo.getAfterHandler()!=null)
-				executeInterceptor(itptInfo.getAfterHandler(), objSource);
+			if(itptInfo!=null && itptInfo.getAfter()!=null)
+				executeInterceptor(itptInfo.getAfter(), objSource);
 			
 			return executable;
 		}
@@ -117,7 +117,7 @@ public class DefaultExecutor implements Executor
 			if(context != null)
 				context.setExecuteException(e);
 			
-			Executable expExe= itptInfo == null ? null : itptInfo.getExceptionHandler();
+			Executable expExe= itptInfo == null ? null : itptInfo.getException();
 			if(expExe == null)
 				throw e;
 			

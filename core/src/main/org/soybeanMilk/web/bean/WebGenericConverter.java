@@ -54,7 +54,7 @@ import org.soybeanMilk.web.os.ParamFilterValue;
  *  	JavaBean对象属性名
  *  </li>
  *  <li>
- *  	List、Set、数组对象的下标值（必须是数值）
+ *  	List、Set、数组对象的下标值（必须是数值，Set时仅作为标识）
  *  </li>
  *  <li>
  *  	Map对象的关键字

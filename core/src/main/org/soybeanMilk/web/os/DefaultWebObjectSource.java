@@ -31,10 +31,10 @@ import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.GenericConverter;
+import org.soybeanMilk.core.bean.MapConvertException;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.WebObjectSource;
-import org.soybeanMilk.web.bean.MapConvertException;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 
 /**

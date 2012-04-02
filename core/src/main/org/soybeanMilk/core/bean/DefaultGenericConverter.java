@@ -72,7 +72,7 @@ import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
  *   	<td>
  *   		Map&lt;String, ?&gt;
  *   	</td><td>
- *   		JavaBean; List&lt;JavaBean&gt;; Set&lt;JavaBean&gt;; Map&lt;String, JavaBean&gt;
+ *   		JavaBean; List&lt;JavaBean&gt;; Set&lt;JavaBean&gt;; Map&lt;SomeKeyType, JavaBean&gt;
  *   	</td>
  *   </tr>
  * </table>
@@ -231,32 +231,91 @@ public class DefaultGenericConverter implements GenericConverter
 	
 	//@Override
 	@SuppressWarnings("unchecked")
-	public <T> T getProperty(Object srcObj, String propertyExpression, Type expectType) throws ConvertException
+	public <T> T getProperty(Object srcObj, String property, Type expectType) throws ConvertException
 	{
 		if(srcObj == null)
 			return null;
 		
-		if(propertyExpression==null || propertyExpression.length()==0)
-			throw new IllegalArgumentException("[propertyExpression] must not be empty");
+		if(property==null || property.length()==0)
+			throw new IllegalArgumentException("[property] must not be empty");
 		
 		if(log.isDebugEnabled())
-			log.debug("start getting  property '"+propertyExpression+"' from '"+SoybeanMilkUtils.toString(srcObj)+"'");
+			log.debug("start getting property '"+property+"' from '"+SoybeanMilkUtils.toString(srcObj)+"'");
 		
 		Object result=null;
 		
 		Object parent=srcObj;
-		PropertyInfo parentBeanInfo=PropertyInfo.getPropertyInfo(srcObj.getClass());
-		String[] properties=SoybeanMilkUtils.splitAccessExpression(propertyExpression);
+		PropertyInfo parentBeanInfo=PropertyInfo.getPropertyInfo(parent.getClass());
+		String[] properties=SoybeanMilkUtils.splitAccessExpression(property);
 		
+		String prop=null;
 		for(int i=0, len=properties.length; i<len; i++)
 		{
 			if(parent == null)
 				break;
 			
-			PropertyInfo propInfo=getSubPropertyInfoNotNull(parentBeanInfo, properties[i]);
+			prop=properties[i];
 			
-			parent=getProperty(parent, propInfo, null);
-			parentBeanInfo=propInfo;
+			if(isIndexAccessor(prop))
+			{
+				int idx=-1;
+				try
+				{
+					idx=Integer.parseInt(prop);
+				}
+				catch(Exception e)
+				{
+					throw new GenericConvertException("illegal index value '"+prop+"' of property '"+property+"'", e);
+				}
+				
+				if(parent.getClass().isArray())
+				{
+					parent=Array.get(parent, idx);
+				}
+				else if(parent instanceof List<?>)
+				{
+					parent=((List<?>)parent).get(idx);
+				}
+				else if(parent instanceof Set<?>)
+				{
+					int si=0;
+					Set<?> set=(Set<?>)parent;
+					
+					for(Object o : set)
+					{
+						if(si == idx)
+						{
+							parent=o;
+							break;
+						}
+						
+						si++;
+					}
+				}
+				else
+					throw new GenericConvertException("get the "+idx+"-th value from '"+parent+"' is not supported");
+				
+				if(parent == null)
+					break;
+				else
+					parentBeanInfo=PropertyInfo.getPropertyInfo(parent.getClass());
+			}
+			else if(parent instanceof Map<?, ?>)
+			{
+				parent=((Map<?, ?>)parent).get(prop);
+				
+				if(parent == null)
+					break;
+				else
+					parentBeanInfo=PropertyInfo.getPropertyInfo(parent.getClass());
+			}
+			else
+			{
+				PropertyInfo propInfo=getSubPropertyInfoNotNull(parentBeanInfo, prop);
+				
+				parent=getProperty(parent, propInfo, null);
+				parentBeanInfo=propInfo;
+			}
 		}
 		
 		result=(expectType == null ? parent : convert(parent, expectType));
@@ -265,19 +324,19 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	//@Override
-	public void setProperty(Object srcObj, String propertyExpression, Object value) throws ConvertException
+	public void setProperty(Object srcObj, String property, Object value) throws ConvertException
 	{
 		if(srcObj == null)
 			throw new IllegalArgumentException("[srcObj] must not be null");
-		if(propertyExpression==null || propertyExpression.length()==0)
-			throw new IllegalArgumentException("[propertyExpression] must not be empty");
+		if(property==null || property.length()==0)
+			throw new IllegalArgumentException("[property] must not be empty");
 		
 		if(log.isDebugEnabled())
-			log.debug("start setting '"+SoybeanMilkUtils.toString(value)+"' to '"+SoybeanMilkUtils.toString(srcObj)+"' property '"+propertyExpression+"'");
+			log.debug("start setting '"+SoybeanMilkUtils.toString(value)+"' to '"+SoybeanMilkUtils.toString(srcObj)+"' property '"+property+"'");
 		
 		Object parent=srcObj;
 		PropertyInfo parentBeanInfo=PropertyInfo.getPropertyInfo(srcObj.getClass());
-		String[] properties=SoybeanMilkUtils.splitAccessExpression(propertyExpression);
+		String[] properties=SoybeanMilkUtils.splitAccessExpression(property);
 		
 		for(int i=0, len=properties.length; i<len; i++)
 		{
@@ -371,7 +430,7 @@ public class DefaultGenericConverter implements GenericConverter
 	{
 		Object result=null;
 		
-		if(String.class.equals(targetType))
+		if(targetType.equals(String.class))
 		{
 			result=sourceObj.toString();
 		}
@@ -612,7 +671,7 @@ public class DefaultGenericConverter implements GenericConverter
 			Object value=sourceMap.get(property);
 			
 			//需要优先处理索引属性
-			if(isIndexOfProperty(property))
+			if(isIndexAccessor(property))
 			{
 				int idx=-1;
 				try
@@ -621,7 +680,7 @@ public class DefaultGenericConverter implements GenericConverter
 				}
 				catch(Exception e)
 				{
-					throw new GenericConvertException("illegal index value '"+property+"' in property expression '"+sourceMap.getPropertyNamePath(property)+"'", e);
+					throw new GenericConvertException("illegal index value '"+property+"' of property '"+sourceMap.getPropertyNamePath(property)+"'", e);
 				}
 				
 				while(result.size() < idx+1)
@@ -817,7 +876,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @param str
 	 * @return
 	 */
-	protected boolean isIndexOfProperty(String str)
+	protected boolean isIndexAccessor(String str)
 	{
 		if(str==null || str.length()==0)
 			return false;

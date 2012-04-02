@@ -2322,6 +2322,142 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
+	public void getProperty_fromArray() throws Exception
+	{
+		MyBean bean0=new MyBean();
+		bean0.setId("111");
+		bean0.setSize(7);
+		
+		MyBean bean1=new MyBean();
+		bean1.setId("222");
+		bean1.setSize(8);
+		
+		MyBean2 myBean2=new MyBean2();
+		myBean2.setId("333");
+		myBean2.setSize(8);
+		myBean2.setMyBean(bean0);
+		
+		bean0.setMyBean2(myBean2);
+		bean1.setMyBean2(myBean2);
+		
+		MyBean[] src=new MyBean[2];
+		src[0]=bean0;
+		src[1]=bean1;
+		
+		String destId=converter.getProperty(src, "0.id", null);
+		Integer destAge=converter.getProperty(src, "1.size", null);
+		String destBean1MyBean2Id=converter.getProperty(src, "0.myBean2.id", null);
+		String destBean2MyBean2Id=converter.getProperty(src, "1.myBean2.id", null);
+		
+		Assert.assertEquals(bean0.getId(), destId);
+		Assert.assertEquals(bean1.getSize(), destAge);
+		Assert.assertEquals(bean0.getMyBean2().getId(), destBean1MyBean2Id);
+		Assert.assertEquals(bean1.getMyBean2().getId(), destBean2MyBean2Id);
+	}
+	
+	@Test
+	public void getProperty_fromList() throws Exception
+	{
+		MyBean bean0=new MyBean();
+		bean0.setId("111");
+		bean0.setSize(7);
+		
+		MyBean bean1=new MyBean();
+		bean1.setId("222");
+		bean1.setSize(8);
+		
+		MyBean2 myBean2=new MyBean2();
+		myBean2.setId("333");
+		myBean2.setSize(8);
+		myBean2.setMyBean(bean0);
+		
+		bean0.setMyBean2(myBean2);
+		bean1.setMyBean2(myBean2);
+		
+		List<MyBean> src=new ArrayList<MyBean>();
+		src.add(bean0);
+		src.add(bean1);
+		
+		String destId=converter.getProperty(src, "0.id", null);
+		Integer destAge=converter.getProperty(src, "1.size", null);
+		String destBean1MyBean2Id=converter.getProperty(src, "0.myBean2.id", null);
+		String destBean2MyBean2Id=converter.getProperty(src, "1.myBean2.id", null);
+		
+		Assert.assertEquals(bean0.getId(), destId);
+		Assert.assertEquals(bean1.getSize(), destAge);
+		Assert.assertEquals(bean0.getMyBean2().getId(), destBean1MyBean2Id);
+		Assert.assertEquals(bean1.getMyBean2().getId(), destBean2MyBean2Id);
+	}
+	
+	@Test
+	public void getProperty_fromSet() throws Exception
+	{
+		MyBean bean0=new MyBean();
+		bean0.setId("111");
+		bean0.setSize(7);
+		
+		MyBean bean1=new MyBean();
+		bean1.setId("222");
+		bean1.setSize(8);
+		
+		MyBean2 myBean2=new MyBean2();
+		myBean2.setId("333");
+		myBean2.setSize(8);
+		myBean2.setMyBean(bean0);
+		
+		bean0.setMyBean2(myBean2);
+		bean1.setMyBean2(myBean2);
+		
+		Set<MyBean> src=new TreeSet<MyBean>();
+		src.add(bean0);
+		src.add(bean1);
+		
+		String destId=converter.getProperty(src, "0.id", null);
+		Integer destAge=converter.getProperty(src, "1.size", null);
+		String destBean1MyBean2Id=converter.getProperty(src, "0.myBean2.id", null);
+		String destBean2MyBean2Id=converter.getProperty(src, "1.myBean2.id", null);
+		
+		Assert.assertEquals(bean0.getId(), destId);
+		Assert.assertEquals(bean1.getSize(), destAge);
+		Assert.assertEquals(bean0.getMyBean2().getId(), destBean1MyBean2Id);
+		Assert.assertEquals(bean1.getMyBean2().getId(), destBean2MyBean2Id);
+	}
+	
+	@Test
+	public void getProperty_fromMap() throws Exception
+	{
+		MyBean bean0=new MyBean();
+		bean0.setId("111");
+		bean0.setSize(7);
+		
+		MyBean bean1=new MyBean();
+		bean1.setId("222");
+		bean1.setSize(8);
+		
+		MyBean2 myBean2=new MyBean2();
+		myBean2.setId("333");
+		myBean2.setSize(8);
+		myBean2.setMyBean(bean0);
+		
+		bean0.setMyBean2(myBean2);
+		bean1.setMyBean2(myBean2);
+		
+		Map<String, MyBean> src=new HashMap<String, MyBean>();
+		src.put("aaa", bean0);
+		src.put("bbb", bean1);
+		
+		String destId=converter.getProperty(src, "aaa.id", null);
+		Integer destAge=converter.getProperty(src, "bbb.size", null);
+		String destBean1MyBean2Id=converter.getProperty(src, "aaa.myBean2.id", null);
+		String destBean2MyBean2Id=converter.getProperty(src, "bbb.myBean2.id", null);
+		
+		Assert.assertEquals(bean0.getId(), destId);
+		Assert.assertEquals(bean1.getSize(), destAge);
+		Assert.assertEquals(bean0.getMyBean2().getId(), destBean1MyBean2Id);
+		Assert.assertEquals(bean1.getMyBean2().getId(), destBean2MyBean2Id);
+	}
+	
+	@Test
 	public void getProperty_inexistentProperty() throws Exception
 	{
 		MyBean bean=new MyBean();
@@ -2496,7 +2632,7 @@ public class TestDefaultGenericConverter
 		return re;
 	}
 	
-	public static class MyBean
+	public static class MyBean implements Comparable<MyBean>
 	{
 		private String id;
 		private Integer size;
@@ -2518,6 +2654,11 @@ public class TestDefaultGenericConverter
 		}
 		public void setMyBean2(MyBean2 myBean2) {
 			this.myBean2 = myBean2;
+		}
+		
+		public int compareTo(MyBean o)
+		{
+			return this.id.compareTo(o.getId());
 		}
 	}
 	public static class MyBean2

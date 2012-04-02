@@ -244,81 +244,44 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		Object result=null;
 		
-		Object parent=srcObj;
-		PropertyInfo parentBeanInfo=PropertyInfo.getPropertyInfo(parent.getClass());
+		Object obj=srcObj;
+		PropertyInfo objBeanInfo=PropertyInfo.getPropertyInfo(obj.getClass());
 		String[] properties=SoybeanMilkUtils.splitAccessExpression(property);
 		
 		String prop=null;
 		for(int i=0, len=properties.length; i<len; i++)
 		{
-			if(parent == null)
+			if(obj == null)
 				break;
 			
 			prop=properties[i];
 			
-			if(isIndexAccessor(prop))
+			if(obj instanceof Map<?, ?>)
 			{
-				int idx=-1;
-				try
-				{
-					idx=Integer.parseInt(prop);
-				}
-				catch(Exception e)
-				{
-					throw new GenericConvertException("illegal index value '"+prop+"' of property '"+property+"'", e);
-				}
+				obj=getMapValueByStringEqualKey(((Map<?, ?>)obj), prop);
 				
-				if(parent.getClass().isArray())
-				{
-					parent=Array.get(parent, idx);
-				}
-				else if(parent instanceof List<?>)
-				{
-					parent=((List<?>)parent).get(idx);
-				}
-				else if(parent instanceof Set<?>)
-				{
-					int si=0;
-					Set<?> set=(Set<?>)parent;
-					
-					for(Object o : set)
-					{
-						if(si == idx)
-						{
-							parent=o;
-							break;
-						}
-						
-						si++;
-					}
-				}
-				else
-					throw new GenericConvertException("get the "+idx+"-th value from '"+parent+"' is not supported");
-				
-				if(parent == null)
+				if(obj == null)
 					break;
 				else
-					parentBeanInfo=PropertyInfo.getPropertyInfo(parent.getClass());
+					objBeanInfo=PropertyInfo.getPropertyInfo(obj.getClass());
 			}
-			else if(parent instanceof Map<?, ?>)
+			else if(isIndexAccessor(prop))
 			{
-				parent=((Map<?, ?>)parent).get(prop);
+				obj=getIndexedObjValueByStringIndex(obj, prop);
 				
-				if(parent == null)
+				if(obj == null)
 					break;
 				else
-					parentBeanInfo=PropertyInfo.getPropertyInfo(parent.getClass());
+					objBeanInfo=PropertyInfo.getPropertyInfo(obj.getClass());
 			}
 			else
 			{
-				PropertyInfo propInfo=getSubPropertyInfoNotNull(parentBeanInfo, prop);
-				
-				parent=getProperty(parent, propInfo, null);
-				parentBeanInfo=propInfo;
+				objBeanInfo=getSubPropertyInfoNotNull(objBeanInfo, prop);
+				obj=getProperty(obj, objBeanInfo, null);
 			}
 		}
 		
-		result=(expectType == null ? parent : convert(parent, expectType));
+		result=(expectType == null ? obj : convert(obj, expectType));
 		
 		return (T)result;
 	}
@@ -334,27 +297,28 @@ public class DefaultGenericConverter implements GenericConverter
 		if(log.isDebugEnabled())
 			log.debug("start setting '"+SoybeanMilkUtils.toString(value)+"' to '"+SoybeanMilkUtils.toString(srcObj)+"' property '"+property+"'");
 		
-		Object parent=srcObj;
-		PropertyInfo parentBeanInfo=PropertyInfo.getPropertyInfo(srcObj.getClass());
+		Object obj=srcObj;
+		PropertyInfo objBeanInfo=PropertyInfo.getPropertyInfo(srcObj.getClass());
 		String[] properties=SoybeanMilkUtils.splitAccessExpression(property);
 		
 		for(int i=0, len=properties.length; i<len; i++)
 		{
-			PropertyInfo propInfo=getSubPropertyInfoNotNull(parentBeanInfo, properties[i]);
+			String prop=properties[i];
+			
+			objBeanInfo=getSubPropertyInfoNotNull(objBeanInfo, prop);
 			
 			if(i == len-1)
-				setProperty(parent, propInfo, value);
+				setProperty(obj, objBeanInfo, value);
 			else
 			{
-				Object tmp=getProperty(parent, propInfo, null);
+				Object tmp=getProperty(obj, objBeanInfo, null);
 				if(tmp == null)
 				{
-					tmp=instance(propInfo.getPropType(), -1);
-					setProperty(parent, propInfo, tmp);
+					tmp=instance(objBeanInfo.getPropType(), -1);
+					setProperty(obj, objBeanInfo, tmp);
 				}
 				
-				parent=tmp;
-				parentBeanInfo=propInfo;
+				obj=tmp;
 			}
 		}
 	}
@@ -1088,6 +1052,94 @@ public class DefaultGenericConverter implements GenericConverter
 			throw new GenericConvertException("can not find property '"+property+"' in class '"+SoybeanMilkUtils.toString(parent.getPropType())+"'");
 		
 		return re;
+	}
+	
+	/**
+	 * 获取给定字符串关键字的值
+	 * @param map
+	 * @param str
+	 * @return
+	 * @date 2012-4-2
+	 */
+	protected Object getMapValueByStringEqualKey(Map<?, ?> map, String str)
+	{
+		Object result=map.get(str);
+		
+		//不能获取值，则映射表的关键字可能不是字符串形式，需要遍历查找
+		if(result == null)
+		{
+			Set<?> mkeys=map.keySet();
+			
+			for(Object mk : mkeys)
+			{
+				if(mk != null)
+				{
+					String strMk=(mk instanceof String ? (String)mk : mk.toString());
+					
+					if(strMk.equals(str))
+					{
+						result=map.get(mk);
+						break;
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 获取可以使用索引访问的对象的某个索引的值
+	 * @param obj
+	 * @param strIdx
+	 * @return
+	 * @date 2012-4-2
+	 */
+	protected Object getIndexedObjValueByStringIndex(Object obj, String strIdx)
+	{
+		Object result=null;
+		
+		int idx=-1;
+		try
+		{
+			idx=Integer.parseInt(strIdx);
+		}
+		catch(Exception e)
+		{
+			throw new GenericConvertException("illegal index value '"+strIdx+"' for getting value from '"+obj+"'", e);
+		}
+		
+		if(obj.getClass().isArray())
+		{
+			result=Array.get(obj, idx);
+		}
+		else if(obj instanceof List<?>)
+		{
+			result=((List<?>)obj).get(idx);
+		}
+		else if(obj instanceof Set<?>)
+		{
+			int si=0;
+			Set<?> set=(Set<?>)obj;
+			
+			if(idx >= set.size())
+				throw new GenericConvertException("you are getting the "+idx+"-th value of Set '"+set+"', but its size is only "+set.size());
+			
+			for(Object o : set)
+			{
+				if(si == idx)
+				{
+					result=o;
+					break;
+				}
+				
+				si++;
+			}
+		}
+		else
+			throw new GenericConvertException("get the "+idx+"-th value from '"+obj+"' is not supported");
+		
+		return result;
 	}
 	
 	/**

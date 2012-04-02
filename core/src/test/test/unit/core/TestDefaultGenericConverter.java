@@ -2324,137 +2324,78 @@ public class TestDefaultGenericConverter
 	@Test
 	public void getProperty_fromArray() throws Exception
 	{
-		MyBean bean0=new MyBean();
-		bean0.setId("111");
-		bean0.setSize(7);
+		ComplexJavaBean[] src=new ComplexJavaBean[3];
 		
-		MyBean bean1=new MyBean();
-		bean1.setId("222");
-		bean1.setSize(8);
+		for(int i=0; i<src.length; i++)
+		{
+			src[i]=createComplexJavaBeanTestInstance(i);
+		}
 		
-		MyBean2 myBean2=new MyBean2();
-		myBean2.setId("333");
-		myBean2.setSize(8);
-		myBean2.setMyBean(bean0);
+		Integer id0=converter.getProperty(src, "0.id", null);
+		String name1=converter.getProperty(src, "1.name", null);
+		Integer simpleArray0=converter.getProperty(src, "0.simpleArray.0", null);
+		Integer javaBeanArray1_id=converter.getProperty(src, "1.javaBean2Array.1.id", null);
 		
-		bean0.setMyBean2(myBean2);
-		bean1.setMyBean2(myBean2);
-		
-		MyBean[] src=new MyBean[2];
-		src[0]=bean0;
-		src[1]=bean1;
-		
-		String destId=converter.getProperty(src, "0.id", null);
-		Integer destAge=converter.getProperty(src, "1.size", null);
-		String destBean1MyBean2Id=converter.getProperty(src, "0.myBean2.id", null);
-		String destBean2MyBean2Id=converter.getProperty(src, "1.myBean2.id", null);
-		
-		Assert.assertEquals(bean0.getId(), destId);
-		Assert.assertEquals(bean1.getSize(), destAge);
-		Assert.assertEquals(bean0.getMyBean2().getId(), destBean1MyBean2Id);
-		Assert.assertEquals(bean1.getMyBean2().getId(), destBean2MyBean2Id);
+		Assert.assertEquals(new Integer(src[0].getId()), id0);
+		Assert.assertEquals(src[1].getName(), name1);
+		Assert.assertEquals(src[0].getSimpleArray()[0], simpleArray0);
+		Assert.assertEquals(src[1].getJavaBean2Array()[1].getId()+"", javaBeanArray1_id+"");
 	}
 	
 	@Test
 	public void getProperty_fromList() throws Exception
 	{
-		MyBean bean0=new MyBean();
-		bean0.setId("111");
-		bean0.setSize(7);
+		List<ComplexJavaBean> src=new ArrayList<ComplexJavaBean>();
+		src.add(createComplexJavaBeanTestInstance(0));
+		src.add(createComplexJavaBeanTestInstance(1));
 		
-		MyBean bean1=new MyBean();
-		bean1.setId("222");
-		bean1.setSize(8);
+		Integer id0=converter.getProperty(src, "0.id", null);
+		String name1=converter.getProperty(src, "1.name", null);
+		Integer simpleList0=converter.getProperty(src, "0.simpleList.0", null);
+		Integer javaBeanList1_id=converter.getProperty(src, "1.javaBean2List.1.id", null);
 		
-		MyBean2 myBean2=new MyBean2();
-		myBean2.setId("333");
-		myBean2.setSize(8);
-		myBean2.setMyBean(bean0);
-		
-		bean0.setMyBean2(myBean2);
-		bean1.setMyBean2(myBean2);
-		
-		List<MyBean> src=new ArrayList<MyBean>();
-		src.add(bean0);
-		src.add(bean1);
-		
-		String destId=converter.getProperty(src, "0.id", null);
-		Integer destAge=converter.getProperty(src, "1.size", null);
-		String destBean1MyBean2Id=converter.getProperty(src, "0.myBean2.id", null);
-		String destBean2MyBean2Id=converter.getProperty(src, "1.myBean2.id", null);
-		
-		Assert.assertEquals(bean0.getId(), destId);
-		Assert.assertEquals(bean1.getSize(), destAge);
-		Assert.assertEquals(bean0.getMyBean2().getId(), destBean1MyBean2Id);
-		Assert.assertEquals(bean1.getMyBean2().getId(), destBean2MyBean2Id);
+		Assert.assertEquals(new Integer(src.get(0).getId()), id0);
+		Assert.assertEquals(src.get(1).getName(), name1);
+		Assert.assertEquals(src.get(0).getSimpleList().get(0), simpleList0);
+		Assert.assertEquals(src.get(1).getJavaBean2List().get(1).getId()+"", javaBeanList1_id+"");
 	}
 	
 	@Test
 	public void getProperty_fromSet() throws Exception
 	{
-		MyBean bean0=new MyBean();
-		bean0.setId("111");
-		bean0.setSize(7);
+		Set<ComplexJavaBean> src=new TreeSet<ComplexJavaBean>();
+		ComplexJavaBean cjb0=createComplexJavaBeanTestInstance(0);
+		ComplexJavaBean cjb1=createComplexJavaBeanTestInstance(1);
+		src.add(cjb0);
+		src.add(cjb1);
 		
-		MyBean bean1=new MyBean();
-		bean1.setId("222");
-		bean1.setSize(8);
+		Integer id0=converter.getProperty(src, "0.id", null);
+		String name1=converter.getProperty(src, "1.name", null);
+		Integer simpleSet0=converter.getProperty(src, "0.simpleSet.0", null);
+		Integer javaBeanSet1_id=converter.getProperty(src, "1.javaBean2Set.1.id", null);
 		
-		MyBean2 myBean2=new MyBean2();
-		myBean2.setId("333");
-		myBean2.setSize(8);
-		myBean2.setMyBean(bean0);
-		
-		bean0.setMyBean2(myBean2);
-		bean1.setMyBean2(myBean2);
-		
-		Set<MyBean> src=new TreeSet<MyBean>();
-		src.add(bean0);
-		src.add(bean1);
-		
-		String destId=converter.getProperty(src, "0.id", null);
-		Integer destAge=converter.getProperty(src, "1.size", null);
-		String destBean1MyBean2Id=converter.getProperty(src, "0.myBean2.id", null);
-		String destBean2MyBean2Id=converter.getProperty(src, "1.myBean2.id", null);
-		
-		Assert.assertEquals(bean0.getId(), destId);
-		Assert.assertEquals(bean1.getSize(), destAge);
-		Assert.assertEquals(bean0.getMyBean2().getId(), destBean1MyBean2Id);
-		Assert.assertEquals(bean1.getMyBean2().getId(), destBean2MyBean2Id);
+		Assert.assertEquals(new Integer(cjb0.getId()), id0);
+		Assert.assertEquals(cjb1.getName(), name1);
+		Assert.assertEquals(cjb0.getSimpleSet().toArray(new Integer[cjb0.getSimpleSet().size()])[0], simpleSet0);
+		Assert.assertEquals(cjb1.getJavaBean2Set().toArray(new JavaBean2[cjb1.getJavaBean2Set().size()])[1].getId()+"", javaBeanSet1_id+"");
 	}
 	
 	@Test
 	public void getProperty_fromMap() throws Exception
 	{
-		MyBean bean0=new MyBean();
-		bean0.setId("111");
-		bean0.setSize(7);
+		Map<String, ComplexJavaBean> src=new HashMap<String, ComplexJavaBean>();
+		src.put("aaaa", createComplexJavaBeanTestInstance(0));
+		src.put("1111", createComplexJavaBeanTestInstance(1));
 		
-		MyBean bean1=new MyBean();
-		bean1.setId("222");
-		bean1.setSize(8);
+		Integer id0=converter.getProperty(src, "aaaa.id", null);
+		String name1=converter.getProperty(src, "1111.name", null);
+		Integer simpleMap0=converter.getProperty(src, "aaaa.simpleMap.0", null);
+		Integer javaBeanMap1_id=converter.getProperty(src, "1111.javaBean2Map.1.id", null);
 		
-		MyBean2 myBean2=new MyBean2();
-		myBean2.setId("333");
-		myBean2.setSize(8);
-		myBean2.setMyBean(bean0);
-		
-		bean0.setMyBean2(myBean2);
-		bean1.setMyBean2(myBean2);
-		
-		Map<String, MyBean> src=new HashMap<String, MyBean>();
-		src.put("aaa", bean0);
-		src.put("bbb", bean1);
-		
-		String destId=converter.getProperty(src, "aaa.id", null);
-		Integer destAge=converter.getProperty(src, "bbb.size", null);
-		String destBean1MyBean2Id=converter.getProperty(src, "aaa.myBean2.id", null);
-		String destBean2MyBean2Id=converter.getProperty(src, "bbb.myBean2.id", null);
-		
-		Assert.assertEquals(bean0.getId(), destId);
-		Assert.assertEquals(bean1.getSize(), destAge);
-		Assert.assertEquals(bean0.getMyBean2().getId(), destBean1MyBean2Id);
-		Assert.assertEquals(bean1.getMyBean2().getId(), destBean2MyBean2Id);
+		Assert.assertEquals(new Integer(src.get("aaaa").getId()), id0);
+		Assert.assertEquals(src.get("1111").getName(), name1);
+		Assert.assertEquals(src.get("aaaa").getSimpleMap().get("0"), simpleMap0);
+		Assert.assertEquals(src.get("1111").getJavaBean2Map().get(1).getId()+"", javaBeanMap1_id+"");
 	}
 	
 	@Test
@@ -2620,6 +2561,55 @@ public class TestDefaultGenericConverter
 		}
 	}
 	
+	private ComplexJavaBean createComplexJavaBeanTestInstance(int flag)
+	{
+		ComplexJavaBean cb=new ComplexJavaBean();
+		cb.setId(flag);
+		cb.setName("name-"+flag);
+		
+		Integer[] simpleArray=new Integer[]{11, 22, 33};
+		
+		List<Integer> simpleList=new ArrayList<Integer>();
+		simpleList.add(111);
+		simpleList.add(222);
+		
+		Set<Integer> simpleSet=new TreeSet<Integer>();
+		simpleSet.add(111);
+		simpleSet.add(222);
+		
+		Map<String, Integer> simpleMap=new HashMap<String, Integer>();
+		simpleMap.put("0", 1111);
+		simpleMap.put("1", 2222);
+		
+		JavaBean2[] javaBean2Array=new JavaBean2[]{
+				new JavaBean2(flag*100+1, "ComplexJavaBean-"+flag+"-javaBean2Array-0"),
+				new JavaBean2(flag*100+2, "ComplexJavaBean-"+flag+"-javaBean2Array-1"),
+			};
+		
+		List<JavaBean2> javaBean2List=new ArrayList<JavaBean2>();
+		javaBean2List.add(new JavaBean2(flag*100+3, "ComplexJavaBean-"+flag+"-javaBean2List-1"));
+		javaBean2List.add(new JavaBean2(flag*100+4, "ComplexJavaBean-"+flag+"-javaBean2List-2"));
+		
+		Set<JavaBean2> javaBean2Set=new TreeSet<JavaBean2>();
+		javaBean2Set.add(new JavaBean2(flag*100+5, "ComplexJavaBean-"+flag+"-javaBean2Set-1"));
+		javaBean2Set.add(new JavaBean2(flag*100+6, "ComplexJavaBean-"+flag+"-javaBean2Set-2"));
+		
+		Map<Integer, JavaBean2> javaBean2Map=new HashMap<Integer, JavaBean2>();
+		javaBean2Map.put(0, new JavaBean2(flag*100+7, "ComplexJavaBean-"+flag+"-javaBean2Map-1"));
+		javaBean2Map.put(1, new JavaBean2(flag*100+8, "ComplexJavaBean-"+flag+"-javaBean2Map-2"));
+		
+		cb.setSimpleArray(simpleArray);
+		cb.setSimpleList(simpleList);
+		cb.setSimpleSet(simpleSet);
+		cb.setSimpleMap(simpleMap);
+		cb.setJavaBean2Array(javaBean2Array);
+		cb.setJavaBean2List(javaBean2List);
+		cb.setJavaBean2Set(javaBean2Set);
+		cb.setJavaBean2Map(javaBean2Map);
+		
+		return cb;
+	}
+	
 	private Integer[] stringArrayToIntArray(String[] strs)
 	{
 		Integer[] re=new Integer[strs.length];
@@ -2746,6 +2736,18 @@ public class TestDefaultGenericConverter
 		private String name;
 		private JavaBean javaBean;
 		
+		public JavaBean2()
+		{
+			super();
+		}
+		
+		public JavaBean2(int id, String name)
+		{
+			super();
+			this.id = id;
+			this.name = name;
+		}
+
 		public int getId() {
 			return id;
 		}

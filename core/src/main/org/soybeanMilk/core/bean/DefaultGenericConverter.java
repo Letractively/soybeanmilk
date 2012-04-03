@@ -249,7 +249,7 @@ public class DefaultGenericConverter implements GenericConverter
 		String[] properties=SoybeanMilkUtils.splitAccessExpression(property);
 		
 		String prop=null;
-		for(int i=0, len=properties.length; i<len; i++)
+		for(int i=0; i<properties.length; i++)
 		{
 			if(obj == null)
 				break;
@@ -263,7 +263,11 @@ public class DefaultGenericConverter implements GenericConverter
 				if(obj == null)
 					break;
 				else
-					objBeanInfo=PropertyInfo.getPropertyInfo(obj.getClass());
+				{
+					//最后一个不再需要准备属性信息
+					if(i < properties.length-1)
+						objBeanInfo=PropertyInfo.getPropertyInfo(obj.getClass());
+				}
 			}
 			else if(isIndexAccessor(prop))
 			{
@@ -272,12 +276,16 @@ public class DefaultGenericConverter implements GenericConverter
 				if(obj == null)
 					break;
 				else
-					objBeanInfo=PropertyInfo.getPropertyInfo(obj.getClass());
+				{
+					//同上
+					if(i < properties.length-1)
+						objBeanInfo=PropertyInfo.getPropertyInfo(obj.getClass());
+				}
 			}
 			else
 			{
 				objBeanInfo=getSubPropertyInfoNotNull(objBeanInfo, prop);
-				obj=getProperty(obj, objBeanInfo, null);
+				obj=getJavaBeanProperty(obj, objBeanInfo, null);
 			}
 		}
 		
@@ -301,21 +309,21 @@ public class DefaultGenericConverter implements GenericConverter
 		PropertyInfo objBeanInfo=PropertyInfo.getPropertyInfo(srcObj.getClass());
 		String[] properties=SoybeanMilkUtils.splitAccessExpression(property);
 		
-		for(int i=0, len=properties.length; i<len; i++)
+		for(int i=0; i<properties.length; i++)
 		{
 			String prop=properties[i];
 			
 			objBeanInfo=getSubPropertyInfoNotNull(objBeanInfo, prop);
 			
-			if(i == len-1)
-				setProperty(obj, objBeanInfo, value);
+			if(i == properties.length-1)
+				setJavaBeanProperty(obj, objBeanInfo, value);
 			else
 			{
-				Object tmp=getProperty(obj, objBeanInfo, null);
+				Object tmp=getJavaBeanProperty(obj, objBeanInfo, null);
 				if(tmp == null)
 				{
 					tmp=instance(objBeanInfo.getPropType(), -1);
-					setProperty(obj, objBeanInfo, tmp);
+					setJavaBeanProperty(obj, objBeanInfo, tmp);
 				}
 				
 				obj=tmp;
@@ -532,7 +540,7 @@ public class DefaultGenericConverter implements GenericConverter
 				
 				try
 				{
-					setProperty(result, propInfo, sourceMap.get(property));
+					setJavaBeanProperty(result, propInfo, sourceMap.get(property));
 				}
 				catch(ConvertException e)
 				{
@@ -605,15 +613,7 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	/**
-	 * 将属性值映射表转换为列表对象，属性值映射表的关键字可以是两种内容：<br>
-	 * <ol>
-	 * 	<li>
-	 * 		数字，比如：“0”、“1”，表示属性值在列表中的索引
-	 * 	</li>
-	 * 	<li>
-	 * 		字符，比如：“property1”、“property2”，表示列表元素对象对应的属性名
-	 * 	</li>
-	 * </ol>
+	 * 将属性值映射表转换为列表对象
 	 * @param sourceMap
 	 * @param listClass
 	 * @param elementClass
@@ -663,7 +663,7 @@ public class DefaultGenericConverter implements GenericConverter
 						
 						try
 						{
-							setProperty(element, propInfo, subPropMap.get(subProp));
+							setJavaBeanProperty(element, propInfo, subPropMap.get(subProp));
 						}
 						catch(ConvertException e)
 						{
@@ -721,7 +721,7 @@ public class DefaultGenericConverter implements GenericConverter
 						
 						try
 						{
-							setProperty(element, propInfo, Array.get(value, i));
+							setJavaBeanProperty(element, propInfo, Array.get(value, i));
 						}
 						catch(ConvertException e)
 						{
@@ -752,7 +752,7 @@ public class DefaultGenericConverter implements GenericConverter
 							
 							try
 							{
-								setProperty(element, propInfo, propList.get(i));
+								setJavaBeanProperty(element, propInfo, propList.get(i));
 							}
 							catch(ConvertException e)
 							{
@@ -776,7 +776,7 @@ public class DefaultGenericConverter implements GenericConverter
 					
 					try
 					{
-						setProperty(element, propInfo, value);
+						setJavaBeanProperty(element, propInfo, value);
 					}
 					catch(ConvertException e)
 					{
@@ -994,7 +994,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @param value 属性值
 	 * @date 2012-2-20
 	 */
-	protected void setProperty(Object obj, PropertyInfo propertyInfo, Object value) throws ConvertException
+	protected void setJavaBeanProperty(Object obj, PropertyInfo propertyInfo, Object value) throws ConvertException
 	{
 		Type targetType=propertyInfo.getPropGenericType();
 		if(!SoybeanMilkUtils.isClassType(targetType))
@@ -1019,7 +1019,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2012-2-20
 	 */
-	protected Object getProperty(Object obj, PropertyInfo propertyInfo, Type targetType)
+	protected Object getJavaBeanProperty(Object obj, PropertyInfo propertyInfo, Type targetType)
 	{
 		Object result=null;
 		

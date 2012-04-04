@@ -787,12 +787,7 @@ public class ConfigurationParser
 	{
 		Document[] docs=null;
 		
-		if(! fileName.endsWith("/*"))
-		{
-			docs=new Document[1];
-			docs[0]=parseDocument(fileName);
-		}
-		else
+		if(fileName.endsWith("/*"))
 		{
 			fileName=formatIncludeFileName(fileName);
 			fileName=fileName.substring(0, fileName.length()-2);
@@ -841,6 +836,11 @@ public class ConfigurationParser
 				if(log.isDebugEnabled())
 					log.debug("no xml file found in directory '"+fileName+"'");
 			}
+		}
+		else
+		{
+			docs=new Document[1];
+			docs[0]=parseDocument(fileName);
 		}
 		
 		return docs;

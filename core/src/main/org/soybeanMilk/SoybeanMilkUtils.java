@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.soybeanMilk.core.Constants;
+import org.soybeanMilk.core.config.parser.ParseException;
 
 /**
  * 框架内部常用类。
@@ -258,6 +259,99 @@ public class SoybeanMilkUtils
 		}
 		else
 			return obj.toString();
+	}
+	
+	/**
+	 * 反转义Java字符串
+	 * @param s
+	 * @return
+	 */
+	public static String unEscape(String s)
+	{
+		if(s==null || s.length()==0)
+			return s;
+		
+		StringBuffer sb=new StringBuffer();
+		
+		int i=0;
+		int len=s.length();
+		while(i < len)
+		{
+			char c=s.charAt(i);
+			
+			if(c == '\\')
+			{
+				if(i == len-1)
+					throw new ParseException("\""+s+"\" must not be end with '\\' ");
+				
+				i+=1;
+				
+				char next=s.charAt(i);
+				if(next == 'u')
+				{
+					i+=1;
+					int end=i+4;
+					
+					if(end > len)
+						throw new ParseException("illegal \\uxxxx encoding in \""+s+"\"");
+					
+					int v=0;
+					for (;i<end;i++)
+					{
+						next = s.charAt(i);
+				        switch (next)
+				        {
+				        	case '0': case '1': case '2': case '3': case '4':
+				        	case '5': case '6': case '7': case '8': case '9':
+				        		v = (v << 4) + next - '0';
+				        		break;
+				        	case 'a': case 'b': case 'c':
+				        	case 'd': case 'e': case 'f':
+				        		v = (v << 4) + 10 + next - 'a';
+				        		break;
+				        	case 'A': case 'B': case 'C':
+				        	case 'D': case 'E': case 'F':
+				        		v = (v << 4) + 10 + next - 'A';
+				        		break;
+				        	default:
+				        		throw new ParseException("illegal \\uxxxx encoding in \""+s+"\"");
+				        }
+					}
+					
+					sb.append((char)v);
+				}
+				else
+				{
+					if(next == 't') sb.append('\t');
+					else if(next == 'r') sb.append('\r');
+					else if(next == 'n') sb.append('\n');
+					else if(next == '\'') sb.append('\'');
+					else if(next == '\\') sb.append('\\');
+					else if(next == '"') sb.append('"');
+					else
+						throw new ParseException("unknown escape character '\\"+next+"' ");
+					
+					i++;
+				}
+			}
+			else
+			{
+				sb.append(c);
+				i++;
+			}
+		}
+		
+		return sb.toString();
+	}
+	
+	/**
+	 * 判断字符是否是数字[0-9]
+	 * @param c
+	 * @return
+	 */
+	public static boolean isDigit(char c)
+	{
+		return c>='0' && c<='9';
 	}
 	
 	/**

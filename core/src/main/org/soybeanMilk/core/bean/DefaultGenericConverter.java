@@ -514,6 +514,8 @@ public class DefaultGenericConverter implements GenericConverter
 		//JavaBean
 		else
 		{
+			targetClass=getPropertyValueMapTargetType(sourceMap, targetClass, 0);
+			
 			PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(targetClass);
 			
 			if(!beanInfo.hasSubPropertyInfo())
@@ -598,13 +600,13 @@ public class DefaultGenericConverter implements GenericConverter
 		else if(genericType.isTypeVariable())
 		{
 			Class<?> actualClass=genericType.getActualClass();
-			result=convert(sourceMap, actualClass);
+			result=convertPropertyValueMapToClass(sourceMap, actualClass);
 		}
 		//? extends SomeType
 		else if(genericType.isWildcardType())
 		{
 			Class<?> actualClass=genericType.getActualClass();
-			result=convert(sourceMap, actualClass);
+			result=convertPropertyValueMapToClass(sourceMap, actualClass);
 		}
 		else
 			result=converterNotFoundThrow(sourceMap.getClass(), genericType);
@@ -621,20 +623,20 @@ public class DefaultGenericConverter implements GenericConverter
 	 */
 	protected List<?> convertPropertyValueMapToList(PropertyValueMap sourceMap, Class<?> listClass, Class<?> elementClass) throws ConvertException
 	{
-		if(sourceMap == null)
+		if(sourceMap==null || sourceMap.isEmpty())
 			return null;
 		
 		@SuppressWarnings("unchecked")
 		List<Object> result=(List<Object>)instance(listClass, -1);
 		
-		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(elementClass);
+		PropertyInfo eleBeanInfo=PropertyInfo.getPropertyInfo(elementClass);
 		
 		Set<String> propertyKeyes=sourceMap.keySet();
 		for(String property : propertyKeyes)
 		{
 			Object value=sourceMap.get(property);
 			
-			//需要优先处理索引属性
+			//明确指定了索引位置
 			if(isIndexAccessor(property))
 			{
 				int idx=-1;
@@ -652,18 +654,20 @@ public class DefaultGenericConverter implements GenericConverter
 				
 				Object element=result.get(idx);
 				
+				//元素存在并且值是属性值映射表，则依次设置这些属性
 				if(element!=null && (value instanceof PropertyValueMap))
 				{
+					PropertyInfo subBeanInfo=PropertyInfo.getPropertyInfo(element.getClass());
 					PropertyValueMap subPropMap=(PropertyValueMap)value;
 					
 					Set<String> subPropKeys=subPropMap.keySet();
 					for(String subProp : subPropKeys)
 					{
-						PropertyInfo propInfo=getSubPropertyInfoNotNull(beanInfo, subProp);
+						PropertyInfo subPropInfo=getSubPropertyInfoNotNull(subBeanInfo, subProp);
 						
 						try
 						{
-							setJavaBeanProperty(element, propInfo, subPropMap.get(subProp));
+							setJavaBeanProperty(element, subPropInfo, subPropMap.get(subProp));
 						}
 						catch(ConvertException e)
 						{
@@ -675,7 +679,7 @@ public class DefaultGenericConverter implements GenericConverter
 				{
 					try
 					{
-						element=convert(value, elementClass);
+						element=convert(value, getPropertyValueMapTargetType(sourceMap, elementClass, idx));
 					}
 					catch(ConvertException e)
 					{
@@ -691,16 +695,14 @@ public class DefaultGenericConverter implements GenericConverter
 					continue;
 				
 				PropertyInfo propInfo=null;
+				//忽略无关属性
 				if(!sourceMap.isCleaned())
-				{
-					propInfo=beanInfo.getSubPropertyInfo(property);
-					
-					//忽略无关属性
-					if(propInfo == null)
-						continue;
-				}
+					propInfo=eleBeanInfo.getSubPropertyInfo(property);
 				else
-					propInfo=getSubPropertyInfoNotNull(beanInfo, property);
+					propInfo=getSubPropertyInfoNotNull(eleBeanInfo, property);
+				
+				if(propInfo == null)
+					continue;
 				
 				//当前属性值是数组
 				if(SoybeanMilkUtils.isArray(value.getClass()))
@@ -713,9 +715,9 @@ public class DefaultGenericConverter implements GenericConverter
 					for(int i=0; i<len; i++)
 					{
 						Object element=result.get(i);
-						if(element ==null)
+						if(element == null)
 						{
-							element=instance(elementClass, -1);
+							element=instance(getPropertyValueMapTargetType(sourceMap, elementClass, i), -1);
 							result.set(i, element);
 						}
 						
@@ -729,35 +731,32 @@ public class DefaultGenericConverter implements GenericConverter
 						}
 					}
 				}
-				//当前属性值是属性映射表，则要将当前属性值转换为集合，并依次赋值
+				//当前值是属性值映射表，则要将当前属性值转换为集合，并依次赋值
 				else if(value instanceof PropertyValueMap)
 				{
 					PropertyValueMap pppm=(PropertyValueMap)value;
 					
 					List<?> propList=convertPropertyValueMapToList(pppm, List.class, propInfo.getPropType());
 					
-					if(propList != null)
+					while(result.size() < propList.size())
+						result.add(null);
+					
+					for(int i=0; i<propList.size(); i++)
 					{
-						while(result.size() < propList.size())
-							result.add(null);
-						
-						for(int i=0; i<propList.size(); i++)
+						Object element=result.get(i);
+						if(element ==null)
 						{
-							Object element=result.get(i);
-							if(element ==null)
-							{
-								element=instance(elementClass, -1);
-								result.set(i, element);
-							}
-							
-							try
-							{
-								setJavaBeanProperty(element, propInfo, propList.get(i));
-							}
-							catch(ConvertException e)
-							{
-								handlePropertyValueMapConvertException(sourceMap, property, e);
-							}
+							element=instance(getPropertyValueMapTargetType(sourceMap, elementClass, i), -1);
+							result.set(i, element);
+						}
+						
+						try
+						{
+							setJavaBeanProperty(element, propInfo, propList.get(i));
+						}
+						catch(ConvertException e)
+						{
+							handlePropertyValueMapConvertException(sourceMap, property, e);
 						}
 					}
 				}
@@ -770,7 +769,7 @@ public class DefaultGenericConverter implements GenericConverter
 					Object element=result.get(0);
 					if(element ==null)
 					{
-						element=instance(elementClass, -1);
+						element=instance(getPropertyValueMapTargetType(sourceMap, elementClass, 0), -1);
 						result.set(0, element);
 					}
 					
@@ -822,7 +821,12 @@ public class DefaultGenericConverter implements GenericConverter
 			
 			try
 			{
-				tv=convert(sourceMap.get(key), valueClass);
+				Object value=sourceMap.get(key);
+				
+				if(value instanceof PropertyValueMap)
+					valueClass=getPropertyValueMapTargetType((PropertyValueMap)value, valueClass, 0);
+				
+				tv=convert(value, valueClass);
 			}
 			catch(ConvertException e)
 			{
@@ -1052,6 +1056,21 @@ public class DefaultGenericConverter implements GenericConverter
 			throw new GenericConvertException("can not find property '"+property+"' in class '"+SoybeanMilkUtils.toString(parent.getPropType())+"'");
 		
 		return re;
+	}
+	
+	/**
+	 * 获取属性值映射表转换的目标类型
+	 * @param pvm
+	 * @param defaultType
+	 * @param idx 索引，当属性值映射表对应集合类型时，可能会有多个目标类型
+	 * @return
+	 * @date 2012-4-12
+	 */
+	protected Class<?> getPropertyValueMapTargetType(PropertyValueMap pvm, Class<?> defaultType, int idx)
+	{
+		Class<?>[] cs=pvm.getPropertyType();
+		
+		return (cs==null || idx>=cs.length ? defaultType : pvm.getPropertyType()[idx]);
 	}
 	
 	/**
@@ -1307,7 +1326,6 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 	}
 	
-
 	/**
 	 * 属性值映射表，它是关键字为<i>访问符表达式</i>映射表的分解结果。<br>
 	 * 它的关键字表示某对象的某个属性名，而关键字对应的值则是这个对象该属性的值（或者是可以转换为该属性值的某个对象）。
@@ -1321,6 +1339,9 @@ public class DefaultGenericConverter implements GenericConverter
 	{
 		private static final long serialVersionUID = 1L;
 		
+		/**保留关键字-表明源映射表中自定义转换的目标类型*/
+		public static final String RESERVE_KEY_CUSTOM_CLASS="class";
+		
 		/**此属性值映射表的属性名*/
 		private String propertyName;
 		
@@ -1329,6 +1350,9 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		/**是否是清洁的*/
 		private boolean cleaned;
+		
+		/**该属性值映射表对应的类型*/
+		private Class<?>[] propertyType;
 		
 		/**
 		 * 由源映射表创建属性值映射表
@@ -1407,6 +1431,14 @@ public class DefaultGenericConverter implements GenericConverter
 			this.parent = parent;
 		}
 		
+		public Class<?>[] getPropertyType() {
+			return propertyType;
+		}
+
+		public void setPropertyType(Class<?>[] propertyType) {
+			this.propertyType = propertyType;
+		}
+
 		/**
 		 * 分解给定的关键字为<i>访问符表达式</i>的映射表。
 		 * @param map 映射表，它的关键字具有<i>访问符表达式</i>语义
@@ -1425,7 +1457,13 @@ public class DefaultGenericConverter implements GenericConverter
 				{
 					if(i == propKeys.length-1)
 					{
-						parent.put(propKeys[i], map.get(key));
+						//当前属性值映射表的自定义对应类型
+						if(RESERVE_KEY_CUSTOM_CLASS.equals(propKeys[i]))
+						{
+							setPropertyType(toPropertyType(map.get(key)));
+						}
+						else
+							parent.put(propKeys[i], map.get(key));
 					}
 					else
 					{
@@ -1440,6 +1478,73 @@ public class DefaultGenericConverter implements GenericConverter
 					}
 				}
 			}
+		}
+		
+		/**
+		 * 将对象转换为类型数组
+		 * @param clazz 可以是Class、String，以及他们的数组
+		 * @return
+		 * @date 2012-4-12
+		 */
+		protected Class<?>[] toPropertyType(Object clazz)
+		{
+			Class<?>[] re=null;
+			
+			if(clazz == null)
+				return re;
+			
+			if(clazz.getClass().isArray())
+			{
+				int len=Array.getLength(clazz);
+				re=new Class<?>[len];
+				
+				for(int i=0; i<len; i++)
+				{
+					Object cla=Array.get(clazz, i);
+					
+					if(cla instanceof String)
+					{
+						try
+						{
+							re[i]=Class.forName((String)cla);
+						}
+						catch(ClassNotFoundException e)
+						{
+							throw new GenericConvertException("custom target type '"+cla+"' not found", e);
+						}
+					}
+					else if(cla instanceof Class<?>)
+					{
+						re[i]=(Class<?>)cla;
+					}
+					else
+						throw new GenericConvertException("custom target type '"+cla+"' is illegal, it must be String or Class type");
+				}
+			}
+			else
+			{
+				re=new Class<?>[1];
+						
+				if(clazz instanceof String)
+				{
+					try
+					{
+						re[0]=Class.forName((String)clazz);
+					}
+					catch(ClassNotFoundException e)
+					{
+						throw new GenericConvertException("custom target type '"+clazz+"' not found", e);
+					}
+				}
+				else if(clazz instanceof Class<?>)
+				{
+					re[0]=(Class<?>)clazz;
+				}
+				else
+					throw new GenericConvertException("custom target type '"+clazz+"' is illegal, it must be String or Class type");
+			}
+			
+			return re;
 		}
 		
 		@Override

@@ -84,7 +84,7 @@ import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
  * 		<i>name</i>[.<i>name</i> ...]
  * </p>
  * <p>
- * 这里，<i>name</i>可以是下面这些语义：
+ * 这里，<i>name</i>可以是下面这些语义和字面值：
  * </p>
  * <ul>
  * 	<li>
@@ -95,6 +95,9 @@ import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
  *  </li>
  *  <li>
  *  	Map对象关键字
+ *  </li>
+ *  <li>
+ *  	“class”字面值，用以指定自定义转换JavaBean类型，它的值必须是JavaBean的全类名
  *  </li>
  * </ul>
  * <p>
@@ -514,7 +517,7 @@ public class DefaultGenericConverter implements GenericConverter
 		//JavaBean
 		else
 		{
-			targetClass=getPropertyValueMapTargetType(sourceMap, targetClass, 0);
+			targetClass=getPropertyValueMapTargetType(sourceMap, targetClass, -1);
 			
 			PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(targetClass);
 			
@@ -823,10 +826,11 @@ public class DefaultGenericConverter implements GenericConverter
 			{
 				Object value=sourceMap.get(key);
 				
+				Class<?> cvc=valueClass;
 				if(value instanceof PropertyValueMap)
-					valueClass=getPropertyValueMapTargetType((PropertyValueMap)value, valueClass, 0);
+					cvc=getPropertyValueMapTargetType((PropertyValueMap)value, valueClass, -1);
 				
-				tv=convert(value, valueClass);
+				tv=convert(value, cvc);
 			}
 			catch(ConvertException e)
 			{
@@ -1068,9 +1072,29 @@ public class DefaultGenericConverter implements GenericConverter
 	 */
 	protected Class<?> getPropertyValueMapTargetType(PropertyValueMap pvm, Class<?> defaultType, int idx)
 	{
+		Class<?> re=null;
+		
 		Class<?>[] cs=pvm.getPropertyType();
 		
-		return (cs==null || idx>=cs.length ? defaultType : pvm.getPropertyType()[idx]);
+		if(idx < 0)
+		{
+			re=(cs!=null && cs.length>0 ? cs[0] : defaultType);
+		}
+		else if(cs!=null && idx<cs.length)
+		{
+				re=cs[idx];
+		}
+		else
+		{
+			Object sub=pvm.get(String.valueOf(idx));
+			
+			if(sub instanceof PropertyValueMap)
+				re=getPropertyValueMapTargetType((PropertyValueMap)sub, defaultType, -1);
+			else
+				re=defaultType;
+		}
+		
+		return re;
 	}
 	
 	/**
@@ -1460,7 +1484,7 @@ public class DefaultGenericConverter implements GenericConverter
 						//当前属性值映射表的自定义对应类型
 						if(RESERVE_KEY_CUSTOM_CLASS.equals(propKeys[i]))
 						{
-							setPropertyType(toPropertyType(map.get(key)));
+							parent.setPropertyType(toPropertyType(map.get(key)));
 						}
 						else
 							parent.put(propKeys[i], map.get(key));
@@ -1491,58 +1515,48 @@ public class DefaultGenericConverter implements GenericConverter
 			Class<?>[] re=null;
 			
 			if(clazz == null)
-				return re;
+				return null;
 			
-			if(clazz.getClass().isArray())
-			{
-				int len=Array.getLength(clazz);
-				re=new Class<?>[len];
-				
-				for(int i=0; i<len; i++)
-				{
-					Object cla=Array.get(clazz, i);
-					
-					if(cla instanceof String)
-					{
-						try
-						{
-							re[i]=Class.forName((String)cla);
-						}
-						catch(ClassNotFoundException e)
-						{
-							throw new GenericConvertException("custom target type '"+cla+"' not found", e);
-						}
-					}
-					else if(cla instanceof Class<?>)
-					{
-						re[i]=(Class<?>)cla;
-					}
-					else
-						throw new GenericConvertException("custom target type '"+cla+"' is illegal, it must be String or Class type");
-				}
-			}
-			else
+			if(clazz instanceof String)
 			{
 				re=new Class<?>[1];
-						
-				if(clazz instanceof String)
+				
+				try
+				{
+					re[0]=Class.forName((String)clazz);
+				}
+				catch(ClassNotFoundException e)
+				{
+					throw new GenericConvertException("custom target type '"+clazz+"' not found", e);
+				}
+			}
+			else if(clazz instanceof String[])
+			{
+				String[] clazzs=(String[])clazz;
+				re=new Class<?>[clazzs.length];
+				
+				for(int i=0; i<clazzs.length; i++)
 				{
 					try
 					{
-						re[0]=Class.forName((String)clazz);
+						re[i]=Class.forName(clazzs[i]);
 					}
 					catch(ClassNotFoundException e)
 					{
-						throw new GenericConvertException("custom target type '"+clazz+"' not found", e);
+						throw new GenericConvertException("custom target type '"+clazzs[i]+"' not found", e);
 					}
 				}
-				else if(clazz instanceof Class<?>)
-				{
-					re[0]=(Class<?>)clazz;
-				}
-				else
-					throw new GenericConvertException("custom target type '"+clazz+"' is illegal, it must be String or Class type");
 			}
+			else if(clazz instanceof Class<?>)
+			{
+				re=new Class<?>[]{ (Class<?>)clazz };
+			}
+			else if(clazz instanceof Class<?>[])
+			{
+				re=(Class<?>[])clazz;
+			}
+			else
+				throw new GenericConvertException("custom convert target type '"+clazz+"' is unknown");
 			
 			return re;
 		}

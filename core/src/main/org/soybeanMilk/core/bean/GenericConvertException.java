@@ -16,7 +16,7 @@ package org.soybeanMilk.core.bean;
 
 /**
  * 通用转换器异常。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-6
  */
 public class GenericConvertException extends RuntimeException

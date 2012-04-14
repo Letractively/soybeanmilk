@@ -17,7 +17,7 @@ package org.soybeanMilk.web.os;
 /**
  * 参数过滤值，它保存参数过滤器和过滤结果值。
  * 
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2012-3-27
  */
 public class ParamFilterValue

@@ -96,7 +96,7 @@ import org.soybeanMilk.web.bean.WebGenericConverter;
  * 注意，如果你是要从默认Web对象源获取“request”、“session”、“application”、“response”、“objectSource”这些对象，而期望类型与与它们的类型不同，
  * 那么你需要为默认Web对象源使用的{@linkplain WebGenericConverter Web通用转换器}添加这些对象表示的类型到你所期望类型的辅助转换器。
  * </p>
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-7-19
  */
 public class DefaultWebObjectSource extends ConvertableObjectSource implements WebObjectSource

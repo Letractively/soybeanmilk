@@ -18,7 +18,7 @@ import java.io.Serializable;
 
 /**
  * 可执行对象。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-9-30
  */
 public interface Executable extends Serializable

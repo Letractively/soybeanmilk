@@ -22,7 +22,7 @@ import org.soybeanMilk.core.exe.Invoke.Arg;
  * 参数准备执行异常，{@linkplain Invoke 调用}在准备方法参数时出现异常。
  * 这通常是由于{@linkplain Invoke 调用}从{@linkplain ObjectSource 对象源}获取方法参数值时出现类型转换异常导致的。
  * 
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2011-1-11
  */
 public class ArgPrepareExecuteException extends ExecuteException

@@ -20,7 +20,7 @@ import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
 
 /**
  * 解决对象提供者，它从解决对象工厂中即时取得调用所需的解决对象。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-19
  */
 public class FactoryResolverProvider implements ResolverProvider

@@ -20,7 +20,7 @@ import java.lang.reflect.Type;
 /**
  * 对象源，用于获取和存储对象。<br>
  * {@linkplain Executable 可执行对象}从它获取执行所需的参数对象并用它存储执行结果对象。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-9-30
  */
 public interface ObjectSource

@@ -160,7 +160,7 @@ import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
  * 另外，如果目标类型为<code>String</code>，而你没有添加某类型对象到<code>String</code>类型的辅助转换器，那么它将返回此对象的<code>toString()</code>结果。
  * </p>
  * 
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-6
  */
 public class DefaultGenericConverter implements GenericConverter
@@ -1300,7 +1300,7 @@ public class DefaultGenericConverter implements GenericConverter
 	
 	/**
 	 * 用于转换器映射表中主键的类
-	 * @author earthAngry@gmail.com
+	 * @author earthangry@gmail.com
 	 * @date 2011-10-8
 	 */
 	protected static class ConverterKey
@@ -1356,7 +1356,7 @@ public class DefaultGenericConverter implements GenericConverter
 	 * 它有一个特殊用途的{@linkplain #clean}属性，用以标识属性值映射表是否是清洁的，清洁的属性值映射表在转换为某对象时，
 	 * 如果它的某个关键字找不到对应的对象属性名，转换将被终止；而如果属性值映射表不是清洁的，找不到对应对象属性名的关键字将被忽略。
 	 * 
-	 * @author earthAngry@gmail.com
+	 * @author earthangry@gmail.com
 	 * @date 2012-3-27
 	 */
 	protected static class PropertyValueMap extends HashMap<String, Object>

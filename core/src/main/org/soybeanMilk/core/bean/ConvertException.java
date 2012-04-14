@@ -18,7 +18,7 @@ import java.lang.reflect.Type;
 
 /**
  * 转换异常。{@linkplain Converter 转换器}在执行对象转换时出现异常。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2011-1-12
  *
  */

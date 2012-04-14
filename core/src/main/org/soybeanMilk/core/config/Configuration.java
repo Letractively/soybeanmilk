@@ -27,7 +27,7 @@ import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 /**
  * 配置，它包含执行所需的环境信息，比如{@linkplain ResolverFactory 解决对象工厂}、{@linkplain GenericConverter 通用转换器}，
  * {@linkplain Executable 可执行对象}集以及{@linkplain Interceptors 执行拦截器}
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-1
  */
 public class Configuration

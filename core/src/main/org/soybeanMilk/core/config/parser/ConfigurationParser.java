@@ -53,7 +53,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * 配置解析器
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-1
  */
 public class ConfigurationParser
@@ -1169,7 +1169,7 @@ public class ConfigurationParser
 	
 	/**
 	 * 可执行对象代理，用于可执行对象引用的延迟初始化
-	 * @author earthAngry@gmail.com
+	 * @author earthangry@gmail.com
 	 * @date 2010-10-28
 	 *
 	 */

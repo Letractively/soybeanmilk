@@ -28,7 +28,7 @@ import org.soybeanMilk.web.exe.WebAction.Target;
 
 /**
  * {@linkplain TypeTargetHandler 类型目标处理器}的默认实现。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2011-4-19
  *
  */

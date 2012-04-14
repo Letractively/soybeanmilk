@@ -27,7 +27,7 @@ import org.soybeanMilk.core.config.parser.ParseException;
 
 /**
  * 框架内部常用类。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-12-31
  */
 public class SoybeanMilkUtils

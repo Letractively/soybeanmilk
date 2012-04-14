@@ -18,7 +18,7 @@ import java.lang.reflect.Type;
 
 /**
  * 转换器，它可以将某个类型的对象转换为另一个类型的对象，比如将字符串转换成整型值
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-5
  */
 public interface Converter

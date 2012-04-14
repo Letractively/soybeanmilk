@@ -35,7 +35,7 @@ import org.soybeanMilk.web.os.ParamFilterValue;
  * Web通用转换器，除了继承自{@linkplain DefaultGenericConverter 默认通用转换器的}的转换支持，
  * 它还添加了一些适用于Web的功能，比如，如果源对象是数组，而目标类型不是，它将会使用数组的第一个元素执行转换。
  * 
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-8
  */
 public class WebGenericConverter extends DefaultGenericConverter

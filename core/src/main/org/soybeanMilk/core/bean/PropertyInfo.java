@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * {@linkplain java.lang.Class Class}类型的属性信息封装类
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-4-4
  */
 public class PropertyInfo

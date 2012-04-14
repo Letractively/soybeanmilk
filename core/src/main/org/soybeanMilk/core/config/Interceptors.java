@@ -20,7 +20,7 @@ import org.soybeanMilk.core.Executable;
 
 /**
  * 执行拦截器集，它包含执行前切点拦截器、后切点拦截器，以及异常拦截器
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-11-27
  */
 public class Interceptors implements Serializable

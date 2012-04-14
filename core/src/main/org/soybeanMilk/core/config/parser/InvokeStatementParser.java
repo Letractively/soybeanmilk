@@ -27,7 +27,7 @@ import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 
 /**
  * 调用语句解析器，它解析诸如"myReulst = myResolver.method(argKey0, argKey1, "string")"之类字符串中的与{@linkplain Invoke 调用}对应的属性
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-11-25
  */
 public class InvokeStatementParser

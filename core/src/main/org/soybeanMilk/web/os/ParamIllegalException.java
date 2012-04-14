@@ -44,7 +44,7 @@ import org.soybeanMilk.web.WebObjectSource;
  *         throw e;
  * }
  * </pre>
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2012-3-27
  */
 public class ParamIllegalException extends ObjectSourceException

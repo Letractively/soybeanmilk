@@ -16,7 +16,7 @@ package org.soybeanMilk.core;
 
 /**
  * 执行器找不到给定名称的可执行对象时，将抛出该异常
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-28
  */
 public class ExecutableNotFoundException extends Exception

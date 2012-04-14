@@ -19,7 +19,7 @@ import java.lang.reflect.Type;
 
 /**
  * {@linkplain Map 映射表}转换异常，它保存导致转换异常的{@linkplain Map 映射表}关键字。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2012-3-27
  *
  */

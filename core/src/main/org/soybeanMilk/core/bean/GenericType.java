@@ -31,7 +31,7 @@ import org.soybeanMilk.core.exe.Invoke;
  * 它同时封装泛型类型的持有类信息，并提供了获取泛型类型的具体类型的方法。<br>
  * {@linkplain Invoke 调用}会首先将它的泛型方法参数类型对象转换为<code>GenericType</code>类型的对象，
  * 从而为底层的{@linkplain GenericConverter 通用转换器}提供足够的类型转换信息。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2011-9-29
  *
  */
@@ -430,7 +430,7 @@ public class GenericType implements Type
 	
 	/**
 	 * 用于泛型类型映射表中主键的类
-	 * @author earthAngry@gmail.com
+	 * @author earthangry@gmail.com
 	 * @date 2011-10-8
 	 */
 	protected static class GenericTypeKey

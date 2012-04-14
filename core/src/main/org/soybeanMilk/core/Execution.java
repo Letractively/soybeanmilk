@@ -22,7 +22,7 @@ import org.soybeanMilk.core.config.Interceptors;
  * 执行语境信息。<br>
  * 如果你为框架添加了执行拦截器（参考{@linkplain Interceptors 执行拦截器信息}类），
  * 或许想要在你的拦截器中获取这些执行语境信息。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-11-28
  */
 public class Execution implements Serializable

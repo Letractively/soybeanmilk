@@ -18,7 +18,7 @@ import java.lang.reflect.Type;
 
 /**
  * 通用转换器，通过添加辅助{@linkplain 转换器}，它可以将任何类型的对象转换到目标类型对象。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-10
  */
 public interface GenericConverter extends Converter

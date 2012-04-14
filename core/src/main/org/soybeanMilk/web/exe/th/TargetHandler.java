@@ -24,7 +24,7 @@ import org.soybeanMilk.web.exe.WebAction.Target;
 
 /**
  * {@linkplain WebAction Web动作}的{@linkplain Target 目标}处理器。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2011-4-19
  *
  */

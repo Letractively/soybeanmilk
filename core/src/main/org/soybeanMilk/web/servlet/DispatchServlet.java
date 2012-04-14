@@ -40,7 +40,7 @@ import org.soybeanMilk.web.os.DefaultWebObjectSource;
 
 /**
  * 框架整合servlet，它可以将WEB请求转给{@linkplain WebExecutor Web执行器}。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-12-28
  */
 public class DispatchServlet extends HttpServlet

@@ -16,7 +16,7 @@ package org.soybeanMilk.core.bean.converters;
 
 /**
  * {@linkplain java.sql.Time}类型转换器，它可以将“HH:mm:ss”或“HH:mm:ss.SSS”格式的字符串转换为{@linkplain java.sql.Time}类型的对象。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-3
  */
 public class SqlTimeConverter extends ClassTypeConverter

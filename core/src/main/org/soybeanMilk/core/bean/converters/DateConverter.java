@@ -25,7 +25,7 @@ package org.soybeanMilk.core.bean.converters;
  *   <li>yyyy-MM-dd HH:mm:ss</li>
  *   <li>yyyy-MM-dd HH:mm:ss.SSS</li>
  * </ul>
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-1-29
  */
 public class DateConverter extends ClassTypeConverter

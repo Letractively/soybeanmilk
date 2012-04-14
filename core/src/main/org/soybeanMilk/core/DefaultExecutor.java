@@ -20,7 +20,7 @@ import org.soybeanMilk.core.os.ConvertableObjectSource;
 
 /**
  * 执行器的默认实现。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-9-30
  */
 public class DefaultExecutor implements Executor

@@ -16,7 +16,7 @@ package org.soybeanMilk.core.bean.converters;
 
 /**
  * 字节类型转换器
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-3
  */
 public class ByteConverter extends ClassTypeConverter

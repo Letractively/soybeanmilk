@@ -36,7 +36,7 @@ import org.soybeanMilk.web.vp.VariablePathMatcher;
 
 /**
  * {@linkplain WebExecutor Web执行器}的默认实现。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2011-4-18
  *
  */

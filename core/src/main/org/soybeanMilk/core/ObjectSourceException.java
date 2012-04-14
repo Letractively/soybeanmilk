@@ -16,7 +16,7 @@ package org.soybeanMilk.core;
 
 /**
  * 对象源异常。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-9-30
  */
 public class ObjectSourceException extends Exception

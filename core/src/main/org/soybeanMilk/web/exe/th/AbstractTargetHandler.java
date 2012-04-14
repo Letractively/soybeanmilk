@@ -33,7 +33,7 @@ import org.soybeanMilk.web.exe.WebAction.Target;
 
 /**
  * {@linkplain TargetHandler 目标处理器}的抽象类，提供一些常用的辅助方法。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2011-4-19
  *
  */

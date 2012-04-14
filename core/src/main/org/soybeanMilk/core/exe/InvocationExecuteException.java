@@ -20,7 +20,7 @@ import org.soybeanMilk.core.ExecuteException;
  * 执行异常，{@linkplain Invoke 调用}方法在执行时内部抛出异常。
  * 它的源异常是由{@linkplain Invoke 调用}方法的编写者定义的方法异常或者方法引起的运行时异常。
  * 
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-12-19
  */
 public class InvocationExecuteException extends ExecuteException

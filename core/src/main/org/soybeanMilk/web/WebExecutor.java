@@ -28,7 +28,7 @@ import org.soybeanMilk.web.exe.WebAction.Target;
 
 /**
  * Web执行器。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2011-4-18
  *
  */

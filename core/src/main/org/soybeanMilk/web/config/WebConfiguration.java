@@ -20,7 +20,7 @@ import org.soybeanMilk.web.exe.th.TypeTargetHandler;
 
 /**
  * Web配置。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2011-4-19
  *
  */

@@ -78,7 +78,7 @@ import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
  * </table>
  * </p>
  * <p>
- * 对于Map&lt;String, ?&gt;类型的源对象，它的关键字必须符合<i>访问符表达式</i>语义：
+ * 对于Map&lt;String, ?&gt;类型的源对象，它的关键字必须符合下面的<i>访问符表达式</i>格式：
  * </p>
  * <p>
  * 		<i>name</i>[.<i>name</i> ...]
@@ -88,16 +88,27 @@ import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
  * </p>
  * <ul>
  * 	<li>
- *  	JavaBean对象属性名
+ *  	JavaBean对象属性名<br>
+ *  	表明映射表的值属于JavaBean的<i>name</i>属性值
  *  </li>
  *  <li>
- *  	List、Set、数组对象的下标值（必须是数值，Set时仅作为标识）
+ *  	List、Set、数组对象的下标值<br>
+ *  	表明映射表的值属于集合中的<i>name</i>元素
  *  </li>
  *  <li>
- *  	Map对象关键字
+ *  	Map对象关键字<br>
+ *  	表明映射表的值属于另一个映射表<i>name</i>关键字的值
  *  </li>
  *  <li>
- *  	“class”字面值，用以指定自定义转换JavaBean类型，它的值必须是JavaBean的全类名
+ *  	"class"字面值<br>
+ *  	表明自定义转换目标类型，它的值必须是全类名，且必须位于<i>访问符表达式</i>的末尾位置。<br>
+ *  	它用以提供集合类元素的多态转换支持，比如：<br>
+ *  	"2.class" -&gt; "org.somePkg.UserSub"<br>
+ *  	&nbsp;&nbsp;&nbsp;&nbsp;指定目标集合的第三个元素类型为“org.somePkg.UserSub”<br>
+ *  	"someKey.class" -&gt; "org.somePkg.UserSub"<br>
+ *  	&nbsp;&nbsp;&nbsp;&nbsp;指定目标映射表的"someKey"元素类型为“org.somePkg.UserSub”<br>
+ *  	"class" -&gt; ["org.somePkg.UserSub0", "org.somePkg.UserSub1"]<br>
+ *  	&nbsp;&nbsp;&nbsp;&nbsp;指定目标集合的第一个元素类型为"org.somePkg.UserSub0"，第二个元素类型为"org.somePkg.UserSub1"
  *  </li>
  * </ul>
  * <p>
@@ -118,6 +129,8 @@ import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
  * </pre>
  * 转换为：
  * <pre>
+ * package org.somePkg;
+ * 
  * class User{
  * 	private Integer id;
  * 	private String name;

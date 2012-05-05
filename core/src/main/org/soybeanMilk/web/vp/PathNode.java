@@ -20,7 +20,7 @@ import org.soybeanMilk.web.WebConstants;
 
 /**
  * 路径的节点，该节点可能是变量节点，也可能是值节点。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-12-16
  */
 public class PathNode implements Comparable<PathNode>,Serializable

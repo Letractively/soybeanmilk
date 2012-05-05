@@ -27,7 +27,7 @@ import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 
 /**
  * 调用语句解析器，它解析诸如"myReulst = myResolver.method(argKey0, argKey1, "string")"之类字符串中的与{@linkplain Invoke 调用}对应的属性
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-11-25
  */
 public class InvokeStatementParser
@@ -385,7 +385,7 @@ public class InvokeStatementParser
 		Object value=null;
 		
 		//首字符为数字，则认为是数值
-		if(stmt.length()>0 && isNumberChar(stmt.charAt(0)))
+		if(stmt.length()>0 && SoybeanMilkUtils.isDigit(stmt.charAt(0)))
 		{
 			if(Byte.class.equals(wrapType))
 				value=new Byte(stmt);
@@ -420,7 +420,7 @@ public class InvokeStatementParser
 		else if(stmt.startsWith("\"") && stmt.endsWith("\"")
 				&& stmt.length()>1)
 		{
-			stmt=unEscape(stmt);
+			stmt=SoybeanMilkUtils.unEscape(stmt);
 			
 			if(stmt.length()<2)
 				throw new ParseException("illegal String definition "+stmt+"");
@@ -429,7 +429,7 @@ public class InvokeStatementParser
 		}
 		else if(stmt.startsWith("'") && stmt.endsWith("'"))
 		{
-			stmt=unEscape(stmt);
+			stmt=SoybeanMilkUtils.unEscape(stmt);
 			
 			if(stmt.length() != 3)
 				throw new ParseException("illegal char definition "+stmt+"");
@@ -441,98 +441,5 @@ public class InvokeStatementParser
 		
 		arg.setKey(key);
 		arg.setValue(value);
-	}
-	
-	/**
-	 * 反转义Java字符串
-	 * @param s
-	 * @return
-	 */
-	public static String unEscape(String s)
-	{
-		if(s==null || s.length()==0)
-			return s;
-		
-		StringBuffer sb=new StringBuffer();
-		
-		int i=0;
-		int len=s.length();
-		while(i < len)
-		{
-			char c=s.charAt(i);
-			
-			if(c == '\\')
-			{
-				if(i == len-1)
-					throw new ParseException("\""+s+"\" must not be end with '\\' ");
-				
-				i+=1;
-				
-				char next=s.charAt(i);
-				if(next == 'u')
-				{
-					i+=1;
-					int end=i+4;
-					
-					if(end > len)
-						throw new ParseException("illegal \\uxxxx encoding in \""+s+"\"");
-					
-					int v=0;
-					for (;i<end;i++)
-					{
-						next = s.charAt(i);
-				        switch (next)
-				        {
-				        	case '0': case '1': case '2': case '3': case '4':
-				        	case '5': case '6': case '7': case '8': case '9':
-				        		v = (v << 4) + next - '0';
-				        		break;
-				        	case 'a': case 'b': case 'c':
-				        	case 'd': case 'e': case 'f':
-				        		v = (v << 4) + 10 + next - 'a';
-				        		break;
-				        	case 'A': case 'B': case 'C':
-				        	case 'D': case 'E': case 'F':
-				        		v = (v << 4) + 10 + next - 'A';
-				        		break;
-				        	default:
-				        		throw new ParseException("illegal \\uxxxx encoding in \""+s+"\"");
-				        }
-					}
-					
-					sb.append((char)v);
-				}
-				else
-				{
-					if(next == 't') sb.append('\t');
-					else if(next == 'r') sb.append('\r');
-					else if(next == 'n') sb.append('\n');
-					else if(next == '\'') sb.append('\'');
-					else if(next == '\\') sb.append('\\');
-					else if(next == '"') sb.append('"');
-					else
-						throw new ParseException("unknown escape character '\\"+next+"' ");
-					
-					i++;
-				}
-			}
-			else
-			{
-				sb.append(c);
-				i++;
-			}
-		}
-		
-		return sb.toString();
-	}
-	
-	/**
-	 * 判断字符是否是数字[0-9]
-	 * @param c
-	 * @return
-	 */
-	public static boolean isNumberChar(char c)
-	{
-		return c>='0' && c<='9';
 	}
 }

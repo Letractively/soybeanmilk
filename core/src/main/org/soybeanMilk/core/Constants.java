@@ -16,7 +16,7 @@ package org.soybeanMilk.core;
 
 /**
  * 常量类
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-6
  */
 public class Constants

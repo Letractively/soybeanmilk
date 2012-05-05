@@ -18,7 +18,7 @@ import java.io.Serializable;
 
 /**
  * 解决对象工厂。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-19
  */
 public interface ResolverFactory

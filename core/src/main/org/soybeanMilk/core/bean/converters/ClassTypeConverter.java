@@ -22,7 +22,7 @@ import org.soybeanMilk.core.bean.Converter;
 
 /**
  * 目标类型是{@linkplain java.lang.Class Class}的转换器。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-3
  */
 public abstract class ClassTypeConverter implements Converter

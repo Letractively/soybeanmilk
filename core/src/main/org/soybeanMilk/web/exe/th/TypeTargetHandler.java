@@ -18,7 +18,7 @@ import org.soybeanMilk.web.exe.WebAction.Target;
 
 /**
  * 类型目标处理器，它可以根据{@linkplain Target 目标}类型来处理目标。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2011-4-19
  *
  */

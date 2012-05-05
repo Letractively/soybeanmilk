@@ -16,7 +16,9 @@ package org.soybeanMilk.web.exe.th;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -31,7 +33,7 @@ import org.soybeanMilk.web.exe.WebAction.Target;
 
 /**
  * {@linkplain TargetHandler 目标处理器}的抽象类，提供一些常用的辅助方法。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2011-4-19
  *
  */
@@ -58,25 +60,25 @@ public abstract class AbstractTargetHandler implements TargetHandler
 	 * 获取动作<code>webAction</code>执行时保存到{@linkplain WebObjectSource Web对象源}中的所有对象。
 	 * @param webAction
 	 * @param webObjectSource
-	 * @return 对象数组，如果<code>webAction</code>没有保存任何对象，它将会是<code>null</code>
+	 * @return 对象映射表，如果<code>webAction</code>没有保存任何对象，它将会是<code>null</code>
 	 * @date 2011-5-8
 	 */
-	public Object[] getAllResults(WebAction webAction, WebObjectSource webObjectSource) throws ServletException, IOException
+	public Map<String, Object> getAllResults(WebAction webAction, WebObjectSource webObjectSource) throws ServletException, IOException
 	{
-		Object[] re=null;
+		Map<String, Object> re=null;
 		
 		String[] keys=getAllResultKeys(webAction);
 		
 		if(keys!=null && keys.length>0)
 		{
-			re=new Object[keys.length];
+			re=new HashMap<String, Object>();
 			
 			for(int i=0; i<keys.length; i++)
 			{
 				try
 				{
 					Object obj=webObjectSource.get(keys[i], null);
-					re[i]=obj;
+					re.put(keys[i], obj);
 				}
 				catch(Exception e)
 				{

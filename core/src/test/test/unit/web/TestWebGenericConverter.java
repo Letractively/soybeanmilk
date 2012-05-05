@@ -2,34 +2,32 @@ package test.unit.web;
 
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
-import java.util.TreeSet;
-import java.util.Vector;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.soybeanMilk.core.bean.ConvertException;
+import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConvertException;
-import org.soybeanMilk.core.bean.GenericType;
-import org.soybeanMilk.web.bean.MapConvertException;
+import org.soybeanMilk.core.bean.MapConvertException;
+import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.bean.WebGenericConverter;
+import org.soybeanMilk.web.os.DefaultWebObjectSource;
 import org.soybeanMilk.web.os.ParamFilterValue;
-
-import test.unit.core.MockGenericArrayType;
-import test.unit.core.MockParameterizedType;
-import test.unit.core.MockTypeVariable;
-import test.unit.core.MockWildcardType;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockServletContext;
 
 public class TestWebGenericConverter
 {
@@ -70,25 +68,56 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convert_paramFilterValue_valueIsMap() throws Exception
+	public void convert_paramFilterValue_valueIsMap_toRawMap() throws Exception
 	{
 		Map<String,Object> paramMap=new HashMap<String, Object>();
 		
-		String name="jack";
-		String age="15";
-		String birth="1900-10-21";
+		String id="15";
+		String name="javaBean2";
+		String javaBean_name="javaBean";
+		String javaBean_age="13";
 		
+		paramMap.put("id", id);
 		paramMap.put("name", name);
-		paramMap.put("age", age);
-		paramMap.put("birth", birth);
+		paramMap.put("javaBean.name", javaBean_name);
+		paramMap.put("javaBean.age", javaBean_age);
 		
 		ParamFilterValue pfv=new ParamFilterValue("paramName", paramMap);
 		
-		JavaBean dest=converter.convert(pfv, JavaBean.class);
+		Map<String, String[]> dest=converter.convert(pfv, Map.class);
 		
+		Assert.assertEquals(paramMap.size(), dest.size());
+		
+		Assert.assertEquals(id, dest.get("id"));
+		Assert.assertEquals(name, dest.get("name"));
+		Assert.assertEquals(javaBean_name, dest.get("javaBean.name"));
+		Assert.assertEquals(javaBean_age, dest.get("javaBean.age"));
+	}
+	
+
+	@Test
+	public void convert_paramFilterValue_valueIsMap_toJavaBean() throws Exception
+	{
+		Map<String,Object> paramMap=new HashMap<String, Object>();
+		
+		String id="15";
+		String name="javaBean2";
+		String javaBean_name="javaBean";
+		String javaBean_age="13";
+		
+		paramMap.put("id", id);
+		paramMap.put("name", name);
+		paramMap.put("javaBean.name", javaBean_name);
+		paramMap.put("javaBean.age", javaBean_age);
+		
+		ParamFilterValue pfv=new ParamFilterValue("paramName", paramMap);
+		
+		JavaBean2 dest=converter.convert(pfv, JavaBean2.class);
+		
+		Assert.assertEquals(id, dest.getId()+"");
 		Assert.assertEquals(name, dest.getName());
-		Assert.assertEquals(age, dest.getAge().toString());
-		Assert.assertEquals(birth, new SimpleDateFormat("yyyy-MM-dd").format(dest.getBirth()));
+		Assert.assertEquals(javaBean_name, dest.getJavaBean().getName());
+		Assert.assertEquals(javaBean_age, dest.getJavaBean().getAge()+"");
 	}
 	
 	@Test
@@ -172,55 +201,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convert_mapToJavaBean_srcIsNull() throws Exception
-	{
-		Object dest = converter.convert(null, JavaBean.class);
-		Assert.assertNull(dest);
-	}
-	
-	@Test
-	public void convert_mapToJavaBean_srcIsEmpty() throws Exception
-	{
-		//源为空
-		Map<String,Object> src=new HashMap<String, Object>();
-		Object dest = converter.convert(src, JavaBean.class);
-		
-		Assert.assertNull(dest);
-	}
-	
-	@Test
-	public void convert_mapToJavaBean_srcContainInexistentJavaBeanProperty() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		src.put("abc", 356);
-		
-		Object dest = converter.convert(src, JavaBean.class);
-		
-		Assert.assertNull(dest);
-	}
-	
-	@Test
-	public void convert_mapToJavaBean_srcContainInexistentSubJavaBeanProperty() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		src.put("javaBean.def", 356);
-		
-		GenericConvertException re=null;
-		
-		try
-		{
-			converter.convert(src, JavaBean2.class);
-		}
-		catch(GenericConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertTrue(( re.getMessage().startsWith("can not find property 'def'") ));
-	}
-	
-	@Test
-	public void convert_mapToJavaBean_srcContainInexistentSubJavaBeanProperty_inSubArrayProperty() throws Exception
+	public void convert_noSupportConverter_mapToJavaBean_srcContainInexistentSubJavaBeanProperty_inSubArrayProperty() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		String[] id=new String[]{"1"};
@@ -250,89 +231,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convert_mapToJavaBean_srcHasInexistentPropertyContainInSubListProperty() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		String[] id=new String[]{"1"};
-		String[] name=new String[]{"jack"};
-		
-		String[] cmplexCollectionProperty_id=new String[]{"2","5","7"};
-		String[] cmplexCollectionProperty_name=new String[]{"aaa","bbb","ccc"};
-		
-		src.put("id", id);
-		src.put("name", name);
-		
-		src.put("javaBean2List.id", cmplexCollectionProperty_id);
-		src.put("javaBean2List.name", cmplexCollectionProperty_name);
-		src.put("javaBean2List.notExistsProperty", cmplexCollectionProperty_name);
-		
-		GenericConvertException re=null;
-		
-		try
-		{
-			converter.convert(src, ComplexJavaBean.class);
-		}
-		catch(GenericConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertTrue((re.getMessage().startsWith("can not find property 'notExistsProperty'")));
-	}
-	
-	@Test
-	public void convert_mapToJavaBean_srcHasInexistentPropertyContainInSubSetProperty() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		String[] id=new String[]{"1"};
-		String[] name=new String[]{"jack"};
-		
-		String[] cmplexCollectionProperty_id=new String[]{"2","5","7"};
-		String[] cmplexCollectionProperty_name=new String[]{"aaa","bbb","ccc"};
-		
-		src.put("id", id);
-		src.put("name", name);
-		
-		src.put("javaBean2Set.id", cmplexCollectionProperty_id);
-		src.put("javaBean2Set.name", cmplexCollectionProperty_name);
-		src.put("javaBean2Set.notExistsProperty", cmplexCollectionProperty_name);
-		
-		GenericConvertException re=null;
-		
-		try
-		{
-			converter.convert(src, ComplexJavaBean.class);
-		}
-		catch(GenericConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertTrue((re.getMessage().startsWith("can not find property 'notExistsProperty'")));
-	}
-	
-	@Test
-	public void convert_mapToJavaBean_srcElementString() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		String name="jack";
-		String age="15";
-		String birth="1900-10-21";
-		
-		src.put("name", name);
-		src.put("age", age);
-		src.put("birth", birth);
-		
-		JavaBean dest=converter.convert(src, JavaBean.class);
-		
-		Assert.assertEquals(name, dest.getName());
-		Assert.assertEquals(new Integer(age), dest.getAge());
-		Assert.assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse(birth), dest.getBirth());
-	}
-
-	@Test
-	public void convert_mapToJavaBean_srcElementSingleStringArray() throws Exception
+	public void convert_noSupportConverter_mapToJavaBean_srcElementSingleStringArray() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -350,9 +249,9 @@ public class TestWebGenericConverter
 		Assert.assertEquals(new Integer(age[0]), dest.getAge());
 		Assert.assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse(birth[0]), dest.getBirth());
 	}
-
+	
 	@Test
-	public void convert_mapToJavaBean_srcElementMultiStringArray() throws Exception
+	public void convert_noSupportConverter_mapToJavaBean_srcElementMultiStringArray() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -370,36 +269,9 @@ public class TestWebGenericConverter
 		Assert.assertEquals(age[0], dest.getAge().toString());
 		Assert.assertEquals(birth[0], new SimpleDateFormat("yyyy-MM-dd").format(dest.getBirth()));
 	}
-
+	
 	@Test
-	public void convert_mapToJavaBeanArray() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		String[] names=new String[]{"aa", "bb", "cc"};
-		String[] ages=new String[]{"11", "22", "33"};
-		String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
-		
-		src.put("name", names);
-		src.put("age", ages);
-		src.put("birth", births);
-		
-		JavaBean[] dest=converter.convert(src, JavaBean[].class);
-		
-		Assert.assertTrue( dest.length == names.length);
-		
-		for(int i=0;i<dest.length;i++)
-		{
-			JavaBean jb=dest[i];
-			
-			Assert.assertEquals(names[i], jb.getName());
-			Assert.assertEquals(ages[i], jb.getAge().toString());
-			Assert.assertEquals(births[i], new SimpleDateFormat("yyyy-MM-dd").format(jb.getBirth()));
-		}
-	}
-
-	@Test
-	public void convert_mapToJavaBean_collectionProperty_simpleKeyArrayValueMap() throws Exception
+	public void convert_noSupportConverter_mapToJavaBean_collectionProperty_simpleKeyArrayValueMap() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -508,7 +380,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convert_mapToJavaBean_srcArrayPropertyContainIllegalValue() throws Exception
+	public void convert_noSupportConverter_mapToJavaBean_srcArrayPropertyContainIllegalValue() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -537,1033 +409,7 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convert_mapToJavaBean_srcComplexPropertyContainIllegalValue() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		String[] id=new String[]{"1"};
-		String[] name=new String[]{"jack"};
-		String[] simpleCollectionProperty=new String[]{"1","3","9"};
-		
-		String[] cmplexCollectionProperty_id=new String[]{"2","illegalValue","7"};
-		String[] cmplexCollectionProperty_name=new String[]{"aaa","bbb","ccc"};
-		
-		src.put("id", id);
-		src.put("name", name);
-		
-		src.put("simpleArray", simpleCollectionProperty);
-		src.put("simpleList", simpleCollectionProperty);
-		src.put("simpleSet", simpleCollectionProperty);
-		
-		src.put("javaBean2List.id", cmplexCollectionProperty_id);
-		src.put("javaBean2List.name", cmplexCollectionProperty_name);
-		
-		MapConvertException re=null;
-		try
-		{
-			converter.convert(src, ComplexJavaBean.class);
-		}
-		catch(MapConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertEquals("javaBean2List.id", re.getKey());
-		Assert.assertEquals("illegalValue", re.getSourceObject());
-		Assert.assertEquals(int.class, re.getTargetType());
-	}
-	
-	@Test
-	public void convert_mapToGeneric_TypeVariable() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		String name="jack";
-		String age="15";
-		String birth="1900-10-21";
-		
-		src.put("name", name);
-		src.put("age", age);
-		src.put("birth", birth);
-		
-		@SuppressWarnings("rawtypes")
-		Type type=new MockTypeVariable("T", new Type[]{JavaBean.class});
-		
-		JavaBean dest=converter.convert(src, type);
-		
-		Assert.assertEquals(name, dest.getName());
-		Assert.assertEquals(new Integer(age), dest.getAge());
-		Assert.assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse(birth), dest.getBirth());
-	}
-	
-	@Test
-	public void convert_mapToGeneric_ParameterizedType() throws Exception
-	{
-		convert_mapToJavaBeanList(List.class);
-	}
-
-	@Test
-	public void convert_mapToGeneric_ParameterizedType_notSupported() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		String name="jack";
-		String age="15";
-		String birth="1900-10-21";
-		
-		src.put("name", name);
-		src.put("age", age);
-		src.put("birth", birth);
-		
-		Exception re=null;
-		
-		try
-		{
-			Type type=new MockParameterizedType(JavaBean.class, JavaBean.class);
-			converter.convert(src, type);
-		}
-		catch(GenericConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertTrue( re.getMessage().endsWith("is not supported") );
-	}
-	
-	@Test
-	public void convert_mapToGeneric_GenericArrayType() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		String[] names=new String[]{"aa", "bb", "cc"};
-		String[] ages=new String[]{"11", "22", "33"};
-		String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
-		
-		src.put("name", names);
-		src.put("age", ages);
-		src.put("birth", births);
-		
-		Type type=new MockGenericArrayType(JavaBean.class);
-		JavaBean[] dest=converter.convert(src, type);
-		
-		Assert.assertTrue( dest.length == names.length);
-		
-		for(int i=0;i<dest.length;i++)
-		{
-			JavaBean jb=dest[i];
-			
-			Assert.assertEquals(names[i], jb.getName());
-			Assert.assertEquals(ages[i], jb.getAge().toString());
-			Assert.assertEquals(births[i], new SimpleDateFormat("yyyy-MM-dd").format(jb.getBirth()));
-		}
-	}
-	
-	@Test
-	public void convert_mapToGeneric_WildcardType() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		String name="jack";
-		String age="15";
-		String birth="1900-10-21";
-		
-		src.put("name", name);
-		src.put("age", age);
-		src.put("birth", birth);
-		
-		MockWildcardType type=new MockWildcardType();
-		type.setUpperBounds(new Type[]{JavaBean.class});
-		
-		JavaBean dest=converter.convert(src, type);
-		
-		Assert.assertEquals(name, dest.getName());
-		Assert.assertEquals(new Integer(age), dest.getAge());
-		Assert.assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse(birth), dest.getBirth());
-	}
-	
-	@Test
-	public void convert_mapToGeneric_GenericType() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		String name="jack";
-		String age="15";
-		String birth="1900-10-21";
-		
-		src.put("name", name);
-		src.put("age", age);
-		src.put("birth", birth);
-		
-		MockWildcardType tp=new MockWildcardType();
-		tp.setUpperBounds(new Type[]{JavaBean.class});
-		
-		Type type=GenericType.getGenericType(tp, null);
-		
-		JavaBean dest=converter.convert(src, type);
-		
-		Assert.assertEquals(name, dest.getName());
-		Assert.assertEquals(new Integer(age), dest.getAge());
-		Assert.assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse(birth), dest.getBirth());
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanCollection_keyComplexSemantics_illegalValue() throws Exception
-	{
-		{
-			Map<String,Object> src=new HashMap<String, Object>();
-			
-			src.put("0.simpleArray.0", "illegalValue");
-			
-			MapConvertException re=null;
-			try
-			{
-				converter.convert(src, ComplexJavaBean[].class);
-			}
-			catch(MapConvertException e)
-			{
-				re=e;
-			}
-			
-			Assert.assertEquals("0.simpleArray.0", re.getKey());
-			Assert.assertEquals("illegalValue", re.getSourceObject());
-			Assert.assertEquals(Integer.class, re.getTargetType());
-		}
-		
-		{
-			Map<String,Object> src=new HashMap<String, Object>();
-			
-			src.put("0.simpleList.0", "illegalValue");
-			
-			MapConvertException re=null;
-			try
-			{
-				converter.convert(src, ComplexJavaBean[].class);
-			}
-			catch(MapConvertException e)
-			{
-				re=e;
-			}
-			
-			Assert.assertEquals("0.simpleList.0", re.getKey());
-			Assert.assertEquals("illegalValue", re.getSourceObject());
-			Assert.assertEquals(Integer.class, re.getTargetType());
-		}
-		
-		{
-			Map<String,Object> src=new HashMap<String, Object>();
-			
-			src.put("0.simpleSet.0", "illegalValue");
-			
-			MapConvertException re=null;
-			try
-			{
-				converter.convert(src, ComplexJavaBean[].class);
-			}
-			catch(MapConvertException e)
-			{
-				re=e;
-			}
-			
-			Assert.assertEquals("0.simpleSet.0", re.getKey());
-			Assert.assertEquals("illegalValue", re.getSourceObject());
-			Assert.assertEquals(Integer.class, re.getTargetType());
-		}
-
-		{
-			Map<String,Object> src=new HashMap<String, Object>();
-			
-			src.put("0.simpleMap.key", "illegalValue");
-			
-			MapConvertException re=null;
-			try
-			{
-				converter.convert(src, ComplexJavaBean[].class);
-			}
-			catch(MapConvertException e)
-			{
-				re=e;
-			}
-			
-			Assert.assertEquals("0.simpleMap.key", re.getKey());
-			Assert.assertEquals("illegalValue", re.getSourceObject());
-			Assert.assertEquals(Integer.class, re.getTargetType());
-		}
-		
-		{
-			Map<String,Object> src=new HashMap<String, Object>();
-			
-			src.put("0.javaBean2Array.0.id", "illegalValue");
-			
-			MapConvertException re=null;
-			try
-			{
-				converter.convert(src, ComplexJavaBean[].class);
-			}
-			catch(MapConvertException e)
-			{
-				re=e;
-			}
-			
-			Assert.assertEquals("0.javaBean2Array.0.id", re.getKey());
-			Assert.assertEquals("illegalValue", re.getSourceObject());
-			Assert.assertEquals(int.class, re.getTargetType());
-		}
-		
-		{
-			Map<String,Object> src=new HashMap<String, Object>();
-			
-			src.put("0.javaBean2List.0.id", "illegalValue");
-			
-			MapConvertException re=null;
-			try
-			{
-				converter.convert(src, ComplexJavaBean[].class);
-			}
-			catch(MapConvertException e)
-			{
-				re=e;
-			}
-			
-			Assert.assertEquals("0.javaBean2List.0.id", re.getKey());
-			Assert.assertEquals("illegalValue",re.getSourceObject());
-			Assert.assertEquals(int.class, re.getTargetType());
-		}
-		
-		{
-			Map<String,Object> src=new HashMap<String, Object>();
-			
-			src.put("0.javaBean2Set.0.id", "illegalValue");
-			
-			MapConvertException re=null;
-			try
-			{
-				converter.convert(src, ComplexJavaBean[].class);
-			}
-			catch(MapConvertException e)
-			{
-				re=e;
-			}
-			
-			Assert.assertEquals("0.javaBean2Set.0.id", re.getKey());
-			Assert.assertEquals("illegalValue", re.getSourceObject());
-			Assert.assertEquals(int.class, re.getTargetType());
-		}
-		
-		{
-			Map<String,Object> src=new HashMap<String, Object>();
-			
-			src.put("0.javaBean2Map.0.id", "illegalValue");
-			
-			MapConvertException re=null;
-			try
-			{
-				converter.convert(src, ComplexJavaBean[].class);
-			}
-			catch(MapConvertException e)
-			{
-				re=e;
-			}
-			
-			Assert.assertEquals("0.javaBean2Map.0.id", re.getKey());
-			Assert.assertEquals("illegalValue", re.getSourceObject());
-			Assert.assertEquals(int.class, re.getTargetType());
-		}
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanCollection_keyComplexSemantics_illegalKey() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		src.put("0.javaBean2Map.illegalKey.id", "1");
-		
-		GenericConvertException re=null;
-		try
-		{
-			converter.convert(src, ComplexJavaBean[].class);
-		}
-		catch(GenericConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertTrue(( re.getMessage().startsWith("convert 'illegalKey' in key '0.javaBean2Map.illegalKey' to Map key of type 'java.lang.Integer' failed") ));
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanArray_keyComplexSemantics() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		String[] ids={"1", "2", "3"};
-		String[] names={"name_1", "name_2", "name_3"};
-		String[][] propsSimpleCollection=new String[][]
-		            {
-						{"11", "12", "13"},
-						{"21", "22", "23", "24"},
-						{"31", "32", "33"}
-		            };
-		String[][] propsSimpleKeys=new String[][]
-					{
-						{"key_1_1", "key_1_2"},
-						{"key_2_1", "key_2_2", "key_2_3", "key_2_4"},
-						{"key_3_1"},
-					};
-		String[][] propsSimpleValues=new String[][]
-					{
-						{"11", "12"},
-						{"21", "22", "23", "24"},
-						{"31"},
-					};
-		String[][] propsJavaBeanCollection_id=new String[][]
-   		            {
-   						{"11", "12"},
-   						{"21", "22", "23", "24"},
-   						{"31"}
-   		            };
-		String[][] propsJavaBeanCollection_name=new String[][]
-   		            {
-   						{"1_1", "1_2"},
-   						{"2_1", "2_2", "2_3", "2_4"},
-   						{"3_1"}
-   		            };
-		String[][] propsJavaBeanMapKeys=new String[][]
-				{
-					{"11", "12"},
-					{"21", "22", "23", "24"},
-					{"31"},
-				};
-		String[][] propsJavaBeanMapValuesId=new String[][]
-				{
-					{"11", "12"},
-					{"21", "22", "23", "24"},
-					{"31"},
-				};
-		String[][] propsJavaBeanMapValuesName=new String[][]
-				{
-					{"1_1", "1_2"},
-					{"2_1", "2_2", "2_3", "2_4"},
-					{"3_1"},
-				};
-		
-		
-		src.put("id", ids);
-		src.put("name", names);
-		
-		//简单集合属性
-		{
-			src.put("0.simpleArray", propsSimpleCollection[0]);
-			src.put("0.simpleList", propsSimpleCollection[0]);
-			src.put("0.simpleSet", propsSimpleCollection[0]);
-			
-			src.put("1.simpleArray", propsSimpleCollection[1]);
-			src.put("1.simpleList", propsSimpleCollection[1]);
-			src.put("1.simpleSet", propsSimpleCollection[1]);
-			
-			for(int i=0; i<propsSimpleCollection[2].length; i++)
-			{
-				src.put("2.simpleArray."+i, propsSimpleCollection[2][i]);
-				src.put("2.simpleList."+i, propsSimpleCollection[2][i]);
-				src.put("2.simpleSet."+i, propsSimpleCollection[2][i]);
-			}
-			
-			for(int i=0; i<propsSimpleKeys.length; i++)
-			{
-				for(int j=0; j<propsSimpleKeys[i].length; j++)
-				{
-					src.put(i+".simpleMap."+propsSimpleKeys[i][j], propsSimpleValues[i][j]);
-				}
-			}
-		}
-		
-		//JavaBean集合属性
-		{
-			for(int i=0; i<propsJavaBeanCollection_name[0].length; i++)
-			{
-				src.put("0.javaBean2Array."+i+".id", propsJavaBeanCollection_id[0][i]);
-				src.put("0.javaBean2List."+i+".id", propsJavaBeanCollection_id[0][i]);
-				src.put("0.javaBean2Set."+i+".id", propsJavaBeanCollection_id[0][i]);
-				src.put("0.javaBean2Array."+i+".name", propsJavaBeanCollection_name[0][i]);
-				src.put("0.javaBean2List."+i+".name", propsJavaBeanCollection_name[0][i]);
-				src.put("0.javaBean2Set."+i+".name", propsJavaBeanCollection_name[0][i]);
-			}
-			
-			src.put("1.javaBean2Array.id", propsJavaBeanCollection_id[1]);
-			src.put("1.javaBean2List.id", propsJavaBeanCollection_id[1]);
-			src.put("1.javaBean2Set.id", propsJavaBeanCollection_id[1]);
-			src.put("1.javaBean2Array.name", propsJavaBeanCollection_name[1]);
-			src.put("1.javaBean2List.name", propsJavaBeanCollection_name[1]);
-			src.put("1.javaBean2Set.name", propsJavaBeanCollection_name[1]);
-			
-			src.put("2.javaBean2Array.id", propsJavaBeanCollection_id[2]);
-			src.put("2.javaBean2List.id", propsJavaBeanCollection_id[2]);
-			src.put("2.javaBean2Set.id", propsJavaBeanCollection_id[2]);
-			src.put("2.javaBean2Array.name", propsJavaBeanCollection_name[2]);
-			src.put("2.javaBean2List.name", propsJavaBeanCollection_name[2]);
-			src.put("2.javaBean2Set.name", propsJavaBeanCollection_name[2]);
-			
-			for(int i=0; i<propsJavaBeanMapKeys.length; i++)
-			{
-				for(int j=0; j<propsJavaBeanMapKeys[i].length; j++)
-				{
-					src.put(i+".javaBean2Map."+propsJavaBeanMapKeys[i][j]+".id", propsJavaBeanMapValuesId[i][j]);
-					src.put(i+".javaBean2Map."+propsJavaBeanMapKeys[i][j]+".name", propsJavaBeanMapValuesName[i][j]);
-				}
-			}
-		}
-		
-		ComplexJavaBean[] re=converter.convert(src, ComplexJavaBean[].class);
-		
-		Assert.assertEquals(ids.length, re.length);
-		
-		for(int i=0; i<ids.length; i++)
-		{
-			ComplexJavaBean rei=re[i];
-			
-			Assert.assertEquals(ids[i], rei.getId()+"");
-			Assert.assertEquals(names[i], rei.getName());
-			
-			//简单集合属性
-			{
-				Integer[] simplePropsArray=stringArrayToIntArray(propsSimpleCollection[i]);
-				Set<Integer> simplePropsSet=new HashSet<Integer>();
-				for(Integer it : simplePropsArray)
-					simplePropsSet.add(it);
-				
-				Integer[] simplePropArrayi=rei.getSimpleArray();
-				Integer[] simplePropListi=new Integer[simplePropsArray.length];
-				rei.getSimpleList().toArray(simplePropListi);
-				Set<Integer> simplePropSeti=rei.getSimpleSet();
-				Map<String, Integer> simplePropsMapi=rei.getSimpleMap();
-				
-				Assert.assertTrue(Arrays.equals(simplePropsArray, simplePropArrayi));
-				Assert.assertTrue(Arrays.equals(simplePropsArray, simplePropListi));
-				Assert.assertEquals(new TreeSet<Integer>(simplePropsSet), new TreeSet<Integer>(simplePropSeti));
-				for(int j=0; j<propsSimpleKeys[i].length; j++)
-				{
-					Integer v=Integer.parseInt(propsSimpleValues[i][j]);
-					Assert.assertEquals(v, simplePropsMapi.get(propsSimpleKeys[i][j]));
-				}
-			}
-			
-			//JavaBean集合属性
-			{
-				JavaBean2[] javaBeanPropsArray=new JavaBean2[propsJavaBeanCollection_id[i].length];
-				for(int j=0; j<javaBeanPropsArray.length; j++)
-				{
-					javaBeanPropsArray[j]=new JavaBean2();
-					javaBeanPropsArray[j].setId(Integer.parseInt(propsJavaBeanCollection_id[i][j]));
-					javaBeanPropsArray[j].setName(propsJavaBeanCollection_name[i][j]);
-				}
-				Set<JavaBean2> javaBeanPropsSet=new HashSet<JavaBean2>();
-				for(JavaBean2 jb : javaBeanPropsArray)
-				{
-					javaBeanPropsSet.add(jb);
-				}
-				
-				JavaBean2[] javaBeanPropsArrayi=rei.getJavaBean2Array();
-				JavaBean2[] javaBeanPropsListi=new JavaBean2[javaBeanPropsArray.length];
-				rei.getJavaBean2List().toArray(javaBeanPropsListi);
-				Set<JavaBean2> javaBeanPropsSeti=rei.getJavaBean2Set();
-				Map<Integer, JavaBean2> javaBeanPropsMapi=rei.getJavaBean2Map();
-				
-				Assert.assertTrue(Arrays.equals(javaBeanPropsArray, javaBeanPropsArrayi));
-				Assert.assertTrue(Arrays.equals(javaBeanPropsArray, javaBeanPropsListi));
-				Assert.assertEquals(new TreeSet<JavaBean2>(javaBeanPropsSet), new TreeSet<JavaBean2>(javaBeanPropsSeti));
-				for(int j=0; j<propsJavaBeanMapKeys[i].length; j++)
-				{
-					Integer key=Integer.parseInt(propsJavaBeanMapKeys[i][j]);
-					JavaBean2 jb2=javaBeanPropsMapi.get(key);
-					
-					Assert.assertEquals(new Integer(propsJavaBeanMapValuesId[i][j]), Integer.valueOf(jb2.getId()));
-					Assert.assertEquals(propsJavaBeanMapValuesName[i][j], jb2.getName());
-				}
-			}
-		}
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanList_keyComplexSemantics() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		String[] ids={"1", "2", "3"};
-		String[] names={"name_1", "name_2", "name_3"};
-		String[][] propsSimpleCollection=new String[][]
-		            {
-						{"11", "12", "13"},
-						{"21", "22", "23", "24"},
-						{"31", "32", "33"}
-		            };
-		String[][] propsSimpleKeys=new String[][]
-					{
-						{"key_1_1", "key_1_2"},
-						{"key_2_1", "key_2_2", "key_2_3", "key_2_4"},
-						{"key_3_1"},
-					};
-		String[][] propsSimpleValues=new String[][]
-					{
-						{"11", "12"},
-						{"21", "22", "23", "24"},
-						{"31"},
-					};
-		String[][] propsJavaBeanCollection_id=new String[][]
-   		            {
-   						{"11", "12"},
-   						{"21", "22", "23", "24"},
-   						{"31"}
-   		            };
-		String[][] propsJavaBeanCollection_name=new String[][]
-   		            {
-   						{"1_1", "1_2"},
-   						{"2_1", "2_2", "2_3", "2_4"},
-   						{"3_1"}
-   		            };
-		String[][] propsJavaBeanMapKeys=new String[][]
-				{
-					{"11", "12"},
-					{"21", "22", "23", "24"},
-					{"31"},
-				};
-		String[][] propsJavaBeanMapValuesId=new String[][]
-				{
-					{"11", "12"},
-					{"21", "22", "23", "24"},
-					{"31"},
-				};
-		String[][] propsJavaBeanMapValuesName=new String[][]
-				{
-					{"1_1", "1_2"},
-					{"2_1", "2_2", "2_3", "2_4"},
-					{"3_1"},
-				};
-		
-		
-		src.put("id", ids);
-		src.put("name", names);
-		
-		//简单集合属性
-		{
-			src.put("0.simpleArray", propsSimpleCollection[0]);
-			src.put("0.simpleList", propsSimpleCollection[0]);
-			src.put("0.simpleSet", propsSimpleCollection[0]);
-			
-			src.put("1.simpleArray", propsSimpleCollection[1]);
-			src.put("1.simpleList", propsSimpleCollection[1]);
-			src.put("1.simpleSet", propsSimpleCollection[1]);
-			
-			for(int i=0; i<propsSimpleCollection[2].length; i++)
-			{
-				src.put("2.simpleArray."+i, propsSimpleCollection[2][i]);
-				src.put("2.simpleList."+i, propsSimpleCollection[2][i]);
-				src.put("2.simpleSet."+i, propsSimpleCollection[2][i]);
-			}
-			
-			for(int i=0; i<propsSimpleKeys.length; i++)
-			{
-				for(int j=0; j<propsSimpleKeys[i].length; j++)
-				{
-					src.put(i+".simpleMap."+propsSimpleKeys[i][j], propsSimpleValues[i][j]);
-				}
-			}
-		}
-		
-		//JavaBean集合属性
-		{
-			for(int i=0; i<propsJavaBeanCollection_name[0].length; i++)
-			{
-				src.put("0.javaBean2Array."+i+".id", propsJavaBeanCollection_id[0][i]);
-				src.put("0.javaBean2List."+i+".id", propsJavaBeanCollection_id[0][i]);
-				src.put("0.javaBean2Set."+i+".id", propsJavaBeanCollection_id[0][i]);
-				src.put("0.javaBean2Array."+i+".name", propsJavaBeanCollection_name[0][i]);
-				src.put("0.javaBean2List."+i+".name", propsJavaBeanCollection_name[0][i]);
-				src.put("0.javaBean2Set."+i+".name", propsJavaBeanCollection_name[0][i]);
-			}
-			
-			src.put("1.javaBean2Array.id", propsJavaBeanCollection_id[1]);
-			src.put("1.javaBean2List.id", propsJavaBeanCollection_id[1]);
-			src.put("1.javaBean2Set.id", propsJavaBeanCollection_id[1]);
-			src.put("1.javaBean2Array.name", propsJavaBeanCollection_name[1]);
-			src.put("1.javaBean2List.name", propsJavaBeanCollection_name[1]);
-			src.put("1.javaBean2Set.name", propsJavaBeanCollection_name[1]);
-			
-			src.put("2.javaBean2Array.id", propsJavaBeanCollection_id[2]);
-			src.put("2.javaBean2List.id", propsJavaBeanCollection_id[2]);
-			src.put("2.javaBean2Set.id", propsJavaBeanCollection_id[2]);
-			src.put("2.javaBean2Array.name", propsJavaBeanCollection_name[2]);
-			src.put("2.javaBean2List.name", propsJavaBeanCollection_name[2]);
-			src.put("2.javaBean2Set.name", propsJavaBeanCollection_name[2]);
-			
-			for(int i=0; i<propsJavaBeanMapKeys.length; i++)
-			{
-				for(int j=0; j<propsJavaBeanMapKeys[i].length; j++)
-				{
-					src.put(i+".javaBean2Map."+propsJavaBeanMapKeys[i][j]+".id", propsJavaBeanMapValuesId[i][j]);
-					src.put(i+".javaBean2Map."+propsJavaBeanMapKeys[i][j]+".name", propsJavaBeanMapValuesName[i][j]);
-				}
-			}
-		}
-		
-		Type listType=new MockParameterizedType(List.class, ComplexJavaBean.class);
-		
-		List<ComplexJavaBean> re=converter.convert(src, listType);
-		
-		Assert.assertEquals(ids.length, re.size());
-		
-		for(int i=0; i<ids.length; i++)
-		{
-			ComplexJavaBean rei=re.get(i);
-			
-			Assert.assertEquals(ids[i], rei.getId()+"");
-			Assert.assertEquals(names[i], rei.getName());
-			
-			//简单集合属性
-			{
-				Integer[] simplePropsArray=stringArrayToIntArray(propsSimpleCollection[i]);
-				Set<Integer> simplePropsSet=new HashSet<Integer>();
-				for(Integer it : simplePropsArray)
-					simplePropsSet.add(it);
-				
-				Integer[] simplePropArrayi=rei.getSimpleArray();
-				Integer[] simplePropListi=new Integer[simplePropsArray.length];
-				rei.getSimpleList().toArray(simplePropListi);
-				Set<Integer> simplePropSeti=rei.getSimpleSet();
-				Map<String, Integer> simplePropsMapi=rei.getSimpleMap();
-				
-				Assert.assertTrue(Arrays.equals(simplePropsArray, simplePropArrayi));
-				Assert.assertTrue(Arrays.equals(simplePropsArray, simplePropListi));
-				Assert.assertEquals(new TreeSet<Integer>(simplePropsSet), new TreeSet<Integer>(simplePropSeti));
-				for(int j=0; j<propsSimpleKeys[i].length; j++)
-				{
-					Integer v=Integer.parseInt(propsSimpleValues[i][j]);
-					Assert.assertEquals(v, simplePropsMapi.get(propsSimpleKeys[i][j]));
-				}
-			}
-			
-			//JavaBean集合属性
-			{
-				JavaBean2[] javaBeanPropsArray=new JavaBean2[propsJavaBeanCollection_id[i].length];
-				for(int j=0; j<javaBeanPropsArray.length; j++)
-				{
-					javaBeanPropsArray[j]=new JavaBean2();
-					javaBeanPropsArray[j].setId(Integer.parseInt(propsJavaBeanCollection_id[i][j]));
-					javaBeanPropsArray[j].setName(propsJavaBeanCollection_name[i][j]);
-				}
-				Set<JavaBean2> javaBeanPropsSet=new HashSet<JavaBean2>();
-				for(JavaBean2 jb : javaBeanPropsArray)
-				{
-					javaBeanPropsSet.add(jb);
-				}
-				
-				JavaBean2[] javaBeanPropsArrayi=rei.getJavaBean2Array();
-				JavaBean2[] javaBeanPropsListi=new JavaBean2[javaBeanPropsArray.length];
-				rei.getJavaBean2List().toArray(javaBeanPropsListi);
-				Set<JavaBean2> javaBeanPropsSeti=rei.getJavaBean2Set();
-				Map<Integer, JavaBean2> javaBeanPropsMapi=rei.getJavaBean2Map();
-				
-				Assert.assertTrue(Arrays.equals(javaBeanPropsArray, javaBeanPropsArrayi));
-				Assert.assertTrue(Arrays.equals(javaBeanPropsArray, javaBeanPropsListi));
-				Assert.assertEquals(new TreeSet<JavaBean2>(javaBeanPropsSet), new TreeSet<JavaBean2>(javaBeanPropsSeti));
-				for(int j=0; j<propsJavaBeanMapKeys[i].length; j++)
-				{
-					Integer key=Integer.parseInt(propsJavaBeanMapKeys[i][j]);
-					JavaBean2 jb2=javaBeanPropsMapi.get(key);
-					
-					Assert.assertEquals(new Integer(propsJavaBeanMapValuesId[i][j]), Integer.valueOf(jb2.getId()));
-					Assert.assertEquals(propsJavaBeanMapValuesName[i][j], jb2.getName());
-				}
-			}
-		}
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanSet_keyComplexSemantics() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		String[] ids={"1", "2", "3"};
-		String[] names={"name_1", "name_2", "name_3"};
-		String[][] propsSimpleCollection=new String[][]
-		            {
-						{"11", "12", "13"},
-						{"21", "22", "23", "24"},
-						{"31", "32", "33"}
-		            };
-		String[][] propsSimpleKeys=new String[][]
-					{
-						{"key_1_1", "key_1_2"},
-						{"key_2_1", "key_2_2", "key_2_3", "key_2_4"},
-						{"key_3_1"},
-					};
-		String[][] propsSimpleValues=new String[][]
-					{
-						{"11", "12"},
-						{"21", "22", "23", "24"},
-						{"31"},
-					};
-		String[][] propsJavaBeanCollection_id=new String[][]
-   		            {
-   						{"11", "12"},
-   						{"21", "22", "23", "24"},
-   						{"31"}
-   		            };
-		String[][] propsJavaBeanCollection_name=new String[][]
-   		            {
-   						{"1_1", "1_2"},
-   						{"2_1", "2_2", "2_3", "2_4"},
-   						{"3_1"}
-   		            };
-		String[][] propsJavaBeanMapKeys=new String[][]
-				{
-					{"11", "12"},
-					{"21", "22", "23", "24"},
-					{"31"},
-				};
-		String[][] propsJavaBeanMapValuesId=new String[][]
-				{
-					{"11", "12"},
-					{"21", "22", "23", "24"},
-					{"31"},
-				};
-		String[][] propsJavaBeanMapValuesName=new String[][]
-				{
-					{"1_1", "1_2"},
-					{"2_1", "2_2", "2_3", "2_4"},
-					{"3_1"},
-				};
-		
-		
-		src.put("id", ids);
-		src.put("name", names);
-		
-		//简单集合属性
-		{
-			src.put("0.simpleArray", propsSimpleCollection[0]);
-			src.put("0.simpleList", propsSimpleCollection[0]);
-			src.put("0.simpleSet", propsSimpleCollection[0]);
-			
-			src.put("1.simpleArray", propsSimpleCollection[1]);
-			src.put("1.simpleList", propsSimpleCollection[1]);
-			src.put("1.simpleSet", propsSimpleCollection[1]);
-			
-			for(int i=0; i<propsSimpleCollection[2].length; i++)
-			{
-				src.put("2.simpleArray."+i, propsSimpleCollection[2][i]);
-				src.put("2.simpleList."+i, propsSimpleCollection[2][i]);
-				src.put("2.simpleSet."+i, propsSimpleCollection[2][i]);
-			}
-			
-			for(int i=0; i<propsSimpleKeys.length; i++)
-			{
-				for(int j=0; j<propsSimpleKeys[i].length; j++)
-				{
-					src.put(i+".simpleMap."+propsSimpleKeys[i][j], propsSimpleValues[i][j]);
-				}
-			}
-		}
-		
-		//JavaBean集合属性
-		{
-			for(int i=0; i<propsJavaBeanCollection_name[0].length; i++)
-			{
-				src.put("0.javaBean2Array."+i+".id", propsJavaBeanCollection_id[0][i]);
-				src.put("0.javaBean2List."+i+".id", propsJavaBeanCollection_id[0][i]);
-				src.put("0.javaBean2Set."+i+".id", propsJavaBeanCollection_id[0][i]);
-				src.put("0.javaBean2Array."+i+".name", propsJavaBeanCollection_name[0][i]);
-				src.put("0.javaBean2List."+i+".name", propsJavaBeanCollection_name[0][i]);
-				src.put("0.javaBean2Set."+i+".name", propsJavaBeanCollection_name[0][i]);
-			}
-			
-			src.put("1.javaBean2Array.id", propsJavaBeanCollection_id[1]);
-			src.put("1.javaBean2List.id", propsJavaBeanCollection_id[1]);
-			src.put("1.javaBean2Set.id", propsJavaBeanCollection_id[1]);
-			src.put("1.javaBean2Array.name", propsJavaBeanCollection_name[1]);
-			src.put("1.javaBean2List.name", propsJavaBeanCollection_name[1]);
-			src.put("1.javaBean2Set.name", propsJavaBeanCollection_name[1]);
-			
-			src.put("2.javaBean2Array.id", propsJavaBeanCollection_id[2]);
-			src.put("2.javaBean2List.id", propsJavaBeanCollection_id[2]);
-			src.put("2.javaBean2Set.id", propsJavaBeanCollection_id[2]);
-			src.put("2.javaBean2Array.name", propsJavaBeanCollection_name[2]);
-			src.put("2.javaBean2List.name", propsJavaBeanCollection_name[2]);
-			src.put("2.javaBean2Set.name", propsJavaBeanCollection_name[2]);
-			
-			for(int i=0; i<propsJavaBeanMapKeys.length; i++)
-			{
-				for(int j=0; j<propsJavaBeanMapKeys[i].length; j++)
-				{
-					src.put(i+".javaBean2Map."+propsJavaBeanMapKeys[i][j]+".id", propsJavaBeanMapValuesId[i][j]);
-					src.put(i+".javaBean2Map."+propsJavaBeanMapKeys[i][j]+".name", propsJavaBeanMapValuesName[i][j]);
-				}
-			}
-		}
-		
-		Type setType=new MockParameterizedType(Set.class, ComplexJavaBean.class);
-
-		Set<ComplexJavaBean> re=converter.convert(src, setType);
-		re=new TreeSet<ComplexJavaBean>(re);
-		
-		Assert.assertEquals(ids.length, re.size());
-		
-		int i=0;
-		for(ComplexJavaBean rei : re)
-		{
-			Assert.assertEquals(ids[i], rei.getId()+"");
-			Assert.assertEquals(names[i], rei.getName());
-			
-			//简单集合属性
-			{
-				Integer[] simplePropsArray=stringArrayToIntArray(propsSimpleCollection[i]);
-				Set<Integer> simplePropsSet=new HashSet<Integer>();
-				for(Integer it : simplePropsArray)
-					simplePropsSet.add(it);
-				
-				Integer[] simplePropArrayi=rei.getSimpleArray();
-				Integer[] simplePropListi=new Integer[simplePropsArray.length];
-				rei.getSimpleList().toArray(simplePropListi);
-				Set<Integer> simplePropSeti=rei.getSimpleSet();
-				Map<String, Integer> simplePropsMapi=rei.getSimpleMap();
-				
-				Assert.assertTrue(Arrays.equals(simplePropsArray, simplePropArrayi));
-				Assert.assertTrue(Arrays.equals(simplePropsArray, simplePropListi));
-				Assert.assertEquals(new TreeSet<Integer>(simplePropsSet), new TreeSet<Integer>(simplePropSeti));
-				for(int j=0; j<propsSimpleKeys[i].length; j++)
-				{
-					Integer v=Integer.parseInt(propsSimpleValues[i][j]);
-					Assert.assertEquals(v, simplePropsMapi.get(propsSimpleKeys[i][j]));
-				}
-			}
-			
-			//JavaBean集合属性
-			{
-				JavaBean2[] javaBeanPropsArray=new JavaBean2[propsJavaBeanCollection_id[i].length];
-				for(int j=0; j<javaBeanPropsArray.length; j++)
-				{
-					javaBeanPropsArray[j]=new JavaBean2();
-					javaBeanPropsArray[j].setId(Integer.parseInt(propsJavaBeanCollection_id[i][j]));
-					javaBeanPropsArray[j].setName(propsJavaBeanCollection_name[i][j]);
-				}
-				Set<JavaBean2> javaBeanPropsSet=new HashSet<JavaBean2>();
-				for(JavaBean2 jb : javaBeanPropsArray)
-				{
-					javaBeanPropsSet.add(jb);
-				}
-				
-				JavaBean2[] javaBeanPropsArrayi=rei.getJavaBean2Array();
-				JavaBean2[] javaBeanPropsListi=new JavaBean2[javaBeanPropsArray.length];
-				rei.getJavaBean2List().toArray(javaBeanPropsListi);
-				Set<JavaBean2> javaBeanPropsSeti=rei.getJavaBean2Set();
-				Map<Integer, JavaBean2> javaBeanPropsMapi=rei.getJavaBean2Map();
-				
-				Assert.assertTrue(Arrays.equals(javaBeanPropsArray, javaBeanPropsArrayi));
-				Assert.assertTrue(Arrays.equals(javaBeanPropsArray, javaBeanPropsListi));
-				Assert.assertEquals(new TreeSet<JavaBean2>(javaBeanPropsSet), new TreeSet<JavaBean2>(javaBeanPropsSeti));
-				for(int j=0; j<propsJavaBeanMapKeys[i].length; j++)
-				{
-					Integer key=Integer.parseInt(propsJavaBeanMapKeys[i][j]);
-					JavaBean2 jb2=javaBeanPropsMapi.get(key);
-					
-					Assert.assertEquals(new Integer(propsJavaBeanMapValuesId[i][j]), Integer.valueOf(jb2.getId()));
-					Assert.assertEquals(propsJavaBeanMapValuesName[i][j], jb2.getName());
-				}
-			}
-			
-			i++;
-		}
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanList() throws Exception
-	{
-		convert_mapToJavaBeanList(List.class);
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanArrayList() throws Exception
-	{
-		convert_mapToJavaBeanList(ArrayList.class);
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanLinkedList() throws Exception
-	{
-		convert_mapToJavaBeanList(LinkedList.class);
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanVector() throws Exception
-	{
-		convert_mapToJavaBeanList(Vector.class);
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanStack() throws Exception
-	{
-		convert_mapToJavaBeanList(Stack.class);
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanSet() throws Exception
-	{
-		convert_mapToJavaBeanSet(Set.class);
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBean_HashSet() throws Exception
-	{
-		convert_mapToJavaBeanSet(HashSet.class);
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanTreeSet() throws Exception
-	{
-		convert_mapToJavaBeanSet(TreeSet.class);
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanLinkedHashSet() throws Exception
-	{
-		convert_mapToJavaBeanSet(LinkedHashSet.class);
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanMap() throws Exception
-	{
-		Map<String, String> src=new HashMap<String, String>();
-		
-		String[] keys=new String[]
-				{
-					"key_1", "key_2", "key_3"
-				};
-		String[] names=new String[]
-				{
-					"name_1", "name_2", "name_3"
-				};
-		String[] ages=new String[]
-				{
-					"11", "12", "13"
-				};
-		for(int i=0; i<keys.length; i++)
-		{
-			src.put(keys[i]+".name", names[i]);
-			src.put(keys[i]+".age", ages[i]);
-		}
-		
-		Type mapType=new MockParameterizedType(Map.class, String.class, JavaBean.class);
-		
-		Map<String, JavaBean> dest=converter.convert(src, mapType);
-		
-		for(int i=0; i<keys.length; i++)
-		{
-			JavaBean jb=dest.get(keys[i]);
-			
-			Assert.assertEquals(names[i], jb.getName());
-			Assert.assertEquals(new Integer(ages[i]), jb.getAge());
-		}
-	}
-	
-	@Test
-	public void convert_mapToGeneric_JavaBeanIsGeneric() throws Exception
+	public void convert_noSupportConverter_mapToGeneric_JavaBeanIsGeneric() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -1588,158 +434,183 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convert_mapToRawMap() throws Exception
+	public void convert_requestToTarget_noConverter() throws Exception
 	{
-		HashMap<String,Integer> src=new HashMap<String, Integer>();
+		GenericConvertException re=null;
 		
-		Object dest=converter.convert(src, Map.class);
+		try
+		{
+			converter.convert(new MockHttpServletRequest(), JavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
 		
-		Assert.assertTrue(src == dest);
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'javax.servlet.http.HttpServletRequest'")) );
 	}
 	
 	@Test
-	public void convert_mapToRawList() throws Exception
+	public void convert_requestToTarget_hasConverter() throws Exception
 	{
-		Map<String,Object> src=new HashMap<String, Object>();
+		final JavaBean bean=new JavaBean();
 		
-		String[] names=new String[]{"aa", "bb", "cc"};
-		String[] ages=new String[]{"11", "22", "33"};
-		String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
-		
-		src.put("name", names);
-		src.put("age", ages);
-		src.put("birth", births);
-		
-		Exception re=null;
-		try
+		converter.addConverter(HttpServletRequest.class, JavaBean.class, new Converter()
 		{
-			List<JavaBean> dest=converter.convert(src, List.class);
-			dest.size();
-		}
-		catch(Exception e)
-		{
-			re=e;
-		}
-		
-		Assert.assertTrue( re.getMessage().endsWith("it has no javaBean property") );
-	}
-
-	@Test
-	public void convert_mapToRawSet() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		String[] names=new String[]{"aa", "bb", "cc"};
-		String[] ages=new String[]{"11", "22", "33"};
-		String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
-		
-		src.put("name", names);
-		src.put("age", ages);
-		src.put("birth", births);
-		
-		Exception re=null;
-		try
-		{
-			Set<JavaBean> dest=converter.convert(src, Set.class);
-			dest.size();
-		}
-		catch(Exception e)
-		{
-			re=e;
-		}
-		
-		Assert.assertTrue( re.getMessage().endsWith("it has no javaBean property") );
-	}
-
-	@SuppressWarnings("rawtypes")
-	private void convert_mapToJavaBeanList(Class<? extends List> listClass) throws Exception
-	{
-		//使用List接口
-		{
-			Map<String,Object> src=new HashMap<String, Object>();
-			
-			String[] names=new String[]{"aa", "bb", "cc"};
-			String[] ages=new String[]{"11", "22", "33"};
-			String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
-			
-			src.put("name", names);
-			src.put("age", ages);
-			src.put("birth", births);
-			
-			Type type=new MockParameterizedType(listClass, new Type[]{JavaBean.class});
-			List<JavaBean> dest=converter.convert(src, type);
-			
-			Assert.assertTrue( dest.size() == names.length);
-			
-			//默认创建ArrayList
-			if(listClass.equals(List.class))
-				Assert.assertEquals(ArrayList.class, dest.getClass());
-			else
-				Assert.assertEquals(listClass, dest.getClass());
-			
-			for(int i=0;i<dest.size();i++)
+			@SuppressWarnings("unchecked")
+			public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
 			{
-				JavaBean jb=dest.get(i);
-				
-				Assert.assertEquals(names[i], jb.getName());
-				Assert.assertEquals(ages[i], jb.getAge().toString());
-				Assert.assertEquals(births[i], new SimpleDateFormat("yyyy-MM-dd").format(jb.getBirth()));
+				return (T)bean;
 			}
-		}
-	}
-
-	@SuppressWarnings("rawtypes")
-	private void convert_mapToJavaBeanSet(Class<? extends Set> setClass) throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
+		});
 		
-		String[] names=new String[]{"aa", "bb", "cc"};
-		String[] ages=new String[]{"11", "22", "33"};
-		String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
+		JavaBean re=converter.convert(new MockHttpServletRequest(), JavaBean.class);
 		
-		src.put("name", names);
-		src.put("age", ages);
-		src.put("birth", births);
-		
-		Type type=new MockParameterizedType(setClass, new Type[]{JavaBean.class});
-		
-		Set<JavaBean> dest=converter.convert(src, type);
-		
-		Assert.assertTrue( dest.size() == names.length);
-		
-		//默认创建ArrayList
-		if(setClass.equals(Set.class))
-			Assert.assertEquals(HashSet.class, dest.getClass());
-		else
-			Assert.assertEquals(setClass, dest.getClass());
-		
-		for(JavaBean jb : dest)
-		{
-			String name=jb.getName();
-			
-			int idx=-1;
-			if(name.equals(names[0]))
-				idx=0;
-			else if(name.equals(names[1]))
-				idx=1;
-			else if(name.equals(names[2]))
-				idx=2;
-			
-			Assert.assertEquals(ages[idx], jb.getAge().toString());
-			Assert.assertEquals(births[idx], new SimpleDateFormat("yyyy-MM-dd").format(jb.getBirth()));
-		}
+		Assert.assertTrue( (re == bean) );
 	}
 	
-	private Integer[] stringArrayToIntArray(String[] strs)
+	@Test
+	public void convert_sessionToTarget_noConverter() throws Exception
 	{
-		Integer[] re=new Integer[strs.length];
+		GenericConvertException re=null;
 		
-		for(int i=0; i<re.length; i++)
+		try
 		{
-			re[i]=Integer.parseInt(strs[i]);
+			converter.convert(new MockHttpServletRequest().getSession(), JavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
 		}
 		
-		return re;
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'javax.servlet.http.HttpSession'")) );
+	}
+	
+	@Test
+	public void convert_sessionToTarget_hasConverter() throws Exception
+	{
+		final JavaBean bean=new JavaBean();
+		
+		converter.addConverter(HttpSession.class, JavaBean.class, new Converter()
+		{
+			@SuppressWarnings("unchecked")
+			public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
+			{
+				return (T)bean;
+			}
+		});
+		
+		JavaBean re=converter.convert(new MockHttpServletRequest().getSession(), JavaBean.class);
+		
+		Assert.assertTrue( (re == bean) );
+	}
+	
+	@Test
+	public void convert_servletContextToTarget_noConverter() throws Exception
+	{
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.convert(new MockServletContext(), JavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'javax.servlet.ServletContext'")) );
+	}
+	
+	@Test
+	public void convert_servletContextToTarget_hasConverter() throws Exception
+	{
+		final JavaBean bean=new JavaBean();
+		
+		converter.addConverter(ServletContext.class, JavaBean.class, new Converter()
+		{
+			@SuppressWarnings("unchecked")
+			public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
+			{
+				return (T)bean;
+			}
+		});
+		
+		JavaBean re=converter.convert(new MockServletContext(), JavaBean.class);
+		
+		Assert.assertTrue( (re == bean) );
+	}
+	
+	@Test
+	public void convert_responseToTarget_noConverter() throws Exception
+	{
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.convert(new MockHttpServletResponse(), JavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'javax.servlet.http.HttpServletResponse'")) );
+	}
+	
+	@Test
+	public void convert_responseToTarget_hasConverter() throws Exception
+	{
+		final JavaBean bean=new JavaBean();
+		
+		converter.addConverter(HttpServletResponse.class, JavaBean.class, new Converter()
+		{
+			@SuppressWarnings("unchecked")
+			public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
+			{
+				return (T)bean;
+			}
+		});
+		
+		JavaBean re=converter.convert(new MockHttpServletResponse(), JavaBean.class);
+		
+		Assert.assertTrue( (re == bean) );
+	}
+	
+	@Test
+	public void convert_objectSourceToTarget_noConverter() throws Exception
+	{
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.convert(new DefaultWebObjectSource(), JavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'org.soybeanMilk.web.WebObjectSource'")) );
+	}
+	
+	@Test
+	public void convert_objectSourceToTarget_hasConverter() throws Exception
+	{
+		final JavaBean bean=new JavaBean();
+		
+		converter.addConverter(WebObjectSource.class, JavaBean.class, new Converter()
+		{
+			@SuppressWarnings("unchecked")
+			public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
+			{
+				return (T)bean;
+			}
+		});
+		
+		JavaBean re=converter.convert(new DefaultWebObjectSource(), JavaBean.class);
+		
+		Assert.assertTrue( (re == bean) );
 	}
 
 	public static class JavaBean implements Comparable<JavaBean>

@@ -12,15 +12,14 @@
  * limitations under the License. 
  */
 
-package org.soybeanMilk.web.bean;
+package org.soybeanMilk.core.bean;
 
 import java.lang.reflect.Type;
 
-import org.soybeanMilk.core.bean.ConvertException;
 
 /**
  * {@linkplain Map 映射表}转换异常，它保存导致转换异常的{@linkplain Map 映射表}关键字。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2012-3-27
  *
  */

@@ -21,7 +21,7 @@ import org.soybeanMilk.core.ObjectSource;
 
 /**
  * Web对象源，它实例的生命周期应该与一次请求的生命周期相同
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2011-12-11
  */
 public interface WebObjectSource extends ObjectSource

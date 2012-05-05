@@ -28,7 +28,7 @@ import org.soybeanMilk.core.ObjectSource;
  * 动作，它可以包含多个{@linkplain Executable 可执行对象}（{@linkplain Action 动作}或者{@linkplain Invoke 调用}），
  * 并且它们会按照添加时的顺序被执行。如果某个可执行对象仅会被添加到动作中，那么你不需要为其设置唯一名称，因为动作不需要标识各子可执行对象。
  * 
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-5-9
  */
 public class Action extends AbstractExecutable

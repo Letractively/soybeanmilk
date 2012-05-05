@@ -22,7 +22,7 @@ import org.soybeanMilk.SoybeanMilkUtils;
  * 变量路径封装类。<br>
  * 如果一个路径字符串的某个节点是“{...}”格式，则认为它是变量路径。
  * 比如“{id}/edit”就是一个变量路径。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-12-16
  */
 public class VariablePath implements Comparable<VariablePath>,Serializable

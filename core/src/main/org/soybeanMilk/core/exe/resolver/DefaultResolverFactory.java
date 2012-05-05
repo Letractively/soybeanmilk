@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * 解决对象工厂的默认实现，它本身是一个解决对象容器，另外还支持添加<i>外部解决对象工厂</i>，用于支持其他的IOC容器，比如spring和Guice。
  * 如果设置了外部解决对象工厂，它将被优先考虑。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-1
  */
 public class DefaultResolverFactory implements ResolverFactory

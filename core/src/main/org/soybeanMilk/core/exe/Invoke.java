@@ -31,7 +31,7 @@ import org.soybeanMilk.core.bean.GenericType;
 /**
  * 调用，它包含执行方法（{@linkplain Method}对象）、方法的{@linkplain Arg 参数信息}、{@linkplain ResolverProvider 解决对象提供者}
  * 
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-9-30
  * 
  * @see Arg
@@ -358,7 +358,7 @@ public class Invoke extends AbstractExecutable
 	 * 从对象源中取得方法的参数值数组
 	 * @param objectSource
 	 * @return
-	 * @throws ArgPrepareExecuteException
+	 * @throws ExecuteException
 	 * @date 2011-1-11
 	 */
 	protected Object[] prepareMethodArguments(ObjectSource objectSource) throws ExecuteException
@@ -392,7 +392,7 @@ public class Invoke extends AbstractExecutable
 	 * @param argIdx
 	 * @param objectSource
 	 * @return
-	 * @throws ArgPrepareExecuteException
+	 * @throws ExecuteException
 	 * @date 2011-4-11
 	 */
 	protected Object getArgValueFromObjectSource(Arg[] args, int argIdx, ObjectSource objectSource) throws ExecuteException
@@ -436,7 +436,7 @@ public class Invoke extends AbstractExecutable
 	
 	/**
 	 * 方法的参数信息。它提供从对象源中取得方法参数值所需的信息，或者可以直接提供参数值（如果参数值被设置，那么它将优先被使用）。
-	 * @author earthAngry@gmail.com
+	 * @author earthangry@gmail.com
 	 * @date 2010-10-3
 	 */
 	public static class Arg implements Serializable
@@ -530,7 +530,7 @@ public class Invoke extends AbstractExecutable
 	
 	/**
 	 * 解决对象（任意Java对象）的提供者，调用所需的解决对象将由它提供
-	 * @author earthAngry@gmail.com
+	 * @author earthangry@gmail.com
 	 * @date 2010-10-19
 	 *
 	 */

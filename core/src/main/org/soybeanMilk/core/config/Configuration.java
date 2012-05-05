@@ -26,8 +26,8 @@ import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 
 /**
  * 配置，它包含执行所需的环境信息，比如{@linkplain ResolverFactory 解决对象工厂}、{@linkplain GenericConverter 通用转换器}，
- * 以及{@linkplain Executable 可执行对象}集
- * @author earthAngry@gmail.com
+ * {@linkplain Executable 可执行对象}集以及{@linkplain Interceptors 执行拦截器}
+ * @author earthangry@gmail.com
  * @date 2010-10-1
  */
 public class Configuration
@@ -41,7 +41,7 @@ public class Configuration
 	private GenericConverter genericConverter;
 	
 	/**拦截器信息*/
-	private InterceptorInfo interceptorInfo;
+	private Interceptors interceptorInfo;
 	
 	/**可执行对象集*/
 	private Map<String, Executable> executablesMap;
@@ -80,11 +80,11 @@ public class Configuration
 			log.debug("set GenericConverter to '"+genericConverter+"'");
 	}
 	
-	public InterceptorInfo getInterceptorInfo() {
+	public Interceptors getInterceptorInfo() {
 		return interceptorInfo;
 	}
 	
-	public void setInterceptorInfo(InterceptorInfo interceptorInfo)
+	public void setInterceptorInfo(Interceptors interceptorInfo)
 	{
 		this.interceptorInfo = interceptorInfo;
 		

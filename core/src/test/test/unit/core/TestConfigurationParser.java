@@ -15,7 +15,7 @@ import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.config.Configuration;
-import org.soybeanMilk.core.config.InterceptorInfo;
+import org.soybeanMilk.core.config.Interceptors;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.core.exe.Invoke;
@@ -46,10 +46,10 @@ public class TestConfigurationParser
 		Assert.assertEquals(TestConverter.class, gc.getConverter(String.class, int.class).getClass());
 		Assert.assertEquals(TestConverter.class, gc.getConverter(String.class, float.class).getClass());
 		
-		InterceptorInfo ii=config.getInterceptorInfo();
-		Assert.assertEquals("global_before", ii.getBeforeHandler().getName());
-		Assert.assertEquals("global_after", ii.getAfterHandler().getName());
-		Assert.assertEquals("m1_exception", ii.getExceptionHandler().getName());
+		Interceptors ii=config.getInterceptorInfo();
+		Assert.assertEquals("global_before", ii.getBefore().getName());
+		Assert.assertEquals("global_after", ii.getAfter().getName());
+		Assert.assertEquals("m1_exception", ii.getException().getName());
 		Assert.assertEquals("executionKey", ii.getExecutionKey());
 		
 		{

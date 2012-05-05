@@ -22,7 +22,7 @@ import org.soybeanMilk.web.WebObjectSource;
 
 /**
  * {@linkplain WebObjectSource WEB对象源}工厂，{@linkplain DispatchServlet}使用它来为请求创建WEB对象源。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-12-9
  */
 public interface WebObjectSourceFactory

@@ -28,7 +28,7 @@ import org.soybeanMilk.core.bean.GenericConverter;
 
 /**
  * 基于哈希表的一个简单对象源实现。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-1
  */
 public class HashMapObjectSource extends ConvertableObjectSource

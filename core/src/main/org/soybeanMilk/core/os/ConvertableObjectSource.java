@@ -24,7 +24,7 @@ import org.soybeanMilk.core.bean.GenericConverter;
 
 /**
  * 可以添加对象转换支持的对象源，当对象源中的对象与期望的结果对象类型不符时，对象源将尝试进行类型转换
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-14
  */
 public abstract class ConvertableObjectSource implements ObjectSource

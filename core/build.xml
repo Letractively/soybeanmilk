@@ -38,7 +38,7 @@
 			<fileset dir="src" includes="META-INF/*" />
 			
 			<manifest>
-				<attribute name="Author" value="earthAngry@gmail.com"/>
+				<attribute name="Author" value="earthangry@gmail.com"/>
 			</manifest>
 			
 		</jar>
@@ -82,7 +82,7 @@
 				includes="example/**/*.class, example/**/*.xml" />
 			
 			<manifest>
-				<attribute name="Author" value="earthAngry@gmail.com"/>
+				<attribute name="Author" value="earthangry@gmail.com"/>
 				<attribute name="Main-Class" value="example.ExampleMain"/>
 				<attribute name="Class-Path" value="../../../${appName}.jar ../../../lib/required/commons-logging-1.0.4.jar ../../../lib/required/commons-logging-api-1.1.jar ../../../lib/required/commons-beanutils-1.8.2.jar"/>
 			</manifest>

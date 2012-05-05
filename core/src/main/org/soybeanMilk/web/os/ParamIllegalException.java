@@ -17,12 +17,34 @@ package org.soybeanMilk.web.os;
 import java.lang.reflect.Type;
 
 import org.soybeanMilk.core.ObjectSourceException;
+import org.soybeanMilk.core.config.Interceptors;
+import org.soybeanMilk.core.exe.ArgPrepareExecuteException;
 import org.soybeanMilk.web.WebObjectSource;
 
 /**
- * 请求参数非法异常，{@linkplain WebObjectSource Web对象源}在将请求参数转换为某类型的对象时由于参数值非法而出现异常。
- * 
- * @author earthAngry@gmail.com
+ * 请求参数非法异常，{@linkplain WebObjectSource Web对象源}在将请求参数转换为某类型的对象时由于参数值非法而出现异常。<br>
+ * 配合{@linkplain ArgPrepareExecuteException}类，它使你可以在{@linkplain Interceptors 执行拦截器}中获取
+ * 和处理非法的请求参数：
+ * <pre>
+ * void handleParamIllegalException(Execution execution)
+ * {
+ *     ExecuteException e=execution.getExecuteException();
+ *     if(e instanceof ArgPrepareExecuteException)
+ *     {
+ *         ArgPrepareExecuteException ae=(ArgPrepareExecuteException)e;
+ *         Throwable t=ae.getCause();
+ *         if(t instanceof ParamIllegalException)
+ *         {
+ *             ......
+ *         }
+ *         else
+ *             throw e;
+ *     }
+ *     else
+ *         throw e;
+ * }
+ * </pre>
+ * @author earthangry@gmail.com
  * @date 2012-3-27
  */
 public class ParamIllegalException extends ObjectSourceException

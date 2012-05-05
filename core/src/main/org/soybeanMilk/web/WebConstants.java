@@ -18,7 +18,7 @@ import org.soybeanMilk.core.Constants;
 
 /**
  * WEB常量类。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-10-6
  */
 public class WebConstants extends Constants
@@ -36,7 +36,7 @@ public class WebConstants extends Constants
 	
 	/**
 	 * servlet允许的初始化配置参数
-	 * @author earthAngry@gmail.com
+	 * @author earthangry@gmail.com
 	 * @date 2010-10-6
 	 */
 	public static final class ServletInitParams
@@ -69,7 +69,7 @@ public class WebConstants extends Constants
 	
 	/**
 	 * 框架的{@linkplain WebObjectSource Web对象源}支持的作用域
-	 * @author earthAngry@gmail.com
+	 * @author earthangry@gmail.com
 	 * @date 2010-10-7
 	 */
 	public static class Scope

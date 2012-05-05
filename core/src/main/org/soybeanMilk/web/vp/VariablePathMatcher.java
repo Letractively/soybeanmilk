@@ -19,7 +19,7 @@ import java.util.Collection;
 
 /**
  * 变量路径匹配器。
- * @author earthAngry@gmail.com
+ * @author earthangry@gmail.com
  * @date 2010-12-16
  */
 public class VariablePathMatcher

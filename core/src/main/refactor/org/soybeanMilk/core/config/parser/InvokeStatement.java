@@ -12,13 +12,14 @@
  * limitations under the License. 
  */
 
-package org.soybeanMilk.core.config.parser;
+package refactor.org.soybeanMilk.core.config.parser;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.core.config.parser.ParseException;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
 

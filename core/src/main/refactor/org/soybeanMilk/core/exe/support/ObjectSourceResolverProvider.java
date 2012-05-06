@@ -1,0 +1,54 @@
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License. 
+ */
+
+package refactor.org.soybeanMilk.core.exe.support;
+
+import java.io.Serializable;
+
+import org.soybeanMilk.core.ObjectSource;
+
+import refactor.org.soybeanMilk.core.exe.Invoke.ResolverProvider;
+
+/**
+ * 对象源解决对象提供者，{@linkplain Invoke 调用}的解决对象是当前执行的{@linkplain ObjectSource 对象源}中的某个对象
+ * @author earthangry@gmail.com
+ * @date 2012-5-6
+ */
+public class ObjectSourceResolverProvider implements ResolverProvider
+{
+	private Serializable resolverKey;
+	
+	public ObjectSourceResolverProvider()
+	{
+		this(null);
+	}
+
+	public ObjectSourceResolverProvider(Serializable resolverKey)
+	{
+		this.resolverKey = resolverKey;
+	}
+
+	public Serializable getResolverKey() {
+		return resolverKey;
+	}
+
+	public void setResolverKey(Serializable resolverKey) {
+		this.resolverKey = resolverKey;
+	}
+	
+	public Object getResolver(ObjectSource objectSource) throws Exception
+	{
+		return objectSource.get(this.resolverKey, null);
+	}
+}

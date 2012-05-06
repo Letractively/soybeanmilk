@@ -84,7 +84,7 @@ public class Invoke extends AbstractExecutable
 		
 		int argNums=(args==null ? 0 : args.length);
 		
-		init(name, SoybeanMilkUtils.findMethodThrow(resolverProvider.getResolver().getClass(), methodName, argNums), args, resultKey, resolverProvider);
+		init(name, SoybeanMilkUtils.findMethodThrow(resObj.getClass(), methodName, argNums), args, resultKey, resolverProvider);
 	}
 	
 	/**

@@ -33,8 +33,8 @@ import org.soybeanMilk.core.ObjectSource;
  */
 public class Action extends AbstractExecutable
 {
-	private static final long serialVersionUID = -8438224010529190055L;
-	
+	private static final long serialVersionUID = 1L;
+
 	private static Log log=LogFactory.getLog(Action.class);
 	
 	/**动作包含的可执行对象集*/

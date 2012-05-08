@@ -44,13 +44,13 @@ public class Invoke extends AbstractExecutable
 	private String methodName;
 	
 	/**调用方法参数*/
-	private Arg[] args;
+	private transient Arg[] args;
 	
 	/**调用结果存放到对象源中的关键字*/
 	private Serializable resultKey;
 	
 	/**调用解决对象*/
-	private ResolverProvider resolverProvider;
+	private transient ResolverProvider resolverProvider;
 	
 	/**此调用的打断器在对象源中的关键字，打断器可以控制调用方法是否执行*/
 	private Serializable breaker;

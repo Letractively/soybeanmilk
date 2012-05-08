@@ -14,14 +14,12 @@
 
 package org.soybeanMilk.core;
 
-import java.io.Serializable;
-
 /**
  * 可执行对象。
  * @author earthangry@gmail.com
  * @date 2010-9-30
  */
-public interface Executable extends Serializable
+public interface Executable
 {
 	/**
 	 * 获取此可执行对象的名称

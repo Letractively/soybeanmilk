@@ -14,6 +14,8 @@
 
 package org.soybeanMilk.core.exe;
 
+import java.io.Serializable;
+
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.ObjectSource;
@@ -24,9 +26,9 @@ import org.soybeanMilk.core.ObjectSource;
  * @author earthangry@gmail.com
  * @date 2010-11-21
  */
-public abstract class AbstractExecutable implements Executable
+public abstract class AbstractExecutable implements Executable, Serializable
 {
-	private static final long serialVersionUID = 8600625732310639588L;
+	private static final long serialVersionUID = 1L;
 	
 	/**可执行对象名称*/
 	private String name;

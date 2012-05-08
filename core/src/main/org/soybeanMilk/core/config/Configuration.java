@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.bean.GenericConverter;
-import org.soybeanMilk.core.exe.resolver.ResolverFactory;
+import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
 
 /**
  * 配置，它包含执行所需的环境信息，比如{@linkplain ResolverFactory 解决对象工厂}、{@linkplain GenericConverter 通用转换器}，
@@ -35,7 +35,7 @@ public class Configuration
 	private static Log log=LogFactory.getLog(Configuration.class);
 	
 	/**解决对象工厂*/
-	private ResolverFactory resolverFactory;
+	private ResolverObjectFactory resolverObjectFactory;
 	
 	/**通用转换器*/
 	private GenericConverter genericConverter;
@@ -51,23 +51,19 @@ public class Configuration
 		this(null);
 	}
 	
-	public Configuration(ResolverFactory resolverFactory)
+	public Configuration(ResolverObjectFactory resolverObjectFactory)
 	{
-		this.resolverFactory = resolverFactory;
+		this.resolverObjectFactory = resolverObjectFactory;
 	}
 	
-	public ResolverFactory getResolverFactory() {
-		return resolverFactory;
+	public ResolverObjectFactory getResolverObjectFactory() {
+		return resolverObjectFactory;
 	}
-	
-	public void setResolverFactory(ResolverFactory resolverFactory)
-	{
-		this.resolverFactory = resolverFactory;
-		
-		if(log.isDebugEnabled())
-			log.debug("set ResolverFactory to '"+resolverFactory+"'");
+
+	public void setResolverObjectFactory(ResolverObjectFactory resolverObjectFactory) {
+		this.resolverObjectFactory = resolverObjectFactory;
 	}
-	
+
 	public GenericConverter getGenericConverter() {
 		return genericConverter;
 	}

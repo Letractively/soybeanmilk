@@ -14,16 +14,11 @@
 
 package org.soybeanMilk.core.config.parser;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.core.config.parser.ParseException;
 import org.soybeanMilk.core.exe.Invoke;
-import org.soybeanMilk.core.exe.Invoke.Arg;
-import org.soybeanMilk.core.exe.resolver.FactoryResolverProvider;
-import org.soybeanMilk.core.exe.resolver.ResolverFactory;
 
 /**
  * 调用语句解析器，它解析诸如"myReulst = myResolver.method(argKey0, argKey1, "string")"之类字符串中的与{@linkplain Invoke 调用}对应的属性
@@ -40,10 +35,18 @@ public class InvokeStatementParser
 	
 	/**输入语句*/
 	private String statement;
-	/**调用*/
-	private Invoke invoke;
-	/**解决对象工厂，解析器需要使用它查找解决对象的方法和参数类型*/
-	private ResolverFactory resolverFactory;
+	
+	/**调用结果关键字*/
+	private String resultKey;
+	
+	/**调用解决者*/
+	private String resolver;
+	
+	/**调用方法名*/
+	private String methodName;
+	
+	/**调用参数*/
+	private String[] args;
 	
 	/**内部缓存，它临时存储解析字符*/
 	private StringBuffer cache;
@@ -54,14 +57,12 @@ public class InvokeStatementParser
 	/**总长度*/
 	private int length;
 	
-	public InvokeStatementParser(Invoke invoke, String statement, ResolverFactory resolverFactory)
+	public InvokeStatementParser(String statement)
 	{
 		if(statement==null || statement.length()==0)
 			throw new ParseException("[statement] must not be empty");
 		
-		this.invoke=invoke;
 		this.statement=statement;
-		this.resolverFactory=resolverFactory;
 		
 		this.cache=new StringBuffer();
 		this.currentIdx=0;
@@ -69,8 +70,49 @@ public class InvokeStatementParser
 		this.endIdx=this.length;
 	}
 	
+	/**
+	 * 获取调用结果关键字
+	 * @return
+	 * @date 2012-5-6
+	 */
+	public String getResultKey() {
+		return resultKey;
+	}
+	
+	/**
+	 * 获取调用解决对象
+	 * @return
+	 * @date 2012-5-6
+	 */
+	public String getResolver() {
+		return resolver;
+	}
+	
+	/**
+	 * 获取调用方法名
+	 * @return
+	 * @date 2012-5-6
+	 */
+	public String getMethodName() {
+		return methodName;
+	}
+	
+	/**
+	 * 获取调用方法参数数组
+	 * @return
+	 * @date 2012-5-6
+	 */
+	public String[] getArgs() {
+		return args;
+	}
+	
 	public void parse()
 	{
+		String resultKey=null;
+		String resolver=null;
+		String methodName=null;
+		String[] args=null;
+		
 		//方法的左括弧
 		int methodLeftBracketIdx=indexOf('(');
 		if(methodLeftBracketIdx < 0)
@@ -87,64 +129,34 @@ public class InvokeStatementParser
 		setCurrentIdx(0);
 		
 		//解析方法的结果关键字
-		
 		if(equalCharIdx < 0)
-			invoke.setResultKey(null);
+			resultKey=null;
 		else
 		{
 			ignoreFormatChars();
 			
-			String resultKey=parseUtil(KEY_CHAR_EQUAL, true, true, FORMAT_WITH_SPACE);
+			resultKey=parseUtil(KEY_CHAR_EQUAL, true, true, FORMAT_WITH_SPACE);
 			if(resultKey==null || resultKey.length()==0)
 				throw new ParseException("no result key segment found in statement \""+this.statement+"\"");
-			
-			invoke.setResultKey(resultKey);
 			
 			//移到'='之后
 			setCurrentIdx(equalCharIdx+1);
 		}
 		
 		//解析解决对象
-		
 		ignoreFormatChars();
 		setEndIdx(methodLeftDotIdx);
-		
-		Class<?> resolverClass=null;
-		
-		String resolver=parseUtil(null, true, true, FORMAT_WITH_SPACE);
+		resolver=parseUtil(null, true, true, FORMAT_WITH_SPACE);
 		if(resolver==null || resolver.length()==0)
-			throw new ParseException("no resolver id segment found in statement \""+this.statement+"\"");
-		
-		Object resolverBean= resolverFactory == null ? null : resolverFactory.getResolver(resolver);
-		
-		if(resolverBean != null)
-		{
-			invoke.setResolverProvider(new FactoryResolverProvider(resolverFactory, resolver));
-			resolverClass=resolverBean.getClass();
-		}
-		else
-		{
-			try
-			{
-				resolverClass=Class.forName(resolver);
-			}
-			catch(ClassNotFoundException e)
-			{
-				throw new ParseException("can not find resolver class '"+resolver+"'");
-			}
-		}
-		
-		invoke.setResolverClass(resolverClass);
+			throw new ParseException("no resolver segment found in statement \""+this.statement+"\"");
 		
 		//移到'.'
 		setCurrentIdx(methodLeftDotIdx+1);
 		
 		//解析方法名
-		
 		ignoreFormatChars();
 		setEndIdx(methodLeftBracketIdx);
-		
-		String methodName=parseUtil(null, true, true, FORMAT_WITH_SPACE);
+		methodName=parseUtil(null, true, true, FORMAT_WITH_SPACE);
 		if(methodName==null || methodName.length()==0)
 			throw new ParseException("no method name segment found in statement \""+this.statement+"\"");
 		
@@ -196,29 +208,15 @@ public class InvokeStatementParser
 			}
 		}
 		
-		Method method=SoybeanMilkUtils.findMethodThrow(resolverClass, methodName, argStrList.size());
-		invoke.setMethod(method);
+		args=argStrList.size()==0 ? null : argStrList.toArray(new String[argStrList.size()]);
 		
-		if(!argStrList.isEmpty())
-		{
-			Type[] argTypes=method.getGenericParameterTypes();
-			Arg[] args=new Arg[argTypes.length];
-			
-			for(int i=0;i<argTypes.length;i++)
-			{
-				Arg arg=new Arg();
-				arg.setType(argTypes[i]);
-				
-				stringToArgProperty(arg, argStrList.get(i));
-				
-				args[i]=arg;
-			}
-			
-			invoke.setArgs(args);
-		}
+		this.resultKey=resultKey;
+		this.resolver=resolver;
+		this.methodName=methodName;
+		this.args=args;
 	}
 	
-	protected int getCurrentIdx()
+	private int getCurrentIdx()
 	{
 		return this.currentIdx;
 	}
@@ -227,26 +225,22 @@ public class InvokeStatementParser
 	 * 设置解析当前位置
 	 * @param currentIdx
 	 */
-	protected void setCurrentIdx(int currentIdx) {
+	private void setCurrentIdx(int currentIdx) {
 		this.currentIdx = currentIdx;
-	}
-	
-	protected int getEndIdx() {
-		return endIdx;
 	}
 	
 	/**
 	 * 设置解析结束位置
 	 * @param endIdx
 	 */
-	protected void setEndIdx(int endIdx) {
+	private void setEndIdx(int endIdx) {
 		this.endIdx = endIdx;
 	}
 	
 	/**
 	 * 忽略所有格式字符
 	 */
-	protected void ignoreFormatChars()
+	private void ignoreFormatChars()
 	{
 		parseUtil(FORMAT_WITH_SPACE, false, false, null);
 	}
@@ -259,7 +253,7 @@ public class InvokeStatementParser
 	 * @param ignoreChars 设置不保存的字符集合
 	 * @return
 	 */
-	protected String parseUtil(char[] specialChars, boolean inSpecial, boolean record, char[] ignoreChars)
+	private String parseUtil(char[] specialChars, boolean inSpecial, boolean record, char[] ignoreChars)
 	{
 		//前一个字符是否是转义标记'\'
 		boolean preEscMark=false;
@@ -313,17 +307,17 @@ public class InvokeStatementParser
 	 * 取得当前位置的字符
 	 * @return
 	 */
-	protected char getCurrentChar()
+	private char getCurrentChar()
 	{
 		return getChar(currentIdx);
 	}
 	
-	protected int indexOf(char c)
+	private int indexOf(char c)
 	{
 		return indexOf(c, this.length);
 	}
 	
-	protected int indexOf(char c, int endIdx)
+	private int indexOf(char c, int endIdx)
 	{
 		int i=0;
 		for(; i<endIdx; i++)
@@ -335,7 +329,7 @@ public class InvokeStatementParser
 		return i == endIdx ? -1 : i;
 	}
 	
-	protected int lastIndexOf(char c, int endIdx)
+	private int lastIndexOf(char c, int endIdx)
 	{
 		int i=endIdx-1;
 		
@@ -348,7 +342,7 @@ public class InvokeStatementParser
 		return i;
 	}
 	
-	protected boolean contain(char[] chars, char c)
+	private boolean contain(char[] chars, char c)
 	{
 		if(chars==null || chars.length==0)
 			return false;
@@ -360,7 +354,7 @@ public class InvokeStatementParser
 		return false;
 	}
 	
-	protected char getChar(int idx)
+	private char getChar(int idx)
 	{
 		return this.statement.charAt(idx);
 	}
@@ -371,6 +365,7 @@ public class InvokeStatementParser
 	 * @param arg
 	 * @param stmt 符合Java语法的字符串，可以包含转义字符和'\\uxxxx'格式字符
 	 */
+	/*
 	public static void stringToArgProperty(Arg arg, String stmt)
 	{
 		if(stmt==null || stmt.length()==0)
@@ -442,4 +437,5 @@ public class InvokeStatementParser
 		arg.setKey(key);
 		arg.setValue(value);
 	}
+	*/
 }

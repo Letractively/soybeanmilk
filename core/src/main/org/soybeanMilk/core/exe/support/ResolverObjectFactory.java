@@ -12,21 +12,21 @@
  * limitations under the License. 
  */
 
-package refactor.org.soybeanMilk.core.exe.support;
+package org.soybeanMilk.core.exe.support;
 
 import java.io.Serializable;
 
 /**
- * 解决对象工厂
+ * 调用目标对象工厂
  * @author earthangry@gmail.com
  * @date 2010-10-19
  */
-public interface ResolverFactory
+public interface ResolverObjectFactory
 {
 	/**
-	 * 根据ID查找解决对象
-	 * @param resolverId 解决对象ID
+	 * 根据ID查找调用目标对象
+	 * @param resolverObjectId 调用目标对象ID
 	 * @return
 	 */
-	Object getResolver(Serializable resolverId);
+	Object getResolverObject(Serializable resolverObjectId);
 }

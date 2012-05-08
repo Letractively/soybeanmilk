@@ -45,6 +45,23 @@
 			<ref name="global_exe0"/>
 		</action>
 		
+		<invoke name="testLiterals">
+			resultKey=resolver.method(
+				10b, 10B,
+				10s, 10S,
+				10i, 10I,
+				10l, 10L,
+				10f, 10F,
+				10d, 10D,
+				1234, 1.234,
+				"string",
+				'c',
+				true, false,
+				null,
+				someKey
+			);
+		</invoke>
+		
 	</executables>
 	
 </soybean-milk>

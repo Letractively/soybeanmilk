@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.soybeanMilk.core.exe.resolver.DefaultResolverFactory;
-import org.soybeanMilk.core.exe.resolver.ResolverFactory;
+import org.soybeanMilk.core.exe.support.DefaultResolverObjectFactory;
+import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.exe.th.AbstractTargetHandler;
@@ -25,7 +25,7 @@ import org.springframework.mock.web.MockServletContext;
 
 public class TestDispatchServlet
 {
-	private static ResolverFactory myExternalResolverFactory=new MyResolverFactory();
+	private static ResolverObjectFactory myExternalResolverObjectFactory=new MyResolverObjectFactory();
 	
 	private static String myExternalResolverKey="myExternalResolver";
 	private static String myEncoding="GBK";
@@ -161,13 +161,13 @@ public class TestDispatchServlet
 	public void initExternalResolverFactory_userSet()
 	{
 		{
-			servletContext.setAttribute(myExternalResolverKey, myExternalResolverFactory);
-			servletInitParameters.put(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY_KEY, myExternalResolverKey);
+			servletContext.setAttribute(myExternalResolverKey, myExternalResolverObjectFactory);
+			servletInitParameters.put(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_OBJECT_FACTORY, myExternalResolverKey);
 			
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
 			
-			Assert.assertTrue( ((DefaultResolverFactory)servlet.getWebExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory() == myExternalResolverFactory );
+			Assert.assertTrue( ((DefaultResolverObjectFactory)servlet.getWebExecutor().getConfiguration().getResolverObjectFactory()).getExternalResolverObjectFactory() == myExternalResolverObjectFactory );
 		}
 	}
 	
@@ -175,12 +175,12 @@ public class TestDispatchServlet
 	public void initExternalResolverFactory_userSetNull()
 	{
 		{
-			servletContext.setAttribute(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY_KEY, null);
+			servletContext.setAttribute(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_OBJECT_FACTORY, null);
 			
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
 			
-			Assert.assertNull(((DefaultResolverFactory)servlet.getWebExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory());
+			Assert.assertNull(((DefaultResolverObjectFactory)servlet.getWebExecutor().getConfiguration().getResolverObjectFactory()).getExternalResolverObjectFactory());
 		}
 	}
 	
@@ -191,7 +191,7 @@ public class TestDispatchServlet
 			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
 			initServlet(servlet);
 			
-			Assert.assertNull(((DefaultResolverFactory)servlet.getWebExecutor().getConfiguration().getResolverFactory()).getExternalResolverFactory());
+			Assert.assertNull(((DefaultResolverObjectFactory)servlet.getWebExecutor().getConfiguration().getResolverObjectFactory()).getExternalResolverObjectFactory());
 		}
 	}
 	
@@ -322,10 +322,10 @@ public class TestDispatchServlet
 		}
 	}
 	
-	public static class MyResolverFactory implements ResolverFactory
+	public static class MyResolverObjectFactory implements ResolverObjectFactory
 	{
 		//@Override
-		public Object getResolver(Serializable resolverId)
+		public Object getResolverObject(Serializable resolverId)
 		{
 			return null;
 		}

@@ -12,16 +12,17 @@
  * limitations under the License. 
  */
 
-package refactor.org.soybeanMilk.core.exe.support;
+package org.soybeanMilk.core.exe.support;
 
 import java.io.Serializable;
 
 import org.soybeanMilk.core.ObjectSource;
 
-import refactor.org.soybeanMilk.core.exe.Invoke.ResolverProvider;
+import org.soybeanMilk.core.exe.Invoke.Resolver;
+import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
 
 /**
- * 对象源解决对象提供者，{@linkplain Invoke 调用}的解决对象是当前执行的{@linkplain ObjectSource 对象源}中的某个对象
+ * 对象源调用目标提供者，它从当前{@linkplain ObjectSource 对象源}中动态获取{@linkplain Resolver 调用目标}
  * @author earthangry@gmail.com
  * @date 2012-5-6
  */
@@ -33,21 +34,22 @@ public class ObjectSourceResolverProvider implements ResolverProvider
 	{
 		this(null);
 	}
-
+	
 	public ObjectSourceResolverProvider(Serializable resolverKey)
 	{
 		this.resolverKey = resolverKey;
 	}
-
+	
 	public Serializable getResolverKey() {
 		return resolverKey;
 	}
-
+	
 	public void setResolverKey(Serializable resolverKey) {
 		this.resolverKey = resolverKey;
 	}
 	
-	public Object getResolver(ObjectSource objectSource) throws Exception
+	//@Override
+	public Resolver getResolver(ObjectSource objectSource) throws Exception
 	{
 		return objectSource.get(this.resolverKey, null);
 	}

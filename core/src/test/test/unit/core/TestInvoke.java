@@ -19,7 +19,9 @@ import org.soybeanMilk.core.exe.InvocationExecuteException;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
 import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
-import org.soybeanMilk.core.exe.resolver.ObjectResolverProvider;
+import org.soybeanMilk.core.exe.support.KeyArg;
+import org.soybeanMilk.core.exe.support.ObjectResolverProvider;
+import org.soybeanMilk.core.exe.support.ValueArg;
 import org.soybeanMilk.core.os.HashMapObjectSource;
 
 public class TestInvoke
@@ -54,48 +56,49 @@ public class TestInvoke
 	public void init_byResolverProvider() throws Exception
 	{
 		Arg[] args=new Arg[]{
-				new Arg("aaa"),
-				new Arg("bbb"),
+				new ValueArg("aaa"),
+				new ValueArg("bbb"),
 		};
 		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
 		
-		Invoke re=new Invoke("test", "test1", args, RESULT_KEY, rp);
+		Invoke re=new Invoke("test", rp,  "test1", args, RESULT_KEY);
 		
 		Assert.assertEquals(re.getName(), "test");
 		Assert.assertEquals(re.getResultKey(), RESULT_KEY);
 		Assert.assertEquals(re.getResolverProvider(), rp);
-		Assert.assertEquals(re.getResolverClass(), TestResolver.class);
-		Assert.assertTrue( (re.getArgs()[0]==args[0] && re.getArgs()[0].getType()==String.class) );
-		Assert.assertTrue( (re.getArgs()[1]==args[1] && re.getArgs()[1].getType()==Integer.class) );
+		Assert.assertTrue( (re.getArgs()[0]==args[0]) );
+		Assert.assertTrue( (re.getArgs()[1]==args[1]) );
 	}
 	
 	@Test
 	public void init_byResolverClass() throws Exception
 	{
 		Arg[] args=new Arg[]{
-				new Arg("aaa"),
-				new Arg("bbb"),
+				new ValueArg("aaa"),
+				new ValueArg("bbb"),
 		};
 		
-		Invoke re=new Invoke("test", "test1", args, RESULT_KEY, TestResolver.class);
+		ResolverProvider rp=new ObjectResolverProvider(TestResolver.class);
+		
+		Invoke re=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		
 		Assert.assertEquals(re.getName(), "test");
 		Assert.assertEquals(re.getResultKey(), RESULT_KEY);
-		Assert.assertEquals(re.getResolverClass(), TestResolver.class);
-		Assert.assertTrue( (re.getArgs()[0]==args[0] && re.getArgs()[0].getType()==String.class) );
-		Assert.assertTrue( (re.getArgs()[1]==args[1] && re.getArgs()[1].getType()==Integer.class) );
+		Assert.assertEquals(re.getResolverProvider(), rp);
+		Assert.assertTrue( (re.getArgs()[0]==args[0]) );
+		Assert.assertTrue( (re.getArgs()[1]==args[1]) );
 	}
 	
 	@Test
 	public void execute() throws Exception
 	{
 		Arg[] args=new Arg[]{
-				new Arg("arg0"),
-				new Arg("arg1"),
+				new KeyArg("arg0"),
+				new KeyArg("arg1"),
 		};
 		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
 		
-		Invoke invoke=new Invoke("test", "test1", args, RESULT_KEY, rp);
+		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		
 		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
 		os.set("arg0", "arg0");
@@ -200,12 +203,12 @@ public class TestInvoke
 	public void execute_exception_ArgPrepareExecuteException() throws Exception
 	{
 		Arg[] args=new Arg[]{
-				new Arg("arg0"),
-				new Arg("arg1"),
+				new KeyArg("arg0"),
+				new KeyArg("arg1"),
 		};
 		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
 		
-		Invoke invoke=new Invoke("test", "test1", args, RESULT_KEY, rp);
+		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		
 		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
 		os.set("arg0", "arg0");
@@ -231,7 +234,7 @@ public class TestInvoke
 	{
 		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
 		
-		Invoke invoke=new Invoke("test", "testThrow", null, RESULT_KEY, rp);
+		Invoke invoke=new Invoke("test", rp, "testThrow", null, RESULT_KEY);
 		
 		InvocationExecuteException re=null;
 		try

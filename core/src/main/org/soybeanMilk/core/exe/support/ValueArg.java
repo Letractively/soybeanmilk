@@ -12,13 +12,14 @@
  * limitations under the License. 
  */
 
-package refactor.org.soybeanMilk.core.exe.support;
+package org.soybeanMilk.core.exe.support;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import org.soybeanMilk.core.ObjectSource;
-import org.soybeanMilk.core.exe.ArgPrepareExecuteException;
 
-import refactor.org.soybeanMilk.core.exe.Invoke.Arg;
-import refactor.org.soybeanMilk.core.exe.Invoke.MethodInfo;
+import org.soybeanMilk.core.exe.Invoke.Arg;
 
 /**
  * 值调用参数，它直接持有调用参数的值
@@ -50,7 +51,8 @@ public class ValueArg implements Arg
 		this.value = value;
 	}
 	
-	public Object getValue(ObjectSource objectSource, MethodInfo methodInfo, int argIdx) throws ArgPrepareExecuteException
+	//@Override
+	public Object getValue(ObjectSource objectSource, Type argType, Method method, Class<?> methodClass) throws Exception
 	{
 		return value;
 	}

@@ -345,16 +345,6 @@ public class SoybeanMilkUtils
 	}
 	
 	/**
-	 * 判断字符是否是数字[0-9]
-	 * @param c
-	 * @return
-	 */
-	public static boolean isDigit(char c)
-	{
-		return c>='0' && c<='9';
-	}
-	
-	/**
 	 * 将字符串从第一个{@linkplain Constants#ACCESSOR 访问符}位置拆分为两部分，如果不包含{@linkplain Constants#ACCESSOR 访问符}，则返回仅包含原字符串的长度为1的数组，
 	 * 否则返回长度为2的且元素为拆分后的字符串的数组。
 	 * @param str

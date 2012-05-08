@@ -18,8 +18,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -41,9 +39,14 @@ import org.soybeanMilk.core.config.Interceptors;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
-import org.soybeanMilk.core.exe.resolver.DefaultResolverFactory;
-import org.soybeanMilk.core.exe.resolver.FactoryResolverProvider;
-import org.soybeanMilk.core.exe.resolver.ResolverFactory;
+import org.soybeanMilk.core.exe.support.DefaultResolverObjectFactory;
+import org.soybeanMilk.core.exe.support.DynamicResolverProvider;
+import org.soybeanMilk.core.exe.support.FactoryResolverProvider;
+import org.soybeanMilk.core.exe.support.KeyArg;
+import org.soybeanMilk.core.exe.support.ObjectResolverProvider;
+import org.soybeanMilk.core.exe.support.ObjectSourceResolverProvider;
+import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
+import org.soybeanMilk.core.exe.support.ValueArg;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -310,17 +313,17 @@ public class ConfigurationParser
 		
 		if(children!=null && !children.isEmpty())
 		{
-			ResolverFactory rf = configuration.getResolverFactory();
+			ResolverObjectFactory rf = configuration.getResolverObjectFactory();
 			if(rf == null)
 			{
-				rf= createResolverFactoryInstance();
-				configuration.setResolverFactory(rf);
+				rf= createResolverObjectFactoryInstance();
+				configuration.setResolverObjectFactory(rf);
 			}
 			
-			if(!(rf instanceof DefaultResolverFactory))
-				throw new ParseException("the resolver factory you set must be instance of '"+DefaultResolverFactory.class.getName()+"'");
+			if(!(rf instanceof DefaultResolverObjectFactory))
+				throw new ParseException("the resolver object factory you set must be instance of '"+DefaultResolverObjectFactory.class.getName()+"'");
 			
-			DefaultResolverFactory drf=(DefaultResolverFactory)rf;
+			DefaultResolverObjectFactory drf=(DefaultResolverObjectFactory)rf;
 			
 			for(Element e : children)
 			{
@@ -525,7 +528,10 @@ public class ConfigurationParser
 		
 		invoke.setName(name);
 		
-		new InvokeStatementParser(invoke, statement, configuration.getResolverFactory()).parse();
+		InvokeStatementParser isp=new InvokeStatementParser(statement);
+		isp.parse();
+		
+		processInvokePropertiesInit(invoke, isp.getResultKey(), isp.getResolver(), isp.getMethodName(), isp.getArgs());
 	}
 	
 	/**
@@ -550,33 +556,9 @@ public class ConfigurationParser
 		if(resolverClazz==null && resolverId==null)
 			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_RESOLVER_OBJECT+"] or ["+TAG_INVOKE_ATTR_RESOLVER_CLASS+"] must not be null");
 		
-		Class<?> resolverClass=null;
-		List<Element> argInfos=getChildrenByTagName(element, TAG_ARG);
-		int argNums= argInfos == null ? 0 : argInfos.size();
+		String[] args=parseArgs(element);
 		
-		if(resolverClazz != null)
-		{
-			resolverClass=toClass(resolverClazz);
-		}
-		else if(resolverId != null)
-		{
-			Object resolverBean=configuration.getResolverFactory().getResolver(resolverId);
-			assertNotEmpty(resolverBean, "can not find resolver with id '"+resolverId+"' referenced in <"+TAG_INVOKE+"> named '"+name+"'");
-			
-			resolverClass=resolverBean.getClass();
-			
-			invoke.setResolverProvider(new FactoryResolverProvider(configuration.getResolverFactory(), resolverId));
-		}
-		
-		invoke.setResolverClass(resolverClass);
-		
-		Method method=SoybeanMilkUtils.findMethodThrow(resolverClass, methodName, argNums);
-		
-		invoke.setName(name);
-		invoke.setMethod(method);
-		invoke.setResultKey(resultKey);
-		
-		parseArgs(element,invoke);
+		processInvokePropertiesInit(invoke, resultKey, (resolverId!=null ? resolverId : resolverClazz), methodName, args);
 	}
 	
 	/**
@@ -584,46 +566,75 @@ public class ConfigurationParser
 	 * @param parent
 	 * @param invoke
 	 */
-	protected void parseArgs(Element parent,Invoke invoke)
+	protected String[] parseArgs(Element parent)
 	{
-		Type[] paramTypes=invoke.getMethod().getGenericParameterTypes();
-		//如果调用对应的方法没有参数，则没有必要再解析
-		if(paramTypes==null || paramTypes.length==0)
-			return;
-		
-		Arg[] args = new Arg[paramTypes.length];
-		
 		List<Element> elements=getChildrenByTagName(parent, TAG_ARG);
-		if(elements==null || elements.size()!=paramTypes.length)
-			throw new ParseException("the number of <"+TAG_ARG+"> does not match the number of the actual method parameters named '"+invoke.getMethod()+"'");
+		if(elements == null)
+			return null;
 		
-		for(int i=0;i<elements.size();i++)
+		String[] args=new String[elements.size()];
+		
+		for(int i=0, len=args.length;i<len;i++)
 		{
 			Element e=elements.get(i);
+			String content=getTextContent(e);
+			if(content == null)
+				throw new ParseException("<"+TAG_ARG+"> must have text content");
 			
-			Arg a=createArgInfoInstance();
-			a.setType(paramTypes[i]);
-			setArgProperties(a,e);
-			
-			args[i]=a;
+			args[i]=content;
 		}
 		
-		invoke.setArgs(args);
+		return args;
 	}
 	
 	/**
-	 * 从元素中解析并设置参数对象的属性
-	 * @param arg
-	 * @param element
+	 * 处理Invoke属性初始化
+	 * @param invoke
+	 * @param resultKey
+	 * @param resolver
+	 * @param methodName
+	 * @param args
+	 * @date 2012-5-8
 	 */
-	protected void setArgProperties(Arg arg,Element element)
+	protected void processInvokePropertiesInit(Invoke invoke, String resultKey, String resolver, String methodName, String[] strArgs)
 	{
-		String content=getTextContent(element);
+		invoke.setResultKey(resultKey);
 		
-		if(content == null)
-			throw new ParseException("<"+TAG_ARG+"> must have text content");
+		boolean classResolver=false;
+		//resolver为类名检测
+		if(resolver.indexOf('.') > -1)
+		{
+			try
+			{
+				Class<?> rc=Class.forName(resolver);
+				invoke.setResolverProvider(new ObjectResolverProvider(null, rc));
+				
+				classResolver=true;
+			}
+			catch(Exception e)
+			{
+				classResolver=false;
+			}
+		}
+		if(!classResolver)
+		{
+			FactoryResolverProvider frp=new FactoryResolverProvider(configuration.getResolverObjectFactory(), resolver);
+			ObjectSourceResolverProvider orp=new ObjectSourceResolverProvider(resolver);
+			
+			invoke.setResolverProvider(new DynamicResolverProvider(frp, orp));
+		}
 		
-		InvokeStatementParser.stringToArgProperty(arg, content);
+		invoke.setMethodName(methodName);
+		
+		if(strArgs != null)
+		{
+			Arg[] args=new Arg[strArgs.length];
+			
+			for(int i=0; i<strArgs.length; i++)
+				args[i]=stringToArg(strArgs[i]);
+			
+			invoke.setArgs(args);
+		}
 	}
 	
 	/**
@@ -1066,6 +1077,91 @@ public class ConfigurationParser
 	}
 	
 	/**
+	 * 将字符串转换为Arg对象
+	 * @param str
+	 * @return
+	 * @date 2012-5-8
+	 */
+	protected Arg stringToArg(String str)
+	{
+		Arg arg=null;
+		
+		if(str==null || str.length()==0)
+			arg=new ValueArg(str);
+		else
+		{
+			int len=str.length();
+			char first=str.charAt(0);
+			char end=str.charAt(len-1);
+			
+			//数值
+			if(Character.isDigit(first))
+			{
+				if('B'==end || 'b'==end)
+					arg=new ValueArg(new Byte(str.substring(0, len-1)));
+				else if('S'==end || 's'==end)
+					arg=new ValueArg(new Short(str.substring(0, len-1)));
+				else if('I'==end || 'i'==end)
+					arg=new ValueArg(new Integer(str.substring(0, len-1)));
+				else if('L'==end || 'l'==end)
+					arg=new ValueArg(new Long(str.substring(0, len-1)));
+				else if('F'==end || 'f'==end)
+					arg=new ValueArg(new Float(str.substring(0, len-1)));
+				else if('D'==end || 'd'==end)
+					arg=new ValueArg(new Double(str.substring(0, len-1)));
+				else
+				{
+					boolean point=str.indexOf('.') >= 0;
+					
+					if(point)
+						arg=new ValueArg(new Double(str));
+					else
+						arg=new ValueArg(new Integer(str));
+				}
+			}
+			else if(first =='"')
+			{
+				String ue=SoybeanMilkUtils.unEscape(str);
+				len=ue.length();
+				
+				if(len<2 || ue.charAt(len-1) != '"')
+					throw new ParseException("illegal String definition: "+str+"");
+				
+				if(len == 2)
+					arg=new ValueArg("");
+				else
+					arg=new ValueArg(ue.subSequence(1, len-1));
+			}
+			else if(first =='\'')
+			{
+				String ue=SoybeanMilkUtils.unEscape(str);
+				len=ue.length();
+				
+				if(len!=3 || end!= '\'')
+					throw new ParseException("illegal char definition: "+str+"");
+				
+				arg=new ValueArg(ue.charAt(1));
+			}
+			else if("true".equals(str))
+			{
+				arg=new ValueArg(Boolean.TRUE);
+			}
+			else if("false".equals(str))
+			{
+				arg=new ValueArg(Boolean.FALSE);
+			}
+			else if("null".equals(str))
+			{
+				arg=new ValueArg(null);
+			}
+			else
+				arg=new KeyArg(str);
+		}
+		
+		return arg;
+	}
+	
+	/**
 	 * 创建空的配置对象，用于从配置文件解析并设置其属性
 	 * @return
 	 */
@@ -1074,9 +1170,9 @@ public class ConfigurationParser
 		return new Configuration();
 	}
 	
-	protected ResolverFactory createResolverFactoryInstance()
+	protected ResolverObjectFactory createResolverObjectFactoryInstance()
 	{
-		return new DefaultResolverFactory();
+		return new DefaultResolverObjectFactory();
 	}
 	
 	/**
@@ -1130,20 +1226,11 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 创建参数信息对象，用于设置其属性
-	 * @return
-	 */
-	protected Arg createArgInfoInstance()
-	{
-		return new Arg();
-	}
-	
-	/**
 	 * 创建对象
 	 * @param clazz
 	 * @return
 	 */
-	protected static Object createClassInstance(String clazz)
+	protected Object createClassInstance(String clazz)
 	{
 		try
 		{
@@ -1155,7 +1242,7 @@ public class ConfigurationParser
 		}
 	}
 	
-	protected static Class<?> toClass(String clazz)
+	protected Class<?> toClass(String clazz)
 	{
 		try
 		{

@@ -32,7 +32,7 @@ public class ArgPrepareExecuteException extends ExecuteException
 	/**产生此异常的调用对象*/
 	private Invoke invoke;
 	
-	/**产生此异常的参数位置*/
+	/**产生此异常的调用参数位置*/
 	private int argIndex;
 	
 	public ArgPrepareExecuteException()
@@ -44,7 +44,7 @@ public class ArgPrepareExecuteException extends ExecuteException
 	{
 		this(invoke, argIndex, message, null);
 	}
-
+	
 	public ArgPrepareExecuteException(Invoke invoke, int argIndex, Throwable cause)
 	{
 		this(invoke, argIndex, null, cause);
@@ -57,7 +57,7 @@ public class ArgPrepareExecuteException extends ExecuteException
 		this.invoke=invoke;
 		this.argIndex=argIndex;
 	}
-
+	
 	/**
 	 * 获取产生此异常的{@linkplain Invoke 调用}。
 	 * @return
@@ -66,11 +66,11 @@ public class ArgPrepareExecuteException extends ExecuteException
 	public Invoke getInvoke() {
 		return invoke;
 	}
-
+	
 	public void setInvoke(Invoke invoke) {
 		this.invoke = invoke;
 	}
-
+	
 	/**
 	 * 获取产生此异常的{@linkplain Invoke 调用}方法参数位置。
 	 * @return
@@ -79,18 +79,18 @@ public class ArgPrepareExecuteException extends ExecuteException
 	public int getArgIndex() {
 		return argIndex;
 	}
-
+	
 	public void setArgIndex(int argIndex) {
 		this.argIndex = argIndex;
 	}
 	
 	/**
-	 * 获取产生此异常的{@linkplain Invoke 调用}方法{@linkplain Arg 参数}。
+	 * 获取产生此异常的{@linkplain Arg 调用参数}
 	 * @return
 	 * @date 2011-1-13
 	 */
 	public Arg getArg()
 	{
-		return invoke.getArg(this.argIndex);
+		return invoke.getArgs()[this.argIndex];
 	}
 }

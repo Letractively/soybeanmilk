@@ -12,22 +12,20 @@
  * limitations under the License. 
  */
 
-package refactor.org.soybeanMilk.core.exe.support;
+package org.soybeanMilk.core.exe.support;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.ObjectSource;
-import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.GenericType;
-import org.soybeanMilk.core.exe.ArgPrepareExecuteException;
 
-import refactor.org.soybeanMilk.core.exe.Invoke.Arg;
-import refactor.org.soybeanMilk.core.exe.Invoke.MethodInfo;
+import org.soybeanMilk.core.exe.Invoke.Arg;
 
 /**
- * 关键字调用参数，参数的值是{@linkplain Invoke 调用}执行的当前{@linkplain ObjectSource 对象源}某个关键字的值
+ * 关键字调用参数，参数的值是{@linkplain Invoke 调用}当前执行{@linkplain ObjectSource 对象源}中某个关键字的值
  * @author earthangry@gmail.com
  * @date 2012-5-6
  */
@@ -56,20 +54,12 @@ public class KeyArg implements Arg
 		this.key = key;
 	}
 	
-	public Object getValue(ObjectSource objectSource, MethodInfo methodInfo, int argIdx) throws ArgPrepareExecuteException
+	//@Override
+	public Object getValue(ObjectSource objectSource, Type argType, Method method, Class<?> methodClass) throws Exception
 	{
-		Type argType=methodInfo.getArgType(argIdx);
 		if(!SoybeanMilkUtils.isClassType(argType))
-			argType=GenericType.getGenericType(argType, methodInfo.getMethodClass());
+			argType=GenericType.getGenericType(argType, methodClass);
 		
-		try
-		{
-			return objectSource.get(this.key, argType);
-		}
-		catch(ObjectSourceException e)
-		{
-			//TODO 把null替换为this
-			throw new ArgPrepareExecuteException(null, argIdx, e);
-		}
+		return objectSource.get(this.key, argType);
 	}
 }

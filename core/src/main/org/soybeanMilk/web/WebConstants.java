@@ -52,9 +52,9 @@ public class WebConstants extends Constants
 		public static final String SOYBEAN_MILK_CONFIG="soybean-milk-config";
 		
 		/**
-		 * 外部解决对象工厂在应用中的关键字。如果指定，框架会搜索并整合它
+		 * 外部调用目标对象工厂在应用中的关键字。如果指定，框架会搜索并整合它
 		 */
-		public static final String EXTERNAL_RESOLVER_FACTORY_KEY="external-resolver-factory-key";
+		public static final String EXTERNAL_RESOLVER_OBJECT_FACTORY="external-resolver-object-factory";
 		
 		/**
 		 * WEB对象源工厂的类名。框架将使用它来为请求创建WEB对象源

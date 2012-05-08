@@ -18,7 +18,6 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,229 +25,93 @@ import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.ObjectSourceException;
-import org.soybeanMilk.core.bean.GenericType;
+import org.soybeanMilk.core.exe.AbstractExecutable;
+import org.soybeanMilk.core.exe.ArgPrepareExecuteException;
+import org.soybeanMilk.core.exe.InvocationExecuteException;
 
 /**
- * 调用，它包含执行方法（{@linkplain Method}对象）、方法的{@linkplain Arg 参数信息}、{@linkplain ResolverProvider 解决对象提供者}
- * 
+ * 调用，它用于执行对象方法
  * @author earthangry@gmail.com
  * @date 2010-9-30
- * 
- * @see Arg
- * @see ResolverProvider
  */
 public class Invoke extends AbstractExecutable
 {
-	private static final long serialVersionUID = -6517860148774345653L;
+	private static final long serialVersionUID = 1L;
 	
 	private static Log log=LogFactory.getLog(Invoke.class);
 	
-	/**解决对象提供者，方法被调用时的对象参数将由它提供*/
-	private transient ResolverProvider resolverProvider;
+	/**调用方法名*/
+	private String methodName;
 	
-	/**调用方法，如果为静态方法，则调用源可以为null*/
-	private transient Method method;
-	
-	/**此调用方法所属的类*/
-	private Class<?> resolverClass;
-	
-	/**调用方法的参数*/
+	/**调用方法参数*/
 	private Arg[] args;
 	
 	/**调用结果存放到对象源中的关键字*/
 	private Serializable resultKey;
 	
+	/**调用解决对象*/
+	private ResolverProvider resolverProvider;
+	
 	/**此调用的打断器在对象源中的关键字，打断器可以控制调用方法是否执行*/
 	private Serializable breaker;
 	
-	/**
-	 * 创建空的调用对象
-	 */
-	public Invoke(){}
+	private transient volatile MethodInfo methodInfo;
 	
-	/**
-	 * 创建调用对象，它将自动查找方法对象
-	 * @param name
-	 * @param methodName
-	 * @param args
-	 * @param resultKey
-	 * @param resolverProvider
-	 * @see #Invoke(String, Method, Arg[], Serializable, ResolverProvider)
-	 */
-	public Invoke(String name, String methodName, Arg[] args, Serializable resultKey,
-			ResolverProvider resolverProvider)
+	public Invoke()
 	{
-		Object resObj=resolverProvider.getResolver();
-		if(resObj == null)
-			throw new IllegalArgumentException("resolver object must not be null");
-		
-		int argNums=(args==null ? 0 : args.length);
-		
-		init(name, SoybeanMilkUtils.findMethodThrow(resObj.getClass(), methodName, argNums), args, resultKey, resolverProvider);
+		super();
 	}
 	
-	/**
-	 * 创建调用对象，它将自动查找方法对象
-	 * @param name
-	 * @param methodName 方法名称
-	 * @param args
-	 * @param resultKey
-	 * @param resolverClass 解决对象类
-	 * @see #Invoke(String, Method, Arg[], Serializable, ResolverProvider)
-	 */
-	public Invoke(String name, String methodName, Arg[] args, Serializable resultKey, Class<?> resolverClass)
-	{
-		int argNums= args==null ? 0 : args.length;
-		
-		init(name, SoybeanMilkUtils.findMethodThrow(resolverClass, methodName, argNums), args, resultKey, null);
-	}
-	
-	/**
-	 * 创建调用对象，它的方法是静态方法，因此不需要解决对象
-	 * @see #Invoke(String, Method, Arg[], Serializable, ResolverProvider)
-	 */
-	public Invoke(String name, Method method, Arg[] args, Serializable resultKey)
-	{
-		init(name, method, args, resultKey, null);
-	}
-	
-	/**
-	 * 创建调用对象
-	 * @param name 调用名称
-	 * @param method 调用将执行的方法
-	 * @param args 参数信息，如果执行方法没有参数，可以将它设置为<code>null</code>，你只需要设置参数信息中的<code>key</code>或者<code>value</code>属性，这个构造方法会自动设置参数类型属性
-	 * @param resultKey 方法执行结果的存储关键字，如果设置为<code>null</code>，无论执行方法是否有返回结果都不会被存储；相反，则都会存储（无返回结果的按<code>null</code>存储）
-	 * @param resolverProvider 解决对象提供者，如果方法是静态的，可以将它设置为<code>null</code>
-	 */
-	public Invoke(String name, Method method, Arg[] args, Serializable resultKey, ResolverProvider resolverProvider)
-	{
-		init(name, method, args, resultKey, resolverProvider);
-	}
-	
-	/**
-	 * 初始化
-	 * @param name
-	 * @param method
-	 * @param args
-	 * @param resultKey
-	 * @param resolverProvider
-	 */
-	private void init(String name, Method method, Arg[] args, Serializable resultKey, ResolverProvider resolverProvider)
+	public Invoke(String name, ResolverProvider resolverProvider, String methodName, Arg[] args, Serializable resultKey)
 	{
 		super.setName(name);
-		setMethod(method);
-		setResolverProvider(resolverProvider);
-		setResolverClass((this.resolverProvider==null ? method.getDeclaringClass() : this.resolverProvider.getResolver().getClass()));
-		setResultKey(resultKey);
-		setArgs(args);
+		this.methodName=methodName;
+		this.args=args;
+		this.resolverProvider=resolverProvider;
+		this.resultKey=resultKey;
 	}
 	
+	public String getMethodName() {
+		return methodName;
+	}
+
+	public void setMethodName(String methodName) {
+		this.methodName = methodName;
+	}
+
+	public Arg[] getArgs() {
+		return args;
+	}
+
+	public void setArgs(Arg[] args) {
+		this.args = args;
+	}
+
+	public Serializable getResultKey() {
+		return resultKey;
+	}
+
+	public void setResultKey(Serializable resultKey) {
+		this.resultKey = resultKey;
+	}
+
 	public ResolverProvider getResolverProvider() {
 		return resolverProvider;
 	}
+
 	public void setResolverProvider(ResolverProvider resolverProvider) {
 		this.resolverProvider = resolverProvider;
 	}
 
-	/**
-	 * 获取此调用的{@linkplain Method 方法}。
-	 * @return
-	 * @date 2011-1-13
-	 */
-	public Method getMethod()
-	{
-		return method;
-	}
-	public void setMethod(Method method)
-	{
-		this.method = method;
-	}
-	
-	/**
-	 * 获取此调用方法{@linkplain Arg 参数}数组。
-	 * @return
-	 * @date 2011-1-13
-	 */
-	public Arg[] getArgs()
-	{
-		return args;
-	}
-	
-	/**
-	 * 设置调用方法{@linkplain Arg 参数}数组，它会自动查找并设置参数类型。
-	 * @param args
-	 * @date 2011-10-1
-	 */
-	public void setArgs(Arg[] args)
-	{
-		this.args = args;
-		
-		Type[] mtdArgs=method.getGenericParameterTypes();
-		if(mtdArgs!=null && mtdArgs.length!=0)
-		{
-			if(args==null || args.length!=mtdArgs.length)
-				throw new IllegalArgumentException("[args] length is not match with the [method] arguments length");
-			
-			for(int i=0;i<mtdArgs.length;i++)
-				args[i].setType(mtdArgs[i]);
-		}
-	}
-
-	/**
-	 * 获取此调用的方法结果保存关键字。
-	 * @return
-	 * @date 2011-1-13
-	 */
-	public Serializable getResultKey()
-	{
-		return resultKey;
-	}
-	public void setResultKey(Serializable resultKey)
-	{
-		this.resultKey = resultKey;
-	}
-	
-	/**
-	 * 获取此调用方法所属的类
-	 * @return
-	 * @date 2011-9-29
-	 */
-	public Class<?> getResolverClass()
-	{
-		return resolverClass;
-	}
-	public void setResolverClass(Class<?> resolverClass)
-	{
-		this.resolverClass = resolverClass;
-	}
-	
-	/**
-	 * 获取此调用的打断器
-	 * @return
-	 * @date 2011-10-28
-	 */
-	public Serializable getBreaker()
-	{
+	public Serializable getBreaker() {
 		return breaker;
 	}
 
-	public void setBreaker(Serializable breaker)
-	{
+	public void setBreaker(Serializable breaker) {
 		this.breaker = breaker;
 	}
-
-	/**
-	 * 获取调用方法某个位置的{@linkplain Arg 参数}。
-	 * @param index
-	 * @return
-	 * @date 2011-1-13
-	 */
-	public Arg getArg(int index)
-	{
-		return this.args[index];
-	}
 	
-	//@Override
+	@Override
 	public void execute(ObjectSource objectSource) throws ExecuteException
 	{
 		if(log.isDebugEnabled())
@@ -257,7 +120,10 @@ public class Invoke extends AbstractExecutable
 		boolean breaked=isBreaked(objectSource);
 		
 		if(!breaked)
-			executeMethod(objectSource);
+		{
+			Object result=executeMethod(objectSource);
+			saveMethodResult(result, objectSource);
+		}
 		else
 		{
 			if(log.isDebugEnabled())
@@ -269,12 +135,129 @@ public class Invoke extends AbstractExecutable
 	}
 	
 	/**
+	 * 执行调用方法
+	 * @param objectSource
+	 * @throws ExecuteException
+	 * @date 2011-1-12
+	 */
+	protected Object executeMethod(ObjectSource objectSource) throws ExecuteException
+	{
+		Resolver resolver=getResolver(objectSource);
+		if(resolver == null)
+			throw new ExecuteException("got null resolver from ResolverProvider '"+SoybeanMilkUtils.toString(this.getResolverProvider())+"'");
+		
+		MethodInfo methodInfo=getMethodInfo(resolver.getResolverClass(), this.methodName, getArgNums());
+		if(methodInfo == null)
+			throw new ExecuteException("no method named '"+this.methodName+"' with "+getArgNums()
+					+" arguments can be found in resolver class '"+SoybeanMilkUtils.toString(resolver.getResolverClass())+"'");
+		
+		Object[] argValues=prepareMethodArgValues(methodInfo, objectSource);
+		
+		try
+		{
+			return methodInfo.getMethod().invoke(resolver.getResolverObject(), argValues);
+		}
+		catch(InvocationTargetException e)
+		{
+			throw new InvocationExecuteException(this, e.getCause());
+		}
+		catch(IllegalArgumentException e)
+		{
+			throw new ExecuteException(e);
+		}
+		catch(IllegalAccessException e)
+		{
+			throw new ExecuteException(e);
+		}
+	}
+	
+	/**
+	 * 将调用方法结果保存到对象源
+	 * @param methodResult
+	 * @param objectSource
+	 * @throws ExecuteException
+	 * @date 2012-5-7
+	 */
+	protected void saveMethodResult(Object methodResult, ObjectSource objectSource) throws ExecuteException
+	{
+		Serializable resultKey=getResultKey();
+		
+		if(resultKey != null)
+		{
+			try
+			{
+				objectSource.set(resultKey, methodResult);
+			}
+			catch(ObjectSourceException e)
+			{
+				throw new ExecuteException(e);
+			}
+		}
+	}
+	
+	/**
+	 * 获取当前调用解决对象
+	 * @param objectSource
+	 * @return
+	 * @throws ExecuteException
+	 * @date 2012-5-6
+	 */
+	protected Resolver getResolver(ObjectSource objectSource) throws ExecuteException
+	{
+		try
+		{
+			return getResolverProvider().getResolver(objectSource);
+		}
+		catch(Exception e)
+		{
+			throw new ExecuteException(e);
+		}
+	}
+	
+	/**
+	 * 获取方法的参数值数组
+	 * @param methodInfo
+	 * @param objectSource
+	 * @return
+	 * @throws ExecuteException
+	 * @date 2012-5-6
+	 */
+	protected Object[] prepareMethodArgValues(MethodInfo methodInfo,ObjectSource objectSource) throws ExecuteException
+	{
+		Object[] values=null;
+		
+		Arg[] args=this.args;
+		
+		if(args != null)
+		{
+			values=new Object[args.length];
+			
+			for(int i=0;i<args.length;i++)
+			{
+				try
+				{
+					values[i]=args[i].getValue(objectSource, methodInfo.getArgType(i), methodInfo.getMethod(), methodInfo.getMethodClass());
+				}
+				catch(Exception e)
+				{
+					throw new ArgPrepareExecuteException(this, i, e);
+				}
+			}
+		}
+		
+		if(log.isDebugEnabled())
+			log.debug("got method arguments: "+SoybeanMilkUtils.toString(values));
+		
+		return values;
+	}
+	
+	/**
 	 * 此调用是否会在给定对象源上执行时被打断
 	 * @param objectSource
 	 * @return
 	 * @date 2011-10-28
 	 */
-	public boolean isBreaked(ObjectSource objectSource) throws ExecuteException
+	protected boolean isBreaked(ObjectSource objectSource) throws ExecuteException
 	{
 		Boolean breaked=null;
 		
@@ -312,234 +295,175 @@ public class Invoke extends AbstractExecutable
 	}
 	
 	/**
-	 * 执行调用方法。
-	 * @param objectSource
-	 * @throws ExecuteException
-	 * @date 2011-1-12
+	 * 获取给定解决对象的{@linkplain MethodInfo 方法信息}对象
+	 * @param methodClass
+	 * @param methodName
+	 * @param argNums
+	 * @return
+	 * @date 2012-5-7
 	 */
-	protected void executeMethod(ObjectSource objectSource) throws ExecuteException
+	protected MethodInfo getMethodInfo(Class<?> methodClass, String methodName, int argNums)
 	{
-		Serializable resultKey=getResultKey();
-		Object methodResult=null;
+		MethodInfo methodInfo=getMethodInfo();
 		
-		Object[] argValues=prepareMethodArguments(objectSource);
-		
-		try
+		if(methodInfo != null)
+			return methodInfo;
+		else if(methodClass != null)
 		{
-			methodResult=getMethod().invoke(getResolver(objectSource), argValues);
-		}
-		catch(InvocationTargetException e)
-		{
-			throw new InvocationExecuteException(this, e.getCause());
-		}
-		catch(IllegalArgumentException e)
-		{
-			throw new ExecuteException(e);
-		}
-		catch(IllegalAccessException e)
-		{
-			throw new ExecuteException(e);
+			methodInfo=new MethodInfo(methodClass, methodName, argNums);
+			setMethodInfo(methodInfo);
 		}
 		
-		if(resultKey != null)
-		{
-			try
-			{
-				objectSource.set(resultKey, methodResult);
-			}
-			catch(ObjectSourceException e)
-			{
-				throw new ExecuteException(e);
-			}
-		}
+		return methodInfo;
+	}
+	
+	protected MethodInfo getMethodInfo() {
+		return methodInfo;
+	}
+
+	protected void setMethodInfo(MethodInfo methodInfo) {
+		this.methodInfo = methodInfo;
 	}
 	
 	/**
-	 * 从对象源中取得方法的参数值数组
-	 * @param objectSource
+	 * 获取调用方法参数个数
 	 * @return
-	 * @throws ExecuteException
-	 * @date 2011-1-11
+	 * @date 2012-5-7
 	 */
-	protected Object[] prepareMethodArguments(ObjectSource objectSource) throws ExecuteException
+	protected int getArgNums()
 	{
-		Object[] values=null;
+		return (this.args==null ? 0 : this.args.length);
+	}
+	
+	/**
+	 * 方法信息
+	 * @author earthangry@gmail.com
+	 * @date 2012-5-6
+	 */
+	protected static class MethodInfo
+	{
+		private Method method;
 		
-		Arg[] args = getArgs();
-		if(args!=null && args.length>0)
+		private Type[] argTypes;
+		
+		private Class<?> methodClass;
+		
+		public MethodInfo(Class<?> methodClass, String methodName, int argNums)
 		{
-			values=new Object[args.length];
+			this.methodClass=methodClass;
 			
-			for(int i=0;i<args.length;i++)
-			{
-				//优先取值
-				if(args[i].getValue()!=null || args[i].getKey()==null)
-					values[i]=args[i].getValue();
-				else
-					values[i]=getArgValueFromObjectSource(args, i, objectSource);
-			}
+			this.method=SoybeanMilkUtils.findMethodThrow(this.methodClass, methodName, argNums);
+			this.argTypes=this.method.getGenericParameterTypes();
+		}
+
+		public Method getMethod() {
+			return method;
+		}
+
+		public void setMethod(Method method) {
+			this.method = method;
+		}
+
+		public Type[] getArgTypes() {
+			return argTypes;
+		}
+
+		public void setArgTypes(Type[] argTypes) {
+			this.argTypes = argTypes;
+		}
+
+		public Class<?> getMethodClass() {
+			return methodClass;
 		}
 		
-		if(log.isDebugEnabled())
-			log.debug("construct method arguments '"+SoybeanMilkUtils.toString(values)+"'");
+		public void setMethodClass(Class<?> methodClass) {
+			this.methodClass = methodClass;
+		}
 		
-		return values;
-	}
-	
-	/**
-	 * 从对象源中取得第<code>argIdx</code>个参数的值。
-	 * @param args
-	 * @param argIdx
-	 * @param objectSource
-	 * @return
-	 * @throws ExecuteException
-	 * @date 2011-4-11
-	 */
-	protected Object getArgValueFromObjectSource(Arg[] args, int argIdx, ObjectSource objectSource) throws ExecuteException
-	{
-		Object re=null;
-		
-		//如果参数类型不是Class类，则需要转换为GenericType类，为通用转换器类型识别提供信息
-		Type argType=args[argIdx].getType();
-		if(!SoybeanMilkUtils.isClassType(argType))
-			argType=GenericType.getGenericType(argType, this.resolverClass);
-		
-		try
+		public Type getArgType(int argIdx)
 		{
-			re=objectSource.get(args[argIdx].getKey(), argType);
+			return this.argTypes[argIdx];
 		}
-		catch(ObjectSourceException e)
+	}
+	
+	/**
+	 * 调用目标，{@linkplain Invoke 调用}执行调用方法时依赖的目标对象
+	 * @author earthangry@gmail.com
+	 * @date 2012-5-7
+	 */
+	public static class Resolver
+	{
+		private Object resolverObject;
+		
+		private Class<?> resolverClass;
+		
+		public Resolver(){}
+		
+		public Resolver(Object resolverObject)
 		{
-			throw new ArgPrepareExecuteException(this, argIdx, e);
+			super();
+			this.resolverObject = resolverObject;
+			this.resolverClass = resolverObject.getClass();
 		}
 		
-		return re;
-	}
-	
-	//@Override
-	public String toString()
-	{
-		return getClass().getSimpleName()+" [name=" + getName() + ", method=" + method
-				+ ", resultKey=" + resultKey + ", breaker="+ breaker+", resolverProvider="
-				+ resolverProvider + ", args=" + Arrays.toString(args) + "]";
+		public Resolver(Object resolverObject, Class<?> resolverClass)
+		{
+			super();
+			this.resolverObject = resolverObject;
+			this.resolverClass = resolverClass;
+		}
+
+		public Object getResolverObject() {
+			return resolverObject;
+		}
+		
+		public void setResolverObject(Object resolverObject) {
+			this.resolverObject = resolverObject;
+		}
+		
+		public Class<?> getResolverClass() {
+			return resolverClass;
+		}
+		
+		public void setResolverClass(Class<?> resolverClass) {
+			this.resolverClass = resolverClass;
+		}
 	}
 	
 	/**
-	 * 取得本调用所依赖的解决对象
-	 * @param objectSource 本次调用的对象源，默认实现是从调用的属性取得解决对象的，所以在这个实现中没有用到
-	 * @return
-	 */
-	protected Object getResolver(ObjectSource objectSource)
-	{
-		return resolverProvider==null ? null : resolverProvider.getResolver();
-	}
-	
-	/**
-	 * 方法的参数信息。它提供从对象源中取得方法参数值所需的信息，或者可以直接提供参数值（如果参数值被设置，那么它将优先被使用）。
+	 * 调用参数
 	 * @author earthangry@gmail.com
 	 * @date 2010-10-3
 	 */
-	public static class Arg implements Serializable
+	public static interface Arg
 	{
-		private static final long serialVersionUID = -1460025906014956461L;
-		
-		/**从对象源中取得参数值的关键字*/
-		private Serializable key;
-		/**参数类型*/
-		private transient Type type;
-		/**参数值*/
-		private transient Object value;
-		
-		public Arg(){}
-		
 		/**
-		 * 创建参数信息对象
-		 * @see Arg#Arg(Serializable, Class)
-		 */
-		public Arg(Serializable key)
-		{
-			super();
-			this.key = key;
-		}
-		
-		/**
-		 * 创建参数信息对象
-		 * @param value 参数的固定值
-		 */
-		public Arg(Object value)
-		{
-			super();
-			this.value = value;
-		}
-		
-		/**
-		 * 创建参数信息对象
-		 * @param key 从{@linkplain ObjectSource 对象源}中取得参数值的关键字
-		 * @param type 参数值类型
-		 */
-		public Arg(Serializable key, Type type)
-		{
-			super();
-			this.key = key;
-			this.type = type;
-		}
-		
-		/**
-		 * 获取此参数的值在{@linkplain ObjectSource 对象源}中的关键字
+		 * 获取参数值
+		 * @param objectSource
+		 * @param argType
+		 * @param method
+		 * @param methodClass
 		 * @return
-		 * @date 2010-10-3
+		 * @throws Exception
+		 * @date 2012-5-7
 		 */
-		public Serializable getKey() {
-			return key;
-		}
-		public void setKey(Serializable key) {
-			this.key = key;
-		}
-		
-		/**
-		 * 获取此参数的类型
-		 * @return
-		 * @date 2010-10-3
-		 */
-		public Type getType() {
-			return type;
-		}
-		public void setType(Type type) {
-			this.type = type;
-		}
-		
-		/**
-		 * 获取此参数的预设值，没有则返回<code>null</code>
-		 * @return
-		 * @date 2010-10-3
-		 */
-		public Object getValue() {
-			return value;
-		}
-		public void setValue(Object value) {
-			this.value = value;
-		}
-
-		//@Override
-		public String toString()
-		{
-			return getClass().getSimpleName()+" [key=" + key + ", type=" + type + ", value=" + value + (value==null ? "" : "("+value.getClass().getName()+")")
-					+ "]";
-		}
+		Object getValue(ObjectSource objectSource, Type argType, Method method, Class<?> methodClass) throws Exception;
 	}
 	
 	/**
-	 * 解决对象（任意Java对象）的提供者，调用所需的解决对象将由它提供
+	 * 调用目标提供者，它为{@linkplain Invoke 调用}执行时提供{@linkplain Resolver 调用目标}对象
 	 * @author earthangry@gmail.com
 	 * @date 2010-10-19
-	 *
 	 */
 	public static interface ResolverProvider
 	{
 		/**
-		 * 取得解决对象
+		 * 获取调用目标
+		 * @param objectSource
 		 * @return
+		 * @throws Exception
+		 * @date 2012-5-7
 		 */
-		Object getResolver();
+		Resolver getResolver(ObjectSource objectSource) throws Exception;
 	}
 }

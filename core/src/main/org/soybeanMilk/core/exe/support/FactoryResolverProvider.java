@@ -12,20 +12,23 @@
  * limitations under the License. 
  */
 
-package refactor.org.soybeanMilk.core.exe.support;
+package org.soybeanMilk.core.exe.support;
 
 import java.io.Serializable;
 
+import org.soybeanMilk.core.ObjectSource;
+
+import org.soybeanMilk.core.exe.Invoke.Resolver;
 import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
 
 /**
- * 解决对象提供者，它从解决对象工厂中即时取得调用所需的解决对象。
+ * 工厂调用目标提供者，它从{@linkplain ResolverObjectFactory 调用目标对象工厂}中获取{@linkplain Resolver 调用目标}
  * @author earthangry@gmail.com
  * @date 2010-10-19
  */
 public class FactoryResolverProvider implements ResolverProvider
 {
-	private ResolverFactory resolverFactory;
+	private ResolverObjectFactory resolverObjectFactory;
 	private Serializable resolverId;
 	
 	public FactoryResolverProvider()
@@ -33,31 +36,33 @@ public class FactoryResolverProvider implements ResolverProvider
 		this(null, null);
 	}
 
-	public FactoryResolverProvider(ResolverFactory resolverFactory,
+	public FactoryResolverProvider(ResolverObjectFactory resolverObjectFactory,
 			Serializable resolverId)
 	{
 		super();
-		this.resolverFactory = resolverFactory;
+		this.resolverObjectFactory = resolverObjectFactory;
 		this.resolverId = resolverId;
 	}
 
-	public ResolverFactory getResolverFactory() {
-		return resolverFactory;
-	}
-	public void setResolverFactory(ResolverFactory resolverFactory) {
-		this.resolverFactory = resolverFactory;
+	public ResolverObjectFactory getResolverObjectFactory() {
+		return resolverObjectFactory;
 	}
 
+	public void setResolverObjectFactory(ResolverObjectFactory resolverObjectFactory) {
+		this.resolverObjectFactory = resolverObjectFactory;
+	}
+	
 	public Serializable getResolverId() {
 		return resolverId;
 	}
+	
 	public void setResolverId(Serializable resolverId) {
 		this.resolverId = resolverId;
 	}
-
+	
 	//@Override
-	public Object getResolver()
+	public Resolver getResolver(ObjectSource objectSource) throws Exception
 	{
-		return getResolverFactory().getResolver(getResolverId());
+		return new Resolver(this.resolverObjectFactory.getResolverObject(this.resolverId));
 	}
 }

@@ -27,8 +27,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.core.ExecutableNotFoundException;
 import org.soybeanMilk.core.ExecuteException;
-import org.soybeanMilk.core.exe.resolver.DefaultResolverFactory;
-import org.soybeanMilk.core.exe.resolver.ResolverFactory;
+import org.soybeanMilk.core.exe.support.DefaultResolverObjectFactory;
+import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
 import org.soybeanMilk.web.DefaultWebExecutor;
 import org.soybeanMilk.web.WebConstants;
 import org.soybeanMilk.web.WebExecutor;
@@ -304,8 +304,8 @@ public class DispatchServlet extends HttpServlet
 	{
 		DefaultWebExecutor we=null;
 		
-		DefaultResolverFactory rf=new DefaultResolverFactory();
-		rf.setExternalResolverFactory(getInitExternalResolverFactory());
+		DefaultResolverObjectFactory rf=new DefaultResolverObjectFactory();
+		rf.setExternalResolverObjectFactory(getInitExternalResolverObjectFactory());
 		
 		WebConfiguration webConfiguration=new WebConfiguration(rf);
 		
@@ -344,25 +344,36 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 取得初始化外部解决对象工厂，它将被整合到框架中。
+	 * 取得初始化调用目标对象工厂，它将被整合到框架中。
 	 * @return
 	 */
-	protected ResolverFactory getInitExternalResolverFactory() throws ServletException
+	protected ResolverObjectFactory getInitExternalResolverObjectFactory() throws ServletException
 	{
-		String erfKey=getInitParameter(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_FACTORY_KEY);
+		String erfKey=getInitParameter(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_OBJECT_FACTORY);
 		
-		ResolverFactory erf=null;
+		ResolverObjectFactory erf=null;
 		
 		if(erfKey!=null && erfKey.length()!=0)
 		{
-			erf=(ResolverFactory)getServletContext().getAttribute(erfKey);
+			erf=(ResolverObjectFactory)getServletContext().getAttribute(erfKey);
 			if(erf == null)
-				throw new ServletException("can not find external ResolverFactory in application with key '"+erfKey+"'");
+				throw new ServletException("can not find external ResolverObjectFactory in application with key '"+erfKey+"'");
 			
 			if(log.isDebugEnabled())
-				log.debug("find external resolver factory '"+erf.getClass().getName()+"' in 'application' scope");
+				log.debug("find external ResolverObjectFactory '"+erf.getClass().getName()+"' in 'application' scope");
 		}
 		
 		return erf;
+	}
+
+	//@Override
+	public String getInitParameter(String name)
+	{
+		String re=super.getInitParameter(name);
+		
+		if(log.isDebugEnabled())
+			log.debug("get init parameter value '"+re+"' for key '"+name+"'");
+		
+		return re;
 	}
 }

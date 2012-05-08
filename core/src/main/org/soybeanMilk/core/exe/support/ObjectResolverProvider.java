@@ -12,37 +12,37 @@
  * limitations under the License. 
  */
 
-package refactor.org.soybeanMilk.core.exe.support;
+package org.soybeanMilk.core.exe.support;
 
+import org.soybeanMilk.core.ObjectSource;
+
+import org.soybeanMilk.core.exe.Invoke.Resolver;
 import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
 
 /**
- * 解决对象提供者，它直接持有解决对象。
+ * 对象调用目标提供者，它直接持有{@linkplain Resolver 调用目标}
  * @author earthangry@gmail.com
  * @date 2010-10-19
  */
 public class ObjectResolverProvider implements ResolverProvider
 {
-	private Object resolver;
+	private Resolver resolver;
 	
-	public ObjectResolverProvider()
-	{
-		this(null);
-	}
+	public ObjectResolverProvider(){}
 
-	public ObjectResolverProvider(Object resolver)
+	public ObjectResolverProvider(Object resolverObject)
 	{
-		super();
-		this.resolver = resolver;
+		this.resolver=new Resolver(resolverObject, resolverObject.getClass());
 	}
-
+	
+	public ObjectResolverProvider(Object resolverObject, Class<?> resolverClass)
+	{
+		this.resolver=new Resolver(resolverObject, resolverClass);
+	}
+	
 	//@Override
-	public Object getResolver()
+	public Resolver getResolver(ObjectSource objectSource) throws Exception
 	{
-		return resolver;
-	}
-
-	public void setResolver(Object resolver) {
-		this.resolver = resolver;
+		return this.resolver;
 	}
 }

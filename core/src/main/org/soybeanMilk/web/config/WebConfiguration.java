@@ -15,7 +15,7 @@
 package org.soybeanMilk.web.config;
 
 import org.soybeanMilk.core.config.Configuration;
-import org.soybeanMilk.core.exe.resolver.ResolverFactory;
+import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
 import org.soybeanMilk.web.exe.th.TypeTargetHandler;
 
 /**
@@ -34,9 +34,9 @@ public class WebConfiguration extends Configuration
 		super();
 	}
 
-	public WebConfiguration(ResolverFactory resolverFactory)
+	public WebConfiguration(ResolverObjectFactory resolverObjectFactory)
 	{
-		super(resolverFactory);
+		super(resolverObjectFactory);
 	}
 	
 	/**

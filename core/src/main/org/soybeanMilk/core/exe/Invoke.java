@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,42 +72,92 @@ public class Invoke extends AbstractExecutable
 		this.resultKey=resultKey;
 	}
 	
+	/**
+	 * 获取调用方法名
+	 * @return
+	 * @date 2012-5-9
+	 */
 	public String getMethodName() {
 		return methodName;
 	}
-
+	
+	/**
+	 * 设置调用方法名
+	 * @return
+	 * @date 2012-5-9
+	 */
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
 	}
 
+	/**
+	 * 获取调用参数
+	 * @return
+	 * @date 2012-5-9
+	 */
 	public Arg[] getArgs() {
 		return args;
 	}
 
+	/**
+	 * 设置调用参数
+	 * @return
+	 * @date 2012-5-9
+	 */
 	public void setArgs(Arg[] args) {
 		this.args = args;
 	}
-
+	
+	/**
+	 * 获取调用结果存储关键字
+	 * @return
+	 * @date 2012-5-9
+	 */
 	public Serializable getResultKey() {
 		return resultKey;
 	}
-
+	
+	/**
+	 * 设置调用结果存储关键字
+	 * @return
+	 * @date 2012-5-9
+	 */
 	public void setResultKey(Serializable resultKey) {
 		this.resultKey = resultKey;
 	}
-
+	
+	/**
+	 * 获取调用目标提供者
+	 * @return
+	 * @date 2012-5-9
+	 */
 	public ResolverProvider getResolverProvider() {
 		return resolverProvider;
 	}
-
+	
+	/**
+	 * 设置调用目标提供者
+	 * @return
+	 * @date 2012-5-9
+	 */
 	public void setResolverProvider(ResolverProvider resolverProvider) {
 		this.resolverProvider = resolverProvider;
 	}
-
+	
+	/**
+	 * 获取调用打断器
+	 * @return
+	 * @date 2012-5-9
+	 */
 	public Serializable getBreaker() {
 		return breaker;
 	}
-
+	
+	/**
+	 * 设置调用打断器
+	 * @param breaker
+	 * @date 2012-5-9
+	 */
 	public void setBreaker(Serializable breaker) {
 		this.breaker = breaker;
 	}
@@ -134,6 +185,14 @@ public class Invoke extends AbstractExecutable
 			log.debug("finish execute '"+this+"'");
 	}
 	
+	@Override
+	public String toString()
+	{
+		return "Invoke [resultKey=" + resultKey + ", resolverProvider="
+				+ resolverProvider + ", methodName=" + methodName + ", args="
+				+ Arrays.toString(args) + ", breaker=" + breaker + "]";
+	}
+
 	/**
 	 * 执行调用方法
 	 * @param objectSource
@@ -259,36 +318,30 @@ public class Invoke extends AbstractExecutable
 	 */
 	protected boolean isBreaked(ObjectSource objectSource) throws ExecuteException
 	{
+		if(this.breaker == null)
+			return false;
+		
 		Boolean breaked=null;
 		
-		if(this.breaker != null)
+		if(this.breaker instanceof Boolean)
+			breaked=(Boolean)this.breaker;
+		else
 		{
-			if(this.breaker instanceof String)
+			Object breakerObj=null;
+			
+			try
 			{
-				String brkString=(String)this.breaker;
-				
-				if(Boolean.toString(true).equalsIgnoreCase(brkString))
-					breaked=true;
-				else if(Boolean.toString(false).equalsIgnoreCase(brkString))
-					breaked=false;
+				breakerObj=objectSource.get(this.breaker, null);
+			}
+			catch(Exception e)
+			{
+				throw new ExecuteException(e);
 			}
 			
-			if(breaked == null)
-			{
-				Object brkObj=null;
-				
-				try
-				{
-					brkObj=objectSource.get(this.breaker, null);
-				}
-				catch(Exception e)
-				{
-					throw new ExecuteException(e);
-				}
-				
-				if(brkObj!=null && Boolean.TRUE.equals(brkObj))
-					breaked=true;
-			}
+			if(breakerObj instanceof Boolean)
+				breaked=(Boolean)breakerObj;
+			else
+				breaked=(breakerObj != null);
 		}
 		
 		return breaked == null ? false : breaked;
@@ -326,7 +379,7 @@ public class Invoke extends AbstractExecutable
 	}
 	
 	/**
-	 * 获取调用方法参数个数
+	 * 获取调用参数个数
 	 * @return
 	 * @date 2012-5-7
 	 */
@@ -387,14 +440,16 @@ public class Invoke extends AbstractExecutable
 	}
 	
 	/**
-	 * 调用目标，{@linkplain Invoke 调用}执行调用方法时依赖的目标对象
+	 * 调用目标，{@linkplain Invoke 调用}执行调用方法时依赖的目标对象，从{@linkplain ResolverProvider 调用目标提供者}获取
 	 * @author earthangry@gmail.com
 	 * @date 2012-5-7
 	 */
 	public static class Resolver
 	{
+		/**目标对象，当调用方法是静态方法时，它可以为null*/
 		private Object resolverObject;
 		
+		/**目标类型，它不会为null*/
 		private Class<?> resolverClass;
 		
 		public Resolver(){}
@@ -413,18 +468,38 @@ public class Invoke extends AbstractExecutable
 			this.resolverClass = resolverClass;
 		}
 
+		/**
+		 * 获取调用目标对象
+		 * @return
+		 * @date 2012-5-9
+		 */
 		public Object getResolverObject() {
 			return resolverObject;
 		}
 		
+		/**
+		 * 设置调用目标对象
+		 * @param resolverObject
+		 * @date 2012-5-9
+		 */
 		public void setResolverObject(Object resolverObject) {
 			this.resolverObject = resolverObject;
 		}
 		
+		/**
+		 * 获取调用目标类型
+		 * @return
+		 * @date 2012-5-9
+		 */
 		public Class<?> getResolverClass() {
 			return resolverClass;
 		}
 		
+		/**
+		 * 设置调用目标类型
+		 * @param resolverClass
+		 * @date 2012-5-9
+		 */
 		public void setResolverClass(Class<?> resolverClass) {
 			this.resolverClass = resolverClass;
 		}

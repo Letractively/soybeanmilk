@@ -45,4 +45,10 @@ public class ObjectResolverProvider implements ResolverProvider
 	{
 		return this.resolver;
 	}
+
+	//@Override
+	public String toString()
+	{
+		return "ObjectResolverProvider [resolver=" + resolver + "]";
+	}
 }

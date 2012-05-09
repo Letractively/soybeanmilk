@@ -30,7 +30,7 @@ public class TestWebConfigurationParser
 	public void tearDown() throws Exception{}
 	
 	@Test
-	public void testParseTargetHandler() throws Exception
+	public void parse_targetHandler() throws Exception
 	{
 		{
 			WebConfigurationParser parser=new WebConfigurationParser(null);
@@ -49,7 +49,6 @@ public class TestWebConfigurationParser
 			
 			Assert.assertEquals(RedirectTargetHandler.class,
 					webConfiguration.getTypeTargetHandler().getTargetHandler("redirect").getClass());
-			
 			
 			TargetHandler multi= webConfiguration.getTypeTargetHandler().getTargetHandler("pdf");
 			Assert.assertEquals(JsonTargetHandler.class, multi.getClass());
@@ -76,7 +75,7 @@ public class TestWebConfigurationParser
 	}
 	
 	@Test
-	public void testParseTarget() throws Exception
+	public void parse_target() throws Exception
 	{
 		WebConfigurationParser parser=new WebConfigurationParser(null);
 		parser.parse("test/unit/web/TestWebConfigurationParser-0.xml");

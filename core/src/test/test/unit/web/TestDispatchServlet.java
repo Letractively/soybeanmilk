@@ -329,6 +329,11 @@ public class TestDispatchServlet
 		{
 			return null;
 		}
+		
+		public void addResolverObject(Serializable resolverObjectId, Object resolverObject)
+		{
+			
+		}
 	}
 	
 	public static class MyWebObjectSourceFactory implements WebObjectSourceFactory

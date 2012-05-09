@@ -11,7 +11,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.Executable;
+import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.Converter;
+import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.Interceptors;
@@ -19,7 +21,10 @@ import org.soybeanMilk.core.config.parser.ConfigurationParser;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
+import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
+import org.soybeanMilk.core.exe.support.DynamicResolverProvider;
 import org.soybeanMilk.core.exe.support.KeyArg;
+import org.soybeanMilk.core.exe.support.ObjectResolverProvider;
 import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
 
 public class TestConfigurationParser
@@ -33,162 +38,266 @@ public class TestConfigurationParser
 	public void tearDown() throws Exception{}
 	
 	@Test
-	public void testParseResult() throws Exception
+	public void parse_genericConverter_noClassAttr() throws Exception
 	{
-		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-0.xml");
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-genericConverter-noClassAttr.xml");
+		
+		GenericConverter gc=config.getGenericConverter();
+		
+		Assert.assertEquals(DefaultGenericConverter.class, gc.getClass());
+		Assert.assertEquals(TestConverter.class, gc.getConverter(String.class, int.class).getClass());
+		Assert.assertEquals(TestConverter.class, gc.getConverter(String.class, float.class).getClass());
+	}
+	
+	@Test
+	public void parse_genericConverter_hasClassAttr() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-genericConverter-hasClassAttr.xml");
+		
+		GenericConverter gc=config.getGenericConverter();
+		
+		Assert.assertEquals(MyGenericConverter.class, gc.getClass());
+	}
+	
+	@Test
+	public void parse_interceptor() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
+		
+		Interceptors ii=config.getInterceptorInfo();
+		
+		Assert.assertTrue(config.getExecutable("global_before") == ii.getBefore());
+		Assert.assertTrue(config.getExecutable("global_after") == ii.getAfter());
+		Assert.assertTrue(config.getExecutable("m1_exception") == ii.getException());
+		Assert.assertEquals("executionKey", ii.getExecutionKey());
+	}
+	
+	@Test
+	public void parse_includes() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
+		
+		ResolverObjectFactory rf=config.getResolverObjectFactory();
+		Assert.assertNotNull(rf.getResolverObject("tr"));
+		Assert.assertNotNull(rf.getResolverObject("tr1"));
+		Assert.assertNotNull(rf.getResolverObject("tr2"));
+		
+		Assert.assertNotNull(config.getExecutable("global_exe0"));
+		Assert.assertNotNull(config.getExecutable("m1_exe0"));
+		Assert.assertNotNull(config.getExecutable("m2_exe0"));
+	}
+	
+	@Test
+	public void parse_resolvers() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
 		
 		ResolverObjectFactory rf=config.getResolverObjectFactory();
 		Assert.assertEquals(TestResolver.class, rf.getResolverObject("tr").getClass());
 		Assert.assertEquals(TestResolver.class, rf.getResolverObject("tr1").getClass());
 		Assert.assertEquals(TestResolver.class, rf.getResolverObject("tr2").getClass());
+	}
+	
+	@Test
+	public void parse_executables_emptyName() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
 		
-		GenericConverter gc=config.getGenericConverter();
-		Assert.assertEquals(TestConverter.class, gc.getConverter(String.class, int.class).getClass());
-		Assert.assertEquals(TestConverter.class, gc.getConverter(String.class, float.class).getClass());
+		Action exe0=(Action)config.getExecutable("global_");
+		Assert.assertNotNull(exe0);
 		
-		Interceptors ii=config.getInterceptorInfo();
-		Assert.assertEquals("global_before", ii.getBefore().getName());
-		Assert.assertEquals("global_after", ii.getAfter().getName());
-		Assert.assertEquals("m1_exception", ii.getException().getName());
-		Assert.assertEquals("executionKey", ii.getExecutionKey());
+		Action exe1=(Action)config.getExecutable("m1_");
+		Assert.assertNotNull(exe1);
 		
-		{
-			Invoke exe=(Invoke)config.getExecutable("global_before");
-			Assert.assertEquals( rf.getResolverObject("tr"), exe.getResolverProvider().getResolver(null).getResolverObject());
-			Assert.assertEquals("test0", exe.getMethodName());
-			Assert.assertNull(exe.getArgs());
-		}
-		
-		{
-			Action exe=(Action)config.getExecutable("global_after");
-			Assert.assertNull(exe.getExecutables());
-		}
-
-		{
-			Action exe=(Action)config.getExecutable("global_");
-			Assert.assertNotNull(exe);
-		}
+		Action exe2=(Action)config.getExecutable("m2_");
+		Assert.assertNotNull(exe2);
+	}
+	
+	@Test
+	public void parse_executables_action() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
 		
 		{
 			Action exe=(Action)config.getExecutable("global_exe0");
-			Assert.assertNotNull(exe);
+			Assert.assertNull(exe.getExecutables());
 		}
 		
 		{
 			Action exe=(Action)config.getExecutable("global_exe1");
+			
+			Assert.assertNotNull(exe.getExecutables());
 			List<Executable> children=exe.getExecutables();
-			
-			Invoke ivk0=(Invoke)children.get(0);
-			Assert.assertNull(ivk0.getName());
-			Assert.assertEquals("test0", ivk0.getMethodName());
-			Assert.assertEquals( rf.getResolverObject("tr"), ivk0.getResolverProvider().getResolver(null).getResolverObject());
-			Assert.assertNull(ivk0.getArgs());
-			Assert.assertNull(ivk0.getResultKey());
-			
+			Assert.assertEquals(4, children.size());
+			Assert.assertEquals(Invoke.class, children.get(0).getClass());
 			Assert.assertTrue( children.get(1) == config.getExecutable("global_exe0") );
+			Assert.assertTrue( children.get(2) == config.getExecutable("global_exe0") );
+			Assert.assertTrue( children.get(3) == config.getExecutable("m1_exe0") );
 		}
+	}
+
+	@Test
+	public void parse_executables_invoke_noArgNoResult() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
 		
-		{
-			Action exe=(Action)config.getExecutable("global_exe2");
-			List<Executable> children=exe.getExecutables();
-			
-			Invoke ivk0=(Invoke)children.get(0);
-			Assert.assertEquals("test2", ivk0.getMethodName());
-			Assert.assertEquals( rf.getResolverObject("tr"), ivk0.getResolverProvider().getResolver(null).getResolverObject());
-			Arg[] args=ivk0.getArgs();
-			Assert.assertEquals(2, args.length);
-			Assert.assertEquals(KeyArg.class, args[0].getClass());
-			Assert.assertEquals("arg0", ((KeyArg)args[0]).getKey());
-			Assert.assertEquals(KeyArg.class, args[1].getClass());
-			Assert.assertEquals("arg1", ((KeyArg)args[1]).getKey());
-			Assert.assertEquals("result", ivk0.getResultKey());
-			
-			Assert.assertTrue( children.get(1) == config.getExecutable("global_exe0") );
-		}
+		Invoke exe=(Invoke)config.getExecutable("global_before");
 		
-		{
-			Invoke invoke=(Invoke)config.getExecutable("global_testLiterals");
-			Arg[] args=invoke.getArgs();
-			
-			Assert.assertEquals(new Byte((byte)10), args[0].getValue(null, null, null, null));
-			Assert.assertEquals(new Byte((byte)10), args[1].getValue(null, null, null, null));
-			
-			Assert.assertEquals(new Short((short)10), args[2].getValue(null, null, null, null));
-			Assert.assertEquals(new Short((short)10), args[3].getValue(null, null, null, null));
-			
-			Assert.assertEquals(new Integer(10), args[4].getValue(null, null, null, null));
-			Assert.assertEquals(new Integer(10), args[5].getValue(null, null, null, null));
-			
-			Assert.assertEquals(new Long(10), args[6].getValue(null, null, null, null));
-			Assert.assertEquals(new Long(10), args[7].getValue(null, null, null, null));
-			
-			Assert.assertEquals(new Float(10f), args[8].getValue(null, null, null, null));
-			Assert.assertEquals(new Float(10f), args[9].getValue(null, null, null, null));
-			
-			Assert.assertEquals(new Double(10d), args[10].getValue(null, null, null, null));
-			Assert.assertEquals(new Double(10d), args[11].getValue(null, null, null, null));
-			
-			Assert.assertEquals(new Integer(1234), args[12].getValue(null, null, null, null));
-			Assert.assertEquals(new Double(1.234), args[13].getValue(null, null, null, null));
-			
-			Assert.assertEquals("string", args[14].getValue(null, null, null, null));
-			Assert.assertEquals('c', args[15].getValue(null, null, null, null));
-			
-			Assert.assertEquals(Boolean.TRUE, args[16].getValue(null, null, null, null));
-			Assert.assertEquals(Boolean.FALSE, args[17].getValue(null, null, null, null));
-			Assert.assertNull(args[18].getValue(null, null, null, null));
-			
-			Assert.assertEquals(KeyArg.class, args[19].getClass());
-			Assert.assertEquals("someKey", ((KeyArg)args[19]).getKey());
-		}
+		ResolverProvider rp=exe.getResolverProvider();
+		Assert.assertEquals(DynamicResolverProvider.class, rp.getClass());
+		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getFactoryResolverProvider().getResolverId());
+		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getObjectSourceResolverProvider().getResolverKey());
+		Assert.assertEquals("test0", exe.getMethodName());
+		Assert.assertNull(exe.getArgs());
+	}
+	
+	@Test
+	public void parse_executables_invoke_hasArgHasResult() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
 		
-		{
-			Action exe=(Action)config.getExecutable("m1_exe0");
-			
-			List<Executable> children=exe.getExecutables();
-			
-			Invoke ivk0=(Invoke)children.get(0);
-			Assert.assertEquals("staticTest", ivk0.getMethodName());
-			Assert.assertNotNull(ivk0.getResolverProvider());
-			Arg[] args=ivk0.getArgs();
-			Assert.assertEquals(2, args.length);
-			Assert.assertEquals(KeyArg.class, args[0].getClass());
-			Assert.assertEquals("arg0", ((KeyArg)args[0]).getKey());
-			Assert.assertEquals(KeyArg.class, args[1].getClass());
-			Assert.assertEquals("arg1", ((KeyArg)args[1]).getKey());
-			Assert.assertEquals("result", ivk0.getResultKey());
-			
-			Assert.assertTrue( children.get(1) == config.getExecutable("global_exe0") );
-		}
+		Invoke exe=(Invoke)config.getExecutable("global_exe3");
 		
-		{
-			Action exe=(Action)config.getExecutable("m2_exe0");
-			
-			List<Executable> children=exe.getExecutables();
-			
-			Invoke ivk0=(Invoke)children.get(0);
-			Assert.assertNull(ivk0.getName());
-			Assert.assertEquals("staticTest",  ivk0.getMethodName());
-			Assert.assertNotNull( ivk0.getResolverProvider());
-			Arg[] args=ivk0.getArgs();
-			Assert.assertEquals(2, args.length);
-			Assert.assertEquals(KeyArg.class, args[0].getClass());
-			Assert.assertEquals("arg0", ((KeyArg)args[0]).getKey());
-			Assert.assertEquals(KeyArg.class, args[1].getClass());
-			Assert.assertEquals("arg1", ((KeyArg)args[1]).getKey());
-			Assert.assertEquals("result", ivk0.getResultKey());
-			
-			Assert.assertTrue( children.get(1) == config.getExecutable("m1_exe0") );
-		}
+		Assert.assertEquals("result", exe.getResultKey());
+		ResolverProvider rp=exe.getResolverProvider();
+		Assert.assertEquals(DynamicResolverProvider.class, rp.getClass());
+		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getFactoryResolverProvider().getResolverId());
+		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getObjectSourceResolverProvider().getResolverKey());
+		Assert.assertEquals("test2", exe.getMethodName());
+		Assert.assertEquals(2, exe.getArgs().length);
+		
+		Assert.assertEquals(KeyArg.class, exe.getArgs()[0].getClass());
+		Assert.assertEquals("arg0", ((KeyArg)exe.getArgs()[0]).getKey());
+		Assert.assertEquals(KeyArg.class, exe.getArgs()[1].getClass());
+		Assert.assertEquals("arg1", ((KeyArg)exe.getArgs()[1]).getKey());
+	}
+	
+	@Test
+	public void parse_executables_invoke_staticMethod() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
+		
+		Invoke exe=(Invoke)config.getExecutable("m1_exe1");
+		
+		Assert.assertEquals("result", exe.getResultKey());
+		ResolverProvider rp=exe.getResolverProvider();
+		Assert.assertEquals(ObjectResolverProvider.class, rp.getClass());
+		Assert.assertNull(((ObjectResolverProvider)rp).getResolver(null).getResolverObject());
+		Assert.assertEquals(TestResolver.class, ((ObjectResolverProvider)rp).getResolver(null).getResolverClass());
+		Assert.assertEquals("staticTest", exe.getMethodName());
+		Assert.assertEquals(2, exe.getArgs().length);
+		
+		Assert.assertEquals(KeyArg.class, exe.getArgs()[0].getClass());
+		Assert.assertEquals("arg0", ((KeyArg)exe.getArgs()[0]).getKey());
+		Assert.assertEquals(KeyArg.class, exe.getArgs()[1].getClass());
+		Assert.assertEquals("arg1", ((KeyArg)exe.getArgs()[1]).getKey());
+	}
+	
+	@Test
+	public void parse_executables_invoke_xml() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
+		
+		Invoke exe=(Invoke)config.getExecutable("global_exe4");
+		
+		Assert.assertEquals("result", exe.getResultKey());
+		ResolverProvider rp=exe.getResolverProvider();
+		Assert.assertEquals(DynamicResolverProvider.class, rp.getClass());
+		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getFactoryResolverProvider().getResolverId());
+		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getObjectSourceResolverProvider().getResolverKey());
+		Assert.assertEquals("test2", exe.getMethodName());
+		Assert.assertEquals(2, exe.getArgs().length);
+		
+		Assert.assertEquals(KeyArg.class, exe.getArgs()[0].getClass());
+		Assert.assertEquals("arg0", ((KeyArg)exe.getArgs()[0]).getKey());
+		Assert.assertEquals(KeyArg.class, exe.getArgs()[1].getClass());
+		Assert.assertEquals("arg1", ((KeyArg)exe.getArgs()[1]).getKey());
+	}
+	
+	@Test
+	public void parse_executables_invoke_breaker() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
 		
 		{
 			Invoke exe=(Invoke)config.getExecutable("m2_exe1");
-			
 			Assert.assertEquals("breakerKey", exe.getBreaker());
-			Assert.assertEquals("test0", exe.getMethodName());
-			Assert.assertEquals( rf.getResolverObject("tr2"), exe.getResolverProvider().getResolver(null).getResolverObject());
-			Arg[] args=exe.getArgs();
-			Assert.assertNull(args);
+		}
+		
+		{
+			Invoke exe=(Invoke)config.getExecutable("m2_exe2");
+			Assert.assertEquals(Boolean.TRUE, exe.getBreaker());
+		}
+		
+		{
+			Invoke exe=(Invoke)config.getExecutable("m2_exe3");
+			Assert.assertEquals(Boolean.FALSE, exe.getBreaker());
+		}
+	}
+	
+	@Test
+	public void parse_executables_invoke_valueArg() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
+		
+		Invoke invoke=(Invoke)config.getExecutable("global_valueArg");
+		Arg[] args=invoke.getArgs();
+		
+		Assert.assertEquals(new Byte((byte)10), args[0].getValue(null, null, null, null));
+		Assert.assertEquals(new Byte((byte)10), args[1].getValue(null, null, null, null));
+		
+		Assert.assertEquals(new Short((short)10), args[2].getValue(null, null, null, null));
+		Assert.assertEquals(new Short((short)10), args[3].getValue(null, null, null, null));
+		
+		Assert.assertEquals(new Integer(10), args[4].getValue(null, null, null, null));
+		Assert.assertEquals(new Integer(10), args[5].getValue(null, null, null, null));
+		
+		Assert.assertEquals(new Long(10), args[6].getValue(null, null, null, null));
+		Assert.assertEquals(new Long(10), args[7].getValue(null, null, null, null));
+		
+		Assert.assertEquals(new Float(10f), args[8].getValue(null, null, null, null));
+		Assert.assertEquals(new Float(10f), args[9].getValue(null, null, null, null));
+		
+		Assert.assertEquals(new Double(10d), args[10].getValue(null, null, null, null));
+		Assert.assertEquals(new Double(10d), args[11].getValue(null, null, null, null));
+		
+		Assert.assertEquals(new Integer(1234), args[12].getValue(null, null, null, null));
+		Assert.assertEquals(new Double(1.234), args[13].getValue(null, null, null, null));
+		
+		Assert.assertEquals("string", args[14].getValue(null, null, null, null));
+		Assert.assertEquals('c', args[15].getValue(null, null, null, null));
+		
+		Assert.assertEquals(Boolean.TRUE, args[16].getValue(null, null, null, null));
+		Assert.assertEquals(Boolean.FALSE, args[17].getValue(null, null, null, null));
+		
+		Assert.assertNull(args[18].getValue(null, null, null, null));
+	}
+	
+	public static class MyGenericConverter implements GenericConverter
+	{
+		public <T> T convert(Object sourceObj, Type targetType)
+				throws ConvertException {
+			return null;
+		}
+
+		public void addConverter(Type sourceType, Type targetType,
+				Converter converter) {
+			
+		}
+
+		public Converter getConverter(Type sourceType, Type targetType) {
+			return null;
+		}
+
+		public void setProperty(Object srcObj, String property, Object value)
+				throws ConvertException {
+			
+		}
+
+		public <T> T getProperty(Object srcObj, String property, Type expectType)
+				throws ConvertException {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	}
 	

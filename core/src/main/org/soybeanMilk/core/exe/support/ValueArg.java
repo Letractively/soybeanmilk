@@ -28,6 +28,7 @@ import org.soybeanMilk.core.exe.Invoke.Arg;
  */
 public class ValueArg implements Arg
 {
+	/**参数值*/
 	private Object value;
 	
 	public ValueArg()
@@ -55,5 +56,11 @@ public class ValueArg implements Arg
 	public Object getValue(ObjectSource objectSource, Type argType, Method method, Class<?> methodClass) throws Exception
 	{
 		return value;
+	}
+
+	//@Override
+	public String toString()
+	{
+		return "ValueArg [value=" + value + "]";
 	}
 }

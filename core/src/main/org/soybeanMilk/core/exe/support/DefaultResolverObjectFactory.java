@@ -73,18 +73,18 @@ public class DefaultResolverObjectFactory implements ResolverObjectFactory
 	 * @param id 解决对象标识
 	 * @param resolver 解决对象
 	 */
-	public void addResolver(Serializable id, Object resolver)
+	public void addResolverObject(Serializable resolverObjectId, Object resolverObject)
 	{
 		if(this.resolverObjects == null)
 			this.resolverObjects = new HashMap<Serializable, Object>();
 		
 		//允许重复添加，使得功能可以被替换
-		if(this.resolverObjects.get(id) != null)
-			log.warn("duplicate resolver id '"+id+"'");
+		if(this.resolverObjects.get(resolverObjectId) != null)
+			log.warn("duplicate resolver object id '"+resolverObjectId+"'");
 		
-		this.resolverObjects.put(id, resolver);
+		this.resolverObjects.put(resolverObjectId, resolverObject);
 		
 		if(log.isDebugEnabled())
-			log.debug("add a Resolver instance of class '"+resolver.getClass().getName()+"' with id '"+id+"'");
+			log.debug("add a resolver object '"+resolverObject+"' with id '"+resolverObjectId+"'");
 	}
 }

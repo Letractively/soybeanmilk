@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE soybean-milk PUBLIC "-//SoybeanMilk//DTD soybeanMilk web//EN" "http://soybeanmilk.googlecode.com/files/soybeanMilk-web-1.0.dtd">
+<soybean-milk>
+	
+	<resolvers>
+		<resolver class="test.unit.core.TestConfigurationParser$TestResolver" id="tr1"/>
+	</resolvers>
+	
+	<executables prefix="m1_">
+		
+		<action name="exception"></action>
+		
+		<action name=""></action>
+		
+		<action name="exe0">
+			<invoke name="staticTest">
+				result = test.unit.core.TestConfigurationParser$TestResolver.staticTest(arg0, arg1);
+			</invoke>
+			
+			<ref name="global_exe0" />
+		</action>
+		
+		<invoke name="exe1">
+			result = test.unit.core.TestConfigurationParser$TestResolver.staticTest(arg0, arg1);
+		</invoke>
+		
+	</executables>
+</soybean-milk>

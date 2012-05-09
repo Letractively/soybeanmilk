@@ -56,4 +56,12 @@ public class DynamicResolverProvider implements ResolverProvider
 		
 		return resolver;
 	}
+	
+	//@Override
+	public String toString()
+	{
+		return "DynamicResolverProvider [factoryResolverProvider="
+				+ factoryResolverProvider + ", objectSourceResolverProvider="
+				+ objectSourceResolverProvider + "]";
+	}
 }

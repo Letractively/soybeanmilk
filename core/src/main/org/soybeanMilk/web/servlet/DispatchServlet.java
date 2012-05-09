@@ -312,7 +312,6 @@ public class DispatchServlet extends HttpServlet
 		String configFileName=getInitParameter(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG);
 		
 		WebConfigurationParser parser=new WebConfigurationParser(webConfiguration,getServletContext());
-		
 		parser.parse(configFileName);
 		
 		we=new DefaultWebExecutor(webConfiguration);
@@ -360,7 +359,7 @@ public class DispatchServlet extends HttpServlet
 				throw new ServletException("can not find external ResolverObjectFactory in application with key '"+erfKey+"'");
 			
 			if(log.isDebugEnabled())
-				log.debug("find external ResolverObjectFactory '"+erf.getClass().getName()+"' in 'application' scope");
+				log.debug("found external ResolverObjectFactory '"+erf.getClass().getName()+"' in 'application' scope");
 		}
 		
 		return erf;
@@ -372,7 +371,7 @@ public class DispatchServlet extends HttpServlet
 		String re=super.getInitParameter(name);
 		
 		if(log.isDebugEnabled())
-			log.debug("get init parameter value '"+re+"' for key '"+name+"'");
+			log.debug("got init parameter value '"+re+"' for key '"+name+"'");
 		
 		return re;
 	}

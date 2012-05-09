@@ -53,4 +53,10 @@ public class ObjectSourceResolverProvider implements ResolverProvider
 	{
 		return objectSource.get(this.resolverKey, null);
 	}
+
+	//@Override
+	public String toString()
+	{
+		return "ObjectSourceResolverProvider [resolverKey=" + resolverKey + "]";
+	}
 }

@@ -24,9 +24,17 @@ import java.io.Serializable;
 public interface ResolverObjectFactory
 {
 	/**
-	 * 根据ID查找调用目标对象
+	 * 根据ID查找调用目标对象。如果没有找到，它应该返回<code>null</code>而不是抛出异常
 	 * @param resolverObjectId 调用目标对象ID
 	 * @return
 	 */
 	Object getResolverObject(Serializable resolverObjectId);
+	
+	/**
+	 * 添加一个调用目标对象
+	 * @param resolverObjectId
+	 * @param resolverObject
+	 * @date 2012-5-9
+	 */
+	void addResolverObject(Serializable resolverObjectId, Object resolverObject);
 }

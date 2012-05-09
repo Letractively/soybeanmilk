@@ -162,41 +162,19 @@ public class TestInvoke
 	@Test
 	public void execute_breakerIsLiteralTrue() throws Exception
 	{
-		//breaker为"true"
-		{
-			ObjectSource objSource=new HashMapObjectSource();
-			executor.execute("testBreaker_2", objSource);
-			
-			Assert.assertNull(objSource.get(RESULT_KEY, null));
-		}
+		ObjectSource objSource=new HashMapObjectSource();
+		executor.execute("testBreaker_2", objSource);
 		
-		//breaker为"TRUE"
-		{
-			ObjectSource objSource=new HashMapObjectSource();
-			executor.execute("testBreaker_4", objSource);
-			
-			Assert.assertNull(objSource.get(RESULT_KEY, null));
-		}
+		Assert.assertNull(objSource.get(RESULT_KEY, null));
 	}
 
 	@Test
 	public void execute_breakerIsLiteralFalse() throws Exception
 	{
-		//breaker为"false"
-		{
-			ObjectSource objSource=new HashMapObjectSource();
-			executor.execute("testBreaker_3", objSource);
-			
-			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
-		}
+		ObjectSource objSource=new HashMapObjectSource();
+		executor.execute("testBreaker_3", objSource);
 		
-		//breaker为"FALSE"
-		{
-			ObjectSource objSource=new HashMapObjectSource();
-			executor.execute("testBreaker_5", objSource);
-			
-			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
-		}
+		Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
 	}
 	
 	@Test

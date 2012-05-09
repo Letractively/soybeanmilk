@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -320,10 +321,7 @@ public class ConfigurationParser
 				configuration.setResolverObjectFactory(rf);
 			}
 			
-			if(!(rf instanceof DefaultResolverObjectFactory))
-				throw new ParseException("the resolver object factory you set must be instance of '"+DefaultResolverObjectFactory.class.getName()+"'");
-			
-			DefaultResolverObjectFactory drf=(DefaultResolverObjectFactory)rf;
+			ResolverObjectFactory drf=(ResolverObjectFactory)rf;
 			
 			for(Element e : children)
 			{
@@ -334,7 +332,7 @@ public class ConfigurationParser
 				
 				Object resolver=createClassInstance(clazz);
 				
-				drf.addResolver(id,resolver);
+				drf.addResolverObject(id,resolver);
 			}
 		}
 	}
@@ -503,7 +501,18 @@ public class ConfigurationParser
 		String breaker=getAttributeValueIngoreEmpty(element, TAG_INVOKE_ATTR_BREAKER);
 		
 		if(breaker != null)
-			invoke.setBreaker(breaker);
+		{
+			Serializable brk=null;
+			
+			if(Boolean.TRUE.toString().equals(breaker))
+				brk=Boolean.TRUE;
+			else if(Boolean.FALSE.toString().equals(breaker))
+				brk=Boolean.FALSE;
+			else
+				brk=breaker;
+			
+			invoke.setBreaker(brk);
+		}
 		
 		if(methodName == null)
 			setInvokePropertiesStatement(invoke, element, global);
@@ -555,6 +564,8 @@ public class ConfigurationParser
 		
 		if(resolverClazz==null && resolverId==null)
 			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_RESOLVER_OBJECT+"] or ["+TAG_INVOKE_ATTR_RESOLVER_CLASS+"] must not be null");
+		
+		invoke.setName(name);
 		
 		String[] args=parseArgs(element);
 		
@@ -1262,11 +1273,9 @@ public class ConfigurationParser
 	 */
 	protected static class ExecutableRefProxy implements Executable
 	{
-		private static final long serialVersionUID = 1L;
-		
 		private String refName;
 		private String currentExecutablePrefix;
-
+		
 		public ExecutableRefProxy(String refName, String currentExecutablePrefix)
 		{
 			super();

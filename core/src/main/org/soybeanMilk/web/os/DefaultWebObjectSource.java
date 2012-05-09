@@ -229,7 +229,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		result=convertGotObject(result, expectType);
 		
 		if(log.isDebugEnabled())
-			log.debug("get object '"+SoybeanMilkUtils.toString(result)+"' from '"+SoybeanMilkUtils.toString(this)+"' with key '"+SoybeanMilkUtils.toString(strKey)+"'");
+			log.debug("got object '"+SoybeanMilkUtils.toString(result)+"' from '"+SoybeanMilkUtils.toString(this)+"' with key '"+SoybeanMilkUtils.toString(strKey)+"'");
 		
 		return (T)result;
 	}

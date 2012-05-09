@@ -31,6 +31,7 @@ import org.soybeanMilk.core.exe.Invoke.Arg;
  */
 public class KeyArg implements Arg
 {
+	/**参数值在对象源中的关键字*/
 	private Serializable key;
 	
 	public KeyArg()
@@ -61,5 +62,11 @@ public class KeyArg implements Arg
 			argType=GenericType.getGenericType(argType, methodClass);
 		
 		return objectSource.get(this.key, argType);
+	}
+
+	//@Override
+	public String toString()
+	{
+		return "KeyArg [key=" + key + "]";
 	}
 }

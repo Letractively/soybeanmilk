@@ -28,8 +28,8 @@ import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
  */
 public class FactoryResolverProvider implements ResolverProvider
 {
-	private ResolverObjectFactory resolverObjectFactory;
 	private Serializable resolverId;
+	private ResolverObjectFactory resolverObjectFactory;
 	
 	public FactoryResolverProvider()
 	{
@@ -64,5 +64,12 @@ public class FactoryResolverProvider implements ResolverProvider
 	public Resolver getResolver(ObjectSource objectSource) throws Exception
 	{
 		return new Resolver(this.resolverObjectFactory.getResolverObject(this.resolverId));
+	}
+
+	//@Override
+	public String toString()
+	{
+		return "FactoryResolverProvider [resolverId=" + resolverId
+				+ ", resolverObjectFactory=" + resolverObjectFactory + "]";
 	}
 }

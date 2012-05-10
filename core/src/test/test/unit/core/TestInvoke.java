@@ -172,7 +172,7 @@ public class TestInvoke
 		ResolverObjectFactory rof=new DefaultResolverObjectFactory();
 		rof.addResolverObject("dynamicResolver", new TestResolver());
 		
-		ResolverProvider rp=new DynamicResolverProvider(new ObjectSourceResolverProvider("dynamicResolver"), null);
+		ResolverProvider rp=new DynamicResolverProvider(null, new ObjectSourceResolverProvider("dynamicResolver"));
 		
 		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		
@@ -197,7 +197,7 @@ public class TestInvoke
 		ResolverObjectFactory rof=new DefaultResolverObjectFactory();
 		rof.addResolverObject("dynamicResolver", new TestResolver());
 		
-		ResolverProvider rp=new DynamicResolverProvider(null, new FactoryResolverProvider(rof, "dynamicResolver"));
+		ResolverProvider rp=new DynamicResolverProvider(new FactoryResolverProvider(rof, "dynamicResolver"), null);
 		
 		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		
@@ -220,7 +220,7 @@ public class TestInvoke
 		
 		ResolverObjectFactory rof=new DefaultResolverObjectFactory();
 		
-		ResolverProvider rp=new DynamicResolverProvider(new ObjectSourceResolverProvider("dynamicResolver"), new FactoryResolverProvider(rof, "dynamicResolver"));
+		ResolverProvider rp=new DynamicResolverProvider(new FactoryResolverProvider(rof, "dynamicResolver"), new ObjectSourceResolverProvider("dynamicResolver"));
 		
 		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		

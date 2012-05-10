@@ -28,6 +28,11 @@
 			interceptor.exception(executionKey);
 		</invoke>
 		
+		<action name="helloStatement">
+			<invoke> statement.helloResult = helloResolver.hello(helloTo, 3) </invoke>
+			<invoke> example . resolver. HelloResolver . printObject ( statement.helloResult ); </invoke>
+		</action>
+		
 		<action name="helloXml">
 			<invoke method="hello" resolver="helloResolver" result-key="helloResult">
 				<arg>helloTo</arg>
@@ -39,19 +44,14 @@
 			</invoke>
 		</action>
 		
-		<action name="helloStatement">
-			<invoke> statement.helloResult = helloResolver.hello(helloTo, 3) </invoke>
-			<invoke> example . resolver. HelloResolver . printObject ( statement.helloResult ); </invoke>
-		</action>
-		
 		<action name="javaSyntax">
 			<invoke>
 				example.resolver.HelloResolver.testJavaSyntax(
 					'a',
-					35,
+					35B,
 					true,
 					22222,
-					33333333333,
+					33333333333333L,
 					2.533f,
 					3.23423434089d,
 					"ab\tcd",

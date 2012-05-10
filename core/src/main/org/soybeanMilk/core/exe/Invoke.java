@@ -457,6 +457,10 @@ public class Invoke extends AbstractExecutable
 		public Resolver(Object resolverObject)
 		{
 			super();
+			
+			if(resolverObject == null)
+				throw new NullPointerException("the resolverObject must not be null");
+			
 			this.resolverObject = resolverObject;
 			this.resolverClass = resolverObject.getClass();
 		}

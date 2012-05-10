@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.soybeanMilk.core.DefaultExecutor;
+import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
@@ -19,8 +20,13 @@ import org.soybeanMilk.core.exe.InvocationExecuteException;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
 import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
+import org.soybeanMilk.core.exe.support.DefaultResolverObjectFactory;
+import org.soybeanMilk.core.exe.support.DynamicResolverProvider;
+import org.soybeanMilk.core.exe.support.FactoryResolverProvider;
 import org.soybeanMilk.core.exe.support.KeyArg;
 import org.soybeanMilk.core.exe.support.ObjectResolverProvider;
+import org.soybeanMilk.core.exe.support.ObjectSourceResolverProvider;
+import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
 import org.soybeanMilk.core.exe.support.ValueArg;
 import org.soybeanMilk.core.os.HashMapObjectSource;
 
@@ -107,6 +113,134 @@ public class TestInvoke
 		invoke.execute(os);
 		
 		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY, null));
+	}
+	
+	@Test
+	public void execute_dynamic_objectSourceResolverProvider() throws Exception
+	{
+		Arg[] args=new Arg[]{
+				new KeyArg("arg0"),
+				new KeyArg("arg1"),
+		};
+		
+		ResolverProvider rp=new ObjectSourceResolverProvider("objectSourceResolver");
+		
+		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("objectSourceResolver", new TestResolver());
+		os.set("arg0", "arg0");
+		os.set("arg1", "1111");
+		
+		invoke.execute(os);
+		
+		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY, null));
+	}
+	
+	@Test
+	public void execute_dynamic_factoryResolverProvider() throws Exception
+	{
+		Arg[] args=new Arg[]{
+				new KeyArg("arg0"),
+				new KeyArg("arg1"),
+		};
+		
+		ResolverObjectFactory rof=new DefaultResolverObjectFactory();
+		rof.addResolverObject("factoryResolver", new TestResolver());
+		
+		ResolverProvider rp=new FactoryResolverProvider(rof, "factoryResolver");
+		
+		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("arg0", "arg0");
+		os.set("arg1", "1111");
+		
+		invoke.execute(os);
+		
+		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY, null));
+	}
+
+	@Test
+	public void execute_dynamic_dynamicResolverProvider_objectSource() throws Exception
+	{
+		Arg[] args=new Arg[]{
+				new KeyArg("arg0"),
+				new KeyArg("arg1"),
+		};
+		
+		ResolverObjectFactory rof=new DefaultResolverObjectFactory();
+		rof.addResolverObject("dynamicResolver", new TestResolver());
+		
+		ResolverProvider rp=new DynamicResolverProvider(new ObjectSourceResolverProvider("dynamicResolver"), null);
+		
+		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("dynamicResolver", new TestResolver());
+		os.set("arg0", "arg0");
+		os.set("arg1", "1111");
+		
+		invoke.execute(os);
+		
+		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY, null));
+	}
+	
+	@Test
+	public void execute_dynamic_dynamicResolverProvider_factory() throws Exception
+	{
+		Arg[] args=new Arg[]{
+				new KeyArg("arg0"),
+				new KeyArg("arg1"),
+		};
+		
+		ResolverObjectFactory rof=new DefaultResolverObjectFactory();
+		rof.addResolverObject("dynamicResolver", new TestResolver());
+		
+		ResolverProvider rp=new DynamicResolverProvider(null, new FactoryResolverProvider(rof, "dynamicResolver"));
+		
+		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("arg0", "arg0");
+		os.set("arg1", "1111");
+		
+		invoke.execute(os);
+		
+		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY, null));
+	}
+	
+	@Test
+	public void execute_dynamic_dynamicResolverProvider_none() throws Exception
+	{
+		Arg[] args=new Arg[]{
+				new KeyArg("arg0"),
+				new KeyArg("arg1"),
+		};
+		
+		ResolverObjectFactory rof=new DefaultResolverObjectFactory();
+		
+		ResolverProvider rp=new DynamicResolverProvider(new ObjectSourceResolverProvider("dynamicResolver"), new FactoryResolverProvider(rof, "dynamicResolver"));
+		
+		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("arg0", "arg0");
+		os.set("arg1", "1111");
+		
+		ExecuteException re=null;
+		
+		try
+		{
+			invoke.execute(os);
+		}
+		catch(ExecuteException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertNotNull(re);
+		Assert.assertTrue( (re.getMessage().startsWith("got null resolver from ResolverProvider")) );
 	}
 	
 	@Test

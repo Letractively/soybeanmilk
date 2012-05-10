@@ -51,9 +51,11 @@ public class ObjectSourceResolverProvider implements ResolverProvider
 	//@Override
 	public Resolver getResolver(ObjectSource objectSource) throws Exception
 	{
-		return objectSource.get(this.resolverKey, null);
+		Object ro=objectSource.get(this.resolverKey, null);
+		
+		return (ro == null ? null : new Resolver(ro));
 	}
-
+	
 	//@Override
 	public String toString()
 	{

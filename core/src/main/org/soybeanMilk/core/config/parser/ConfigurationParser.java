@@ -632,7 +632,7 @@ public class ConfigurationParser
 			FactoryResolverProvider frp=new FactoryResolverProvider(configuration.getResolverObjectFactory(), resolver);
 			ObjectSourceResolverProvider orp=new ObjectSourceResolverProvider(resolver);
 			
-			invoke.setResolverProvider(new DynamicResolverProvider(frp, orp));
+			invoke.setResolverProvider(new DynamicResolverProvider(orp, frp));
 		}
 		
 		invoke.setMethodName(methodName);

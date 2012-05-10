@@ -63,7 +63,9 @@ public class FactoryResolverProvider implements ResolverProvider
 	//@Override
 	public Resolver getResolver(ObjectSource objectSource) throws Exception
 	{
-		return new Resolver(this.resolverObjectFactory.getResolverObject(this.resolverId));
+		Object ro=this.resolverObjectFactory.getResolverObject(this.resolverId);
+		
+		return (ro == null ? null : new Resolver(ro));
 	}
 
 	//@Override

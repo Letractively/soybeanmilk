@@ -51,16 +51,14 @@ import org.soybeanMilk.web.bean.WebGenericConverter;
  * 将变为“someValue”。
  * </p>
  * <p>
- * 另外，你也可以使用“someObj.someProperty”形式的关键字，来获取已存在于底层对象源的“someObj”对象的“someProperty”属性值，而如果“someObj”对象不存在，
- * “someObj.someProperty”将被认为仅仅是一个普通形式的关键字而重新查找。
+ * 另外，你也可以使用“someObj.someProperty”形式的关键字，来获取已存在于底层对象源的“someObj”对象的“someProperty”属性值。
  * </p>
  * <p>
  * 如果默认Web对象源从底层对象源中获取的对象与期望的对象类型不匹配，它将会使用{@linkplain WebGenericConverter Web通用转换器}将这个对象转换为期望类型的对象。
  * </p>
  * <p>
  * 当将对象保存到默认Web对象源时，对象将会被直接保存到{@linkplain HttpServletRequest}中，而如果是要将对象保存到已存在于底层对象源的某个对象的某个属性中，
- * 比如以关键字“someObj.someProperty”，那么默认Web对象源会从三个底层对象源查找“someObj”对象，并设置它的“someProperty”属性的值，而如果“someObj”对象不存在，
- * “someObj.someProperty”将被认为仅仅是一个普通形式的关键字，而保存到{@linkplain HttpServletRequest}中。
+ * 比如以关键字“someObj.someProperty”，那么默认Web对象源会从三个底层对象源查找“someObj”对象，并设置它的“someProperty”属性的值。
  * </p>
  * <p>
  * 默认Web对象源还提供了一些用于标识作用域的特殊关键字，包括“param”、“request”、“session”、“application”、“response”、“objectSource”：
@@ -334,7 +332,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 				success=setServletObjAttrExpression(getApplication(), key, value, false);
 				
 				if(!success)
-					setServletObjAttr(getRequest(), key, value);
+					setServletObjAttrExpression(getRequest(), key, value, true);
 			}
 		}
 	}
@@ -359,38 +357,17 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 			result=getServletObjAttr(servletObj, attrExpression);
 		else
 		{
-			//尝试确定Servlet作用域属性名并获取属性值
-			StringBuilder nameCache=new StringBuilder();
-			int i=0;
-			for(; i<propKeys.length; i++)
+			Object tmp=getServletObjAttr(servletObj, propKeys[0]);
+			
+			for(int i=1; i<propKeys.length; i++)
 			{
-				if(i != 0)
-					nameCache.append(WebConstants.ACCESSOR);
-				
-				nameCache.append(propKeys[i]);
-				
-				result=getServletObjAttr(servletObj, nameCache.toString());
-				
-				if(result != null)
+				if(tmp == null)
 					break;
+				else
+					tmp=getProperty(tmp, propKeys[i]);
 			}
 			
-			i=i+1;
-			
-			//作用域属性名之后的即是对象的属性名
-			if(result!=null && i<propKeys.length)
-			{
-				nameCache.delete(0, nameCache.length());
-				for(int j=i; j<propKeys.length; j++)
-				{
-					if(j != 0)
-						nameCache.append(WebConstants.ACCESSOR);
-					
-					nameCache.append(propKeys[j]);
-				}
-				
-				result=getProperty(result, nameCache.toString());
-			}
+			result=tmp;
 		}
 		
 		return result;
@@ -407,58 +384,31 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	 */
 	protected boolean setServletObjAttrExpression(Object servletObj, String attrExpression, Object value, boolean force) throws ObjectSourceException
 	{
-		if(attrExpression == null)
-			return force;
-		
 		boolean result=false;
 		
-		String[] propKeys=SoybeanMilkUtils.splitAccessExpression(attrExpression);
+		String[] propKeys=SoybeanMilkUtils.splitByFirstAccessor(attrExpression);
 		
 		//没有包含访问符，则直接保存到此作用域
-		if(propKeys.length ==1)
+		if(propKeys.length == 1)
 		{
 			setServletObjAttr(servletObj, attrExpression, value);
 			result=true;
 		}
 		else
 		{
-			//尝试确定Servlet作用域属性名并获取属性值
-			Object attrObj=null;
-			StringBuilder nameCache=new StringBuilder();
-			int i=0;
-			for(; i<propKeys.length; i++)
-			{
-				if(i != 0)
-					nameCache.append(WebConstants.ACCESSOR);
-				
-				nameCache.append(propKeys[i]);
-				
-				attrObj=getServletObjAttr(servletObj, nameCache.toString());
-				
-				if(attrObj != null)
-					break;
-			}
+			Object attrObj=getServletObjAttr(servletObj, propKeys[0]);
 			
-			i=i+1;
-			
-			//作用域属性名之后的即是对象属性名
-			if(attrObj!=null && i<propKeys.length)
+			if(attrObj == null)
 			{
-				nameCache.delete(0, nameCache.length());
-				for(int j=i; j<propKeys.length; j++)
-				{
-					if(j != 0)
-						nameCache.append(WebConstants.ACCESSOR);
-					
-					nameCache.append(propKeys[j]);
-				}
-				
-				setProperty(attrObj, nameCache.toString(), value);
-				result=true;
+				if(force)
+					throw new ObjectSourceException("no '"+propKeys[0]+"' attribute object found in '"+servletObj+"' scope with key '"+attrExpression+"'");
+				else
+					result=false;
 			}
-			else if(force)
+			else
 			{
-				setServletObjAttr(servletObj, attrExpression, value);
+				setProperty(attrObj, propKeys[1], value);
+				
 				result=true;
 			}
 		}

@@ -76,7 +76,7 @@ public class PathNode implements Comparable<PathNode>,Serializable
 	
 	//@Override
 	public String toString() {
-		return "PathNode [nodeValue=" + nodeValue + ", isVariable="
+		return getClass().getSimpleName()+" [nodeValue=" + nodeValue + ", isVariable="
 				+ isVariable + "]";
 	}
 

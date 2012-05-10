@@ -57,6 +57,6 @@ public class ObjectSourceResolverProvider implements ResolverProvider
 	//@Override
 	public String toString()
 	{
-		return "ObjectSourceResolverProvider [resolverKey=" + resolverKey + "]";
+		return getClass().getSimpleName()+" [resolverKey=" + resolverKey + "]";
 	}
 }

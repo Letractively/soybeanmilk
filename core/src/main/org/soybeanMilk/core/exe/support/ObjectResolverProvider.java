@@ -49,6 +49,6 @@ public class ObjectResolverProvider implements ResolverProvider
 	//@Override
 	public String toString()
 	{
-		return "ObjectResolverProvider [resolver=" + resolver + "]";
+		return getClass().getSimpleName()+" [resolver=" + resolver + "]";
 	}
 }

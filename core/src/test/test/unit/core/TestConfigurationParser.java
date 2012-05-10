@@ -16,7 +16,7 @@ import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.config.Configuration;
-import org.soybeanMilk.core.config.Interceptors;
+import org.soybeanMilk.core.config.Interceptor;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.core.exe.Invoke;
@@ -64,7 +64,7 @@ public class TestConfigurationParser
 	{
 		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
 		
-		Interceptors ii=config.getInterceptorInfo();
+		Interceptor ii=config.getInterceptor();
 		
 		Assert.assertTrue(config.getExecutable("global_before") == ii.getBefore());
 		Assert.assertTrue(config.getExecutable("global_after") == ii.getAfter());

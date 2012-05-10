@@ -188,7 +188,7 @@ public class Invoke extends AbstractExecutable
 	@Override
 	public String toString()
 	{
-		return "Invoke [resultKey=" + resultKey + ", resolverProvider="
+		return getClass().getSimpleName()+" [name="+getName()+", resultKey=" + resultKey + ", resolverProvider="
 				+ resolverProvider + ", methodName=" + methodName + ", args="
 				+ Arrays.toString(args) + ", breaker=" + breaker + "]";
 	}
@@ -305,7 +305,7 @@ public class Invoke extends AbstractExecutable
 		}
 		
 		if(log.isDebugEnabled())
-			log.debug("got method arguments: "+SoybeanMilkUtils.toString(values));
+			log.debug("prepared method arguments: "+SoybeanMilkUtils.toString(values));
 		
 		return values;
 	}

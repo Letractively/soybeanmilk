@@ -23,7 +23,7 @@ import org.soybeanMilk.core.Executable;
  * @author earthangry@gmail.com
  * @date 2010-11-27
  */
-public class Interceptors implements Serializable
+public class Interceptor implements Serializable
 {
 	private static final long serialVersionUID = -9129725997833969256L;
 	
@@ -39,12 +39,12 @@ public class Interceptors implements Serializable
 	/**执行语境对象保存关键字*/
 	private Serializable executionKey;
 	
-	public Interceptors()
+	public Interceptor()
 	{
 		super();
 	}
 	
-	public Interceptors(Executable before, Executable after,
+	public Interceptor(Executable before, Executable after,
 			Executable exception, Serializable executionKey)
 	{
 		super();
@@ -82,7 +82,7 @@ public class Interceptors implements Serializable
 	//@Override
 	public String toString()
 	{
-		return "InterceptorInfo [before=" + before
+		return getClass().getSimpleName()+" [before=" + before
 				+ ", after=" + after + ", exception="
 				+ exception + ", executionKey=" + executionKey
 				+ "]";

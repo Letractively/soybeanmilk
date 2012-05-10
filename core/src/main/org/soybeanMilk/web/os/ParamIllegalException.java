@@ -17,13 +17,13 @@ package org.soybeanMilk.web.os;
 import java.lang.reflect.Type;
 
 import org.soybeanMilk.core.ObjectSourceException;
-import org.soybeanMilk.core.config.Interceptors;
+import org.soybeanMilk.core.config.Interceptor;
 import org.soybeanMilk.core.exe.ArgPrepareExecuteException;
 import org.soybeanMilk.web.WebObjectSource;
 
 /**
  * 请求参数非法异常，{@linkplain WebObjectSource Web对象源}在将请求参数转换为某类型的对象时由于参数值非法而出现异常。<br>
- * 配合{@linkplain ArgPrepareExecuteException}类，它使你可以在{@linkplain Interceptors 执行拦截器}中获取
+ * 配合{@linkplain ArgPrepareExecuteException}类，它使你可以在{@linkplain Interceptor 执行拦截器}中获取
  * 和处理非法的请求参数：
  * <pre>
  * void handleParamIllegalException(Execution execution)

@@ -69,7 +69,7 @@ public class FactoryResolverProvider implements ResolverProvider
 	//@Override
 	public String toString()
 	{
-		return "FactoryResolverProvider [resolverId=" + resolverId
+		return getClass().getSimpleName()+" [resolverId=" + resolverId
 				+ ", resolverObjectFactory=" + resolverObjectFactory + "]";
 	}
 }

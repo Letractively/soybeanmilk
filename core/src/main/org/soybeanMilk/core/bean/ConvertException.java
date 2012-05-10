@@ -71,6 +71,6 @@ public class ConvertException extends Exception
 	@Override
 	public String toString()
 	{
-		return "ConvertException [sourceObject=" + sourceObject + ", targetType=" + targetType + "]";
+		return getClass().getSimpleName()+" [sourceObject=" + sourceObject + ", targetType=" + targetType + "]";
 	}
 }

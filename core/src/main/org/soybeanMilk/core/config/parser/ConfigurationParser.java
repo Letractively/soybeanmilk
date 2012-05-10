@@ -36,7 +36,7 @@ import org.soybeanMilk.core.bean.Converter;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.config.Configuration;
-import org.soybeanMilk.core.config.Interceptors;
+import org.soybeanMilk.core.config.Interceptor;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
@@ -441,7 +441,7 @@ public class ConfigurationParser
 		
 		assertNotEmpty(executionKey, "<"+TAG_INTERCEPROT+"> attribute ["+TAG_INTERCEPROT_ATTR_EXECUTION_KEY+"] must not be empty");
 		
-		Interceptors ii=createInterceptorInfoInstance();
+		Interceptor ii=createInterceptorInfoInstance();
 		ii.setExecutionKey(executionKey);
 		
 		if(before != null)
@@ -451,7 +451,7 @@ public class ConfigurationParser
 		if(exception != null)
 			ii.setException(new ExecutableRefProxy(exception, getCurrentExecutablePrefix()));
 		
-		getConfiguration().setInterceptorInfo(ii);
+		getConfiguration().setInterceptor(ii);
 	}
 	
 	/**
@@ -691,7 +691,7 @@ public class ConfigurationParser
 	 */
 	protected void processInterceptorInfoRefs()
 	{
-		Interceptors ii=getConfiguration().getInterceptorInfo();
+		Interceptor ii=getConfiguration().getInterceptor();
 		if(ii == null)
 			return;
 		
@@ -1199,9 +1199,9 @@ public class ConfigurationParser
 	 * 创建空的拦截器信息对象，用于设置其属性
 	 * @return
 	 */
-	protected Interceptors createInterceptorInfoInstance()
+	protected Interceptor createInterceptorInfoInstance()
 	{
-		return new Interceptors();
+		return new Interceptor();
 	}
 	
 	/**
@@ -1316,7 +1316,7 @@ public class ConfigurationParser
 		//@Override
 		public String toString()
 		{
-			return "Executable [name=" + refName + "]";
+			return Executable.class.getSimpleName()+" [name=" + refName + "]";
 		}
 	}
 }

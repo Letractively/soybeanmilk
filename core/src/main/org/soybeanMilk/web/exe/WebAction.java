@@ -63,7 +63,7 @@ public class WebAction extends Action
 	@Override
 	public String toString()
 	{
-		return "WebAction [name=" + getName() + ", target=" + target + "]";
+		return getClass().getSimpleName()+" [name=" + getName() + ", target=" + target + "]";
 	}
 
 	/**

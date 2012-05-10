@@ -60,7 +60,7 @@ public class DynamicResolverProvider implements ResolverProvider
 	//@Override
 	public String toString()
 	{
-		return "DynamicResolverProvider [factoryResolverProvider="
+		return getClass().getSimpleName()+" [factoryResolverProvider="
 				+ factoryResolverProvider + ", objectSourceResolverProvider="
 				+ objectSourceResolverProvider + "]";
 	}

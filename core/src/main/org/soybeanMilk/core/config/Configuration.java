@@ -26,7 +26,7 @@ import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
 
 /**
  * 配置，它包含执行所需的环境信息，比如{@linkplain ResolverFactory 解决对象工厂}、{@linkplain GenericConverter 通用转换器}，
- * {@linkplain Executable 可执行对象}集以及{@linkplain Interceptors 执行拦截器}
+ * {@linkplain Executable 可执行对象}集以及{@linkplain Interceptor 执行拦截器}
  * @author earthangry@gmail.com
  * @date 2010-10-1
  */
@@ -41,7 +41,7 @@ public class Configuration
 	private GenericConverter genericConverter;
 	
 	/**拦截器信息*/
-	private Interceptors interceptorInfo;
+	private Interceptor interceptor;
 	
 	/**可执行对象集*/
 	private Map<String, Executable> executablesMap;
@@ -73,19 +73,20 @@ public class Configuration
 		this.genericConverter = genericConverter;
 		
 		if(log.isDebugEnabled())
-			log.debug("set GenericConverter to '"+genericConverter+"'");
+			log.debug("set GenericConverter property to '"+this.genericConverter+"'");
 	}
 	
-	public Interceptors getInterceptorInfo() {
-		return interceptorInfo;
-	}
-	
-	public void setInterceptorInfo(Interceptors interceptorInfo)
+	public Interceptor getInterceptor()
 	{
-		this.interceptorInfo = interceptorInfo;
+		return interceptor;
+	}
+	
+	public void setInterceptor(Interceptor interceptor)
+	{
+		this.interceptor = interceptor;
 		
 		if(log.isDebugEnabled())
-			log.debug("set interceptor info to '"+interceptorInfo+"'");
+			log.debug("set Interceptor property to '"+this.interceptor+"'");
 	}
 	
 	/**
@@ -147,7 +148,7 @@ public class Configuration
 		
 		//允许重复添加，使得功能可以被替换
 		if(exeMap.get(executable.getName()) != null)
-			log.warn("duplicate Executable name '"+executable.getName()+"'");
+			log.warn("duplicate Executable named '"+executable.getName()+"' is added, the previous will be replaced");
 		
 		exeMap.put(executable.getName(), executable);
 		

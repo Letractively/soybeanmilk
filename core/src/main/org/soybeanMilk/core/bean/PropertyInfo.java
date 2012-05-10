@@ -205,7 +205,7 @@ public class PropertyInfo
 	
 	//@Override
 	public String toString() {
-		return "PropertyInfo [name=" + propName + ", type=" + propType
+		return getClass().getSimpleName()+" [name=" + propName + ", type=" + propType
 				+ ", genericType=" + propGenericType + "]";
 	}
 	

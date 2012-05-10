@@ -108,6 +108,6 @@ public class Action extends AbstractExecutable
 	//@Override
 	public String toString()
 	{
-		return "Action [name=" + getName() + "]";
+		return getClass().getSimpleName()+" [name=" + getName() + "]";
 	}
 }

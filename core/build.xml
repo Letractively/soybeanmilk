@@ -58,16 +58,14 @@
 	</target>
 	
 	<!--拷贝源文件到dist下-->
-	<!--
 	<target name="copySrcToDist" depends="zipExampleProject">
 		<delete dir="${distDir}/src" />
 		<mkdir dir="${distDir}/src"/>
 		<copydir dest="${distDir}/src" src="${srcDir}/main" />
 	</target>
-	-->
 	
 	<!--拷贝临时目录下的API到docs下-->
-	<target name="copyApiToDocs" depends="zipExampleProject">
+	<target name="copyApiToDocs" depends="copySrcToDist">
 		<delete dir="${distDir}/docs/api" />
 		<mkdir dir="${distDir}/docs/api"/>
 		<copydir dest="${distDir}/docs/api" src="${tmpDir}/api" />
@@ -93,7 +91,7 @@
 	<target name="zipDist" depends="jarCoreExamples">
 		<delete file="${versionDir}/${appName}.zip" />
 		<zip destfile="${versionDir}/${appName}.zip">
-			<!--<zipfileset dir="${distDir}/src" prefix="src" />-->
+			<zipfileset dir="${distDir}/src" prefix="src" />
 			<zipfileset dir="${distDir}/docs" prefix="docs" />
 			<zipfileset dir="${distDir}/lib/optional" prefix="lib/optional" />
 			<zipfileset dir="${distDir}/lib/required" prefix="lib/required" />
@@ -104,6 +102,6 @@
 	<!--清除-->
 	<target name="cleanAfterDist" depends="zipDist">
 		<delete dir="${distDir}/docs/api" />
-		<!--<delete dir="${distDir}/src" />-->
+		<delete dir="${distDir}/src" />
 	</target>
 </project>

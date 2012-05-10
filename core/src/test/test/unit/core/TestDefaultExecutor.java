@@ -100,7 +100,7 @@ public class TestDefaultExecutor
 	@Test
 	public void execute_executionNotCreatedIfExecutionKeyIsNull() throws Exception
 	{
-		executor.getConfiguration().getInterceptorInfo().setExecutionKey(null);
+		executor.getConfiguration().getInterceptor().setExecutionKey(null);
 		
 		HashMapObjectSource os=new HashMapObjectSource();
 		
@@ -122,7 +122,7 @@ public class TestDefaultExecutor
 	@Test
 	public void execute_beforeInterceptorIsNull() throws Exception
 	{
-		executor.getConfiguration().getInterceptorInfo().setBefore(null);
+		executor.getConfiguration().getInterceptor().setBefore(null);
 		
 		HashMapObjectSource os=new HashMapObjectSource();
 		
@@ -144,7 +144,7 @@ public class TestDefaultExecutor
 	@Test
 	public void execute_afterInterceptorIsNull() throws Exception
 	{
-		executor.getConfiguration().getInterceptorInfo().setAfter(null);
+		executor.getConfiguration().getInterceptor().setAfter(null);
 		
 		HashMapObjectSource os=new HashMapObjectSource();
 		
@@ -166,7 +166,7 @@ public class TestDefaultExecutor
 	@Test
 	public void execute_exceptionInterceptorIsNull() throws Exception
 	{
-		executor.getConfiguration().getInterceptorInfo().setException(null);
+		executor.getConfiguration().getInterceptor().setException(null);
 		
 		HashMapObjectSource os=new HashMapObjectSource();
 		
@@ -182,7 +182,7 @@ public class TestDefaultExecutor
 	@Test
 	public void execute_exceptionIsThrownIfNoExceptionInterceptor() throws Exception
 	{
-		executor.getConfiguration().getInterceptorInfo().setException(null);
+		executor.getConfiguration().getInterceptor().setException(null);
 		
 		HashMapObjectSource os=new HashMapObjectSource();
 		

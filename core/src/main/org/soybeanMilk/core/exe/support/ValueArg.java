@@ -61,6 +61,6 @@ public class ValueArg implements Arg
 	//@Override
 	public String toString()
 	{
-		return "ValueArg [value=" + value + "]";
+		return getClass().getSimpleName()+" [value=" + value + "]";
 	}
 }

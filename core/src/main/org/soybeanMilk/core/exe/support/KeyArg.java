@@ -67,6 +67,6 @@ public class KeyArg implements Arg
 	//@Override
 	public String toString()
 	{
-		return "KeyArg [key=" + key + "]";
+		return getClass().getSimpleName()+" [key=" + key + "]";
 	}
 }

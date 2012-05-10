@@ -15,7 +15,7 @@
 package org.soybeanMilk.core;
 
 import org.soybeanMilk.core.config.Configuration;
-import org.soybeanMilk.core.config.Interceptors;
+import org.soybeanMilk.core.config.Interceptor;
 import org.soybeanMilk.core.os.ConvertableObjectSource;
 
 /**
@@ -80,7 +80,7 @@ public class DefaultExecutor implements Executor
 				cvtObjSource.setGenericConverter(getConfiguration().getGenericConverter());
 		}
 		
-		Interceptors itptInfo = getConfiguration().getInterceptorInfo();
+		Interceptor itptInfo = getConfiguration().getInterceptor();
 		
 		//保存执行语境信息
 		Execution context=null;

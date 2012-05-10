@@ -7,8 +7,6 @@
 	<property name="classDir" value="../../bin" />
 	<!--发布目录-->
 	<property name="distDir" value="dist" />
-	<!--发布目录-->
-	<property name="versionDir" value="versions" />
 	<!--临时目录-->
 	<property name="tmpDir" value="../../tmp" />
 	
@@ -87,10 +85,10 @@
 		</jar>
 	</target>
 	
-	<!--将整个dist打成zip文件并放到versions录下-->
+	<!--将整个dist打成zip文件并放到临时录下-->
 	<target name="zipDist" depends="jarCoreExamples">
-		<delete file="${versionDir}/${appName}.zip" />
-		<zip destfile="${versionDir}/${appName}.zip">
+		<delete file="${tmpDir}/${appName}.zip" />
+		<zip destfile="${tmpDir}/${appName}.zip">
 			<zipfileset dir="${distDir}/src" prefix="src" />
 			<zipfileset dir="${distDir}/docs" prefix="docs" />
 			<zipfileset dir="${distDir}/lib/optional" prefix="lib/optional" />

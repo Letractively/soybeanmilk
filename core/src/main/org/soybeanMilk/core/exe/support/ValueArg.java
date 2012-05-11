@@ -57,6 +57,12 @@ public class ValueArg implements Arg
 	{
 		return value;
 	}
+	
+	//@Override
+	public Type getArgType()
+	{
+		return (this.value == null ? null : this.value.getClass());
+	}
 
 	//@Override
 	public String toString()

@@ -15,9 +15,6 @@
 package org.soybeanMilk;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -130,62 +127,6 @@ public class SoybeanMilkUtils
 			return narrowToClassType(type).isArray();
 		else
 			return false;
-	}
-	
-	/**
-	 * 根据方法名称及方法参数数目查找类的公开方法，找不到则会抛出异常
-	 * @param clazz 查找目标类
-	 * @param methodName 方法名
-	 * @param argNums 参数数目
-	 * @return
-	 */
-	public static Method findMethodThrow(Class<?> clazz,String methodName,int argNums)
-	{
-		Method result=null;
-		
-		//动态代理类会丢失泛型信息，所以如果是动态代理类，则需要在其实现的接口中查找方法，以获取泛型信息
-		if(isAncestorClass(Proxy.class, clazz))
-		{
-			 Class<?>[] interfaces=clazz.getInterfaces();
-			 
-			 if(interfaces!=null && interfaces.length>0)
-			 {
-				 for(Class<?> si : interfaces)
-				 {
-					 result=findMethodThrow(si, methodName, argNums);
-					 
-					 if(result != null)
-						 break;
-				 }
-			 }
-		}
-		else
-		{
-			Method[] ms=clazz.getMethods();
-			for(Method m : ms)
-			{
-				if(m.isSynthetic())
-					continue;
-				
-				if(m.getName().equals(methodName)
-						&& Modifier.isPublic(m.getModifiers()))
-				{
-					Class<?>[] types=m.getParameterTypes();
-					int mParamNums= types == null ? 0 : types.length;
-					
-					if(mParamNums == argNums)
-					{
-						result=m;
-						break;
-					}
-				}
-			}
-		}
-		
-		if(result == null)
-			throw new NullPointerException("can not find Method named '"+methodName+"' with "+argNums+" arguments in Class '"+clazz.getName()+"'");
-		
-		return result;
 	}
 	
 	/**

@@ -15,6 +15,8 @@
 package test.unit.core;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -47,7 +49,7 @@ public class TestGenericType
 		
 		//TypeVariable
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "typeVariable", 1);
+			Method m=findMethodThrow(clazz, "typeVariable", 1);
 			Type t=m.getGenericParameterTypes()[0];
 			
 			GenericType re=GenericType.getGenericType(t, clazz);
@@ -58,7 +60,7 @@ public class TestGenericType
 		
 		//ParameterizedType
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "paramerized", 1);
+			Method m=findMethodThrow(clazz, "paramerized", 1);
 			Type t=m.getGenericParameterTypes()[0];
 			
 			GenericType re=GenericType.getGenericType(t, clazz);
@@ -70,7 +72,7 @@ public class TestGenericType
 		
 		//GenericArrayType
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "array", 1);
+			Method m=findMethodThrow(clazz, "array", 1);
 			Type t=m.getGenericParameterTypes()[0];
 			
 			GenericType re=GenericType.getGenericType(t, clazz);
@@ -81,7 +83,7 @@ public class TestGenericType
 		
 		//WildcardType
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "wildcard", 1);
+			Method m=findMethodThrow(clazz, "wildcard", 1);
 			Type t=m.getGenericParameterTypes()[0];
 			
 			GenericType re=GenericType.getGenericType(t, clazz);
@@ -100,7 +102,7 @@ public class TestGenericType
 		
 		//TypeVariable
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "typeVariable", 1);
+			Method m=findMethodThrow(clazz, "typeVariable", 1);
 			Type t=m.getGenericParameterTypes()[0];
 			
 			GenericType re=GenericType.getGenericType(t, clazz);
@@ -111,7 +113,7 @@ public class TestGenericType
 		
 		//ParameterizedType
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "paramerized", 1);
+			Method m=findMethodThrow(clazz, "paramerized", 1);
 			Type t=m.getGenericParameterTypes()[0];
 			
 			GenericType re=GenericType.getGenericType(t, clazz);
@@ -123,7 +125,7 @@ public class TestGenericType
 		
 		//GenericArrayType
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "array", 1);
+			Method m=findMethodThrow(clazz, "array", 1);
 			Type t=m.getGenericParameterTypes()[0];
 			
 			GenericType re=GenericType.getGenericType(t, clazz);
@@ -134,7 +136,7 @@ public class TestGenericType
 		
 		//WildcardType
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "wildcard", 1);
+			Method m=findMethodThrow(clazz, "wildcard", 1);
 			Type t=m.getGenericParameterTypes()[0];
 			
 			GenericType re=GenericType.getGenericType(t, clazz);
@@ -151,7 +153,7 @@ public class TestGenericType
 		@SuppressWarnings("rawtypes")
 		Class<B> clazz=B.class;
 		
-		Method m=SoybeanMilkUtils.findMethodThrow(clazz, "local", 1);
+		Method m=findMethodThrow(clazz, "local", 1);
 		Type t=m.getGenericParameterTypes()[0];
 		
 		GenericType re=GenericType.getGenericType(t, clazz);
@@ -167,7 +169,7 @@ public class TestGenericType
 		
 		//TypeVariable
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "typeVariable", 1);
+			Method m=findMethodThrow(clazz, "typeVariable", 1);
 			Type t=m.getGenericParameterTypes()[0];
 			
 			GenericType re=GenericType.getGenericType(t, clazz);
@@ -178,7 +180,7 @@ public class TestGenericType
 		
 		//ParameterizedType
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "paramerized", 1);
+			Method m=findMethodThrow(clazz, "paramerized", 1);
 			Type t=m.getGenericParameterTypes()[0];
 			
 			GenericType re=GenericType.getGenericType(t, clazz);
@@ -190,7 +192,7 @@ public class TestGenericType
 		
 		//GenericArrayType
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "array", 1);
+			Method m=findMethodThrow(clazz, "array", 1);
 			Type t=m.getGenericParameterTypes()[0];
 			
 			GenericType re=GenericType.getGenericType(t, clazz);
@@ -201,7 +203,7 @@ public class TestGenericType
 		
 		//WildcardType
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "wildcard", 1);
+			Method m=findMethodThrow(clazz, "wildcard", 1);
 			Type t=m.getGenericParameterTypes()[0];
 			
 			GenericType re=GenericType.getGenericType(t, clazz);
@@ -219,7 +221,7 @@ public class TestGenericType
 		
 		//TypeVariable
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "typeVariable", 2);
+			Method m=findMethodThrow(clazz, "typeVariable", 2);
 			Type t0=m.getGenericParameterTypes()[0];
 			Type t1=m.getGenericParameterTypes()[1];
 			
@@ -235,7 +237,7 @@ public class TestGenericType
 		
 		//ParameterizedType
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "paramerized", 2);
+			Method m=findMethodThrow(clazz, "paramerized", 2);
 			Type t0=m.getGenericParameterTypes()[0];
 			Type t1=m.getGenericParameterTypes()[1];
 			
@@ -253,7 +255,7 @@ public class TestGenericType
 		
 		//GenericArrayType
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "array", 2);
+			Method m=findMethodThrow(clazz, "array", 2);
 			Type t0=m.getGenericParameterTypes()[0];
 			Type t1=m.getGenericParameterTypes()[1];
 			
@@ -269,7 +271,7 @@ public class TestGenericType
 		
 		//WildcardType
 		{
-			Method m=SoybeanMilkUtils.findMethodThrow(clazz, "wildcard", 2);
+			Method m=findMethodThrow(clazz, "wildcard", 2);
 			Type t0=m.getGenericParameterTypes()[0];
 			Type t1=m.getGenericParameterTypes()[1];
 			
@@ -364,5 +366,61 @@ public class TestGenericType
 		public void setName(String name) {
 			this.name = name;
 		}
+	}
+	
+	/**
+	 * 根据方法名称及方法参数数目查找类的公开方法，找不到则会抛出异常
+	 * @param clazz 查找目标类
+	 * @param methodName 方法名
+	 * @param argNums 参数数目
+	 * @return
+	 */
+	protected Method findMethodThrow(Class<?> clazz,String methodName,int argNums)
+	{
+		Method result=null;
+		
+		//动态代理类会丢失泛型信息，所以如果是动态代理类，则需要在其实现的接口中查找方法，以获取泛型信息
+		if(SoybeanMilkUtils.isAncestorClass(Proxy.class, clazz))
+		{
+			 Class<?>[] interfaces=clazz.getInterfaces();
+			 
+			 if(interfaces!=null && interfaces.length>0)
+			 {
+				 for(Class<?> si : interfaces)
+				 {
+					 result=findMethodThrow(si, methodName, argNums);
+					 
+					 if(result != null)
+						 break;
+				 }
+			 }
+		}
+		else
+		{
+			Method[] ms=clazz.getMethods();
+			for(Method m : ms)
+			{
+				if(m.isSynthetic())
+					continue;
+				
+				if(m.getName().equals(methodName)
+						&& Modifier.isPublic(m.getModifiers()))
+				{
+					Class<?>[] types=m.getParameterTypes();
+					int mParamNums= types == null ? 0 : types.length;
+					
+					if(mParamNums == argNums)
+					{
+						result=m;
+						break;
+					}
+				}
+			}
+		}
+		
+		if(result == null)
+			throw new NullPointerException("can not find Method named '"+methodName+"' with "+argNums+" arguments in Class '"+clazz.getName()+"'");
+		
+		return result;
 	}
 }

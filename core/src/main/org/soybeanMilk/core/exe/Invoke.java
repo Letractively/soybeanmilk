@@ -17,6 +17,8 @@ package org.soybeanMilk.core.exe;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
@@ -162,7 +164,7 @@ public class Invoke extends AbstractExecutable
 		this.breaker = breaker;
 	}
 	
-	@Override
+	//@Override
 	public void execute(ObjectSource objectSource) throws ExecuteException
 	{
 		if(log.isDebugEnabled())
@@ -185,7 +187,7 @@ public class Invoke extends AbstractExecutable
 			log.debug("finish execute '"+this+"'");
 	}
 	
-	@Override
+	//@Override
 	public String toString()
 	{
 		return getClass().getSimpleName()+" [name="+getName()+", resultKey=" + resultKey + ", resolverProvider="
@@ -205,9 +207,13 @@ public class Invoke extends AbstractExecutable
 		if(resolver == null)
 			throw new ExecuteException("got null resolver from ResolverProvider '"+SoybeanMilkUtils.toString(this.getResolverProvider())+"'");
 		
-		MethodInfo methodInfo=getMethodInfo(resolver.getResolverClass(), this.methodName, getArgNums());
+		Class<?> resolverClass=resolver.getResolverClass();
+		if(resolverClass == null)
+			throw new ExecuteException("the resolver class must not be null in Resolver '"+resolver+"'");
+		
+		MethodInfo methodInfo=getMethodInfo(resolverClass, this.methodName, this.args);
 		if(methodInfo == null)
-			throw new ExecuteException("no method named '"+this.methodName+"' with "+getArgNums()
+			throw new ExecuteException("no method named '"+this.methodName+"' with "+SoybeanMilkUtils.toString(this.args)
 					+" arguments can be found in resolver class '"+SoybeanMilkUtils.toString(resolver.getResolverClass())+"'");
 		
 		Object[] argValues=prepareMethodArgValues(methodInfo, objectSource);
@@ -355,16 +361,19 @@ public class Invoke extends AbstractExecutable
 	 * @return
 	 * @date 2012-5-7
 	 */
-	protected MethodInfo getMethodInfo(Class<?> methodClass, String methodName, int argNums)
+	protected MethodInfo getMethodInfo(Class<?> methodClass, String methodName, Arg[] args)
 	{
 		MethodInfo methodInfo=getMethodInfo();
 		
-		if(methodInfo != null)
-			return methodInfo;
-		else if(methodClass != null)
+		if(methodInfo == null)
 		{
-			methodInfo=new MethodInfo(methodClass, methodName, argNums);
-			setMethodInfo(methodInfo);
+			Method m=findMethod(methodClass, methodName, args);
+			
+			if(m != null)
+			{
+				methodInfo=new MethodInfo(m, methodClass);
+				setMethodInfo(methodInfo);
+			}
 		}
 		
 		return methodInfo;
@@ -389,6 +398,80 @@ public class Invoke extends AbstractExecutable
 	}
 	
 	/**
+	 * 根据方法名和参数查找方法
+	 * @param clazz
+	 * @param methodName
+	 * @param args
+	 * @return
+	 * @throws ExecuteException
+	 * @date 2012-5-11
+	 */
+	protected Method findMethod(Class<?> clazz, String methodName, Arg[] args)
+	{
+		Method result=null;
+		
+		//动态代理类会丢失泛型信息，所以如果是动态代理类，则需要在其实现的接口中查找方法，以获取泛型信息
+		if(SoybeanMilkUtils.isAncestorClass(Proxy.class, clazz))
+		{
+			 Class<?>[] interfaces=clazz.getInterfaces();
+			 
+			 if(interfaces!=null && interfaces.length>0)
+			 {
+				 for(Class<?> si : interfaces)
+				 {
+					 result=findMethod(si, methodName, args);
+					 
+					 if(result != null)
+						 break;
+				 }
+			 }
+		}
+		else
+		{
+			int al=(args == null ? 0 : args.length);
+			Type[] at=new Type[al];
+			for(int i=0; i<al; i++)
+				at[i]=args[i].getArgType();
+			
+			Method[] ms=clazz.getMethods();
+			for(Method m : ms)
+			{
+				//忽略小三方法
+				if(m.isSynthetic())
+					continue;
+				
+				if(m.getName().equals(methodName) && Modifier.isPublic(m.getModifiers()))
+				{
+					Class<?>[] types=m.getParameterTypes();
+					int mal=(types == null ? 0 : types.length);
+					
+					if(mal == al)
+					{
+						boolean match=true;
+						
+						for(int i=0; i<mal; i++)
+						{
+							if(at[i]!=null && !at[i].equals(types[i]))
+							{
+								match=false;
+								break;
+							}
+						}
+						
+						if(match)
+						{
+							result=m;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
 	 * 方法信息
 	 * @author earthangry@gmail.com
 	 * @date 2012-5-6
@@ -401,14 +484,13 @@ public class Invoke extends AbstractExecutable
 		
 		private Class<?> methodClass;
 		
-		public MethodInfo(Class<?> methodClass, String methodName, int argNums)
+		public MethodInfo(Method method, Class<?> methodClass)
 		{
+			this.method=method;
 			this.methodClass=methodClass;
-			
-			this.method=SoybeanMilkUtils.findMethodThrow(this.methodClass, methodName, argNums);
 			this.argTypes=this.method.getGenericParameterTypes();
 		}
-
+		
 		public Method getMethod() {
 			return method;
 		}
@@ -527,6 +609,13 @@ public class Invoke extends AbstractExecutable
 		 * @date 2012-5-7
 		 */
 		Object getValue(ObjectSource objectSource, Type argType, Method method, Class<?> methodClass) throws Exception;
+		
+		/**
+		 * 获取参数类型，指定它可以让{@linkplain Invoke 调用}更准确地查找到方法，如果无法确定，则返回<code>null</code>即可
+		 * @return
+		 * @date 2012-5-11
+		 */
+		Type getArgType();
 	}
 	
 	/**

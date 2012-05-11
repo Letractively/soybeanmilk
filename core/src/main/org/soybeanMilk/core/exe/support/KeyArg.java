@@ -34,6 +34,9 @@ public class KeyArg implements Arg
 	/**参数值在对象源中的关键字*/
 	private Serializable key;
 	
+	/**参数类型*/
+	private Type argType;
+	
 	public KeyArg()
 	{
 		this(null);
@@ -45,6 +48,13 @@ public class KeyArg implements Arg
 		this.key = key;
 	}
 	
+	public KeyArg(Serializable key, Type argType)
+	{
+		super();
+		this.key = key;
+		this.argType = argType;
+	}
+
 	public Serializable getKey()
 	{
 		return key;
@@ -55,6 +65,10 @@ public class KeyArg implements Arg
 		this.key = key;
 	}
 	
+	public void setArgType(Type argType) {
+		this.argType = argType;
+	}
+
 	//@Override
 	public Object getValue(ObjectSource objectSource, Type argType, Method method, Class<?> methodClass) throws Exception
 	{
@@ -63,10 +77,16 @@ public class KeyArg implements Arg
 		
 		return objectSource.get(this.key, argType);
 	}
-
+	
+	//@Override
+	public Type getArgType()
+	{
+		return this.argType;
+	}
+	
 	//@Override
 	public String toString()
 	{
-		return getClass().getSimpleName()+" [key=" + key + "]";
+		return getClass().getSimpleName()+" [key=" + key + ", argType= " + this.argType + "]";
 	}
 }

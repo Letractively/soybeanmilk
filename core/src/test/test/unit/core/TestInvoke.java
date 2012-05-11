@@ -330,6 +330,120 @@ public class TestInvoke
 	}
 	
 	@Test
+	public void execute_findMethod_keyArgTypeSet() throws Exception
+	{
+		{
+			Arg[] args=new Arg[]{
+					new KeyArg("arg", Double.class),
+				};
+			
+			ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+			
+			Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
+			
+			ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+			os.set("arg", "33");
+			
+			invoke.execute(os);
+			
+			Assert.assertEquals("Double", os.get(RESULT_KEY, null));
+		}
+		
+		{
+			Arg[] args=new Arg[]{
+					new KeyArg("arg", Integer.class),
+				};
+			
+			ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+			
+			Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
+			
+			ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+			os.set("arg", "33");
+			
+			invoke.execute(os);
+			
+			Assert.assertEquals("Integer", os.get(RESULT_KEY, null));
+		}
+	}
+	
+	@Test
+	public void execute_findMethod_keyArgTypeNotSet() throws Exception
+	{
+		Arg[] args=new Arg[]{
+				new KeyArg("arg"),
+			};
+		
+		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		
+		Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("arg", "33");
+		
+		invoke.execute(os);
+		
+		Assert.assertNotNull(os.get(RESULT_KEY, null));
+	}
+	
+	@Test
+	public void execute_findMethod_valueArgSet() throws Exception
+	{
+		{
+			Arg[] args=new Arg[]{
+					new ValueArg(33D),
+				};
+			
+			ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+			
+			Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
+			
+			ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+			
+			invoke.execute(os);
+			
+			Assert.assertEquals("Double", os.get(RESULT_KEY, null));
+		}
+		
+		{
+			Arg[] args=new Arg[]{
+					new ValueArg(33),
+				};
+			
+			ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+			
+			Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
+			
+			ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+			os.set("arg", "33");
+			
+			invoke.execute(os);
+			
+			Assert.assertEquals("Integer", os.get(RESULT_KEY, null));
+		}
+	}
+	
+	@Test
+	public void execute_findMethod_valueArgNull() throws Exception
+	{
+		{
+			Arg[] args=new Arg[]{
+					new ValueArg(null),
+				};
+			
+			ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+			
+			Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
+			
+			ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+			
+			invoke.execute(os);
+			
+			Assert.assertNotNull(os.get(RESULT_KEY, null));
+		}
+	}
+	
+	@Test
 	public void execute_exception_ArgPrepareExecuteException() throws Exception
 	{
 		Arg[] args=new Arg[]{
@@ -396,6 +510,16 @@ public class TestInvoke
 		public String testThrow()
 		{
 			throw new NullPointerException();
+		}
+		
+		public String sameMethod(Integer arg)
+		{
+			return "Integer";
+		}
+		
+		public String sameMethod(Double arg)
+		{
+			return "Double";
 		}
 	}
 }

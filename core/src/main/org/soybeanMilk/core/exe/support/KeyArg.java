@@ -22,20 +22,15 @@ import org.soybeanMilk.SoybeanMilkUtils;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.bean.GenericType;
 
-import org.soybeanMilk.core.exe.Invoke.Arg;
-
 /**
  * 关键字调用参数，参数的值是{@linkplain Invoke 调用}当前执行{@linkplain ObjectSource 对象源}中某个关键字的值
  * @author earthangry@gmail.com
  * @date 2012-5-6
  */
-public class KeyArg implements Arg
+public class KeyArg extends AbstractArg
 {
 	/**参数值在对象源中的关键字*/
 	private Serializable key;
-	
-	/**参数类型*/
-	private Type argType;
 	
 	public KeyArg()
 	{
@@ -48,13 +43,13 @@ public class KeyArg implements Arg
 		this.key = key;
 	}
 	
-	public KeyArg(Serializable key, Type argType)
+	public KeyArg(Serializable key, Type type)
 	{
 		super();
 		this.key = key;
-		this.argType = argType;
+		setType(type);
 	}
-
+	
 	public Serializable getKey()
 	{
 		return key;
@@ -65,28 +60,25 @@ public class KeyArg implements Arg
 		this.key = key;
 	}
 	
-	public void setArgType(Type argType) {
-		this.argType = argType;
-	}
-
 	//@Override
 	public Object getValue(ObjectSource objectSource, Type argType, Method method, Class<?> methodClass) throws Exception
 	{
-		if(!SoybeanMilkUtils.isClassType(argType))
-			argType=GenericType.getGenericType(argType, methodClass);
+		Type targetType=getType();
 		
-		return objectSource.get(this.key, argType);
-	}
-	
-	//@Override
-	public Type getArgType()
-	{
-		return this.argType;
+		if(targetType == null)
+		{
+			if(!SoybeanMilkUtils.isClassType(argType))
+				argType=GenericType.getGenericType(argType, methodClass);
+			
+			targetType=argType;
+		}
+		
+		return objectSource.get(this.key, targetType);
 	}
 	
 	//@Override
 	public String toString()
 	{
-		return getClass().getSimpleName()+" [key=" + key + ", argType= " + this.argType + "]";
+		return getClass().getSimpleName()+" [key=" + key + ", type= " + getType() + "]";
 	}
 }

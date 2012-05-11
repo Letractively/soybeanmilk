@@ -330,7 +330,7 @@ public class TestInvoke
 	}
 	
 	@Test
-	public void execute_findMethod_keyArgTypeSet() throws Exception
+	public void execute_similarMethod_keyArg_typeSet() throws Exception
 	{
 		{
 			Arg[] args=new Arg[]{
@@ -368,7 +368,7 @@ public class TestInvoke
 	}
 	
 	@Test
-	public void execute_findMethod_keyArgTypeNotSet() throws Exception
+	public void execute_similarMethod_keyArg_typeNotSet() throws Exception
 	{
 		Arg[] args=new Arg[]{
 				new KeyArg("arg"),
@@ -387,7 +387,7 @@ public class TestInvoke
 	}
 	
 	@Test
-	public void execute_findMethod_valueArgSet() throws Exception
+	public void execute_similarMethod_valueArg_wrapperType() throws Exception
 	{
 		{
 			Arg[] args=new Arg[]{
@@ -424,23 +424,40 @@ public class TestInvoke
 	}
 	
 	@Test
-	public void execute_findMethod_valueArgNull() throws Exception
+	public void execute_similarMethod_valueArg_primitiveType() throws Exception
 	{
-		{
-			Arg[] args=new Arg[]{
-					new ValueArg(null),
-				};
-			
-			ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
-			
-			Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
-			
-			ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
-			
-			invoke.execute(os);
-			
-			Assert.assertNotNull(os.get(RESULT_KEY, null));
-		}
+		Arg[] args=new Arg[]{
+				new ValueArg(33, int.class),
+			};
+		
+		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		
+		Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("arg", "33");
+		
+		invoke.execute(os);
+		
+		Assert.assertEquals("int", os.get(RESULT_KEY, null));
+	}
+	
+	@Test
+	public void execute_similarMethod_valueArgNull() throws Exception
+	{
+		Arg[] args=new Arg[]{
+				new ValueArg(null, Integer.class),
+			};
+		
+		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		
+		Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		
+		invoke.execute(os);
+		
+		Assert.assertNotNull(os.get(RESULT_KEY, null));
 	}
 	
 	@Test
@@ -516,10 +533,20 @@ public class TestInvoke
 		{
 			return "Integer";
 		}
+
+		public String sameMethod(int arg)
+		{
+			return "int";
+		}
 		
 		public String sameMethod(Double arg)
 		{
 			return "Double";
+		}
+		
+		public String sameMethod(Object o)
+		{
+			return "object";
 		}
 	}
 }

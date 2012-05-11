@@ -19,6 +19,7 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -97,12 +98,12 @@ public class ConfigurationParser
 	protected static final String TAG_INVOKE="invoke";
 	protected static final String TAG_INVOKE_ATTR_NAME=TAG_ACTION_ATTR_NAME;
 	protected static final String TAG_INVOKE_ATTR_METHOD="method";
-	protected static final String TAG_INVOKE_ATTR_RESOLVER_OBJECT="resolver";
-	protected static final String TAG_INVOKE_ATTR_RESOLVER_CLASS="resolver-class";
+	protected static final String TAG_INVOKE_ATTR_RESOLVER="resolver";
 	protected static final String TAG_INVOKE_ATTR_RESULT_KEY="result-key";
 	protected static final String TAG_INVOKE_ATTR_BREAKER="breaker";
 	
 	protected static final String TAG_ARG="arg";
+	protected static final String TAG_ARG_ATTR_TYPE="type";
 	
 	protected static final String TAG_REF="ref";
 	protected static final String TAG_REF_ATTR_NAME="name";
@@ -420,7 +421,7 @@ public class ConfigurationParser
 			assertNotEmpty(target, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_TARGET+"] must not be empty");
 			assertNotEmpty(clazz, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_CLASS+"] must not be empty");
 			
-			genericConverter.addConverter(converterClassAttrToClass(src), converterClassAttrToClass(target), (Converter)createClassInstance(clazz));
+			genericConverter.addConverter(nameToClass(src), nameToClass(target), (Converter)createClassInstance(clazz));
 		}
 	}
 	
@@ -535,12 +536,14 @@ public class ConfigurationParser
 		if(global)
 			name=formatGlobalExecutableName(name);
 		
-		invoke.setName(name);
-		
 		InvokeStatementParser isp=new InvokeStatementParser(statement);
 		isp.parse();
 		
-		processInvokePropertiesInit(invoke, isp.getResultKey(), isp.getResolver(), isp.getMethodName(), isp.getArgs());
+		invoke.setName(name);
+		invoke.setResultKey(isp.getResultKey());
+		invoke.setMethodName(isp.getMethodName());
+		processInvokeResolverInit(invoke, isp.getResolver());
+		processInvokeArgsInit(invoke, isp.getArgs(), isp.getArgTypes());
 	}
 	
 	/**
@@ -555,47 +558,50 @@ public class ConfigurationParser
 		if(global)
 			name=formatGlobalExecutableName(name);
 		String methodName=getAttributeValueIngoreEmpty(element, TAG_INVOKE_ATTR_METHOD);
-		String resolverId=getAttributeValueIngoreEmpty(element,TAG_INVOKE_ATTR_RESOLVER_OBJECT);
-		String resolverClazz=getAttributeValueIngoreEmpty(element, TAG_INVOKE_ATTR_RESOLVER_CLASS);
+		String resolver=getAttributeValueIngoreEmpty(element,TAG_INVOKE_ATTR_RESOLVER);
 		String resultKey=getAttributeValueIngoreEmpty(element,TAG_INVOKE_ATTR_RESULT_KEY);
 		
 		if(methodName == null)
 			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_METHOD+"] must not be null");
-		
-		if(resolverClazz==null && resolverId==null)
-			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_RESOLVER_OBJECT+"] or ["+TAG_INVOKE_ATTR_RESOLVER_CLASS+"] must not be null");
+		if(resolver == null)
+			throw new ParseException("<"+TAG_INVOKE+"> attribute ["+TAG_INVOKE_ATTR_RESOLVER+"] must not be null");
 		
 		invoke.setName(name);
+		invoke.setResultKey(resultKey);
+		invoke.setMethodName(methodName);
+		processInvokeResolverInit(invoke, resolver);
 		
-		String[] args=parseArgs(element);
-		
-		processInvokePropertiesInit(invoke, resultKey, (resolverId!=null ? resolverId : resolverClazz), methodName, args);
+		parseArgs(invoke, element);
 	}
 	
 	/**
 	 * 解析并构建parent元素下的所有参数信息对象，写入调用对象中
-	 * @param parent
 	 * @param invoke
+	 * @param parent
 	 */
-	protected String[] parseArgs(Element parent)
+	protected void parseArgs(Invoke invoke, Element parent)
 	{
 		List<Element> elements=getChildrenByTagName(parent, TAG_ARG);
 		if(elements == null)
-			return null;
+			return;
 		
-		String[] args=new String[elements.size()];
+		String[] strArgs=new String[elements.size()];
+		String[] strArgTypes=new String[elements.size()];
 		
-		for(int i=0, len=args.length;i<len;i++)
+		for(int i=0, len=strArgs.length;i<len;i++)
 		{
 			Element e=elements.get(i);
+			
+			String type=getAttributeValue(e, TAG_ARG_ATTR_TYPE);
 			String content=getTextContent(e);
 			if(content == null)
 				throw new ParseException("<"+TAG_ARG+"> must have text content");
 			
-			args[i]=content;
+			strArgs[i]=content;
+			strArgTypes[i]=type;
 		}
 		
-		return args;
+		processInvokeArgsInit(invoke, strArgs, strArgTypes);
 	}
 	
 	/**
@@ -605,9 +611,11 @@ public class ConfigurationParser
 	 * @param resolver
 	 * @param methodName
 	 * @param args
+	 * @param strArgTypes
 	 * @date 2012-5-8
 	 */
-	protected void processInvokePropertiesInit(Invoke invoke, String resultKey, String resolver, String methodName, String[] strArgs)
+	/*
+	protected void processInvokePropertiesInit(Invoke invoke, String resultKey, String resolver, String methodName, String[] strArgs, String[] strArgTypes)
 	{
 		invoke.setResultKey(resultKey);
 		
@@ -642,7 +650,60 @@ public class ConfigurationParser
 			Arg[] args=new Arg[strArgs.length];
 			
 			for(int i=0; i<strArgs.length; i++)
-				args[i]=stringToArg(strArgs[i]);
+				args[i]=stringToArg(strArgs[i], (strArgTypes==null ? null : strArgTypes[i]));
+			
+			invoke.setArgs(args);
+		}
+	}
+	*/
+	
+	/**
+	 * 处理调用目标初始化
+	 * @param invoke
+	 * @param resolver
+	 * @date 2012-5-11
+	 */
+	protected void processInvokeResolverInit(Invoke invoke, String resolver)
+	{
+		boolean classResolver=false;
+		//resolver为类名检测
+		if(resolver.indexOf('.') > -1)
+		{
+			try
+			{
+				Class<?> rc=Class.forName(resolver);
+				invoke.setResolverProvider(new ObjectResolverProvider(null, rc));
+				
+				classResolver=true;
+			}
+			catch(Exception e)
+			{
+				classResolver=false;
+			}
+		}
+		if(!classResolver)
+		{
+			FactoryResolverProvider frp=new FactoryResolverProvider(configuration.getResolverObjectFactory(), resolver);
+			ObjectSourceResolverProvider orp=new ObjectSourceResolverProvider(resolver);
+			
+			invoke.setResolverProvider(new DynamicResolverProvider(frp, orp));
+		}
+	}
+	
+	/**
+	 * 处理调用参数初始化
+	 * @param invoke
+	 * @param resolver
+	 * @date 2012-5-11
+	 */
+	protected void processInvokeArgsInit(Invoke invoke, String[] strArgs, String[] strArgTypes)
+	{
+		if(strArgs != null)
+		{
+			Arg[] args=new Arg[strArgs.length];
+			
+			for(int i=0; i<strArgs.length; i++)
+				args[i]=stringToArg(strArgs[i], (strArgTypes==null ? null : strArgTypes[i]));
 			
 			invoke.setArgs(args);
 		}
@@ -915,20 +976,6 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 将converter元素里面的src或者dest属性的值转换为它所代表的类型
-	 * @param name
-	 * @return
-	 */
-	protected Class<?> converterClassAttrToClass(String name)
-	{
-		Class<?> re=ClassShortName.get(name);
-		if(re == null)
-			re=toClass(name);
-		
-		return re;
-	}
-	
-	/**
 	 * 取得文档根元素
 	 * @return
 	 */
@@ -1089,87 +1136,130 @@ public class ConfigurationParser
 	
 	/**
 	 * 将字符串转换为Arg对象
-	 * @param str
+	 * @param strArg
+	 * @param strType
 	 * @return
 	 * @date 2012-5-8
 	 */
-	protected Arg stringToArg(String str)
+	protected Arg stringToArg(String strArg, String strType)
 	{
-		Arg arg=null;
+		Arg re=null;
 		
-		if(str==null || str.length()==0)
-			arg=new ValueArg(str);
+		Type argType=null;
+		if(strType!=null && strType.length()>0)
+			argType=nameToClass(strType);
+		
+		if(strArg==null || strArg.length()==0)
+			re=new ValueArg(strArg, argType);
 		else
 		{
-			int len=str.length();
-			char first=str.charAt(0);
-			char end=str.charAt(len-1);
+			int len=strArg.length();
+			char first=strArg.charAt(0);
+			char end=strArg.charAt(len-1);
 			
 			//数值
 			if(Character.isDigit(first))
 			{
-				if('B'==end || 'b'==end)
-					arg=new ValueArg(new Byte(str.substring(0, len-1)));
-				else if('S'==end || 's'==end)
-					arg=new ValueArg(new Short(str.substring(0, len-1)));
-				else if('I'==end || 'i'==end)
-					arg=new ValueArg(new Integer(str.substring(0, len-1)));
-				else if('L'==end || 'l'==end)
-					arg=new ValueArg(new Long(str.substring(0, len-1)));
-				else if('F'==end || 'f'==end)
-					arg=new ValueArg(new Float(str.substring(0, len-1)));
-				else if('D'==end || 'd'==end)
-					arg=new ValueArg(new Double(str.substring(0, len-1)));
+				Type wrappedType=(argType == null ? null : SoybeanMilkUtils.toWrapperType(argType));
+				
+				if(Byte.class.equals(wrappedType))
+				{
+					re=new ValueArg(new Byte(strArg), argType);
+				}
+				else if(Short.class.equals(wrappedType))
+				{
+					re=new ValueArg(new Short(strArg), argType);
+				}
+				else if(Integer.class.equals(wrappedType))
+				{
+					re=new ValueArg(new Integer(strArg), argType);
+				}
+				else if(Long.class.equals(wrappedType))
+				{
+					re=new ValueArg(new Long(strArg), argType);
+				}
+				else if(Float.class.equals(wrappedType))
+				{
+					re=new ValueArg(new Float(strArg), argType);
+				}
+				else if(Double.class.equals(wrappedType))
+				{
+					re=new ValueArg(new Double(strArg), argType);
+				}
+				else if('L' == end)
+				{
+					re=new ValueArg(new Long(strArg.substring(0, len-1)), Long.class);
+				}
+				else if('l' == end)
+				{
+					re=new ValueArg(new Long(strArg.substring(0, len-1)), long.class);
+				}
+				else if('F' == end)
+				{
+					re=new ValueArg(new Float(strArg.substring(0, len-1)), Float.class);
+				}
+				else if('f'==end)
+				{
+					re=new ValueArg(new Float(strArg.substring(0, len-1)), float.class);
+				}
+				else if('D' == end)
+				{
+					re=new ValueArg(new Double(strArg.substring(0, len-1)), Double.class);
+				}
+				else if('d' == end)
+				{
+					re=new ValueArg(new Double(strArg.substring(0, len-1)), double.class);
+				}
 				else
 				{
-					boolean point=str.indexOf('.') >= 0;
+					boolean point=strArg.indexOf('.') >= 0;
 					
 					if(point)
-						arg=new ValueArg(new Double(str));
+						re=new ValueArg(new Double(strArg), argType);
 					else
-						arg=new ValueArg(new Integer(str));
+						re=new ValueArg(new Integer(strArg), argType);
 				}
 			}
 			else if(first =='"')
 			{
-				String ue=SoybeanMilkUtils.unEscape(str);
+				String ue=SoybeanMilkUtils.unEscape(strArg);
 				len=ue.length();
 				
 				if(len<2 || ue.charAt(len-1) != '"')
-					throw new ParseException("illegal String definition: "+str+"");
+					throw new ParseException("illegal String definition: "+strArg+"");
 				
 				if(len == 2)
-					arg=new ValueArg("");
+					re=new ValueArg("", argType);
 				else
-					arg=new ValueArg(ue.subSequence(1, len-1));
+					re=new ValueArg(ue.subSequence(1, len-1), argType);
 			}
 			else if(first =='\'')
 			{
-				String ue=SoybeanMilkUtils.unEscape(str);
+				String ue=SoybeanMilkUtils.unEscape(strArg);
 				len=ue.length();
 				
 				if(len!=3 || end!= '\'')
-					throw new ParseException("illegal char definition: "+str+"");
+					throw new ParseException("illegal char definition: "+strArg+"");
 				
-				arg=new ValueArg(ue.charAt(1));
+				re=new ValueArg(ue.charAt(1), argType);
 			}
-			else if("true".equals(str))
+			else if("true".equals(strArg))
 			{
-				arg=new ValueArg(Boolean.TRUE);
+				re=new ValueArg(Boolean.TRUE, argType);
 			}
-			else if("false".equals(str))
+			else if("false".equals(strArg))
 			{
-				arg=new ValueArg(Boolean.FALSE);
+				re=new ValueArg(Boolean.FALSE, argType);
 			}
-			else if("null".equals(str))
+			else if("null".equals(strArg))
 			{
-				arg=new ValueArg(null);
+				re=new ValueArg(null, argType);
 			}
 			else
-				arg=new KeyArg(str);
+				re=new KeyArg(strArg, argType);
 		}
 		
-		return arg;
+		return re;
 	}
 	
 	/**
@@ -1253,16 +1343,23 @@ public class ConfigurationParser
 		}
 	}
 	
-	protected Class<?> toClass(String clazz)
+	protected Class<?> nameToClass(String clazz)
 	{
-		try
+		Class<?> re=ClassShortName.get(clazz);
+		
+		if(re == null)
 		{
-			return Class.forName(clazz);
+			try
+			{
+				re=Class.forName(clazz);
+			}
+			catch(Exception e)
+			{
+				throw new ParseException(e);
+			}
 		}
-		catch(Exception e)
-		{
-			throw new ParseException(e);
-		}
+		
+		return re;
 	}
 	
 	/**

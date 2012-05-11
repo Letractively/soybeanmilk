@@ -26,39 +26,71 @@ import org.soybeanMilk.core.config.parser.InvokeStatementParser;
 public class TestInvokeStatementParser
 {
 	@Test
-	public void parse() throws Exception
+	public void parse_noArgNoResult() throws Exception
 	{
-		{
-			String stmt=" testResolver . method_a( ); ";
-			InvokeStatementParser isp=new InvokeStatementParser(stmt);
-			isp.parse();
-			
-			Assert.assertNull(isp.getResultKey());
-			Assert.assertEquals("testResolver", isp.getResolver());
-			Assert.assertEquals("method_a", isp.getMethodName());
-			Assert.assertNull(isp.getArgs());
-		}
+		String stmt=" testResolver . method_a( ); ";
+		InvokeStatementParser isp=new InvokeStatementParser(stmt);
+		isp.parse();
 		
-		{
-			String stmt=" testResult =  testResolver . method_b  ( my.argKey, 10); ";
-			InvokeStatementParser isp=new InvokeStatementParser(stmt);
-			isp.parse();
-			
-			Assert.assertEquals("testResult", isp.getResultKey());
-			Assert.assertEquals("testResolver", isp.getResolver());
-			Assert.assertEquals("method_b", isp.getMethodName());
-			Assert.assertEquals("my.argKey", isp.getArgs()[0]);
-			Assert.assertEquals("10", isp.getArgs()[1]);
-		}
+		Assert.assertNull(isp.getResultKey());
+		Assert.assertEquals("testResolver", isp.getResolver());
+		Assert.assertEquals("method_a", isp.getMethodName());
+		Assert.assertNull(isp.getArgs());
+		Assert.assertNull(isp.getArgTypes());
 	}
 	
-	protected static class TestResolver
+	@Test
+	public void parse_hasArghasResult() throws Exception
 	{
-		public void method_a(){}
+		String stmt=" testResult =  testResolver . method_b  ( my.argKey, 10, agrEnd); ";
+		InvokeStatementParser isp=new InvokeStatementParser(stmt);
+		isp.parse();
 		
-		public TestResolver method_b(TestResolver arg0, int arg1)
-		{
-			return null;
-		}
+		Assert.assertEquals("testResult", isp.getResultKey());
+		Assert.assertEquals("testResolver", isp.getResolver());
+		Assert.assertEquals("method_b", isp.getMethodName());
+		Assert.assertEquals("my.argKey", isp.getArgs()[0]);
+		Assert.assertEquals("10", isp.getArgs()[1]);
+		Assert.assertEquals("agrEnd", isp.getArgs()[2]);
+		
+		Assert.assertEquals(isp.getArgs().length, isp.getArgTypes().length);
+	}
+	
+	@Test
+	public void parse_hasArgType() throws Exception
+	{
+		String stmt=" testResult =  testResolver . method_b  ( my.argKey(int), \"aaa\", 10(somepkg.some.someClass), 345(double), \"aaa\"(String), 'a'(char), endArg()); ";
+		InvokeStatementParser isp=new InvokeStatementParser(stmt);
+		isp.parse();
+		
+		Assert.assertEquals("testResult", isp.getResultKey());
+		Assert.assertEquals("testResolver", isp.getResolver());
+		Assert.assertEquals("method_b", isp.getMethodName());
+		
+		String[] args=isp.getArgs();
+		String[] argTypes=isp.getArgTypes();
+		
+		Assert.assertEquals(args.length, argTypes.length);
+		
+		Assert.assertEquals("my.argKey", args[0]);
+		Assert.assertEquals("int", argTypes[0]);
+		
+		Assert.assertEquals("\"aaa\"", args[1]);
+		Assert.assertNull(argTypes[1]);
+		
+		Assert.assertEquals("10", args[2]);
+		Assert.assertEquals("somepkg.some.someClass", argTypes[2]);
+		
+		Assert.assertEquals("345", args[3]);
+		Assert.assertEquals("double", argTypes[3]);
+		
+		Assert.assertEquals("\"aaa\"", args[4]);
+		Assert.assertEquals("String", argTypes[4]);
+		
+		Assert.assertEquals("'a'", args[5]);
+		Assert.assertEquals("char", argTypes[5]);
+		
+		Assert.assertEquals("endArg", args[6]);
+		Assert.assertEquals("", argTypes[6]);
 	}
 }

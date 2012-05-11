@@ -367,13 +367,12 @@ public class Invoke extends AbstractExecutable
 		
 		if(methodInfo == null)
 		{
-			Method m=findMethod(methodClass, methodName, args);
+			methodInfo=findMethodInfo(methodClass, methodName, args, true);
+			if(methodInfo == null)
+				methodInfo=findMethodInfo(methodClass, methodName, args, false);
 			
-			if(m != null)
-			{
-				methodInfo=new MethodInfo(m, methodClass);
+			if(methodInfo != null)
 				setMethodInfo(methodInfo);
-			}
 		}
 		
 		return methodInfo;
@@ -402,13 +401,14 @@ public class Invoke extends AbstractExecutable
 	 * @param clazz
 	 * @param methodName
 	 * @param args
+	 * @param exactMatch 是否精确匹配类型
 	 * @return
 	 * @throws ExecuteException
 	 * @date 2012-5-11
 	 */
-	protected Method findMethod(Class<?> clazz, String methodName, Arg[] args)
+	protected MethodInfo findMethodInfo(Class<?> clazz, String methodName, Arg[] args, boolean exactMatch)
 	{
-		Method result=null;
+		MethodInfo result=null;
 		
 		//动态代理类会丢失泛型信息，所以如果是动态代理类，则需要在其实现的接口中查找方法，以获取泛型信息
 		if(SoybeanMilkUtils.isAncestorClass(Proxy.class, clazz))
@@ -419,7 +419,7 @@ public class Invoke extends AbstractExecutable
 			 {
 				 for(Class<?> si : interfaces)
 				 {
-					 result=findMethod(si, methodName, args);
+					 result=findMethodInfo(si, methodName, args, exactMatch);
 					 
 					 if(result != null)
 						 break;
@@ -428,12 +428,16 @@ public class Invoke extends AbstractExecutable
 		}
 		else
 		{
+			Method method=null;
+			Class<?> methodClass=clazz;
+			
 			int al=(args == null ? 0 : args.length);
 			Type[] at=new Type[al];
 			for(int i=0; i<al; i++)
-				at[i]=args[i].getArgType();
+				at[i]=args[i].getType();
 			
 			Method[] ms=clazz.getMethods();
+			
 			for(Method m : ms)
 			{
 				//忽略小三方法
@@ -451,21 +455,45 @@ public class Invoke extends AbstractExecutable
 						
 						for(int i=0; i<mal; i++)
 						{
-							if(at[i]!=null && !at[i].equals(types[i]))
+							//null认为是匹配
+							if(at[i] == null)
+								continue;
+							
+							//精确匹配
+							if(exactMatch)
 							{
-								match=false;
-								break;
+								if(!at[i].equals(types[i]))
+								{
+									match=false;
+									break;
+								}
+							}
+							//父子类型匹配
+							else
+							{
+								Type wat=SoybeanMilkUtils.toWrapperType(at[i]);
+								Type wt=SoybeanMilkUtils.toWrapperType(types[i]);
+								
+								if(SoybeanMilkUtils.isClassType(wat) && SoybeanMilkUtils.isClassType(wt)
+										&&!SoybeanMilkUtils.isAncestorClass((Class<?>)wt, (Class<?>)wat))
+								{
+									match=false;
+									break;
+								}
 							}
 						}
 						
 						if(match)
 						{
-							result=m;
+							method=m;
 							break;
 						}
 					}
 				}
 			}
+			
+			if(method != null)
+				result=new MethodInfo(method, methodClass);
 		}
 		
 		return result;
@@ -611,11 +639,11 @@ public class Invoke extends AbstractExecutable
 		Object getValue(ObjectSource objectSource, Type argType, Method method, Class<?> methodClass) throws Exception;
 		
 		/**
-		 * 获取参数类型，指定它可以让{@linkplain Invoke 调用}更准确地查找到方法，如果无法确定，则返回<code>null</code>即可
+		 * 获取参数类型，它可以让{@linkplain Invoke 调用}更准确地找到调用方法，也可以返回<code>null</code>，由{@linkplain Invoke 调用}自己查找
 		 * @return
 		 * @date 2012-5-11
 		 */
-		Type getArgType();
+		Type getType();
 	}
 	
 	/**

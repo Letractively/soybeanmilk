@@ -160,11 +160,9 @@ class 解决对象类名
 <!ATTLIST invoke method CDATA #IMPLIED>
 
 <!--
-调用的解决对象配置，配置解析器通过它来查找方法对象并确定参数类型
-resolver-class 解决对象类名，如果方法是静态的，你可以仅指定“resolver-class”
-resolver 解决对象ID，如果方法是非静态的，你应该设置它的值
+调用目标配置，配置解析器通过它来查找方法对象并确定参数类型
+resolver 调用目标标识，可以是对象标识或者完整类名
 -->
-<!ATTLIST invoke resolver-class CDATA #IMPLIED>
 <!ATTLIST invoke resolver CDATA #IMPLIED>
 
 <!--
@@ -177,6 +175,11 @@ resolver 解决对象ID，如果方法是非静态的，你应该设置它的值
 调用方法打断器，如果对象源中此打断器的值为true，调用方法将不会被执行；如果为false或者null，则执行。
 -->
 <!ATTLIST invoke breaker CDATA #IMPLIED>
+
+<!--
+调用参数类型
+-->
+<!ATTLIST arg type CDATA #IMPLIED>
 
 <!--
 动作目标配置属性

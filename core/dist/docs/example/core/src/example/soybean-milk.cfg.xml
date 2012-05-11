@@ -39,7 +39,7 @@
 				<arg>helloRepeat</arg>
 			</invoke>
 			
-			<invoke method="printObject" resolver-class="example.resolver.HelloResolver">
+			<invoke method="printObject" resolver="example.resolver.HelloResolver">
 				<arg>helloResult</arg>
 			</invoke>
 		</action>
@@ -48,7 +48,7 @@
 			<invoke>
 				example.resolver.HelloResolver.testJavaSyntax(
 					'a',
-					35B,
+					35(byte),
 					true,
 					22222,
 					33333333333333L,

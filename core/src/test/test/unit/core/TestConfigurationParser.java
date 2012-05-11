@@ -228,8 +228,41 @@ public class TestConfigurationParser
 		
 		Assert.assertEquals(KeyArg.class, exe.getArgs()[0].getClass());
 		Assert.assertEquals("arg0", ((KeyArg)exe.getArgs()[0]).getKey());
+		
 		Assert.assertEquals(KeyArg.class, exe.getArgs()[1].getClass());
 		Assert.assertEquals("arg1", ((KeyArg)exe.getArgs()[1]).getKey());
+	}
+	
+	@Test
+	public void parse_executables_invoke_xml_setArgType() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
+		
+		Invoke exe=(Invoke)config.getExecutable("global_exe5");
+		
+		Assert.assertEquals("result", exe.getResultKey());
+		ResolverProvider rp=exe.getResolverProvider();
+		Assert.assertEquals(DynamicResolverProvider.class, rp.getClass());
+		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getFactoryResolverProvider().getResolverId());
+		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getObjectSourceResolverProvider().getResolverKey());
+		Assert.assertEquals("test2", exe.getMethodName());
+		Assert.assertEquals(4, exe.getArgs().length);
+		
+		Assert.assertEquals(KeyArg.class, exe.getArgs()[0].getClass());
+		Assert.assertEquals("arg0", ((KeyArg)exe.getArgs()[0]).getKey());
+		Assert.assertEquals(String.class, exe.getArgs()[0].getType());
+		
+		Assert.assertEquals(KeyArg.class, exe.getArgs()[1].getClass());
+		Assert.assertEquals("arg1", ((KeyArg)exe.getArgs()[1]).getKey());
+		Assert.assertEquals(Date.class, exe.getArgs()[1].getType());
+		
+		Assert.assertEquals(KeyArg.class, exe.getArgs()[2].getClass());
+		Assert.assertEquals("arg2", ((KeyArg)exe.getArgs()[2]).getKey());
+		Assert.assertEquals(int.class, exe.getArgs()[2].getType());
+		
+		Assert.assertEquals(KeyArg.class, exe.getArgs()[3].getClass());
+		Assert.assertEquals("arg3", ((KeyArg)exe.getArgs()[3]).getKey());
+		Assert.assertEquals(Integer.class, exe.getArgs()[3].getType());
 	}
 	
 	@Test
@@ -254,41 +287,146 @@ public class TestConfigurationParser
 	}
 	
 	@Test
-	public void parse_executables_invoke_valueArg() throws Exception
+	public void parse_executables_invoke_valueArg_withType() throws Exception
 	{
 		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
 		
 		Invoke invoke=(Invoke)config.getExecutable("global_valueArg");
 		Arg[] args=invoke.getArgs();
 		
-		Assert.assertEquals(new Byte((byte)10), args[0].getValue(null, null, null, null));
-		Assert.assertEquals(new Byte((byte)10), args[1].getValue(null, null, null, null));
+		int idx=-1;
 		
-		Assert.assertEquals(new Short((short)10), args[2].getValue(null, null, null, null));
-		Assert.assertEquals(new Short((short)10), args[3].getValue(null, null, null, null));
+		idx++;
+		Assert.assertEquals(new Byte((byte)10), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(byte.class, args[idx].getType());
 		
-		Assert.assertEquals(new Integer(10), args[4].getValue(null, null, null, null));
-		Assert.assertEquals(new Integer(10), args[5].getValue(null, null, null, null));
+		idx++;
+		Assert.assertEquals(new Byte((byte)10), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Byte.class, args[idx].getType());
 		
-		Assert.assertEquals(new Long(10), args[6].getValue(null, null, null, null));
-		Assert.assertEquals(new Long(10), args[7].getValue(null, null, null, null));
+		idx++;
+		Assert.assertEquals(new Short((short)10), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(short.class, args[idx].getType());
 		
-		Assert.assertEquals(new Float(10f), args[8].getValue(null, null, null, null));
-		Assert.assertEquals(new Float(10f), args[9].getValue(null, null, null, null));
+		idx++;
+		Assert.assertEquals(new Short((short)10), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Short.class, args[idx].getType());
 		
-		Assert.assertEquals(new Double(10d), args[10].getValue(null, null, null, null));
-		Assert.assertEquals(new Double(10d), args[11].getValue(null, null, null, null));
+		idx++;
+		Assert.assertEquals(new Integer(10), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(int.class, args[idx].getType());
 		
-		Assert.assertEquals(new Integer(1234), args[12].getValue(null, null, null, null));
-		Assert.assertEquals(new Double(1.234), args[13].getValue(null, null, null, null));
+		idx++;
+		Assert.assertEquals(new Integer(10), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Integer.class, args[idx].getType());
 		
-		Assert.assertEquals("string", args[14].getValue(null, null, null, null));
-		Assert.assertEquals('c', args[15].getValue(null, null, null, null));
+		idx++;
+		Assert.assertEquals(new Long(10), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(long.class, args[idx].getType());
 		
-		Assert.assertEquals(Boolean.TRUE, args[16].getValue(null, null, null, null));
-		Assert.assertEquals(Boolean.FALSE, args[17].getValue(null, null, null, null));
+		idx++;
+		Assert.assertEquals(new Long(10), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Long.class, args[idx].getType());
 		
-		Assert.assertNull(args[18].getValue(null, null, null, null));
+		idx++;
+		Assert.assertEquals(new Float(10f), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(float.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(new Float(10f), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Float.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(new Double(10d), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(double.class, args[10].getType());
+		
+		idx++;
+		Assert.assertEquals(new Double(10d), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Double.class, args[idx].getType());
+
+		idx++;
+		Assert.assertEquals('c', args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(char.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals('c', args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Character.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals("string", args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(String.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(Boolean.TRUE, args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(boolean.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(Boolean.FALSE, args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(boolean.class, args[idx].getType());
+
+		idx++;
+		Assert.assertEquals(Boolean.TRUE, args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Boolean.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(Boolean.FALSE, args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Boolean.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertNull(args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(String.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertNull(args[idx].getValue(null, null, null, null));
+		Assert.assertNull(args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(new Integer(10), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Integer.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(new Double(10.0), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Double.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(new Long(10), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(long.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(new Long(10), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Long.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(new Float(10f), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(float.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(new Float(10f), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Float.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(new Double(10d), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(double.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(new Double(10d), args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Double.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals('c', args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Character.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals("string", args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(String.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(Boolean.TRUE, args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Boolean.class, args[idx].getType());
+		
+		idx++;
+		Assert.assertEquals(Boolean.FALSE, args[idx].getValue(null, null, null, null));
+		Assert.assertEquals(Boolean.class, args[idx].getType());
 	}
 	
 	public static class MyGenericConverter implements GenericConverter

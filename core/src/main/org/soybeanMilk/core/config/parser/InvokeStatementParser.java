@@ -29,7 +29,7 @@ public class InvokeStatementParser
 {
 	private static final char[] FORMAT_WITH_SPACE={'\n', '\t', ' '};
 	private static final char[] KEY_CHAR_EQUAL={'='};
-	private static final char[] METHOD_ARG_END={'\n', '\t', ' ', ',', ')'};
+	private static final char[] METHOD_ARG_END={'\n', '\t', ' ', ','};
 	private static final char[] SINGLE_QUOTE={'\''};
 	private static final char[] DOUBLE_QUOTE={'"'};
 	
@@ -47,6 +47,9 @@ public class InvokeStatementParser
 	
 	/**调用参数*/
 	private String[] args;
+	
+	/**参数类型*/
+	private String[] argTypes;
 	
 	/**内部缓存，它临时存储解析字符*/
 	private StringBuffer cache;
@@ -106,17 +109,31 @@ public class InvokeStatementParser
 		return args;
 	}
 	
+	/**
+	 * 获取调用方法参数类型
+	 * @return
+	 * @date 2012-5-11
+	 */
+	public String[] getArgTypes() {
+		return argTypes;
+	}
+
 	public void parse()
 	{
 		String resultKey=null;
 		String resolver=null;
 		String methodName=null;
 		String[] args=null;
+		String[] argTypes=null;
 		
 		//方法的左括弧
 		int methodLeftBracketIdx=indexOf('(');
 		if(methodLeftBracketIdx < 0)
-			throw new ParseException("no key character '(' found in statement \""+this.statement+"\"");
+			throw new ParseException("no method left bracket character '(' found in statement \""+this.statement+"\"");
+		
+		int methodRightBracketIdx=lastIndexOf(')', this.length);
+		if(methodRightBracketIdx < 0)
+			throw new ParseException("no method right bracket character ')' found in statement \""+this.statement+"\"");
 		
 		//等号位置
 		int equalCharIdx=indexOf('=', methodLeftBracketIdx);
@@ -124,7 +141,7 @@ public class InvokeStatementParser
 		//方法名之前的'.'访问符位置
 		int methodLeftDotIdx=lastIndexOf('.', methodLeftBracketIdx);
 		if(methodLeftDotIdx < 0)
-			throw new ParseException("no key character  '.' found in statement \""+this.statement+"\"");
+			throw new ParseException("no method name start character  '.' found in statement \""+this.statement+"\"");
 		
 		setCurrentIdx(0);
 		
@@ -143,7 +160,7 @@ public class InvokeStatementParser
 			setCurrentIdx(equalCharIdx+1);
 		}
 		
-		//解析解决对象
+		//解析调用目标
 		ignoreFormatChars();
 		setEndIdx(methodLeftDotIdx);
 		resolver=parseUtil(null, true, true, FORMAT_WITH_SPACE);
@@ -164,19 +181,21 @@ public class InvokeStatementParser
 		setCurrentIdx(methodLeftBracketIdx+1);
 		
 		//解析方法参数
-		setEndIdx(this.length);
+		setEndIdx(methodRightBracketIdx);
 		List<String> argStrList=new ArrayList<String>();
+		List<String> argTypeStrList=new ArrayList<String>();
 		while(getCurrentIdx() < this.length)
 		{
 			ignoreFormatChars();
 			
+			//遇到方法的右括弧
+			if(getCurrentIdx() >= methodRightBracketIdx)
+				break;
+			
 			char c=getCurrentChar();
 			
-			//遇到方法的右括弧
-			if(c == ')')
-				break;
 			//参数分隔符
-			else if(c == ',')
+			if(c == ',')
 			{
 				setCurrentIdx(getCurrentIdx()+1);
 			}
@@ -187,9 +206,18 @@ public class InvokeStatementParser
 				setCurrentIdx(getCurrentIdx()+1);
 				
 				String str=parseUtil(DOUBLE_QUOTE, true, true, null);
-				argStrList.add(str+"\"");
 				
 				setCurrentIdx(getCurrentIdx()+1);
+				String strType=parseUtil(METHOD_ARG_END, true, true, null);
+				if(strType==null || strType.length()==0)
+					strType=null;
+				else if(strType.startsWith("(") && strType.endsWith(")"))
+					strType=strType.substring(1, strType.length()-1);
+				else
+					throw new ParseException("illegal argument segment '"+strType+"' in statement '"+this.statement+"'");
+				
+				argStrList.add(str+"\"");
+				argTypeStrList.add(strType);
 			}
 			else if(c == '\'')
 			{
@@ -197,23 +225,49 @@ public class InvokeStatementParser
 				setCurrentIdx(getCurrentIdx()+1);
 				
 				String str=parseUtil(SINGLE_QUOTE, true, true, null);
-				argStrList.add(str+"'");
 				
 				setCurrentIdx(getCurrentIdx()+1);
+				String strType=parseUtil(METHOD_ARG_END, true, true, null);
+				if(strType==null || strType.length()==0)
+					strType=null;
+				else if(strType.startsWith("(") && strType.endsWith(")"))
+					strType=strType.substring(1, strType.length()-1);
+				else
+					throw new ParseException("illegal argument segment '"+strType+"' in statement '"+this.statement+"'");
+				
+				argStrList.add(str+"'");
+				argTypeStrList.add(strType);
 			}
 			else
 			{
 				String str=parseUtil(METHOD_ARG_END, true, true, null);
-				argStrList.add(str);
+				
+				String arg=str;
+				String argType=null;
+				
+				if(str.endsWith(")"))
+				{
+					int typeStartIdx=str.indexOf('(');
+					if(typeStartIdx <= 0)
+						throw new ParseException("illegal argument type segment '"+str+"' in statement '"+this.statement+"'");
+					
+					arg=str.substring(0, typeStartIdx);
+					argType=str.substring(typeStartIdx+1, str.length()-1);
+				}
+				
+				argStrList.add(arg);
+				argTypeStrList.add(argType);
 			}
 		}
 		
 		args=argStrList.size()==0 ? null : argStrList.toArray(new String[argStrList.size()]);
+		argTypes=argTypeStrList.size()==0 ? null : argTypeStrList.toArray(new String[argTypeStrList.size()]);
 		
 		this.resultKey=resultKey;
 		this.resolver=resolver;
 		this.methodName=methodName;
 		this.args=args;
+		this.argTypes=argTypes;
 	}
 	
 	private int getCurrentIdx()

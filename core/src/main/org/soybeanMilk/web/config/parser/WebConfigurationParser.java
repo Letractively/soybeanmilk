@@ -210,7 +210,7 @@ public class WebConfigurationParser extends ConfigurationParser
 	}
 	
 	//@Override
-	protected Class<?> converterClassAttrToClass(String name)
+	protected Class<?> nameToClass(String name)
 	{
 		if(WebConstants.Scope.REQUEST.equals(name))
 			return HttpServletRequest.class;
@@ -221,7 +221,7 @@ public class WebConfigurationParser extends ConfigurationParser
 		if(WebConstants.Scope.RESPONSE.equals(name))
 			return HttpServletResponse.class;
 		else
-			return super.converterClassAttrToClass(name);
+			return super.nameToClass(name);
 	}
 	
 	//@Override

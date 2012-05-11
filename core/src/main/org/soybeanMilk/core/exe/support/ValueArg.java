@@ -19,14 +19,12 @@ import java.lang.reflect.Type;
 
 import org.soybeanMilk.core.ObjectSource;
 
-import org.soybeanMilk.core.exe.Invoke.Arg;
-
 /**
  * 值调用参数，它直接持有调用参数的值
  * @author earthangry@gmail.com
  * @date 2012-5-6
  */
-public class ValueArg implements Arg
+public class ValueArg extends AbstractArg
 {
 	/**参数值*/
 	private Object value;
@@ -35,13 +33,21 @@ public class ValueArg implements Arg
 	{
 		this(null);
 	}
-
+	
 	public ValueArg(Object value)
 	{
 		super();
 		this.value = value;
+		setType((this.value == null ? null : this.value.getClass()));
 	}
 	
+	public ValueArg(Object value, Type type)
+	{
+		super();
+		this.value = value;
+		setType(type);
+	}
+
 	public Object getValue()
 	{
 		return value;
@@ -59,14 +65,19 @@ public class ValueArg implements Arg
 	}
 	
 	//@Override
-	public Type getArgType()
+	public Type getType()
 	{
-		return (this.value == null ? null : this.value.getClass());
+		Type re=super.getType();
+		
+		if(re==null && this.value!=null)
+			re=this.value.getClass();
+		
+		return re;
 	}
-
+	
 	//@Override
 	public String toString()
 	{
-		return getClass().getSimpleName()+" [value=" + value + "]";
+		return getClass().getSimpleName()+" [value=" + value + ", type=" + getType() + "]";
 	}
 }

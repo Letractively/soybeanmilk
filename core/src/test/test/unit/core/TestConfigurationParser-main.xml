@@ -55,19 +55,33 @@
 			<arg>arg1</arg>
 		</invoke>
 		
+		<invoke name="exe5" result-key="result" resolver="tr" method="test2">
+			<arg type="String">arg0</arg>
+			<arg type="Date">arg1</arg>
+			<arg type="int">arg2</arg>
+			<arg type="Integer">arg3</arg>
+		</invoke>
+		
 		<invoke name="valueArg">
 			resultKey=resolver.method(
-				10b, 10B,
-				10s, 10S,
-				10i, 10I,
-				10l, 10L,
-				10f, 10F,
-				10d, 10D,
-				1234, 1.234,
-				"string",
+				10(byte), 				10(Byte),
+				10(short), 				10(Short),
+				10(int), 				10(Integer),
+				10(long), 				10(Long),
+				10(float), 				10(Float),
+				10(double), 			10(Double),
+				'c'(char), 				'c'(Character),
+				"string"(String),
+				true(boolean), 			false(boolean),
+				true(Boolean), 			false(Boolean),
+				null(java.lang.String)	null,
+				10,						10.0,
+				10l,					10L,
+				10f,					10F,
+				10d,					10D,
 				'c',
-				true, false,
-				null
+				"string",
+				true,					false
 			);
 		</invoke>
 		

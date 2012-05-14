@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
@@ -73,7 +74,7 @@ public class Configuration
 		this.genericConverter = genericConverter;
 		
 		if(log.isDebugEnabled())
-			log.debug("set GenericConverter property to '"+this.genericConverter+"'");
+			log.debug("set GenericConverter property to "+SbmUtils.toString(this.genericConverter));
 	}
 	
 	public Interceptor getInterceptor()
@@ -86,7 +87,7 @@ public class Configuration
 		this.interceptor = interceptor;
 		
 		if(log.isDebugEnabled())
-			log.debug("set Interceptor property to '"+this.interceptor+"'");
+			log.debug("set Interceptor property to "+SbmUtils.toString(this.interceptor));
 	}
 	
 	/**
@@ -148,12 +149,12 @@ public class Configuration
 		
 		//允许重复添加，使得功能可以被替换
 		if(exeMap.get(executable.getName()) != null)
-			log.warn("duplicate Executable named '"+executable.getName()+"' is added, the previous will be replaced");
+			log.warn("duplicate Executable named "+SbmUtils.toString(executable.getName())+" is added, the previous will be replaced");
 		
 		exeMap.put(executable.getName(), executable);
 		
 		if(log.isDebugEnabled())
-			log.debug("add an Executable '"+executable+"'");
+			log.debug("add an Executable "+SbmUtils.toString(executable));
 	}
 	
 	public Map<String, Executable> getExecutablesMap() {

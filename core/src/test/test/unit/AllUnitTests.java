@@ -21,7 +21,6 @@ import test.unit.core.TestClassShortName;
 import test.unit.core.TestConfigurationParser;
 import test.unit.core.TestDefaultExecutor;
 import test.unit.core.TestDefaultGenericConverter;
-import test.unit.core.TestGenericType;
 import test.unit.core.TestHashMapObjectSource;
 import test.unit.core.TestInvoke;
 import test.unit.core.TestInvokeStatementParser;
@@ -50,7 +49,6 @@ TestHashMapObjectSource.class,
 TestInvokeStatementParser.class,
 TestPropertyInfo.class,
 TestConfigurationParser.class,
-TestGenericType.class,
 
 TestDispatchServlet.class,
 TestPathNode.class,

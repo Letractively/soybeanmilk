@@ -28,7 +28,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecuteException;
@@ -295,7 +295,7 @@ public class ConfigurationParser
 		for(Element el : files)
 		{
 			String fileName=getTextContent(el);
-			assertNotEmpty(fileName, "<"+TAG_FILE+">'s content must not be null");
+			assertNotEmpty(fileName, "<"+TAG_FILE+"> content must not be null");
 			
 			Document[] docs=parseDocuments(fileName);
 			if(docs != null)
@@ -329,7 +329,7 @@ public class ConfigurationParser
 				String id=getAttributeValueIngoreEmpty(e,TAG_RESOLVER_ATTR_ID);
 				assertNotEmpty(id,"<"+TAG_RESOLVER+"> attribute ["+TAG_RESOLVER_ATTR_ID+"] must not be null");
 				String clazz=getAttributeValueIngoreEmpty(e,TAG_RESOLVER_ATTR_CLASS);
-				assertNotEmpty(clazz,"<"+TAG_RESOLVER+"> of id '"+id+"' attribute ["+TAG_RESOLVER_ATTR_CLASS+"] must not be null");
+				assertNotEmpty(clazz,"<"+TAG_RESOLVER+"> of id "+SbmUtils.toString(id)+" attribute ["+TAG_RESOLVER_ATTR_CLASS+"] must not be null");
 				
 				Object resolver=createClassInstance(clazz);
 				
@@ -476,7 +476,7 @@ public class ConfigurationParser
 			if(TAG_REF.equals(tagName))
 			{
 				String refExecutableName=getAttributeValue(e,TAG_REF_ATTR_NAME);
-				assertNotNull(refExecutableName, "<"+TAG_REF+"> attribute ["+TAG_REF_ATTR_NAME+"] in <"+TAG_ACTION+"> named '"+action.getName()+"' must not be null");
+				assertNotNull(refExecutableName, "<"+TAG_REF+"> attribute ["+TAG_REF_ATTR_NAME+"] in <"+TAG_ACTION+"> named "+SbmUtils.toString(action.getName())+" must not be null");
 				
 				action.addExecutable(new ExecutableRefProxy(refExecutableName, getCurrentExecutablePrefix()));
 			}
@@ -738,7 +738,7 @@ public class ConfigurationParser
 						Executable targetExe=getTargetRefExecutable((ExecutableRefProxy)e);
 						
 						if(targetExe == null)
-							throw new ParseException("can not find Executable named '"+proxy.getRefName()+"' referenced in Action '"+action.getName()+"'");
+							throw new ParseException("can not find Executable named "+SbmUtils.toString(proxy.getRefName())+" referenced in Action "+SbmUtils.toString(action.getName()));
 						
 						actionExes.set(i, targetExe);
 					}
@@ -762,7 +762,7 @@ public class ConfigurationParser
 			{
 				Executable targetExe=getTargetRefExecutable((ExecutableRefProxy)before);
 				if(targetExe == null)
-					throw new ParseException("can not find 'before' interceptor named '"+((ExecutableRefProxy)before).getRefName()+"'");
+					throw new ParseException("can not find 'before' interceptor named "+SbmUtils.toString(((ExecutableRefProxy)before).getRefName()));
 				
 				ii.setBefore(targetExe);
 			}
@@ -774,7 +774,7 @@ public class ConfigurationParser
 			{
 				Executable targetExe=getTargetRefExecutable((ExecutableRefProxy)after);
 				if(targetExe == null)
-					throw new ParseException("can not find 'after' interceptor named '"+((ExecutableRefProxy)after).getRefName()+"'");
+					throw new ParseException("can not find 'after' interceptor named "+SbmUtils.toString(((ExecutableRefProxy)after).getRefName()));
 				
 				ii.setAfter(targetExe);
 			}
@@ -786,7 +786,7 @@ public class ConfigurationParser
 			{
 				Executable targetExe=getTargetRefExecutable((ExecutableRefProxy)exception);
 				if(targetExe == null)
-					throw new ParseException("can not find 'exception' interceptor named '"+((ExecutableRefProxy)exception).getRefName()+"'");
+					throw new ParseException("can not find 'exception' interceptor named "+SbmUtils.toString(((ExecutableRefProxy)exception).getRefName()));
 				
 				ii.setException(targetExe);
 			}
@@ -877,7 +877,7 @@ public class ConfigurationParser
 			
 			File folder=new File(fileName);
 			if(!folder.exists() || !folder.isDirectory())
-				throw new ParseException("can not find directory '"+fileName+"'");
+				throw new ParseException("can not find directory "+SbmUtils.toString(fileName));
 			
 			File[] files=folder.listFiles(new FileFilter()
 			{
@@ -911,13 +911,13 @@ public class ConfigurationParser
 					docs[i]=parseDocument(in);
 					
 					if(log.isDebugEnabled())
-						log.debug("parsed Document object from '"+files[i].getAbsolutePath()+"'");
+						log.debug("parsed Document object from "+SbmUtils.toString(files[i].getAbsolutePath()));
 				}
 			}
 			else
 			{
 				if(log.isDebugEnabled())
-					log.debug("no xml file found in directory '"+fileName+"'");
+					log.debug("no xml file found in directory "+SbmUtils.toString(fileName));
 			}
 		}
 		else
@@ -955,12 +955,12 @@ public class ConfigurationParser
 		}
 		
 		if(in == null)
-			throw new ParseException("can not find config file named '"+fileName+"'");
+			throw new ParseException("can not find config file named "+SbmUtils.toString(fileName));
 		
 		Document doc=parseDocument(in);
 		
 		if(log.isDebugEnabled())
-			log.debug("parsing Document object from '"+fileName+"'");
+			log.debug("parsing Document object from "+SbmUtils.toString(fileName));
 		
 		return doc;
 	}
@@ -1160,7 +1160,7 @@ public class ConfigurationParser
 			//数值
 			if(Character.isDigit(first))
 			{
-				Type wrappedType=(argType == null ? null : SoybeanMilkUtils.toWrapperType(argType));
+				Type wrappedType=(argType == null ? null : SbmUtils.toWrapperType(argType));
 				
 				if(Byte.class.equals(wrappedType))
 				{
@@ -1222,7 +1222,7 @@ public class ConfigurationParser
 			}
 			else if(first =='"')
 			{
-				String ue=SoybeanMilkUtils.unEscape(strArg);
+				String ue=SbmUtils.unEscape(strArg);
 				len=ue.length();
 				
 				if(len<2 || ue.charAt(len-1) != '"')
@@ -1235,7 +1235,7 @@ public class ConfigurationParser
 			}
 			else if(first =='\'')
 			{
-				String ue=SoybeanMilkUtils.unEscape(strArg);
+				String ue=SbmUtils.unEscape(strArg);
 				len=ue.length();
 				
 				if(len!=3 || end!= '\'')

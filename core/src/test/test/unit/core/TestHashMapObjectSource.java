@@ -70,6 +70,6 @@ public class TestHashMapObjectSource
 			re=e;
 		}
 		
-		Assert.assertTrue((re.getMessage().startsWith("can not convert 'null' to primitive")));
+		Assert.assertTrue((re.getMessage().startsWith("can not convert null to primitive")));
 	}
 }

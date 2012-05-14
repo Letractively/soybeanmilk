@@ -16,7 +16,7 @@ package org.soybeanMilk.web.vp;
 
 import java.io.Serializable;
 
-import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.SbmUtils;
 
 /**
  * 变量路径封装类。<br>
@@ -148,7 +148,7 @@ public class VariablePath implements Comparable<VariablePath>,Serializable
 	{
 		PathNode re[]=null;
 		
-		String[] names=SoybeanMilkUtils.split(path, PATH_SEPRATOR);
+		String[] names=SbmUtils.split(path, PATH_SEPRATOR);
 		
 		boolean variable=false;
 		

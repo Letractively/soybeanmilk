@@ -25,7 +25,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.web.WebObjectSource;
@@ -58,11 +58,11 @@ public class WebGenericConverter extends DefaultGenericConverter
 		Object result=null;
 		
 		//如果源对象是数组而目标类型不是，则使用数组的第一个元素转换，与request.getParameter(...)规则相同
-		if(SoybeanMilkUtils.isArray(sourceObj.getClass())
-				&& SoybeanMilkUtils.isClassType(targetType) && !SoybeanMilkUtils.isArray((Class<?>)targetType))
+		if(SbmUtils.isArray(sourceObj.getClass())
+				&& SbmUtils.isClassType(targetType) && !SbmUtils.isArray((Class<?>)targetType))
 		{
 			if(log.isDebugEnabled())
-				log.debug("'"+SoybeanMilkUtils.toString(sourceObj)+"' is an array while the target not, so it's first element will be used for converting");
+				log.debug(SbmUtils.toString(sourceObj)+" is an array while the target not, so it's first element will be used for converting");
 			
 			sourceObj=(Array.getLength(sourceObj) == 0 ? null : Array.get(sourceObj, 0));
 			
@@ -116,7 +116,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		String filter=pfv.getFilter();
 		Object value=pfv.getValue();
 		
-		if(SoybeanMilkUtils.isInstanceOf(value, SoybeanMilkUtils.toWrapperType(targetType)))
+		if(SbmUtils.isInstanceOf(value, SbmUtils.toWrapperType(targetType)))
 			return value;
 		else if(value instanceof Map<?, ?>)
 		{

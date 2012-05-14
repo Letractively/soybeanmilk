@@ -16,7 +16,7 @@ package org.soybeanMilk.core.bean.converters;
 
 import java.lang.reflect.Type;
 
-import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.Converter;
 
@@ -38,7 +38,7 @@ public abstract class ClassTypeConverter implements Converter
 		
 		try
 		{
-			result=convertToClass(sourceObj, SoybeanMilkUtils.narrowToClassType(targetType));
+			result=convertToClass(sourceObj, SbmUtils.narrowToClassType(targetType));
 		}
 		catch(Exception e)
 		{

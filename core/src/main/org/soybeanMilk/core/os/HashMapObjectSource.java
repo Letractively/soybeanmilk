@@ -20,7 +20,7 @@ import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.GenericConverter;
@@ -57,7 +57,7 @@ public class HashMapObjectSource extends ConvertableObjectSource
 		re=convertGotObject(re, expectType);
 		
 		if(log.isDebugEnabled())
-			log.debug("get object '"+SoybeanMilkUtils.toString(re)+"' from '"+SoybeanMilkUtils.toString(this)+"' with key '"+SoybeanMilkUtils.toString(key)+"'");
+			log.debug("get object "+SbmUtils.toString(re)+" from "+SbmUtils.toString(this)+" with key "+SbmUtils.toString(key));
 		
 		return (T)re;
 	}
@@ -68,7 +68,7 @@ public class HashMapObjectSource extends ConvertableObjectSource
 		source.put(key, obj);
 		
 		if(log.isDebugEnabled())
-			log.debug("set object '"+SoybeanMilkUtils.toString(obj)+"' to '"+SoybeanMilkUtils.toString(this)+"' with key '"+SoybeanMilkUtils.toString(key)+"'");
+			log.debug("set object "+SbmUtils.toString(obj)+" to "+SbmUtils.toString(this)+" with key "+SbmUtils.toString(key));
 	}
 	
 	/**

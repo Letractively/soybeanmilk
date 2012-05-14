@@ -36,11 +36,10 @@ import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
-import org.soybeanMilk.core.bean.GenericType;
 import org.soybeanMilk.core.bean.MapConvertException;
 
 /**
@@ -93,7 +92,7 @@ public class TestDefaultGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue( (re.getMessage().endsWith("' to primitive type '"+SoybeanMilkUtils.toString(int.class)+"'")) );
+		Assert.assertTrue( (re.getMessage().endsWith(" to primitive type "+SbmUtils.toString(int.class))) );
 	}
 	
 	@Test
@@ -122,7 +121,7 @@ public class TestDefaultGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue( (re.getMessage().endsWith("' to primitive type '"+SoybeanMilkUtils.toString(int.class)+"'")) );
+		Assert.assertTrue( (re.getMessage().endsWith(" to primitive type "+SbmUtils.toString(int.class))) );
 	}
 	
 	@Test
@@ -646,9 +645,8 @@ public class TestDefaultGenericConverter
 		
 		MockWildcardType type=new MockWildcardType();
 		type.setUpperBounds(new Type[]{Integer.class});
-		Type tp=GenericType.getGenericType(type,null);
 		
-		Integer re=converter.convert(src, tp);
+		Integer re=converter.convert(src, type);
 		
 		Assert.assertEquals(new Integer(src), re);
 	}
@@ -730,7 +728,7 @@ public class TestDefaultGenericConverter
 	{
 		String[] src=new String[]{"123", "456", "789"};
 		
-		Type targetType=GenericType.getGenericType(new MockGenericArrayType(Integer.class), null);
+		Type targetType=new MockGenericArrayType(Integer.class);
 		Integer[] dest=converter.convert(src, targetType);
 		
 		for(int i=0; i<src.length; i++)
@@ -809,7 +807,7 @@ public class TestDefaultGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue(( re.getMessage().startsWith("can not find property 'abc'") ));
+		Assert.assertTrue(( re.getMessage().startsWith("can not find property \"abc\"") ));
 	}
 	
 	@Test
@@ -829,7 +827,7 @@ public class TestDefaultGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue(( re.getMessage().startsWith("can not find property 'def'") ));
+		Assert.assertTrue(( re.getMessage().startsWith("can not find property \"def\"") ));
 	}
 	
 	@Test
@@ -859,7 +857,7 @@ public class TestDefaultGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue( (re.getMessage().startsWith("can not find property 'notExistsProperty'")) );
+		Assert.assertTrue( (re.getMessage().startsWith("can not find property \"notExistsProperty\"")) );
 	}
 	
 	@Test
@@ -890,7 +888,7 @@ public class TestDefaultGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue((re.getMessage().startsWith("can not find property 'notExistsProperty'")));
+		Assert.assertTrue((re.getMessage().startsWith("can not find property \"notExistsProperty\"")));
 	}
 	
 	@Test
@@ -921,7 +919,7 @@ public class TestDefaultGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue((re.getMessage().startsWith("can not find property 'notExistsProperty'")));
+		Assert.assertTrue((re.getMessage().startsWith("can not find property \"notExistsProperty\"")));
 	}
 	
 	@Test
@@ -1287,10 +1285,8 @@ public class TestDefaultGenericConverter
 		src.put("age", age);
 		src.put("birth", birth);
 		
-		MockWildcardType tp=new MockWildcardType();
-		tp.setUpperBounds(new Type[]{JavaBean.class});
-		
-		Type type=GenericType.getGenericType(tp, null);
+		MockWildcardType type=new MockWildcardType();
+		type.setUpperBounds(new Type[]{JavaBean.class});
 		
 		JavaBean dest=converter.convert(src, type);
 		
@@ -1480,7 +1476,7 @@ public class TestDefaultGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue(( re.getMessage().startsWith("convert 'illegalKey' in key '0.javaBean2Map.illegalKey' to Map key of type 'java.lang.Integer' failed") ));
+		Assert.assertTrue(( re.getMessage().startsWith("convert \"illegalKey\" in key \"0.javaBean2Map.illegalKey\" to Map key") ));
 	}
 	
 	@Test
@@ -2600,7 +2596,7 @@ public class TestDefaultGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue(( re.getMessage().startsWith("can not find property 'age' in class") ));
+		Assert.assertTrue(( re.getMessage().startsWith("can not find property \"age\" in class") ));
 	}
 	
 	@Test

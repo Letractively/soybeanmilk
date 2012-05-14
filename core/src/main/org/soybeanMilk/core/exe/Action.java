@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.ObjectSource;
@@ -58,7 +59,7 @@ public class Action extends AbstractExecutable
 	public void execute(ObjectSource dataStore) throws ExecuteException
 	{
 		if(log.isDebugEnabled())
-			log.debug("start  execute '"+this+"'");
+			log.debug("start  execute "+SbmUtils.toString(this));
 		
 		List<Executable> executables = getExecutables();
 		
@@ -69,7 +70,7 @@ public class Action extends AbstractExecutable
 		}
 		
 		if(log.isDebugEnabled())
-			log.debug("finish execute '"+this+"'");
+			log.debug("finish execute "+SbmUtils.toString(this));
 	}
 
 	/**
@@ -102,7 +103,7 @@ public class Action extends AbstractExecutable
 		exes.add(exe);
 		
 		if(log.isDebugEnabled())
-			log.debug("add an Executable '"+exe+"'");
+			log.debug("add an Executable "+SbmUtils.toString(exe));
 	}
 	
 	//@Override

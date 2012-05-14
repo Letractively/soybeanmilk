@@ -24,7 +24,7 @@ import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.ObjectSourceException;
@@ -205,16 +205,16 @@ public class Invoke extends AbstractExecutable
 	{
 		Resolver resolver=getResolver(objectSource);
 		if(resolver == null)
-			throw new ExecuteException("got null resolver from ResolverProvider '"+SoybeanMilkUtils.toString(this.getResolverProvider())+"'");
+			throw new ExecuteException("got null resolver from ResolverProvider "+SbmUtils.toString(this.getResolverProvider()));
 		
 		Class<?> resolverClass=resolver.getResolverClass();
 		if(resolverClass == null)
-			throw new ExecuteException("the resolver class must not be null in Resolver '"+resolver+"'");
+			throw new ExecuteException("the resolver class must not be null in Resolver "+resolver);
 		
 		MethodInfo methodInfo=getMethodInfo(resolverClass, this.methodName, this.args);
 		if(methodInfo == null)
-			throw new ExecuteException("no method named '"+this.methodName+"' with "+SoybeanMilkUtils.toString(this.args)
-					+" arguments can be found in resolver class '"+SoybeanMilkUtils.toString(resolver.getResolverClass())+"'");
+			throw new ExecuteException("no method named "+this.methodName+" with "+SbmUtils.toString(this.args)
+					+" arguments can be found in resolver class "+SbmUtils.toString(resolver.getResolverClass()));
 		
 		Object[] argValues=prepareMethodArgValues(methodInfo, objectSource);
 		
@@ -311,7 +311,7 @@ public class Invoke extends AbstractExecutable
 		}
 		
 		if(log.isDebugEnabled())
-			log.debug("prepared method arguments: "+SoybeanMilkUtils.toString(values));
+			log.debug("prepared method arguments: "+SbmUtils.toString(values));
 		
 		return values;
 	}
@@ -411,7 +411,7 @@ public class Invoke extends AbstractExecutable
 		MethodInfo result=null;
 		
 		//动态代理类会丢失泛型信息，所以如果是动态代理类，则需要在其实现的接口中查找方法，以获取泛型信息
-		if(SoybeanMilkUtils.isAncestorClass(Proxy.class, clazz))
+		if(SbmUtils.isAncestorClass(Proxy.class, clazz))
 		{
 			 Class<?>[] interfaces=clazz.getInterfaces();
 			 
@@ -471,11 +471,11 @@ public class Invoke extends AbstractExecutable
 							//父子类型匹配
 							else
 							{
-								Type wat=SoybeanMilkUtils.toWrapperType(at[i]);
-								Type wt=SoybeanMilkUtils.toWrapperType(types[i]);
+								Type wat=SbmUtils.toWrapperType(at[i]);
+								Type wt=SbmUtils.toWrapperType(types[i]);
 								
-								if(SoybeanMilkUtils.isClassType(wat) && SoybeanMilkUtils.isClassType(wt)
-										&&!SoybeanMilkUtils.isAncestorClass((Class<?>)wt, (Class<?>)wat))
+								if(SbmUtils.isClassType(wat) && SbmUtils.isClassType(wt)
+										&&!SbmUtils.isAncestorClass((Class<?>)wt, (Class<?>)wat))
 								{
 									match=false;
 									break;

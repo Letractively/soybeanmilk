@@ -18,9 +18,8 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.ObjectSource;
-import org.soybeanMilk.core.bean.GenericType;
 
 /**
  * 关键字调用参数，参数的值是{@linkplain Invoke 调用}当前执行{@linkplain ObjectSource 对象源}中某个关键字的值
@@ -66,12 +65,10 @@ public class KeyArg extends AbstractArg
 		Type targetType=getType();
 		
 		if(targetType == null)
-		{
-			if(!SoybeanMilkUtils.isClassType(argType))
-				argType=GenericType.getGenericType(argType, methodClass);
-			
 			targetType=argType;
-		}
+		
+		if(!SbmUtils.isClassType(targetType))
+			targetType=SbmUtils.toConcreteType(targetType, methodClass);
 		
 		return objectSource.get(this.key, targetType);
 	}

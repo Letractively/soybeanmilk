@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SbmUtils;
 
 /**
  * 调用目标对象工厂的默认实现，它本身是一个对象容器，另外还支持添加<i>外部调用目标对象工厂</i>，用于支持其他的IOC容器，比如spring和Guice。
@@ -80,11 +81,11 @@ public class DefaultResolverObjectFactory implements ResolverObjectFactory
 		
 		//允许重复添加，使得功能可以被替换
 		if(this.resolverObjects.get(resolverObjectId) != null)
-			log.warn("duplicate resolver object id '"+resolverObjectId+"'");
+			log.warn("duplicate resolver object id "+SbmUtils.toString(resolverObjectId));
 		
 		this.resolverObjects.put(resolverObjectId, resolverObject);
 		
 		if(log.isDebugEnabled())
-			log.debug("add a resolver object '"+resolverObject+"' with id '"+resolverObjectId+"'");
+			log.debug("add a resolver object "+SbmUtils.toString(resolverObject)+" with id "+SbmUtils.toString(resolverObjectId));
 	}
 }

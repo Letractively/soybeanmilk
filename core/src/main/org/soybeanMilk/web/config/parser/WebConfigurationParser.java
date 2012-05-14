@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
@@ -149,7 +149,7 @@ public class WebConfigurationParser extends ConfigurationParser
 			assertNotEmpty(clazz, "<"+TAG_HANDLER+"> attribute ["+TAG_HANDLER_ATTR_CLASS+"] must not be empty");
 			
 			TargetHandler handler=(TargetHandler)createClassInstance(clazz);
-			String[] ttps=SoybeanMilkUtils.split(targetTypes, ',');
+			String[] ttps=SbmUtils.split(targetTypes, ',');
 			
 			for(String tt : ttps)
 				typeTargetHandler.addTargetHandler(tt.trim(), handler);

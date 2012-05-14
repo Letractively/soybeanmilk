@@ -27,7 +27,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.soybeanMilk.SoybeanMilkUtils;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.ObjectSourceException;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.GenericConverter;
@@ -176,7 +176,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		Object result = null;
 		
 		String strKey=(key instanceof String ? (String)key : key.toString());
-		String[] scopedKeys=SoybeanMilkUtils.splitByFirstAccessor(strKey);
+		String[] scopedKeys=SbmUtils.splitByFirstAccessor(strKey);
 		
 		if(WebConstants.Scope.PARAM.equalsIgnoreCase(scopedKeys[0]))
 		{
@@ -227,7 +227,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		result=convertGotObject(result, expectType);
 		
 		if(log.isDebugEnabled())
-			log.debug("got object '"+SoybeanMilkUtils.toString(result)+"' from '"+SoybeanMilkUtils.toString(this)+"' with key '"+SoybeanMilkUtils.toString(strKey)+"'");
+			log.debug("got object "+SbmUtils.toString(result)+" from "+SbmUtils.toString(this)+" with key "+SbmUtils.toString(strKey));
 		
 		return (T)result;
 	}
@@ -239,7 +239,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 			throw new IllegalArgumentException("[key] must not be null");
 		
 		String strKey=(key instanceof String ? (String)key : key.toString());
-		String[] scopedKeys=SoybeanMilkUtils.splitByFirstAccessor(strKey);
+		String[] scopedKeys=SbmUtils.splitByFirstAccessor(strKey);
 		
 		if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scopedKeys[0]))
 		{
@@ -284,7 +284,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 			setObjectWithScopeUnknownKey(strKey, obj);
 		
 		if(log.isDebugEnabled())
-			log.debug("set object '"+SoybeanMilkUtils.toString(obj)+"' to '"+SoybeanMilkUtils.toString(this)+"' with key '"+SoybeanMilkUtils.toString(strKey)+"'");
+			log.debug("set object "+SbmUtils.toString(obj)+" to "+SbmUtils.toString(this)+" with key "+SbmUtils.toString(strKey));
 	}
 	
 	/**
@@ -350,7 +350,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		
 		Object result=null;
 		
-		String[] propKeys=SoybeanMilkUtils.splitAccessExpression(attrExpression);
+		String[] propKeys=SbmUtils.splitAccessExpression(attrExpression);
 		
 		//不包含访问符，则直接取值
 		if(propKeys.length == 1)
@@ -386,7 +386,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	{
 		boolean result=false;
 		
-		String[] propKeys=SoybeanMilkUtils.splitByFirstAccessor(attrExpression);
+		String[] propKeys=SbmUtils.splitByFirstAccessor(attrExpression);
 		
 		//没有包含访问符，则直接保存到此作用域
 		if(propKeys.length == 1)

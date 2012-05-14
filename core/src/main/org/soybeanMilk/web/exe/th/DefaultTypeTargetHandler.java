@@ -22,6 +22,7 @@ import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
@@ -93,7 +94,7 @@ public class DefaultTypeTargetHandler implements TypeTargetHandler
 		this.typeHandlers.put(consistentTargetType(type), targetHandler);
 		
 		if(log.isDebugEnabled())
-			log.debug("add "+targetHandler+" for handling '"+consistentTargetType(type)+"' type target");
+			log.debug("add "+SbmUtils.toString(targetHandler)+" for handling "+SbmUtils.toString(consistentTargetType(type))+" type target");
 	}
 	
 	/**

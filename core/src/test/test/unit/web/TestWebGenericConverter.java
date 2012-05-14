@@ -215,7 +215,7 @@ public class TestWebGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue((re.getMessage().startsWith("can not find property 'inexistent'")));
+		Assert.assertTrue((re.getMessage().startsWith("can not find property \"inexistent\"")));
 	}
 	
 	@Test
@@ -245,7 +245,7 @@ public class TestWebGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue( (re.getMessage().startsWith("can not find property 'notExistsProperty'")) );
+		Assert.assertTrue( (re.getMessage().startsWith("can not find property \"notExistsProperty\"")) );
 	}
 	
 	@Test
@@ -465,7 +465,7 @@ public class TestWebGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'javax.servlet.http.HttpServletRequest'")) );
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting")) );
 	}
 	
 	@Test
@@ -501,7 +501,7 @@ public class TestWebGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'javax.servlet.http.HttpSession'")) );
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting")) );
 	}
 	
 	@Test
@@ -537,7 +537,7 @@ public class TestWebGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'javax.servlet.ServletContext'")) );
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting")) );
 	}
 	
 	@Test
@@ -573,7 +573,7 @@ public class TestWebGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'javax.servlet.http.HttpServletResponse'")) );
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting")) );
 	}
 	
 	@Test
@@ -609,7 +609,7 @@ public class TestWebGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting 'org.soybeanMilk.web.WebObjectSource'")) );
+		Assert.assertTrue( (re.getMessage().startsWith("can not find Converter for converting")) );
 	}
 	
 	@Test

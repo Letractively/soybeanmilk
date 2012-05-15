@@ -66,7 +66,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			
 			sourceObj=(Array.getLength(sourceObj) == 0 ? null : Array.get(sourceObj, 0));
 			
-			result=convert(sourceObj, targetType);
+			result=convertObjectToType(sourceObj, targetType);
 		}
 		else if(sourceObj instanceof ParamFilterValue)
 		{
@@ -122,10 +122,10 @@ public class WebGenericConverter extends DefaultGenericConverter
 		{
 			//过滤后的参数映射表必须是清洁的
 			value=new PropertyValueMap((Map<String, ?>)value, (filter!=null && filter.length()!=0));
-			result=convert(value, targetType);
+			result=convertObjectToType(value, targetType);
 		}
 		else
-			result=convert(value, targetType);
+			result=convertObjectToType(value, targetType);
 		
 		return result;
 	}

@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SbmUtils;
 
 /**
  * {@linkplain java.lang.Class Class}类型的属性信息封装类
@@ -248,13 +249,13 @@ public class PropertyInfo
 		if(cached != null)
 		{
 			if(log.isDebugEnabled())
-				log.debug(getSpace(depth)+"get '"+beanClass.getName()+"' property information from cache");
+				log.debug(getSpace(depth)+"got "+SbmUtils.toString(beanClass.getName())+" property information from cache");
 			
 			return cached;
 		}
 		
 		if(log.isDebugEnabled())
-			log.debug(getSpace(depth)+"start  anatomizing '"+beanClass.getName()+"' property information");
+			log.debug(getSpace(depth)+"start  anatomizing "+SbmUtils.toString(beanClass.getName())+" property information");
 		
 		PropertyInfo beanInfo=new PropertyInfo(beanClass);
 		
@@ -300,12 +301,12 @@ public class PropertyInfo
 				beanInfo.addSubPropertyInfo(copied);
 				
 				if(log.isDebugEnabled())
-					log.debug(getSpace(depth)+"add '"+copied+"'");
+					log.debug(getSpace(depth)+" add "+SbmUtils.toString(copied));
 			}
 		}
 		
 		if(log.isDebugEnabled())
-			log.debug(getSpace(depth)+"finish anatomizing '"+beanClass.getName()+"' property information");
+			log.debug(getSpace(depth)+"finish anatomizing "+SbmUtils.toString(beanClass.getName())+" property information");
 		
 		propertyInfoCache.putIfAbsent(beanClass, beanInfo);
 		

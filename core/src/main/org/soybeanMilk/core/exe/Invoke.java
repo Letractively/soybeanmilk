@@ -168,7 +168,7 @@ public class Invoke extends AbstractExecutable
 	public void execute(ObjectSource objectSource) throws ExecuteException
 	{
 		if(log.isDebugEnabled())
-			log.debug("start  execute '"+this+"'");
+			log.debug("start  execute "+SbmUtils.toString(this));
 		
 		boolean breaked=isBreaked(objectSource);
 		
@@ -184,7 +184,7 @@ public class Invoke extends AbstractExecutable
 		}
 		
 		if(log.isDebugEnabled())
-			log.debug("finish execute '"+this+"'");
+			log.debug("finish execute "+SbmUtils.toString(this));
 	}
 	
 	//@Override

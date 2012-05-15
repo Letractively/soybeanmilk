@@ -229,8 +229,8 @@ public class SbmUtils
 	}
 	
 	/**
-	 * 将<code>type</code>类型转换为具体化类型，类型中所有的{@linkplain TypeVariable}和{@linkplain WildcardType}对象都将被具体化，
-	 * 如果<code>type</code>中不包含这两个对象，它将直接被返回；否则，一个新的类型将被创建并返回。
+	 * 将<code>type</code>类型转换为具体化类型，它包含的所有{@linkplain TypeVariable}和{@linkplain WildcardType}类型都将被<code>ownerClass</code>的具体类型替代，
+	 * 如果<code>type</code>中不包含这两种类型，它将直接被返回；否则，一个新的类型将被创建并返回。
 	 * @param type
 	 * @param ownerClass
 	 * @return
@@ -241,14 +241,17 @@ public class SbmUtils
 		if(isClassType(type))
 			return type;
 		
-		Map<TypeVariable<?>, Type> variableTypesMap=null;
-		if(ownerClass != null)
+		if(ownerClass == null)
 		{
-			variableTypesMap=new HashMap<TypeVariable<?>, Type>();
-			extractTypeVariablesInType(ownerClass, variableTypesMap);
+			return toConcreteTypeInner(type, null);
 		}
-		
-		return toConcreteType(type, variableTypesMap);
+		else
+		{
+			Map<TypeVariable<?>, Type> variableTypesMap=new HashMap<TypeVariable<?>, Type>();
+			extractTypeVariablesInType(ownerClass, variableTypesMap);
+			
+			return toConcreteTypeInner(type, variableTypesMap);
+		}
 	}
 	
 	/**
@@ -258,30 +261,13 @@ public class SbmUtils
 	 * @return
 	 * @date 2012-5-14
 	 */
-	private static Type toConcreteType(Type type, Map<TypeVariable<?>, Type> variableTypesMap)
+	private static Type toConcreteTypeInner(Type type, Map<TypeVariable<?>, Type> variableTypesMap)
 	{
 		Type result=null;
 		
 		if(type instanceof Class<?>)
 		{
 			result=type;
-		}
-		else if(type instanceof TypeVariable<?>)
-		{
-			TypeVariable<?> tv=(TypeVariable<?>)type;
-			
-			if(variableTypesMap != null)
-				result=variableTypesMap.get(tv);
-			
-			if(result == null)
-			{
-				Type[] bounds=tv.getBounds();
-				
-				if(bounds==null || bounds.length==0)
-					result=Object.class;
-				else
-					result=toConcreteType(bounds[0], variableTypesMap);
-			}
 		}
 		else if(type instanceof ParameterizedType)
 		{
@@ -294,7 +280,7 @@ public class SbmUtils
 			boolean concrete=true;
 			for(int i=0; i<at.length; i++)
 			{
-				cat[i]=toConcreteType(at[i], variableTypesMap);
+				cat[i]=toConcreteTypeInner(at[i], variableTypesMap);
 				
 				if(cat[i] != at[i])
 					concrete=false;
@@ -310,12 +296,31 @@ public class SbmUtils
 			GenericArrayType gap=(GenericArrayType)type;
 			
 			Type ct=gap.getGenericComponentType();
-			Type cct=toConcreteType(ct, variableTypesMap);
+			Type cct=toConcreteTypeInner(ct, variableTypesMap);
 			
 			if(cct == ct)
 				result=gap;
 			else
 				result=new CustomGenericArrayType(cct);
+		}
+		else if(type instanceof TypeVariable<?>)
+		{
+			TypeVariable<?> tv=(TypeVariable<?>)type;
+			
+			if(variableTypesMap != null)
+				result=variableTypesMap.get(tv);
+			
+			if(result == null)
+			{
+				Type[] bounds=tv.getBounds();
+				
+				if(bounds==null || bounds.length==0)
+					result=Object.class;
+				else
+					result=bounds[0];
+			}
+			
+			result=toConcreteTypeInner(result, variableTypesMap);
 		}
 		else if(type instanceof WildcardType)
 		{
@@ -330,7 +335,7 @@ public class SbmUtils
 			if(cwt == null)
 				cwt=Object.class;
 			
-			result=toConcreteType(cwt, variableTypesMap);
+			result=toConcreteTypeInner(cwt, variableTypesMap);
 		}
 		else
 			result=type;
@@ -422,7 +427,7 @@ public class SbmUtils
 		
 		if(obj instanceof Class<?>)
 		{
-			return "["+((Class<?>)obj).getName()+"]";
+			return "'"+((Class<?>)obj).getName()+"'";
 		}
 		else if(obj instanceof String)
 		{

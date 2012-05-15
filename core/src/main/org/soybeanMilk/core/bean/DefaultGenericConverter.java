@@ -216,34 +216,16 @@ public class DefaultGenericConverter implements GenericConverter
 	@SuppressWarnings("unchecked")
 	public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
 	{
-		if(log.isDebugEnabled())
-			log.debug("start converting "+SbmUtils.toString(sourceObj)+" to type "+SbmUtils.toString(targetType));
-		
 		Object result=null;
 		
 		if(targetType == null)
 		{
 			result=sourceObj;
 		}
-		else if(SbmUtils.isInstanceOf(sourceObj, SbmUtils.toWrapperType(targetType)))
-		{
-			result=sourceObj;
-		}
-		else if(sourceObj==null || "".equals(sourceObj))
-		{
-			if(SbmUtils.isPrimitive(targetType))
-				throw new GenericConvertException("can not convert "+SbmUtils.toString(sourceObj)+" to primitive type "+SbmUtils.toString(targetType));
-			else
-				result=null;
-		}
 		else
 		{
-			Converter converter = getConverter(sourceObj.getClass(), targetType);
-			
-			if(converter != null)
-				result=doConvert(converter, sourceObj, targetType);
-			else
-				result=convertWhenNoSupportConverter(sourceObj, targetType);
+			//将targetType具体化，这样内部的所有方法都不再需要处理TypeVarialble和WildcardType类型
+			result=convertObjectToType(sourceObj, toConcreteType(targetType));
 		}
 		
 		return (T)result;
@@ -380,26 +362,56 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	/**
-	 * 当找不到对应的辅助转换器时，此方法将被调用。
-	 * @param sourceObj
-	 * @param targetType
-	 * @return
-	 * @date 2011-1-5
-	 */
-	protected Object convertWhenNoSupportConverter(Object sourceObj, Type targetType) throws ConvertException
-	{
-		return convertObjectToType(sourceObj, targetType);
-	}
-	
-	/**
 	 * 将对象转换为给定类型的对象
 	 * @param obj
 	 * @param type
 	 * @return
-	 * @date 2011-10-12
+	 * @throws ConvertException
+	 * @date 2012-5-12
+	 */
+	protected Object convertObjectToType(Object obj, Type type) throws ConvertException
+	{
+		if(log.isDebugEnabled())
+			log.debug("start converting "+SbmUtils.toString(obj)+" to type "+SbmUtils.toString(type));
+		
+		Object result=null;
+		
+		if(SbmUtils.isInstanceOf(obj, SbmUtils.toWrapperType(type)))
+		{
+			result=obj;
+		}
+		else if(obj==null || "".equals(obj))
+		{
+			if(SbmUtils.isPrimitive(type))
+				throw new GenericConvertException("can not convert "+SbmUtils.toString(obj)+" to primitive type "+SbmUtils.toString(type));
+			else
+				result=null;
+		}
+		else
+		{
+			Converter converter = getConverter(obj.getClass(), type);
+			
+			if(converter != null)
+				result=doConvert(converter, obj, type);
+			else
+				result=convertWhenNoSupportConverter(obj, type);
+		}
+		
+		if(log.isDebugEnabled())
+			log.debug("finish converting "+SbmUtils.toString(obj)+" to type "+SbmUtils.toString(type));
+		
+		return result;
+	}
+	
+	/**
+	 * 当找不到对应的辅助转换器时，此方法将被调用。
+	 * @param obj
+	 * @param type
+	 * @return
+	 * @date 2011-1-5
 	 */
 	@SuppressWarnings("unchecked")
-	protected Object convertObjectToType(Object obj, Type type) throws ConvertException
+	protected Object convertWhenNoSupportConverter(Object obj, Type type) throws ConvertException
 	{
 		if(obj == null)
 			return null;
@@ -432,7 +444,7 @@ public class DefaultGenericConverter implements GenericConverter
 	protected Object convertStringToType(String str, Type type) throws ConvertException
 	{
 		if(str==null || str.length()==0)
-			return convert(null, type);
+			return convertObjectToType(null, type);
 		
 		Object result=null;
 		
@@ -445,22 +457,6 @@ public class DefaultGenericConverter implements GenericConverter
 				result= Enum.valueOf(clazz, str);
 			else
 				result=converterNotFoundThrow(str.getClass(), type);
-		}
-		else if(type instanceof TypeVariable<?>)
-		{
-			result=convert(str, SbmUtils.toConcreteType(type, null));
-		}
-		else if(type instanceof WildcardType)
-		{
-			result=convert(str, SbmUtils.toConcreteType(type, null));
-		}
-		else if(type instanceof ParameterizedType)
-		{
-			result=converterNotFoundThrow(str.getClass(), type);
-		}
-		else if(type instanceof GenericArrayType)
-		{
-			result=converterNotFoundThrow(str.getClass(), type);
 		}
 		else
 			result=converterNotFoundThrow(str.getClass(), type);
@@ -484,48 +480,19 @@ public class DefaultGenericConverter implements GenericConverter
 		Object result=null;
 		
 		if(SbmUtils.isClassType(type))
+		{
 			result=convertArrayToClass(array, SbmUtils.narrowToClassType(type));
+		}
 		else if(type instanceof ParameterizedType)
+		{
 			result=convertArrayToParameterrizedType(array, (ParameterizedType)type);
+		}
 		else if(type instanceof GenericArrayType)
+		{
 			result=convertArrayToGenericArrayType(array, (GenericArrayType)type);
-		else if(type instanceof TypeVariable<?>)
-			result=convertArrayToTypeVariable(array, (TypeVariable<?>)type);
-		else if(type instanceof WildcardType)
-			result=convertArrayToWildcardType(array, (WildcardType)type);
+		}
 		else
 			result=converterNotFoundThrow(array.getClass(), type);
-		
-		return result;
-	}
-	
-	/**
-	 * 将属性值映射表转换为目标类型的对象
-	 * @param pvm
-	 * @param type
-	 * @return
-	 * @throws ConvertException
-	 * @date 2012-5-14
-	 */
-	protected Object convertPropertyValueMapToType(PropertyValueMap pvm, Type type) throws ConvertException
-	{
-		if(pvm==null || pvm.size()==0)
-			return null;
-		
-		Object result=null;
-		
-		if(SbmUtils.isClassType(type))
-			result=convertPropertyValueMapToClass(pvm, SbmUtils.narrowToClassType(type));
-		else if(type instanceof ParameterizedType)
-			result=convertPropertyValueMapToParameterrizedType(pvm, (ParameterizedType)type);
-		else if(type instanceof GenericArrayType)
-			result=convertPropertyValueMapToGenericArrayType(pvm, (GenericArrayType)type);
-		else if(type instanceof TypeVariable<?>)
-			result=convertPropertyValueMapToTypeVariable(pvm, (TypeVariable<?>)type);
-		else if(type instanceof WildcardType)
-			result=convertPropertyValueMapToWildcardType(pvm, (WildcardType)type);
-		else
-			result=converterNotFoundThrow(pvm.getClass(), type);
 		
 		return result;
 	}
@@ -574,23 +541,16 @@ public class DefaultGenericConverter implements GenericConverter
 		{
 			Class<?> actualType=SbmUtils.narrowToClassType(rt);
 			
-			if(SbmUtils.isClassType(actualType))
+			//List<T>
+			if(SbmUtils.isAncestorClass(List.class, actualType))
 			{
-				Class<?> actualClass=(Class<?>)actualType;
-				
-				//List<T>
-				if(SbmUtils.isAncestorClass(List.class, actualClass))
-				{
-					result=convertArrayToList(array, actualClass, atas[0]);
-				}
-				//Set<T>
-				else if(SbmUtils.isAncestorClass(Set.class, actualClass))
-				{
-					List<?> list=convertArrayToList(array, List.class, atas[0]);
-					result=listToSet(list, actualClass);
-				}
-				else
-					result=converterNotFoundThrow(array.getClass(), type);
+				result=convertArrayToList(array, actualType, atas[0]);
+			}
+			//Set<T>
+			else if(SbmUtils.isAncestorClass(Set.class, actualType))
+			{
+				List<?> list=convertArrayToList(array, List.class, atas[0]);
+				result=listToSet(list, actualType);
 			}
 			else
 				result=converterNotFoundThrow(array.getClass(), type);
@@ -621,67 +581,116 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	/**
-	 * 将数组对象转换为{@linkplain TypeVariable}类型的对象
-	 * @param pvm
-	 * @param type
+	 * 由一个数组对象转换为另一数组对象
+	 * @param array
+	 * @param elementType
 	 * @return
-	 * @throws ConvertException
-	 * @date 2012-5-14
+	 * @date 2012-2-20
 	 */
-	protected Object convertArrayToTypeVariable(Object array, TypeVariable<?> type) throws ConvertException
+	protected Object convertArrayToArray(Object array, Type elementType) throws ConvertException
 	{
-		Type tt=SbmUtils.toConcreteType(type, null);
+		Object result=null;
 		
-		return convertArrayToType(array, tt);
+		if(array != null)
+		{
+			int len=Array.getLength(array);
+			
+			result=instance(elementType, len);
+			
+			for(int i=0; i<len; i++)
+			{
+				Object v=convertObjectToType(Array.get(array, i), elementType);
+				Array.set(result, i, v);
+			}
+		}
+		
+		return result;
 	}
 	
 	/**
-	 * 将数组对象转换为{@linkplain WildcardType}类型的对象
+	 * 由数组转换为{@linkplain java.util.List List}对象。
+	 * @param array
+	 * @param listClass
+	 * @param elementType
+	 * @return
+	 * @date 2011-1-5
+	 */
+	@SuppressWarnings("unchecked")
+	protected List<?> convertArrayToList(Object array, Class<?> listClass, Type elementType) throws ConvertException
+	{
+		List<Object> result=null;
+		
+		if(array != null)
+		{
+			result=(List<Object>)instance(listClass, -1);
+			
+			for(int i=0,len=Array.getLength(array); i<len; i++)
+				result.add(convertObjectToType(Array.get(array, i), elementType));
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 将属性值映射表转换为目标类型的对象
 	 * @param pvm
 	 * @param type
 	 * @return
 	 * @throws ConvertException
 	 * @date 2012-5-14
 	 */
-	protected Object convertArrayToWildcardType(Object array, WildcardType type) throws ConvertException
+	protected Object convertPropertyValueMapToType(PropertyValueMap pvm, Type type) throws ConvertException
 	{
-		Type tt=SbmUtils.toConcreteType(type, null);
+		if(pvm==null || pvm.size()==0)
+			return null;
 		
-		return convertArrayToType(array, tt);
+		Object result=null;
+		
+		if(SbmUtils.isClassType(type))
+		{
+			result=convertPropertyValueMapToClass(pvm, SbmUtils.narrowToClassType(type));
+		}
+		else if(type instanceof ParameterizedType)
+		{
+			result=convertPropertyValueMapToParameterrizedType(pvm, (ParameterizedType)type);
+		}
+		else if(type instanceof GenericArrayType)
+		{
+			result=convertPropertyValueMapToGenericArrayType(pvm, (GenericArrayType)type);
+		}
+		else
+			result=converterNotFoundThrow(pvm.getClass(), type);
+		
+		return result;
 	}
 	
 	/**
 	 * 将属性值映射表转换为目标类型为<code>Class&lt?&gt;</code>的对象，目标类型只可能为JavaBean或者JavaBean数组
-	 * @param sourceMap 属性值映射表
-	 * @param targetClass
+	 * @param pvm 属性值映射表
+	 * @param type
 	 * @return
 	 */
-	protected Object convertPropertyValueMapToClass(PropertyValueMap sourceMap, Class<?> targetClass) throws ConvertException
+	protected Object convertPropertyValueMapToClass(PropertyValueMap pvm, Class<?> type) throws ConvertException
 	{
 		Object result=null;
 		
-		if(sourceMap==null || sourceMap.isEmpty())
+		if(pvm==null || pvm.isEmpty())
 		{
-			result=convert(null, targetClass);
+			result=convertObjectToType(null, type);
 		}
 		//数组
-		if(SbmUtils.isArray(targetClass))
+		if(SbmUtils.isArray(type))
 		{
-			Class<?> eleClass=targetClass.getComponentType();
+			Class<?> eleClass=type.getComponentType();
 			
-			List<?> tmpRe=convertPropertyValueMapToList(sourceMap, List.class, eleClass);
+			List<?> tmpRe=convertPropertyValueMapToList(pvm, List.class, eleClass);
 			
 			result=listToArray(tmpRe, eleClass);
 		}
+		//JavaBean
 		else
 		{
-			Type targetType=getPropertyValueMapTargetType(sourceMap, targetClass, -1);
-			
-			//JavaBean
-			if(SbmUtils.isClassType(targetType))
-			{
-				result=convertPropertyValueMapToJavaBeanClass(sourceMap, SbmUtils.narrowToClassType(targetType));
-			}
+			result=convertPropertyValueMapToJavaBeanClass(pvm, type);
 		}
 		
 		return result;
@@ -689,62 +698,71 @@ public class DefaultGenericConverter implements GenericConverter
 	
 	/**
 	 * 将属性值映射表转换为JavaBean对象
-	 * @param sourceMap
+	 * @param pvm
 	 * @param javaBeanClass
 	 * @return
 	 * @throws ConvertException
 	 * @date 2012-5-14
 	 */
-	protected Object convertPropertyValueMapToJavaBeanClass(PropertyValueMap sourceMap, Class<?> javaBeanClass) throws ConvertException
+	protected Object convertPropertyValueMapToJavaBeanClass(PropertyValueMap pvm, Class<?> javaBeanClass) throws ConvertException
 	{
 		Object result=null;
 		
-		PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(javaBeanClass);
+		Type actualType=getPropertyValueMapTargetType(pvm, javaBeanClass, -1);
 		
-		if(!beanInfo.hasSubPropertyInfo())
-			throw new GenericConvertException("the target javaBean Class "+SbmUtils.toString(javaBeanClass)+" is not valid, it has no javaBean property");
-		
-		Set<String> propertyKeys=sourceMap.keySet();
-		for(String property : propertyKeys)
+		if(SbmUtils.isClassType(actualType))
 		{
-			PropertyInfo propInfo=null;
-			if(!sourceMap.isCleaned())
+			Class<?> actualClass=SbmUtils.narrowToClassType(actualType);
+			
+			PropertyInfo beanInfo=PropertyInfo.getPropertyInfo(actualClass);
+			
+			if(!beanInfo.hasSubPropertyInfo())
+				throw new GenericConvertException("the target javaBean Class "+SbmUtils.toString(actualClass)+" is not valid, it has no javaBean property");
+			
+			Set<String> propertyKeys=pvm.keySet();
+			for(String property : propertyKeys)
 			{
-				propInfo=beanInfo.getSubPropertyInfo(property);
+				PropertyInfo propInfo=null;
+				if(!pvm.isCleaned())
+				{
+					propInfo=beanInfo.getSubPropertyInfo(property);
+					
+					//忽略无关属性
+					if(propInfo == null)
+						continue;
+				}
+				else
+					propInfo=getSubPropertyInfoNotNull(beanInfo, property);
 				
-				//忽略无关属性
-				if(propInfo == null)
-					continue;
-			}
-			else
-				propInfo=getSubPropertyInfoNotNull(beanInfo, property);
-			
-			//延迟初始化
-			if(result == null)
-				result = instance(beanInfo.getPropType(), -1);
-			
-			try
-			{
-				setJavaBeanProperty(result, propInfo, sourceMap.get(property));
-			}
-			catch(ConvertException e)
-			{
-				handlePropertyValueMapConvertException(sourceMap, property, e);
+				//延迟初始化
+				if(result == null)
+					result = instance(beanInfo.getPropType(), -1);
+				
+				try
+				{
+					setJavaBeanProperty(result, propInfo, pvm.get(property));
+				}
+				catch(ConvertException e)
+				{
+					handlePropertyValueMapConvertException(pvm, property, e);
+				}
 			}
 		}
+		else
+			result=convertPropertyValueMapToType(pvm, actualType);
 		
 		return result;
 	}
 	
 	/**
 	 * 将属性值映射表转换为{@linkplain ParameterizedType}类型的对象
-	 * @param sourceMap
+	 * @param pvm
 	 * @param type
 	 * @return
 	 * @throws ConvertException
 	 * @date 2012-5-14
 	 */
-	protected Object convertPropertyValueMapToParameterrizedType(PropertyValueMap sourceMap, ParameterizedType type) throws ConvertException
+	protected Object convertPropertyValueMapToParameterrizedType(PropertyValueMap pvm, ParameterizedType type) throws ConvertException
 	{
 		Object result=null;
 		
@@ -758,143 +776,135 @@ public class DefaultGenericConverter implements GenericConverter
 			//List<T>
 			if(SbmUtils.isAncestorClass(List.class, actualType))
 			{
-				result=convertPropertyValueMapToList(sourceMap, actualType, atas[0]);
+				result=convertPropertyValueMapToList(pvm, actualType, atas[0]);
 			}
 			//Set<T>
 			else if(SbmUtils.isAncestorClass(Set.class, actualType))
 			{
-				List<?> tmpRe=convertPropertyValueMapToList(sourceMap, List.class, atas[0]);
+				List<?> tmpRe=convertPropertyValueMapToList(pvm, List.class, atas[0]);
 				result=listToSet(tmpRe, actualType);
 			}
 			//Map<K, V>
 			else if(SbmUtils.isAncestorClass(Map.class, actualType))
 			{
-				result=convertPropertyValueMapToMap(sourceMap, actualType, atas[0], atas[1]);
+				result=convertPropertyValueMapToMap(pvm, actualType, atas[0], atas[1]);
 			}
 			else
-				result=converterNotFoundThrow(sourceMap.getClass(), type);
+				result=converterNotFoundThrow(pvm.getClass(), type);
 		}
 		else
-			result=converterNotFoundThrow(sourceMap.getClass(), type);
+			result=converterNotFoundThrow(pvm.getClass(), type);
 		
 		return result;
 	}
 	
 	/**
 	 * 将属性值映射表转换为{@linkplain GenericArrayType}类型的对象
-	 * @param sourceMap
+	 * @param pvm
 	 * @param type
 	 * @return
 	 * @throws ConvertException
 	 * @date 2012-5-14
 	 */
-	protected Object convertPropertyValueMapToGenericArrayType(PropertyValueMap sourceMap, GenericArrayType type) throws ConvertException
+	protected Object convertPropertyValueMapToGenericArrayType(PropertyValueMap pvm, GenericArrayType type) throws ConvertException
 	{
 		Object result=null;
 		
 		Type ct=type.getGenericComponentType();
 		
-		result=convertPropertyValueMapToList(sourceMap, List.class, ct);
+		result=convertPropertyValueMapToList(pvm, List.class, ct);
 		result=listToArray((List<?>)result, ct);
 		
 		return result;
 	}
 	
 	/**
-	 * 将属性值映射表转换为{@linkplain TypeVariable}类型的对象
-	 * @param pvm
-	 * @param type
-	 * @return
-	 * @throws ConvertException
-	 * @date 2012-5-14
-	 */
-	protected Object convertPropertyValueMapToTypeVariable(PropertyValueMap pvm, TypeVariable<?> type) throws ConvertException
-	{
-		Type tt=SbmUtils.toConcreteType(type, null);
-		
-		return convertPropertyValueMapToType(pvm, tt);
-	}
-	
-	/**
-	 * 将属性值映射表转换为{@linkplain WildcardType}类型的对象
-	 * @param pvm
-	 * @param type
-	 * @return
-	 * @throws ConvertException
-	 * @date 2012-5-14
-	 */
-	protected Object convertPropertyValueMapToWildcardType(PropertyValueMap pvm, WildcardType type) throws ConvertException
-	{
-		Type tt=SbmUtils.toConcreteType(type, null);
-		
-		return convertPropertyValueMapToType(pvm, tt);
-	}
-	
-	/**
 	 * 将属性值映射表转换为{@linkplain List}类型的对象
-	 * @param sourceMap
+	 * @param pvm
 	 * @param listClass
 	 * @param elementType
 	 * @return
 	 * @throws ConvertException
 	 * @date 2012-5-14
 	 */
-	@SuppressWarnings("unchecked")
-	protected List<?> convertPropertyValueMapToList(PropertyValueMap sourceMap, Class<?> listClass, Type elementType) throws ConvertException
+	protected List<?> convertPropertyValueMapToList(PropertyValueMap pvm, Class<?> listClass, Type elementType) throws ConvertException
 	{
-		if(sourceMap==null || sourceMap.isEmpty())
+		if(pvm==null || pvm.isEmpty())
 			return null;
 		
-		List<Object> result=null;
+		List<?> result=null;
 		
 		if(SbmUtils.isClassType(elementType))
 		{
-			result=(List<Object>)convertPropertyValueMapToListJavaBeanElement(sourceMap, listClass, SbmUtils.narrowToClassType(elementType));
+			Class<?> eleClass=SbmUtils.narrowToClassType(elementType);
+			
+			//数组
+			if(eleClass.isArray())
+				result=convertPropertyValueMapToListElementCollection(pvm, listClass, eleClass);
+			//JavaBean
+			else
+				result=convertPropertyValueMapToListElementJavaBean(pvm, listClass, eleClass);
 		}
 		else
 		{
-			result=(List<Object>)instance(listClass, -1);
-			
-			Set<String> propertyKeyes=sourceMap.keySet();
-			for(String property : propertyKeyes)
-			{
-				//明确指定了索引位置
-				if(isIndexAccessor(property))
-				{
-					int idx=-1;
-					try
-					{
-						idx=Integer.parseInt(property);
-					}
-					catch(Exception e)
-					{
-						throw new GenericConvertException("illegal index value '"+property+"' of property '"+sourceMap.getPropertyNamePath(property)+"'", e);
-					}
-					
-					while(result.size() < idx+1)
-						result.add(null);
-					
-					Object ele=convertObjectToType(sourceMap.get(property), elementType);
-					result.set(idx, ele);
-				}
-				else
-					throw new GenericConvertException("");
-			}
+			//集合类型
+			result=convertPropertyValueMapToListElementCollection(pvm, listClass, elementType);
 		}
 		
 		return result;
 	}
 	
 	/**
-	 * 将属性值映射表转换为列表对象
-	 * @param sourceMap
+	 * 将属性值映射表转换为列表，它的元素是集合类型：数组、List、Set、Map
+	 * @param pvm
+	 * @param listClass
+	 * @param elementType
+	 * @return
+	 * @throws ConvertException
+	 * @date 2012-5-15
+	 */
+	protected List<?> convertPropertyValueMapToListElementCollection(PropertyValueMap pvm, Class<?> listClass, Type elementType) throws ConvertException
+	{
+		if(pvm==null || pvm.isEmpty())
+			return null;
+		
+		@SuppressWarnings("unchecked")
+		List<Object> result=(List<Object>)instance(listClass, -1);
+		
+		Set<String> propertyKeyes=pvm.keySet();
+		for(String property : propertyKeyes)
+		{
+			int idx=-1;
+			try
+			{
+				idx=Integer.parseInt(property);
+			}
+			catch(Exception e)
+			{
+				throw new GenericConvertException(SbmUtils.toString("illegal index value "+SbmUtils.toString(property)+" of key "+SbmUtils.toString(pvm.getPropertyNamePath(property)))
+						+", you must explicitly specify the index value because the element type of List "+SbmUtils.toString(listClass)+" is not a JavaBean class but "+SbmUtils.toString(elementType));
+			}
+			
+			while(result.size() < idx+1)
+				result.add(null);
+			
+			Object ele=convertObjectToType(pvm.get(property), elementType);
+			result.set(idx, ele);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * 将属性值映射表转换为JavaBean列表
+	 * @param pvm
 	 * @param listClass
 	 * @param elementType
 	 * @return
 	 */
-	protected List<?> convertPropertyValueMapToListJavaBeanElement(PropertyValueMap sourceMap, Class<?> listClass, Class<?> elementType) throws ConvertException
+	protected List<?> convertPropertyValueMapToListElementJavaBean(PropertyValueMap pvm, Class<?> listClass, Class<?> elementType) throws ConvertException
 	{
-		if(sourceMap==null || sourceMap.isEmpty())
+		if(pvm==null || pvm.isEmpty())
 			return null;
 		
 		@SuppressWarnings("unchecked")
@@ -902,10 +912,10 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		PropertyInfo eleBeanInfo=PropertyInfo.getPropertyInfo(elementType);
 		
-		Set<String> propertyKeyes=sourceMap.keySet();
+		Set<String> propertyKeyes=pvm.keySet();
 		for(String property : propertyKeyes)
 		{
-			Object value=sourceMap.get(property);
+			Object value=pvm.get(property);
 			
 			//明确指定了索引位置
 			if(isIndexAccessor(property))
@@ -917,7 +927,7 @@ public class DefaultGenericConverter implements GenericConverter
 				}
 				catch(Exception e)
 				{
-					throw new GenericConvertException("illegal index value '"+property+"' of property '"+sourceMap.getPropertyNamePath(property)+"'", e);
+					throw new GenericConvertException("illegal index value '"+property+"' of property '"+pvm.getPropertyNamePath(property)+"'", e);
 				}
 				
 				while(result.size() < idx+1)
@@ -942,7 +952,7 @@ public class DefaultGenericConverter implements GenericConverter
 						}
 						catch(ConvertException e)
 						{
-							handlePropertyValueMapConvertException(sourceMap, property, e);
+							handlePropertyValueMapConvertException(pvm, property, e);
 						}
 					}
 				}
@@ -950,11 +960,11 @@ public class DefaultGenericConverter implements GenericConverter
 				{
 					try
 					{
-						element=convert(value, getPropertyValueMapTargetType(sourceMap, elementType, idx));
+						element=convertObjectToType(value, getPropertyValueMapTargetType(pvm, elementType, idx));
 					}
 					catch(ConvertException e)
 					{
-						handlePropertyValueMapConvertException(sourceMap, property, e);
+						handlePropertyValueMapConvertException(pvm, property, e);
 					}
 					
 					result.set(idx, element);
@@ -967,7 +977,7 @@ public class DefaultGenericConverter implements GenericConverter
 				
 				PropertyInfo propInfo=null;
 				//忽略无关属性
-				if(!sourceMap.isCleaned())
+				if(!pvm.isCleaned())
 					propInfo=eleBeanInfo.getSubPropertyInfo(property);
 				else
 					propInfo=getSubPropertyInfoNotNull(eleBeanInfo, property);
@@ -988,7 +998,7 @@ public class DefaultGenericConverter implements GenericConverter
 						Object element=result.get(i);
 						if(element == null)
 						{
-							element=instance(getPropertyValueMapTargetType(sourceMap, elementType, i), -1);
+							element=instance(getPropertyValueMapTargetType(pvm, elementType, i), -1);
 							result.set(i, element);
 						}
 						
@@ -998,7 +1008,7 @@ public class DefaultGenericConverter implements GenericConverter
 						}
 						catch(ConvertException e)
 						{
-							handlePropertyValueMapConvertException(sourceMap, property, e);
+							handlePropertyValueMapConvertException(pvm, property, e);
 						}
 					}
 				}
@@ -1017,7 +1027,7 @@ public class DefaultGenericConverter implements GenericConverter
 						Object element=result.get(i);
 						if(element ==null)
 						{
-							element=instance(getPropertyValueMapTargetType(sourceMap, elementType, i), -1);
+							element=instance(getPropertyValueMapTargetType(pvm, elementType, i), -1);
 							result.set(i, element);
 						}
 						
@@ -1027,7 +1037,7 @@ public class DefaultGenericConverter implements GenericConverter
 						}
 						catch(ConvertException e)
 						{
-							handlePropertyValueMapConvertException(sourceMap, property, e);
+							handlePropertyValueMapConvertException(pvm, property, e);
 						}
 					}
 				}
@@ -1040,7 +1050,7 @@ public class DefaultGenericConverter implements GenericConverter
 					Object element=result.get(0);
 					if(element ==null)
 					{
-						element=instance(getPropertyValueMapTargetType(sourceMap, elementType, 0), -1);
+						element=instance(getPropertyValueMapTargetType(pvm, elementType, 0), -1);
 						result.set(0, element);
 					}
 					
@@ -1050,7 +1060,7 @@ public class DefaultGenericConverter implements GenericConverter
 					}
 					catch(ConvertException e)
 					{
-						handlePropertyValueMapConvertException(sourceMap, property, e);
+						handlePropertyValueMapConvertException(pvm, property, e);
 					}
 				}
 			}
@@ -1061,21 +1071,21 @@ public class DefaultGenericConverter implements GenericConverter
 	
 	/**
 	 * 将属性值映射表转换为目标映射表, <code>sourceMap</code>的关键字将被转换目标映射表的关键字，值将被转换为此关键字对应的值
-	 * @param sourceMap
+	 * @param pvm
 	 * @param mapClass
 	 * @param keyType
 	 * @param valueType
 	 * @return
 	 */
-	protected Map<?, ?> convertPropertyValueMapToMap(PropertyValueMap sourceMap, Class<?> mapClass, Type keyType, Type valueType) throws ConvertException
+	protected Map<?, ?> convertPropertyValueMapToMap(PropertyValueMap pvm, Class<?> mapClass, Type keyType, Type valueType) throws ConvertException
 	{
-		if(sourceMap == null)
+		if(pvm == null)
 			return null;
 		
 		@SuppressWarnings("unchecked")
 		Map<Object, Object> result=(Map<Object, Object>)instance(mapClass, -1);
 		
-		Set<String> keys=sourceMap.keySet();
+		Set<String> keys=pvm.keySet();
 		for(String key : keys)
 		{
 			Object tk=null;
@@ -1083,26 +1093,21 @@ public class DefaultGenericConverter implements GenericConverter
 			
 			try
 			{
-				tk=convert(key, keyType);
+				tk=convertObjectToType(key, keyType);
 			}
 			catch(ConvertException e)
 			{
-				throw new GenericConvertException("convert "+SbmUtils.toString(key)+" in key "+SbmUtils.toString(sourceMap.getPropertyNamePath(key))+" to Map key of type "+SbmUtils.toString(keyType)+" failed", e);
+				throw new GenericConvertException("convert "+SbmUtils.toString(key)+" in key "+SbmUtils.toString(pvm.getPropertyNamePath(key))+" to Map key of type "+SbmUtils.toString(keyType)+" failed", e);
 			}
 			
 			try
 			{
-				Object value=sourceMap.get(key);
-				
-				Type cvc=valueType;
-				if(value instanceof PropertyValueMap)
-					cvc=getPropertyValueMapTargetType((PropertyValueMap)value, valueType, -1);
-				
-				tv=convert(value, cvc);
+				Object value=pvm.get(key);
+				tv=convertObjectToType(value, valueType);
 			}
 			catch(ConvertException e)
 			{
-				handlePropertyValueMapConvertException(sourceMap, key, e);
+				handlePropertyValueMapConvertException(pvm, key, e);
 			}
 			
 			result.put(tk, tv);
@@ -1167,57 +1172,6 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	/**
-	 * 由数组转换为{@linkplain java.util.List List}对象。
-	 * @param array
-	 * @param listClass
-	 * @param elementType
-	 * @return
-	 * @date 2011-1-5
-	 */
-	@SuppressWarnings("unchecked")
-	protected List<?> convertArrayToList(Object array, Class<?> listClass, Type elementType) throws ConvertException
-	{
-		List<Object> result=null;
-		
-		if(array != null)
-		{
-			result=(List<Object>)instance(listClass, -1);
-			
-			for(int i=0,len=Array.getLength(array); i<len; i++)
-				result.add(convert(Array.get(array, i), elementType));
-		}
-		
-		return result;
-	}
-	
-	/**
-	 * 由一个数组对象转换为另一数组对象
-	 * @param array
-	 * @param elementType
-	 * @return
-	 * @date 2012-2-20
-	 */
-	protected Object convertArrayToArray(Object array, Type elementType) throws ConvertException
-	{
-		Object result=null;
-		
-		if(array != null)
-		{
-			int len=Array.getLength(array);
-			
-			result=instance(elementType, len);
-			
-			for(int i=0; i<len; i++)
-			{
-				Object v=convert(Array.get(array, i), elementType);
-				Array.set(result, i, v);
-			}
-		}
-		
-		return result;
-	}
-	
-	/**
 	 * 由列表对象转换为{@linkplain java.util.Set Set}对象，它不会对列表对象的元素执行类型转换
 	 * @param list
 	 * @param setClass
@@ -1275,9 +1229,9 @@ public class DefaultGenericConverter implements GenericConverter
 	{
 		Type targetType=propertyInfo.getPropGenericType();
 		if(!SbmUtils.isClassType(targetType))
-			targetType=SbmUtils.toConcreteType(targetType, propertyInfo.getOwnerClass());
+			targetType=toConcreteType(targetType, propertyInfo.getOwnerClass());
 		
-		Object destValue=convert(value, targetType);
+		Object destValue=convertObjectToType(value, targetType);
 		try
 		{
 			propertyInfo.getWriteMethod().invoke(obj, new Object[]{destValue});
@@ -1305,7 +1259,7 @@ public class DefaultGenericConverter implements GenericConverter
 			result=propertyInfo.getReadMethod().invoke(obj, EMPTY_ARGS);
 			
 			if(targetType != null)
-				result=convert(result, targetType);
+				result=convertObjectToType(result, targetType);
 		}
 		catch(Exception e)
 		{
@@ -1347,7 +1301,8 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		if(idx < 0)
 		{
-			re=(cs!=null && cs.length>0 ? cs[0] : defaultType);
+			if(cs!=null && cs.length>0)
+				re=cs[0];
 		}
 		else if(cs!=null && idx<cs.length)
 		{
@@ -1359,9 +1314,13 @@ public class DefaultGenericConverter implements GenericConverter
 			
 			if(sub instanceof PropertyValueMap)
 				re=getPropertyValueMapTargetType((PropertyValueMap)sub, defaultType, -1);
-			else
-				re=defaultType;
 		}
+		
+		if(re == null)
+			re=defaultType;
+		//自定义类型需要首先具体化，因为所有相关的方法都只会处理具体化类型
+		else
+			re=toConcreteType(re);
 		
 		return re;
 	}
@@ -1535,7 +1494,30 @@ public class DefaultGenericConverter implements GenericConverter
 			throw new GenericConvertException("exception occur while creating instance of type "+SbmUtils.toString(type),e);
 		}
 	}
-
+	
+	/**
+	 * 将给定类型具体化，它包含的所有{@linkplain TypeVariable}和{@linkplain WildcardType}都将被它们的边界类型替代
+	 * @param type
+	 * @return
+	 * @date 2012-5-15
+	 */
+	protected Type toConcreteType(Type type)
+	{
+		return SbmUtils.toConcreteType(type, null);
+	}
+	
+	/**
+	 * 将给定类型具体化，它包含的所有{@linkplain TypeVariable}和{@linkplain WildcardType}都将被被<code>ownerClass</code>中具体化的类型所替代
+	 * @param type
+	 * @param ownerClass
+	 * @return
+	 * @date 2012-5-15
+	 */
+	protected Type toConcreteType(Type type, Class<?> ownerClass)
+	{
+		return SbmUtils.toConcreteType(type, ownerClass);
+	}
+	
 	protected Map<ConverterKey, Converter> getConverters() {
 		return converters;
 	}

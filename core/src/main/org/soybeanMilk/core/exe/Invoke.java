@@ -337,7 +337,7 @@ public class Invoke extends AbstractExecutable
 			
 			try
 			{
-				breakerObj=objectSource.get(this.breaker, null);
+				breakerObj=objectSource.get(this.breaker);
 			}
 			catch(Exception e)
 			{

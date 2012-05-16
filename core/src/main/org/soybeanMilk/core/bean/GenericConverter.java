@@ -38,25 +38,4 @@ public interface GenericConverter extends Converter
 	 * @return 转换器对象
 	 */
 	Converter getConverter(Type sourceType,Type targetType);
-	
-	/**
-	 * 设置对象的属性值，<code>value</code>将被转换为属性类型的对象。
-	 * @param srcObj 源对象
-	 * @param property 属性名
-	 * @param value 要设置的属性值
-	 * @throws ConvertException
-	 * @date 2010-12-28
-	 */
-	void setProperty(Object srcObj, String property, Object value) throws ConvertException;
-	
-	/**
-	 * 取得对象的属性值，属性值将被转换为<code>targetType</code>类型的对象。
-	 * @param srcObj 源对象
-	 * @param property 属性名
-	 * @param expectType 期望返回对象的类型，如果为null，则表示默认
-	 * @return <code>targetType</code>类型的对象
-	 * @throws ConvertException
-	 * @date 2010-12-28
-	 */
-	<T> T getProperty(Object srcObj, String property, Type expectType) throws ConvertException;
 }

@@ -130,7 +130,7 @@ public class TestInvoke
 		
 		invoke.execute(os);
 		
-		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY, null));
+		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY));
 	}
 	
 	@Test
@@ -152,7 +152,7 @@ public class TestInvoke
 		
 		invoke.execute(os);
 		
-		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY, null));
+		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY));
 	}
 	
 	@Test
@@ -176,7 +176,7 @@ public class TestInvoke
 		
 		invoke.execute(os);
 		
-		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY, null));
+		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY));
 	}
 
 	@Test
@@ -201,7 +201,7 @@ public class TestInvoke
 		
 		invoke.execute(os);
 		
-		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY, null));
+		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY));
 	}
 	
 	@Test
@@ -225,7 +225,7 @@ public class TestInvoke
 		
 		invoke.execute(os);
 		
-		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY, null));
+		Assert.assertEquals(TestResolver.RESULT, os.get(RESULT_KEY));
 	}
 	
 	@Test
@@ -269,7 +269,7 @@ public class TestInvoke
 			ObjectSource objSource=new HashMapObjectSource();
 			executor.execute("testBreaker_0", objSource);
 			
-			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
+			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY));
 		}
 	}
 	
@@ -281,7 +281,7 @@ public class TestInvoke
 			ObjectSource objSource=new HashMapObjectSource();
 			executor.execute("testBreaker_1", objSource);
 			
-			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
+			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY));
 		}
 	}
 	
@@ -294,7 +294,7 @@ public class TestInvoke
 			objSource.set("breakerKey", false);
 			executor.execute("testBreaker_1", objSource);
 			
-			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
+			Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY));
 		}
 	}
 	
@@ -307,7 +307,7 @@ public class TestInvoke
 			objSource.set("breakerKey", true);
 			executor.execute("testBreaker_1", objSource);
 			
-			Assert.assertNull(objSource.get(RESULT_KEY, null));
+			Assert.assertNull(objSource.get(RESULT_KEY));
 		}
 	}
 	
@@ -317,7 +317,7 @@ public class TestInvoke
 		ObjectSource objSource=new HashMapObjectSource();
 		executor.execute("testBreaker_2", objSource);
 		
-		Assert.assertNull(objSource.get(RESULT_KEY, null));
+		Assert.assertNull(objSource.get(RESULT_KEY));
 	}
 
 	@Test
@@ -326,7 +326,7 @@ public class TestInvoke
 		ObjectSource objSource=new HashMapObjectSource();
 		executor.execute("testBreaker_3", objSource);
 		
-		Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY, null));
+		Assert.assertEquals(TestResolver.RESULT, objSource.get(RESULT_KEY));
 	}
 	
 	@Test
@@ -346,7 +346,7 @@ public class TestInvoke
 			
 			invoke.execute(os);
 			
-			Assert.assertEquals("Double", os.get(RESULT_KEY, null));
+			Assert.assertEquals("Double", os.get(RESULT_KEY));
 		}
 		
 		{
@@ -363,7 +363,7 @@ public class TestInvoke
 			
 			invoke.execute(os);
 			
-			Assert.assertEquals("Integer", os.get(RESULT_KEY, null));
+			Assert.assertEquals("Integer", os.get(RESULT_KEY));
 		}
 	}
 	
@@ -383,7 +383,7 @@ public class TestInvoke
 		
 		invoke.execute(os);
 		
-		Assert.assertNotNull(os.get(RESULT_KEY, null));
+		Assert.assertNotNull(os.get(RESULT_KEY));
 	}
 	
 	@Test
@@ -402,7 +402,7 @@ public class TestInvoke
 			
 			invoke.execute(os);
 			
-			Assert.assertEquals("Double", os.get(RESULT_KEY, null));
+			Assert.assertEquals("Double", os.get(RESULT_KEY));
 		}
 		
 		{
@@ -419,7 +419,7 @@ public class TestInvoke
 			
 			invoke.execute(os);
 			
-			Assert.assertEquals("Integer", os.get(RESULT_KEY, null));
+			Assert.assertEquals("Integer", os.get(RESULT_KEY));
 		}
 	}
 	
@@ -439,7 +439,7 @@ public class TestInvoke
 		
 		invoke.execute(os);
 		
-		Assert.assertEquals("int", os.get(RESULT_KEY, null));
+		Assert.assertEquals("int", os.get(RESULT_KEY));
 	}
 	
 	@Test
@@ -457,7 +457,7 @@ public class TestInvoke
 		
 		invoke.execute(os);
 		
-		Assert.assertNotNull(os.get(RESULT_KEY, null));
+		Assert.assertNotNull(os.get(RESULT_KEY));
 	}
 	
 	@Test

@@ -123,7 +123,7 @@ public class TestDefaultWebExecutor
 		
 		webExecutor.execute("typeVariableTest", os);
 		
-		TestBeanSub result=os.get("request.testResult", null);
+		TestBeanSub result=os.get("request.testResult");
 		
 		Assert.assertEquals(result.getId(), id);
 		Assert.assertEquals(result.getName(), name);
@@ -143,7 +143,7 @@ public class TestDefaultWebExecutor
 		
 		webExecutor.execute("genericArrayTest", os);
 		
-		TestBeanSub[] result=os.get("request.testResult", null);
+		TestBeanSub[] result=os.get("request.testResult");
 		
 		Assert.assertEquals(id.length, result.length);
 		
@@ -170,7 +170,7 @@ public class TestDefaultWebExecutor
 		
 		webExecutor.execute("parameterizedTypeTest", os);
 		
-		List<TestBeanSub> result=os.get("request.testResult", null);
+		List<TestBeanSub> result=os.get("request.testResult");
 		
 		Assert.assertEquals(id.length, result.size());
 		

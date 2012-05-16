@@ -49,17 +49,6 @@ public class SbmUtils
 	}
 	
 	/**
-	 * 是否是数组类型
-	 * @param type
-	 * @return
-	 * @date 2011-1-3
-	 */
-	public static boolean isArray(Class<?> type)
-	{
-		return type.isArray();
-	}
-	
-	/**
 	 * 将类型强制转换为<code>Class</code>
 	 * @param type
 	 * @return

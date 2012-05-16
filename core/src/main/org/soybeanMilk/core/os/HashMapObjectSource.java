@@ -50,16 +50,16 @@ public class HashMapObjectSource extends ConvertableObjectSource
 
 	//@Override
 	@SuppressWarnings("unchecked")
+	public <T> T get(Serializable key) throws ObjectSourceException
+	{
+		return (T)getObject(key, null);
+	}
+	
+	//@Override
+	@SuppressWarnings("unchecked")
 	public <T> T get(Serializable key, Type expectType) throws ObjectSourceException
 	{
-		Object re = source.get(key);
-		
-		re=convertGotObject(re, expectType);
-		
-		if(log.isDebugEnabled())
-			log.debug("get object "+SbmUtils.toString(re)+" from "+SbmUtils.toString(this)+" with key "+SbmUtils.toString(key));
-		
-		return (T)re;
+		return (T)getObject(key, expectType);
 	}
 	
 	//@Override
@@ -69,6 +69,26 @@ public class HashMapObjectSource extends ConvertableObjectSource
 		
 		if(log.isDebugEnabled())
 			log.debug("set object "+SbmUtils.toString(obj)+" to "+SbmUtils.toString(this)+" with key "+SbmUtils.toString(key));
+	}
+	
+	/**
+	 * 获取对象
+	 * @param key
+	 * @param expectType
+	 * @return
+	 * @throws ObjectSourceException
+	 * @date 2012-5-16
+	 */
+	protected Object getObject(Serializable key, Type expectType) throws ObjectSourceException
+	{
+		Object re = source.get(key);
+		
+		re=convertGotObject(re, expectType);
+		
+		if(log.isDebugEnabled())
+			log.debug("got object "+SbmUtils.toString(re)+" from "+SbmUtils.toString(this)+" with key "+SbmUtils.toString(key));
+		
+		return re;
 	}
 	
 	/**

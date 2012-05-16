@@ -41,46 +41,42 @@ import org.soybeanMilk.web.bean.WebGenericConverter;
  * 默认Web对象源，它是{@linkplain WebObjectSource Web对象源}的一个默认实现，
  * 使用Servlet环境的{@linkplain HttpServletRequest}、{@linkplain HttpSession}、{@linkplain ServletContext}作为底层对象源。
  * <p>
- * 当从默认Web对象源获取某个关键字对应的对象时，它会依次从这三个底层对象源中查找对象，如果在任意一个中找到匹配，那个匹配对象将被返回，否则，它会把这个关键字理解为请求
- * 参数过滤器，然后从请求参数中过滤和获取对象并返回。
+ * 当从默认Web对象源获取某个关键字对应的对象时（通过{@linkplain #get(Serializable, Type)}方法），它会依次从这三个底层对象源中查找对象，如果在任意一个中找到匹配，那个匹配对象将被返回，否则，
+ * 它会把这个关键字理解为请求参数过滤器，然后从请求参数中过滤和获取对象并返回。
  * </p>
  * <p>
  * 在从请求参数获取对象时，它会做一些特殊的处理：如果这个关键字直接对应某个请求参数，那么那个请求参数的值将被返回；否则，它会以“[关键字].”作为过滤器（加一个'.'字符），
  * 筛选请求参数映射表中仅以这个过滤器开头的项，生成一个新的映射表并将它返回，并且这个新映射表的关键字将只是原请求参数映射表关键字的这个过滤器之后的部分。
- * 比如有一个参数名为“somePrefix.someParam.someValue”的请求参数，那么在以“somePrefix.someParam”为关键字从默认Web对象源获取之后，新的映射表关键字
- * 将变为“someValue”。
- * </p>
- * <p>
- * 另外，你也可以使用“someObj.someProperty”形式的关键字，来获取已存在于底层对象源的“someObj”对象的“someProperty”属性值。
+ * 比如有参数名为“somePrefix.someBean.propertyA”和“somePrefix.someBean.propertyB”的请求参数值，
+ * 那么在以“somePrefix.someBean”为关键字从默认Web对象源获取之后，新的映射表关键字将变为“propertyA”和“propertyB”。
  * </p>
  * <p>
  * 如果默认Web对象源从底层对象源中获取的对象与期望的对象类型不匹配，它将会使用{@linkplain WebGenericConverter Web通用转换器}将这个对象转换为期望类型的对象。
  * </p>
  * <p>
- * 当将对象保存到默认Web对象源时，对象将会被直接保存到{@linkplain HttpServletRequest}中，而如果是要将对象保存到已存在于底层对象源的某个对象的某个属性中，
- * 比如以关键字“someObj.someProperty”，那么默认Web对象源会从三个底层对象源查找“someObj”对象，并设置它的“someProperty”属性的值。
+ * 当将对象保存到默认Web对象源时（通过{@linkplain #set(Serializable, Object)}方法），对象将会被直接保存到{@linkplain HttpServletRequest}中。
  * </p>
  * <p>
  * 默认Web对象源还提供了一些用于标识作用域的特殊关键字，包括“param”、“request”、“session”、“application”、“response”、“objectSource”：
  * <ul>
  *     <li>
  *         param<br>
- *         表示整个请求参数映射表，使用它可以从默认Web对象源获取整个请求参数映射表，也可以使用“param.someKey”的形式，指明是从请求参数中过滤和获取对象。
+ *         表示整个请求参数映射表，使用它可以从默认Web对象源获取整个请求参数映射表，也可以使用“param.someKey”形式的关键字，指明是从请求参数中过滤和获取对象。
  *     </li>
  *     <li>
  *         request<br>
  *         表示{@linkplain HttpServletRequest}对象，使用它可以从默认Web对象源获取当前请求对象，
- *         也可以使用“request.someKey”的形式，指明是从当前请求对象属性中获取对象或者将对象保存到请求对象属性中。
+ *         也可以使用“request.someKey”形式的关键字，指明是从当前请求对象属性中获取对象或者将对象保存到请求对象属性中。
  *     </li>
  *     <li>
  *         session<br>
  *         表示{@linkplain HttpSession}对象，使用它可以从默认Web对象源获取当前会话对象，
- *         也可以使用“session.someKey”的形式，指明是当前从会话对象属性中获取对象或者将对象保存到会话对象属性中。
+ *         也可以使用“session.someKey”形式的关键字，指明是当前从会话对象属性中获取对象或者将对象保存到会话对象属性中。
  *     </li>
  *     <li>
  *         application<br>
  *         表示{@linkplain ServletContext}对象，使用它可以从默认Web对象源获取当前应用对象，
- *         也可以使用“application.someKey”的形式，指明是从当前应用对象属性中获取对象或者将对象保存到应用对象属性中。
+ *         也可以使用“application.someKey”形式的关键字，指明是从当前应用对象属性中获取对象或者将对象保存到应用对象属性中。
  *     </li>
  *     <li>
  *         response<br>
@@ -152,7 +148,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	public void setResponse(HttpServletResponse response) {
 		this.response = response;
 	}
-
+	
 	public ServletContext getApplication() {
 		return application;
 	}
@@ -168,7 +164,83 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	
 	//@Override
 	@SuppressWarnings("unchecked")
+	public <T> T get(Serializable key) throws ObjectSourceException
+	{
+		return (T)getObject(key, null);
+	}
+	
+	//@Override
+	@SuppressWarnings("unchecked")
 	public <T> T get(Serializable key, Type expectType) throws ObjectSourceException
+	{
+		return (T)getObject(key, expectType);
+	}
+	
+	//@Override
+	public void set(Serializable key, Object obj)  throws ObjectSourceException
+	{
+		if(key == null)
+			throw new IllegalArgumentException("[key] must not be null");
+		
+		String strKey=(key instanceof String ? (String)key : key.toString());
+		String[] scopedKeys=SbmUtils.splitByFirstAccessor(strKey);
+		
+		if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scopedKeys[0]))
+		{
+			if(scopedKeys.length > 1)
+				getRequest().setAttribute(scopedKeys[1], obj);
+			else
+				throw new ObjectSourceException("key "+SbmUtils.toString(key)+" is illegal, you can not replace "
+						+SbmUtils.toString(WebConstants.Scope.REQUEST)+" scope object");
+		}
+		else if(WebConstants.Scope.SESSION.equalsIgnoreCase(scopedKeys[0]))
+		{
+			if(scopedKeys.length > 1)
+				getRequest().getSession().setAttribute(scopedKeys[1], obj);
+			else
+				throw new ObjectSourceException("key "+SbmUtils.toString(key)+" is illegal, you can not replace "
+						+SbmUtils.toString(WebConstants.Scope.SESSION)+" scope object");
+		}
+		else if(WebConstants.Scope.APPLICATION.equalsIgnoreCase(scopedKeys[0]))
+		{
+			if(scopedKeys.length > 1)
+				getApplication().setAttribute(scopedKeys[1], obj);
+			else
+				throw new ObjectSourceException("key "+SbmUtils.toString(key)+" is illegal, you can not replace "
+						+SbmUtils.toString(WebConstants.Scope.APPLICATION)+" scope object");
+		}
+		else if(WebConstants.Scope.PARAM.equalsIgnoreCase(scopedKeys[0]))
+		{
+			throw new ObjectSourceException("key "+SbmUtils.toString(key)+" is illegal, set object to "
+					+SbmUtils.toString(WebConstants.Scope.PARAM)+" scope is not supported");
+		}
+		else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scopedKeys[0]))
+		{
+			throw new ObjectSourceException("key "+SbmUtils.toString(key)+" is illegal, set object to "
+					+SbmUtils.toString(WebConstants.Scope.RESPONSE)+" scope is not supported");
+		}
+		else if(WebConstants.Scope.OBJECT_SOURCE.equalsIgnoreCase(scopedKeys[0]))
+		{
+			throw new ObjectSourceException("key "+SbmUtils.toString(key)+" is illegal, set object to "
+					+SbmUtils.toString(WebConstants.Scope.OBJECT_SOURCE)+" scope is not supported");
+		}
+		else
+			setObjectWithScopeUnknownKey(strKey, obj);
+		
+		if(log.isDebugEnabled())
+			log.debug("set object "+SbmUtils.toString(obj)+" to "+SbmUtils.toString(this)+" with key "+SbmUtils.toString(strKey));
+	}
+	
+	/**
+	 * 获取对象
+	 * @param key
+	 * @param expectType
+	 * @return
+	 * @throws ObjectSourceException
+	 * @date 2012-5-16
+	 */
+	@SuppressWarnings("unchecked")
+	protected Object getObject(Serializable key, Type expectType) throws ObjectSourceException
 	{
 		if(key == null)
 			throw new ObjectSourceException("[key] must not be null");
@@ -185,28 +257,28 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		else if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scopedKeys[0]))
 		{
 			if(scopedKeys.length > 1)
-				result=getServletObjAttrExpression(getRequest(), scopedKeys[1]);
+				result=getRequest().getAttribute(scopedKeys[1]);
 			else
 				result=getRequest();
 		}
 		else if(WebConstants.Scope.SESSION.equalsIgnoreCase(scopedKeys[0]))
 		{
 			if(scopedKeys.length > 1)
-				result=getServletObjAttrExpression(getRequest().getSession(), scopedKeys[1]);
+				result=getRequest().getSession().getAttribute(scopedKeys[1]);
 			else
 				result=getRequest().getSession();
 		}
 		else if(WebConstants.Scope.APPLICATION.equalsIgnoreCase(scopedKeys[0]))
 		{
 			if(scopedKeys.length > 1)
-				result=getServletObjAttrExpression(getApplication(), scopedKeys[1]);
+				result=getApplication().getAttribute(scopedKeys[1]);
 			else
 				result=getApplication();
 		}
 		else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scopedKeys[0]))
 		{
 			if(scopedKeys.length > 1)
-				throw new ObjectSourceException("key '"+key+"' is illegal, get object from "
+				throw new ObjectSourceException("key "+SbmUtils.toString(key)+" is illegal, get object from "
 						+HttpServletResponse.class.getSimpleName()+" is not supported");
 			else
 				result=getResponse();
@@ -214,7 +286,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		else if(WebConstants.Scope.OBJECT_SOURCE.equalsIgnoreCase(scopedKeys[0]))
 		{
 			if(scopedKeys.length > 1)
-				throw new ObjectSourceException("key '"+key+"' is illegal, get object from "
+				throw new ObjectSourceException("key "+SbmUtils.toString(key)+" is illegal, get object from "
 						+WebObjectSource.class.getSimpleName()+" is not supported");
 			else
 				result=this;
@@ -229,62 +301,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		if(log.isDebugEnabled())
 			log.debug("got object "+SbmUtils.toString(result)+" from "+SbmUtils.toString(this)+" with key "+SbmUtils.toString(strKey));
 		
-		return (T)result;
-	}
-	
-	//@Override
-	public void set(Serializable key, Object obj)  throws ObjectSourceException
-	{
-		if(key == null)
-			throw new IllegalArgumentException("[key] must not be null");
-		
-		String strKey=(key instanceof String ? (String)key : key.toString());
-		String[] scopedKeys=SbmUtils.splitByFirstAccessor(strKey);
-		
-		if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scopedKeys[0]))
-		{
-			if(scopedKeys.length > 1)
-				setServletObjAttrExpression(getRequest(), scopedKeys[1], obj, true);
-			else
-				throw new ObjectSourceException("key '"+key+"' is illegal, you can not replace '"
-						+WebConstants.Scope.REQUEST+"' scope object");
-		}
-		else if(WebConstants.Scope.SESSION.equalsIgnoreCase(scopedKeys[0]))
-		{
-			if(scopedKeys.length > 1)
-				setServletObjAttrExpression(getRequest().getSession(), scopedKeys[1], obj, true);
-			else
-				throw new ObjectSourceException("key '"+key+"' is illegal, you can not replace '"
-						+WebConstants.Scope.SESSION+"' scope object");
-		}
-		else if(WebConstants.Scope.APPLICATION.equalsIgnoreCase(scopedKeys[0]))
-		{
-			if(scopedKeys.length > 1)
-				setServletObjAttrExpression(getApplication(), scopedKeys[1], obj, true);
-			else
-				throw new ObjectSourceException("key '"+key+"' is illegal, you can not replace '"
-						+WebConstants.Scope.APPLICATION+"' scope object");
-		}
-		else if(WebConstants.Scope.PARAM.equalsIgnoreCase(scopedKeys[0]))
-		{
-			throw new ObjectSourceException("key '"+key+"' is illegal, set object to '"
-					+WebConstants.Scope.PARAM+"' scope is not supported");
-		}
-		else if(WebConstants.Scope.RESPONSE.equalsIgnoreCase(scopedKeys[0]))
-		{
-			throw new ObjectSourceException("key '"+key+"' is illegal, set object to '"
-					+WebConstants.Scope.RESPONSE+"' scope is not supported");
-		}
-		else if(WebConstants.Scope.OBJECT_SOURCE.equalsIgnoreCase(scopedKeys[0]))
-		{
-			throw new ObjectSourceException("key '"+key+"' is illegal, set object to '"
-					+WebConstants.Scope.OBJECT_SOURCE+"' scope is not supported");
-		}
-		else
-			setObjectWithScopeUnknownKey(strKey, obj);
-		
-		if(log.isDebugEnabled())
-			log.debug("set object "+SbmUtils.toString(obj)+" to "+SbmUtils.toString(this)+" with key "+SbmUtils.toString(strKey));
+		return result;
 	}
 	
 	/**
@@ -296,15 +313,15 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	@SuppressWarnings("unchecked")
 	protected Object getObjectWithScopeUnknownKey(String key) throws ObjectSourceException
 	{
-		Object result=getServletObjAttrExpression(getRequest(), key);
+		Object result=getRequest().getAttribute(key);
 		
 		if(result == null)
 		{
-			result=getServletObjAttrExpression(getRequest().getSession(), key);
+			result=getRequest().getSession().getAttribute(key);
 			
 			if(result == null)
 			{
-				result=getServletObjAttrExpression(getApplication(), key);
+				result=getApplication().getAttribute(key);
 				
 				if(result == null)
 					result=getParamFilterValue(getRequest().getParameterMap(), key);
@@ -321,99 +338,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	 */
 	protected void setObjectWithScopeUnknownKey(String key, Object value) throws ObjectSourceException
 	{
-		boolean success=setServletObjAttrExpression(getRequest(), key, value, false);
-		
-		if(!success)
-		{
-			success=setServletObjAttrExpression(getRequest().getSession(), key, value, false);
-			
-			if(!success)
-			{
-				success=setServletObjAttrExpression(getApplication(), key, value, false);
-				
-				if(!success)
-					setServletObjAttrExpression(getRequest(), key, value, true);
-			}
-		}
-	}
-	
-	/**
-	 * 获取给定属性表达式在Servlet对象中的值
-	 * @param servletObj
-	 * @param attrExpression
-	 * @return
-	 */
-	protected Object getServletObjAttrExpression(Object servletObj, String attrExpression) throws ObjectSourceException
-	{
-		if(attrExpression == null)
-			return null;
-		
-		Object result=null;
-		
-		String[] propKeys=SbmUtils.splitAccessExpression(attrExpression);
-		
-		//不包含访问符，则直接取值
-		if(propKeys.length == 1)
-			result=getServletObjAttr(servletObj, attrExpression);
-		else
-		{
-			Object tmp=getServletObjAttr(servletObj, propKeys[0]);
-			
-			for(int i=1; i<propKeys.length; i++)
-			{
-				if(tmp == null)
-					break;
-				else
-					tmp=getProperty(tmp, propKeys[i]);
-			}
-			
-			result=tmp;
-		}
-		
-		return result;
-	}
-	
-	/**
-	 * 将值以给定属性表达式保存到Servlet对象中
-	 * @param servletObj
-	 * @param attrExpression
-	 * @param value
-	 * @param force 强制保存，返回结果将始终为<code>true</code>
-	 * @return 是否成功保存
-	 * @date 2012-3-25
-	 */
-	protected boolean setServletObjAttrExpression(Object servletObj, String attrExpression, Object value, boolean force) throws ObjectSourceException
-	{
-		boolean result=false;
-		
-		String[] propKeys=SbmUtils.splitByFirstAccessor(attrExpression);
-		
-		//没有包含访问符，则直接保存到此作用域
-		if(propKeys.length == 1)
-		{
-			setServletObjAttr(servletObj, attrExpression, value);
-			result=true;
-		}
-		else
-		{
-			Object attrObj=getServletObjAttr(servletObj, propKeys[0]);
-			
-			if(attrObj == null)
-			{
-				if(force)
-					throw new ObjectSourceException("no '"+propKeys[0]+"' attribute object found in '"+servletObj+"' scope with key '"+attrExpression+"'");
-				else
-					result=false;
-			}
-			else
-			{
-				setProperty(attrObj, propKeys[1], value);
-				
-				result=true;
-			}
-		}
-		
-		return result;
+		getRequest().setAttribute(key, value);
 	}
 	
 	/**
@@ -457,43 +382,6 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		}
 		
 		return result;
-	}
-	
-	/**
-	 * 从Servlet对象作用域内获取给定属性名的对象
-	 * @param servletObj
-	 * @param attr 属性名
-	 * @date 2010-12-30
-	 */
-	protected Object getServletObjAttr(Object servletObj, String attr) throws ObjectSourceException
-	{
-		if(servletObj instanceof HttpServletRequest)
-			return ((HttpServletRequest)servletObj).getAttribute(attr);
-		else if(servletObj instanceof HttpSession)
-			return ((HttpSession)servletObj).getAttribute(attr);
-		else if(servletObj instanceof ServletContext)
-			return ((ServletContext)servletObj).getAttribute(attr);
-		else
-			throw new ObjectSourceException("can not get attribute from servlet object '"+servletObj+"'");
-	}
-	
-	/**
-	 * 将对象保存到servlet对象作用域内
-	 * @param servletObj
-	 * @param attr 属性名
-	 * @param value
-	 * @date 2010-12-30
-	 */
-	protected void setServletObjAttr(Object servletObj, String attr, Object value) throws ObjectSourceException
-	{
-		if(servletObj instanceof HttpServletRequest)
-			((HttpServletRequest)servletObj).setAttribute(attr, value);
-		else if(servletObj instanceof HttpSession)
-			((HttpSession)servletObj).setAttribute(attr, value);
-		else if(servletObj instanceof ServletContext)
-			((ServletContext)servletObj).setAttribute(attr, value);
-		else
-			throw new ObjectSourceException("can not set attribute to servlet object '"+servletObj+"'");
 	}
 	
 	/**
@@ -546,43 +434,5 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		}
 		
 		return result;
-	}
-	
-	/**
-	 * 获取对象的给定属性表达式的值
-	 * @param obj
-	 * @param propExpression
-	 * @return
-	 * @date 2012-3-25
-	 */
-	protected Object getProperty(Object obj, String propExpression) throws ObjectSourceException
-	{
-		try
-		{
-			return getGenericConverter().getProperty(obj, propExpression, null);
-		}
-		catch(ConvertException e)
-		{
-			throw new ObjectSourceException(e);
-		}
-	}
-	
-	/**
-	 * 设置对象的给定属性表达式的值
-	 * @param obj
-	 * @param propExpression
-	 * @param value
-	 * @date 2012-3-25
-	 */
-	protected void setProperty(Object obj, String propExpression, Object value) throws ObjectSourceException
-	{
-		try
-		{
-			getGenericConverter().setProperty(obj, propExpression, value);
-		}
-		catch(ConvertException e)
-		{
-			throw new ObjectSourceException(e);
-		}
 	}
 }

@@ -90,7 +90,7 @@ public class TestDefaultExecutor
 		HashMapObjectSource os=new HashMapObjectSource();
 		executor.execute(KEY_EXE_HELLO, os);
 		
-		Execution re=os.get(KEY_EXECUTION, null);
+		Execution re=os.get(KEY_EXECUTION);
 		
 		Assert.assertEquals(os, re.getObjectSource());
 		Assert.assertEquals(KEY_EXE_HELLO, re.getExecutable().getName());
@@ -106,10 +106,10 @@ public class TestDefaultExecutor
 		HashMapObjectSource os=new HashMapObjectSource();
 		
 		executor.execute(KEY_EXE_HELLO, os);
-		re0=os.get(KEY_EXECUTION, null);
+		re0=os.get(KEY_EXECUTION);
 		
 		executor.execute(KEY_EXE_HELLO, os);
-		re1=os.get(KEY_EXECUTION, null);
+		re1=os.get(KEY_EXECUTION);
 		
 		Assert.assertTrue( re0!=null && re1!=null && re0!=re1 );
 	}
@@ -123,7 +123,7 @@ public class TestDefaultExecutor
 		
 		executor.execute(KEY_EXE_HELLO, os);
 		
-		Assert.assertNull(os.get(KEY_EXECUTION, null));
+		Assert.assertNull(os.get(KEY_EXECUTION));
 	}
 	
 	@Test
@@ -133,7 +133,7 @@ public class TestDefaultExecutor
 		
 		executor.execute(KEY_EXE_HELLO, os);
 		
-		Assert.assertEquals(ResolverForTest.beforeResultVal, os.get(ResolverForTest.beforeResultKey, null));
+		Assert.assertEquals(ResolverForTest.beforeResultVal, os.get(ResolverForTest.beforeResultKey));
 	}
 	
 	@Test
@@ -145,7 +145,7 @@ public class TestDefaultExecutor
 		
 		executor.execute(KEY_EXE_HELLO, os);
 		
-		Assert.assertNull(os.get(ResolverForTest.beforeResultKey, null));
+		Assert.assertNull(os.get(ResolverForTest.beforeResultKey));
 	}
 	
 	@Test
@@ -155,7 +155,7 @@ public class TestDefaultExecutor
 		
 		executor.execute(KEY_EXE_HELLO, os);
 		
-		Assert.assertEquals(ResolverForTest.afterResultVal, os.get(ResolverForTest.afterResultKey, null));
+		Assert.assertEquals(ResolverForTest.afterResultVal, os.get(ResolverForTest.afterResultKey));
 	}
 	
 	@Test
@@ -167,7 +167,7 @@ public class TestDefaultExecutor
 		
 		executor.execute(KEY_EXE_HELLO, os);
 		
-		Assert.assertNull(os.get(ResolverForTest.afterResultKey, null));
+		Assert.assertNull(os.get(ResolverForTest.afterResultKey));
 	}
 	
 	@Test
@@ -177,7 +177,7 @@ public class TestDefaultExecutor
 		
 		executor.execute("helloThrow", os);
 		
-		Assert.assertEquals(ResolverForTest.exceptionResultVal, os.get(ResolverForTest.exceptionResultKey, null));
+		Assert.assertEquals(ResolverForTest.exceptionResultVal, os.get(ResolverForTest.exceptionResultKey));
 	}
 	
 	@Test
@@ -193,7 +193,7 @@ public class TestDefaultExecutor
 		}
 		catch(InvocationExecuteException e){}
 		
-		Assert.assertNull(os.get(ResolverForTest.exceptionResultKey, null));
+		Assert.assertNull(os.get(ResolverForTest.exceptionResultKey));
 	}
 	
 	@Test
@@ -223,7 +223,7 @@ public class TestDefaultExecutor
 		
 		executor.execute("helloThrow", os);
 		
-		Execution re=os.get(KEY_EXECUTION, null);
+		Execution re=os.get(KEY_EXECUTION);
 		
 		Assert.assertTrue( (re.getExecuteException().getCause() instanceof UnsupportedOperationException) );
 	}

@@ -232,108 +232,6 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	//@Override
-	@SuppressWarnings("unchecked")
-	public <T> T getProperty(Object srcObj, String property, Type expectType) throws ConvertException
-	{
-		if(srcObj == null)
-			return null;
-		
-		if(property==null || property.length()==0)
-			throw new IllegalArgumentException("[property] must not be empty");
-		
-		if(log.isDebugEnabled())
-			log.debug("start getting property "+property+" from "+SbmUtils.toString(srcObj));
-		
-		Object result=null;
-		
-		Object obj=srcObj;
-		PropertyInfo objBeanInfo=PropertyInfo.getPropertyInfo(obj.getClass());
-		String[] properties=SbmUtils.splitAccessExpression(property);
-		
-		String prop=null;
-		for(int i=0; i<properties.length; i++)
-		{
-			if(obj == null)
-				break;
-			
-			prop=properties[i];
-			
-			if(obj instanceof Map<?, ?>)
-			{
-				obj=getMapValueByStringEqualKey(((Map<?, ?>)obj), prop);
-				
-				if(obj == null)
-					break;
-				else
-				{
-					//最后一个不再需要准备属性信息
-					if(i < properties.length-1)
-						objBeanInfo=PropertyInfo.getPropertyInfo(obj.getClass());
-				}
-			}
-			else if(isIndexAccessor(prop))
-			{
-				obj=getIndexedObjValueByStringIndex(obj, prop);
-				
-				if(obj == null)
-					break;
-				else
-				{
-					//同上
-					if(i < properties.length-1)
-						objBeanInfo=PropertyInfo.getPropertyInfo(obj.getClass());
-				}
-			}
-			else
-			{
-				objBeanInfo=getSubPropertyInfoNotNull(objBeanInfo, prop);
-				obj=getJavaBeanProperty(obj, objBeanInfo, null);
-			}
-		}
-		
-		result=(expectType == null ? obj : convert(obj, expectType));
-		
-		return (T)result;
-	}
-	
-	//@Override
-	public void setProperty(Object srcObj, String property, Object value) throws ConvertException
-	{
-		if(srcObj == null)
-			throw new IllegalArgumentException("[srcObj] must not be null");
-		if(property==null || property.length()==0)
-			throw new IllegalArgumentException("[property] must not be empty");
-		
-		if(log.isDebugEnabled())
-			log.debug("start setting "+SbmUtils.toString(value)+" to "+SbmUtils.toString(srcObj)+" property "+property);
-		
-		Object obj=srcObj;
-		PropertyInfo objBeanInfo=PropertyInfo.getPropertyInfo(srcObj.getClass());
-		String[] properties=SbmUtils.splitAccessExpression(property);
-		
-		for(int i=0; i<properties.length; i++)
-		{
-			String prop=properties[i];
-			
-			objBeanInfo=getSubPropertyInfoNotNull(objBeanInfo, prop);
-			
-			if(i == properties.length-1)
-				setJavaBeanProperty(obj, objBeanInfo, value);
-			else
-			{
-				Object tmp=getJavaBeanProperty(obj, objBeanInfo, null);
-				if(tmp == null)
-				{
-					tmp=instance(objBeanInfo.getPropType(), -1);
-					setJavaBeanProperty(obj, objBeanInfo, tmp);
-				}
-				
-				obj=tmp;
-			}
-		}
-	}
-	
-	//@Override
 	public void addConverter(Type sourceType,Type targetType,Converter converter)
 	{
 		if(getConverters() == null)
@@ -512,7 +410,7 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		Object result=null;
 		
-		if(SbmUtils.isArray(clazz))
+		if(clazz.isArray())
 		{
 			result=convertArrayToArray(array, clazz.getComponentType());
 		}
@@ -679,7 +577,7 @@ public class DefaultGenericConverter implements GenericConverter
 			result=convertObjectToType(null, type);
 		}
 		//数组
-		if(SbmUtils.isArray(type))
+		if(type.isArray())
 		{
 			Class<?> eleClass=type.getComponentType();
 			
@@ -986,7 +884,7 @@ public class DefaultGenericConverter implements GenericConverter
 					continue;
 				
 				//当前属性值是数组
-				if(SbmUtils.isArray(value.getClass()))
+				if(value.getClass().isArray())
 				{
 					int len=Array.getLength(value);
 					
@@ -1240,33 +1138,6 @@ public class DefaultGenericConverter implements GenericConverter
 		{
 			throw new GenericConvertException("exception occur while calling write method '"+propertyInfo.getWriteMethod()+"'",e);
 		}
-	}
-	
-	/**
-	 * 获取对象属性值，如果属性值类型与期望的目标类型不相符，属性值对象将被转换
-	 * @param obj
-	 * @param propertyInfo
-	 * @param targetType
-	 * @return
-	 * @date 2012-2-20
-	 */
-	protected Object getJavaBeanProperty(Object obj, PropertyInfo propertyInfo, Type targetType)
-	{
-		Object result=null;
-		
-		try
-		{
-			result=propertyInfo.getReadMethod().invoke(obj, EMPTY_ARGS);
-			
-			if(targetType != null)
-				result=convertObjectToType(result, targetType);
-		}
-		catch(Exception e)
-		{
-			throw new GenericConvertException("exception occur while calling read method '"+propertyInfo.getReadMethod().getName()+"'",e);
-		}
-		
-		return result;
 	}
 	
 	/**

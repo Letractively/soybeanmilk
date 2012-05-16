@@ -26,16 +26,25 @@ import java.lang.reflect.Type;
 public interface ObjectSource
 {
 	/**
-	 * 取得对象
+	 * 从这个对象源中获取对象
 	 * @param key 对象关键字
-	 * @param expectType 期望的对象类型，如果为<code>null</code>，则表明不关心类型
+	 * @return
+	 * @throws ObjectSourceException
+	 * @date 2012-5-16
+	 */
+	<T> T get(Serializable key) throws ObjectSourceException;
+	
+	/**
+	 * 从这个对象源中获取对象，如果对象类型与期望类型不匹配，对象会被转换为目标类型的对象
+	 * @param key 对象关键字
+	 * @param expectType 期望类型
 	 * @return
 	 * @throws ObjectSourceException
 	 */
 	<T> T get(Serializable key, Type expectType) throws ObjectSourceException;
 	
 	/**
-	 * 保存对象
+	 * 将对象保存到这个对象源中
 	 * @param key 对象关键字
 	 * @param obj 要保存的对象
 	 * @throws ObjectSourceException

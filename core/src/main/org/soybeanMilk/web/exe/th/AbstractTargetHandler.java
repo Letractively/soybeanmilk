@@ -77,7 +77,7 @@ public abstract class AbstractTargetHandler implements TargetHandler
 			{
 				try
 				{
-					Object obj=webObjectSource.get(keys[i], null);
+					Object obj=webObjectSource.get(keys[i]);
 					re.put(keys[i], obj);
 				}
 				catch(Exception e)

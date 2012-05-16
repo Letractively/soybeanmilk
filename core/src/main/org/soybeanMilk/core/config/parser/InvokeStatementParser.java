@@ -17,6 +17,7 @@ package org.soybeanMilk.core.config.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.config.parser.ParseException;
 import org.soybeanMilk.core.exe.Invoke;
 
@@ -214,7 +215,7 @@ public class InvokeStatementParser
 				else if(strType.startsWith("(") && strType.endsWith(")"))
 					strType=strType.substring(1, strType.length()-1);
 				else
-					throw new ParseException("illegal argument segment '"+strType+"' in statement '"+this.statement+"'");
+					throw new ParseException("illegal argument segment "+SbmUtils.toString(strType)+" in statement "+SbmUtils.toString(this.statement));
 				
 				argStrList.add(str+"\"");
 				argTypeStrList.add(strType);
@@ -233,7 +234,7 @@ public class InvokeStatementParser
 				else if(strType.startsWith("(") && strType.endsWith(")"))
 					strType=strType.substring(1, strType.length()-1);
 				else
-					throw new ParseException("illegal argument segment '"+strType+"' in statement '"+this.statement+"'");
+					throw new ParseException("illegal argument segment "+SbmUtils.toString(strType)+" in statement "+SbmUtils.toString(this.statement));
 				
 				argStrList.add(str+"'");
 				argTypeStrList.add(strType);
@@ -249,7 +250,7 @@ public class InvokeStatementParser
 				{
 					int typeStartIdx=str.indexOf('(');
 					if(typeStartIdx <= 0)
-						throw new ParseException("illegal argument type segment '"+str+"' in statement '"+this.statement+"'");
+						throw new ParseException("illegal argument type segment "+SbmUtils.toString(str)+" in statement "+SbmUtils.toString(this.statement));
 					
 					arg=str.substring(0, typeStartIdx);
 					argType=str.substring(typeStartIdx+1, str.length()-1);
@@ -449,7 +450,7 @@ public class InvokeStatementParser
 			else if(Short.class.equals(wrapType))
 				value=new Short(stmt);
 			else
-				throw new ParseException("can not create Number instance of class '"+arg.getType()+"' with value \""+stmt+"\"");
+				throw new ParseException("can not create Number instance of class "+SbmUtils.toString(arg.getType())+" with value \""+stmt+"\"");
 		}
 		else if("true".equals(stmt))
 		{
@@ -472,7 +473,7 @@ public class InvokeStatementParser
 			stmt=SoybeanMilkUtils.unEscape(stmt);
 			
 			if(stmt.length()<2)
-				throw new ParseException("illegal String definition "+stmt+"");
+				throw new ParseException("illegal String definition "+stmt);
 			
 			value=stmt.substring(1, stmt.length()-1);
 		}
@@ -481,7 +482,7 @@ public class InvokeStatementParser
 			stmt=SoybeanMilkUtils.unEscape(stmt);
 			
 			if(stmt.length() != 3)
-				throw new ParseException("illegal char definition "+stmt+"");
+				throw new ParseException("illegal char definition "+stmt);
 			
 			value=stmt.charAt(1);
 		}

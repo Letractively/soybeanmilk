@@ -64,7 +64,7 @@ public class DefaultTypeTargetHandler implements TypeTargetHandler
 		
 		TargetHandler th=getTargetHandler(target.getType());
 		if(th == null)
-			throw new NullPointerException("no TargetHandler found for handling Target of type '"+target.getType()+"'");
+			throw new NullPointerException("no TargetHandler found for handling Target of type "+SbmUtils.toString(target.getType()));
 		
 		th.handleTarget(webAction, webObjectSource);
 	}

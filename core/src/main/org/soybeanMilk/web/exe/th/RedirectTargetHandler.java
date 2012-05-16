@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
@@ -48,7 +49,7 @@ public class RedirectTargetHandler extends AbstractTargetHandler
 		String url=getActualTargetUrl(webAction, webObjectSource);
 		
 		if(url==null)
-			throw new NullPointerException("the url must not be null in '"+Target.REDIRECT+"' type target");
+			throw new NullPointerException("the url must not be null in "+SbmUtils.toString(Target.REDIRECT)+" type target");
 		
 		HttpServletRequest request = webObjectSource.getRequest();
 		HttpServletResponse response=webObjectSource.getResponse();
@@ -60,6 +61,6 @@ public class RedirectTargetHandler extends AbstractTargetHandler
 			response.sendRedirect(url);
 		
 		if(log.isDebugEnabled())
-			log.debug("redirect '"+url+"' for request");
+			log.debug("redirect "+SbmUtils.toString(url)+" for request");
 	}
 }

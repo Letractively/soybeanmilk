@@ -21,6 +21,7 @@ import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.DefaultExecutor;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ExecutableNotFoundException;
@@ -133,7 +134,7 @@ public class DefaultWebExecutor extends DefaultExecutor implements WebExecutor
 			if(re != null)
 			{
 				if(log.isDebugEnabled())
-					log.debug("found '"+re+"' that matches name '"+executableName+"'");
+					log.debug("found "+SbmUtils.toString(re)+" that matches name "+SbmUtils.toString(executableName));
 				
 				PathNode[] pathNodes=targetPath.getPathNodes();
 				for(int i=0;i<pathNodes.length;i++)

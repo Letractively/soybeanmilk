@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.Executable;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.exe.Invoke;
@@ -124,7 +125,7 @@ public abstract class AbstractTargetHandler implements TargetHandler
 				findAllResultKeys(re, (WebAction)exe);
 			}
 			else
-				throw new UnsupportedOperationException("unknown Executable object of type "+exe.getClass().getName());
+				throw new UnsupportedOperationException("unknown Executable object of type "+SbmUtils.toString(exe.getClass()));
 		}
 	}
 	

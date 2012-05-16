@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.exe.WebAction;
 import org.soybeanMilk.web.exe.WebAction.Target;
@@ -48,7 +49,7 @@ public class ForwardTargetHandler extends AbstractTargetHandler
 		String url=getActualTargetUrl(webAction, webObjectSource);
 		
 		if(url==null)
-			throw new NullPointerException("the url must not be null in '"+Target.FORWARD+"' type target");
+			throw new NullPointerException("the url must not be null in "+SbmUtils.toString(Target.FORWARD)+" type target");
 		
 		HttpServletRequest request = webObjectSource.getRequest();
 		HttpServletResponse response=webObjectSource.getResponse();
@@ -58,14 +59,14 @@ public class ForwardTargetHandler extends AbstractTargetHandler
 			request.getRequestDispatcher(url).include(request, response);
 			
 			if(log.isDebugEnabled())
-				log.debug("include '"+url+"' for request");
+				log.debug("include "+SbmUtils.toString(url)+" for request");
 		}
 		else
 		{
 			request.getRequestDispatcher(url).forward(request, response);
 			
 			if(log.isDebugEnabled())
-				log.debug("forward '"+url+"' for request");
+				log.debug("forward "+SbmUtils.toString(url)+" for request");
 		}
 	}
 }

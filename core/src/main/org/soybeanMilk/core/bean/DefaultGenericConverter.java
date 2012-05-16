@@ -825,7 +825,7 @@ public class DefaultGenericConverter implements GenericConverter
 				}
 				catch(Exception e)
 				{
-					throw new GenericConvertException("illegal index value '"+property+"' of property '"+pvm.getPropertyNamePath(property)+"'", e);
+					throw new GenericConvertException("illegal index value "+SbmUtils.toString(property)+" of property "+SbmUtils.toString(pvm.getPropertyNamePath(property)), e);
 				}
 				
 				while(result.size() < idx+1)
@@ -1136,7 +1136,7 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 		catch(Exception e)
 		{
-			throw new GenericConvertException("exception occur while calling write method '"+propertyInfo.getWriteMethod()+"'",e);
+			throw new GenericConvertException("exception occur while calling write method "+SbmUtils.toString(propertyInfo.getWriteMethod()),e);
 		}
 	}
 	
@@ -1248,7 +1248,7 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 		catch(Exception e)
 		{
-			throw new GenericConvertException("illegal index value '"+strIdx+"' for getting value from '"+obj+"'", e);
+			throw new GenericConvertException("illegal index value "+SbmUtils.toString(strIdx)+" for getting value from "+SbmUtils.toString(obj), e);
 		}
 		
 		if(obj.getClass().isArray())
@@ -1265,7 +1265,7 @@ public class DefaultGenericConverter implements GenericConverter
 			Set<?> set=(Set<?>)obj;
 			
 			if(idx >= set.size())
-				throw new GenericConvertException("you are getting the "+idx+"-th value of Set '"+set+"', but its size is only "+set.size());
+				throw new GenericConvertException("you are getting the "+idx+"-th value of Set "+SbmUtils.toString(set)+", but its size is only "+set.size());
 			
 			for(Object o : set)
 			{
@@ -1279,7 +1279,7 @@ public class DefaultGenericConverter implements GenericConverter
 			}
 		}
 		else
-			throw new GenericConvertException("get the "+idx+"-th value from '"+obj+"' is not supported");
+			throw new GenericConvertException("get the "+idx+"-th value from "+SbmUtils.toString(obj)+" is not supported");
 		
 		return result;
 	}
@@ -1661,7 +1661,7 @@ public class DefaultGenericConverter implements GenericConverter
 				}
 				catch(ClassNotFoundException e)
 				{
-					throw new GenericConvertException("custom target type '"+clazz+"' not found", e);
+					throw new GenericConvertException("custom target type "+SbmUtils.toString(clazz)+" not found", e);
 				}
 			}
 			else if(clazz instanceof String[])
@@ -1677,7 +1677,7 @@ public class DefaultGenericConverter implements GenericConverter
 					}
 					catch(ClassNotFoundException e)
 					{
-						throw new GenericConvertException("custom target type '"+clazzs[i]+"' not found", e);
+						throw new GenericConvertException("custom target type "+SbmUtils.toString(clazzs[i])+" not found", e);
 					}
 				}
 			}
@@ -1690,7 +1690,7 @@ public class DefaultGenericConverter implements GenericConverter
 				re=(Class<?>[])clazz;
 			}
 			else
-				throw new GenericConvertException("custom convert target type '"+clazz+"' is unknown");
+				throw new GenericConvertException("custom convert target type "+SbmUtils.toString(clazz)+" is unknown");
 			
 			return re;
 		}

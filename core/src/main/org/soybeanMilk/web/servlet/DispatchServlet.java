@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.ExecutableNotFoundException;
 import org.soybeanMilk.core.ExecuteException;
 import org.soybeanMilk.core.exe.support.DefaultResolverObjectFactory;
@@ -188,7 +189,7 @@ public class DispatchServlet extends HttpServlet
 		String exeName=getRequestExecutableName(request, response);
 		
 		if(log.isDebugEnabled())
-			log.debug("processing request '"+exeName+"'");
+			log.debug("processing request "+SbmUtils.toString(exeName));
 		
 		WebObjectSource webObjSource=getWebObjectSourceFactory().create(request, response, getServletContext());
 		
@@ -356,10 +357,10 @@ public class DispatchServlet extends HttpServlet
 		{
 			erf=(ResolverObjectFactory)getServletContext().getAttribute(erfKey);
 			if(erf == null)
-				throw new ServletException("can not find external ResolverObjectFactory in application with key '"+erfKey+"'");
+				throw new ServletException("can not find external ResolverObjectFactory in application with key "+SbmUtils.toString(erfKey));
 			
 			if(log.isDebugEnabled())
-				log.debug("found external ResolverObjectFactory '"+erf.getClass().getName()+"' in 'application' scope");
+				log.debug("found external ResolverObjectFactory "+SbmUtils.toString(erf.getClass())+" in "+SbmUtils.toString(WebConstants.Scope.APPLICATION)+" scope");
 		}
 		
 		return erf;
@@ -371,7 +372,7 @@ public class DispatchServlet extends HttpServlet
 		String re=super.getInitParameter(name);
 		
 		if(log.isDebugEnabled())
-			log.debug("got init parameter value '"+re+"' for key '"+name+"'");
+			log.debug("got init parameter value "+SbmUtils.toString(re)+" for key "+SbmUtils.toString(name));
 		
 		return re;
 	}

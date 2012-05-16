@@ -1226,7 +1226,7 @@ public class ConfigurationParser
 				len=ue.length();
 				
 				if(len<2 || ue.charAt(len-1) != '"')
-					throw new ParseException("illegal String definition: "+strArg+"");
+					throw new ParseException("illegal String definition: "+strArg);
 				
 				if(len == 2)
 					re=new ValueArg("", argType);
@@ -1239,7 +1239,7 @@ public class ConfigurationParser
 				len=ue.length();
 				
 				if(len!=3 || end!= '\'')
-					throw new ParseException("illegal char definition: "+strArg+"");
+					throw new ParseException("illegal char definition: "+strArg);
 				
 				re=new ValueArg(ue.charAt(1), argType);
 			}

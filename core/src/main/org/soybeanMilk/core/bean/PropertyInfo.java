@@ -237,7 +237,7 @@ public class PropertyInfo
 		else
 		{
 			if(log.isDebugEnabled())
-				log.debug("get '"+beanClass.getName()+"' property information from cache");
+				log.debug("get "+SbmUtils.toString(beanClass)+" property information from cache");
 		}
 		
 		return beanInfo;
@@ -249,13 +249,13 @@ public class PropertyInfo
 		if(cached != null)
 		{
 			if(log.isDebugEnabled())
-				log.debug(getSpace(depth)+"got "+SbmUtils.toString(beanClass.getName())+" property information from cache");
+				log.debug(getSpace(depth)+"got "+SbmUtils.toString(beanClass)+" property information from cache");
 			
 			return cached;
 		}
 		
 		if(log.isDebugEnabled())
-			log.debug(getSpace(depth)+"start  anatomizing "+SbmUtils.toString(beanClass.getName())+" property information");
+			log.debug(getSpace(depth)+"start  anatomizing "+SbmUtils.toString(beanClass)+" property information");
 		
 		PropertyInfo beanInfo=new PropertyInfo(beanClass);
 		
@@ -306,7 +306,7 @@ public class PropertyInfo
 		}
 		
 		if(log.isDebugEnabled())
-			log.debug(getSpace(depth)+"finish anatomizing "+SbmUtils.toString(beanClass.getName())+" property information");
+			log.debug(getSpace(depth)+"finish anatomizing "+SbmUtils.toString(beanClass)+" property information");
 		
 		propertyInfoCache.putIfAbsent(beanClass, beanInfo);
 		

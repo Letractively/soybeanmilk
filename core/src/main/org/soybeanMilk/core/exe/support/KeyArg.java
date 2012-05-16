@@ -68,7 +68,7 @@ public class KeyArg extends AbstractArg
 			targetType=argType;
 		
 		if(!SbmUtils.isClassType(targetType))
-			targetType=SbmUtils.toConcreteType(targetType, methodClass);
+			targetType=toConcreteArgType(argType, methodClass);
 		
 		return objectSource.get(this.key, targetType);
 	}
@@ -77,5 +77,17 @@ public class KeyArg extends AbstractArg
 	public String toString()
 	{
 		return getClass().getSimpleName()+" [key=" + key + ", type= " + getType() + "]";
+	}
+	
+	/**
+	 * 将参数类型具体化
+	 * @param argType
+	 * @param ownerClass
+	 * @return
+	 * @date 2012-5-16
+	 */
+	protected Type toConcreteArgType(Type argType, Class<?> ownerClass)
+	{
+		return SbmUtils.toConcreteType(argType, ownerClass);
 	}
 }

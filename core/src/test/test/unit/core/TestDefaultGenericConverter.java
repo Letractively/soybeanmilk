@@ -2177,6 +2177,569 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
+	public void convert_noSupportConverter_mapToGeneric_javaBeanArrayList() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] name_0={"a", "b", "c"};
+		String[] age_0={"2", "3", "4"};
+		
+		String[] name_1={"aa", "bb", "cc"};
+		String[] age_1={"12", "13", "14"};
+		
+		String[] name_2={"aaa", "bbb", "ccc"};
+		String[] age_2={"112", "113", "114"};
+		
+		src.put("0.name", name_0);
+		src.put("0.age", age_0);
+		
+		src.put("1.0.name", name_1[0]);
+		src.put("1.0.age", age_1[0]);
+		src.put("1.1.name", name_1[1]);
+		src.put("1.1.age", age_1[1]);
+		src.put("1.2.name", name_1[2]);
+		src.put("1.2.age", age_1[2]);
+		
+		src.put("2.name", name_2);
+		src.put("2.age", age_2);
+		
+		Type type=new MockParameterizedType(List.class, JavaBean[].class);
+		List<JavaBean[]> dest=converter.convert(src, type);
+		
+		Assert.assertEquals(3, dest.size());
+		
+		JavaBean[] jb0=dest.get(0);
+		Assert.assertEquals(3, jb0.length);
+		Assert.assertEquals(name_0[0], jb0[0].getName());
+		Assert.assertEquals(age_0[0], jb0[0].getAge().toString());
+		Assert.assertEquals(name_0[1], jb0[1].getName());
+		Assert.assertEquals(age_0[1], jb0[1].getAge().toString());
+		Assert.assertEquals(name_0[2], jb0[2].getName());
+		Assert.assertEquals(age_0[2], jb0[2].getAge().toString());
+		
+		JavaBean[] jb1=dest.get(1);
+		Assert.assertEquals(3, jb1.length);
+		Assert.assertEquals(name_1[0], jb1[0].getName());
+		Assert.assertEquals(age_1[0], jb1[0].getAge().toString());
+		Assert.assertEquals(name_1[1], jb1[1].getName());
+		Assert.assertEquals(age_1[1], jb1[1].getAge().toString());
+		Assert.assertEquals(name_1[2], jb1[2].getName());
+		Assert.assertEquals(age_1[2], jb1[2].getAge().toString());
+		
+		JavaBean[] jb2=dest.get(2);
+		Assert.assertEquals(3, jb2.length);
+		Assert.assertEquals(name_2[0], jb2[0].getName());
+		Assert.assertEquals(age_2[0], jb2[0].getAge().toString());
+		Assert.assertEquals(name_2[1], jb2[1].getName());
+		Assert.assertEquals(age_2[1], jb2[1].getAge().toString());
+		Assert.assertEquals(name_2[2], jb2[2].getName());
+		Assert.assertEquals(age_2[2], jb2[2].getAge().toString());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToGeneric_javaBeanListList() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] name_0={"a", "b", "c"};
+		String[] age_0={"2", "3", "4"};
+		
+		String[] name_1={"aa", "bb", "cc"};
+		String[] age_1={"12", "13", "14"};
+		
+		String[] name_2={"aaa", "bbb", "ccc"};
+		String[] age_2={"112", "113", "114"};
+		
+		src.put("0.name", name_0);
+		src.put("0.age", age_0);
+		
+		src.put("1.0.name", name_1[0]);
+		src.put("1.0.age", age_1[0]);
+		src.put("1.1.name", name_1[1]);
+		src.put("1.1.age", age_1[1]);
+		src.put("1.2.name", name_1[2]);
+		src.put("1.2.age", age_1[2]);
+		
+		src.put("2.name", name_2);
+		src.put("2.age", age_2);
+		
+		Type type=new MockParameterizedType(List.class, new MockParameterizedType(List.class, JavaBean.class));
+		List<List<JavaBean>> dest=converter.convert(src, type);
+		
+		Assert.assertEquals(3, dest.size());
+		
+		List<JavaBean> jb0=dest.get(0);
+		Assert.assertEquals(3, jb0.size());
+		Assert.assertEquals(name_0[0], jb0.get(0).getName());
+		Assert.assertEquals(age_0[0], jb0.get(0).getAge().toString());
+		Assert.assertEquals(name_0[1], jb0.get(1).getName());
+		Assert.assertEquals(age_0[1], jb0.get(1).getAge().toString());
+		Assert.assertEquals(name_0[2], jb0.get(2).getName());
+		Assert.assertEquals(age_0[2], jb0.get(2).getAge().toString());
+		
+		List<JavaBean> jb1=dest.get(1);
+		Assert.assertEquals(3, jb1.size());
+		Assert.assertEquals(name_1[0], jb1.get(0).getName());
+		Assert.assertEquals(age_1[0], jb1.get(0).getAge().toString());
+		Assert.assertEquals(name_1[1], jb1.get(1).getName());
+		Assert.assertEquals(age_1[1], jb1.get(1).getAge().toString());
+		Assert.assertEquals(name_1[2], jb1.get(2).getName());
+		Assert.assertEquals(age_1[2], jb1.get(2).getAge().toString());
+		
+		List<JavaBean> jb2=dest.get(2);
+		Assert.assertEquals(3, jb2.size());
+		Assert.assertEquals(name_2[0], jb2.get(0).getName());
+		Assert.assertEquals(age_2[0], jb2.get(0).getAge().toString());
+		Assert.assertEquals(name_2[1], jb2.get(1).getName());
+		Assert.assertEquals(age_2[1], jb2.get(1).getAge().toString());
+		Assert.assertEquals(name_2[2], jb2.get(2).getName());
+		Assert.assertEquals(age_2[2], jb2.get(2).getAge().toString());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToGeneric_javaBeanMapList() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] name_0={"a", "b", "c"};
+		String[] age_0={"2", "3", "4"};
+		
+		String[] name_1={"aa", "bb", "cc"};
+		String[] age_1={"12", "13", "14"};
+		
+		String[] name_2={"aaa", "bbb", "ccc"};
+		String[] age_2={"112", "113", "114"};
+		
+		src.put("0.key00.name", name_0[0]);
+		src.put("0.key00.age", age_0[0]);
+		src.put("0.key01.name", name_0[1]);
+		src.put("0.key01.age", age_0[1]);
+		src.put("0.key02.name", name_0[2]);
+		src.put("0.key02.age", age_0[2]);
+		
+		src.put("1.key10.name", name_1[0]);
+		src.put("1.key10.age", age_1[0]);
+		src.put("1.key11.name", name_1[1]);
+		src.put("1.key11.age", age_1[1]);
+		src.put("1.key12.name", name_1[2]);
+		src.put("1.key12.age", age_1[2]);
+		
+		src.put("2.key20.name", name_2[0]);
+		src.put("2.key20.age", age_2[0]);
+		src.put("2.key21.name", name_2[1]);
+		src.put("2.key21.age", age_2[1]);
+		src.put("2.key22.name", name_2[2]);
+		src.put("2.key22.age", age_2[2]);
+		
+		Type type=new MockParameterizedType(List.class, new MockParameterizedType(Map.class, String.class, JavaBean.class));
+		List<Map<String, JavaBean>> dest=converter.convert(src, type);
+		
+		Assert.assertEquals(3, dest.size());
+		
+		Map<String, JavaBean> jb0=dest.get(0);
+		Assert.assertEquals(3, jb0.size());
+		Assert.assertEquals(name_0[0], jb0.get("key00").getName());
+		Assert.assertEquals(age_0[0], jb0.get("key00").getAge().toString());
+		Assert.assertEquals(name_0[1], jb0.get("key01").getName());
+		Assert.assertEquals(age_0[1], jb0.get("key01").getAge().toString());
+		Assert.assertEquals(name_0[2], jb0.get("key02").getName());
+		Assert.assertEquals(age_0[2], jb0.get("key02").getAge().toString());
+		
+		Map<String, JavaBean> jb1=dest.get(1);
+		Assert.assertEquals(3, jb1.size());
+		Assert.assertEquals(name_1[0], jb1.get("key10").getName());
+		Assert.assertEquals(age_1[0], jb1.get("key10").getAge().toString());
+		Assert.assertEquals(name_1[1], jb1.get("key11").getName());
+		Assert.assertEquals(age_1[1], jb1.get("key11").getAge().toString());
+		Assert.assertEquals(name_1[2], jb1.get("key12").getName());
+		Assert.assertEquals(age_1[2], jb1.get("key12").getAge().toString());
+		
+		Map<String, JavaBean> jb2=dest.get(2);
+		Assert.assertEquals(3, jb2.size());
+		Assert.assertEquals(name_2[0], jb2.get("key20").getName());
+		Assert.assertEquals(age_2[0], jb2.get("key20").getAge().toString());
+		Assert.assertEquals(name_2[1], jb2.get("key21").getName());
+		Assert.assertEquals(age_2[1], jb2.get("key21").getAge().toString());
+		Assert.assertEquals(name_2[2], jb2.get("key22").getName());
+		Assert.assertEquals(age_2[2], jb2.get("key22").getAge().toString());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToGeneric_javaBeanArrayArray() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] name_0={"a", "b", "c"};
+		String[] age_0={"2", "3", "4"};
+		
+		String[] name_1={"aa", "bb", "cc"};
+		String[] age_1={"12", "13", "14"};
+		
+		String[] name_2={"aaa", "bbb", "ccc"};
+		String[] age_2={"112", "113", "114"};
+		
+		src.put("0.name", name_0);
+		src.put("0.age", age_0);
+		
+		src.put("1.0.name", name_1[0]);
+		src.put("1.0.age", age_1[0]);
+		src.put("1.1.name", name_1[1]);
+		src.put("1.1.age", age_1[1]);
+		src.put("1.2.name", name_1[2]);
+		src.put("1.2.age", age_1[2]);
+		
+		src.put("2.name", name_2);
+		src.put("2.age", age_2);
+		
+		JavaBean[][] dest=converter.convert(src, JavaBean[][].class);
+		
+		Assert.assertEquals(3, dest.length);
+		
+		JavaBean[] jb0=dest[0];
+		Assert.assertEquals(3, jb0.length);
+		Assert.assertEquals(name_0[0], jb0[0].getName());
+		Assert.assertEquals(age_0[0], jb0[0].getAge().toString());
+		Assert.assertEquals(name_0[1], jb0[1].getName());
+		Assert.assertEquals(age_0[1], jb0[1].getAge().toString());
+		Assert.assertEquals(name_0[2], jb0[2].getName());
+		Assert.assertEquals(age_0[2], jb0[2].getAge().toString());
+		
+		JavaBean[] jb1=dest[1];
+		Assert.assertEquals(3, jb1.length);
+		Assert.assertEquals(name_1[0], jb1[0].getName());
+		Assert.assertEquals(age_1[0], jb1[0].getAge().toString());
+		Assert.assertEquals(name_1[1], jb1[1].getName());
+		Assert.assertEquals(age_1[1], jb1[1].getAge().toString());
+		Assert.assertEquals(name_1[2], jb1[2].getName());
+		Assert.assertEquals(age_1[2], jb1[2].getAge().toString());
+		
+		JavaBean[] jb2=dest[2];
+		Assert.assertEquals(3, jb2.length);
+		Assert.assertEquals(name_2[0], jb2[0].getName());
+		Assert.assertEquals(age_2[0], jb2[0].getAge().toString());
+		Assert.assertEquals(name_2[1], jb2[1].getName());
+		Assert.assertEquals(age_2[1], jb2[1].getAge().toString());
+		Assert.assertEquals(name_2[2], jb2[2].getName());
+		Assert.assertEquals(age_2[2], jb2[2].getAge().toString());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToGeneric_javaBeanListArray() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] name_0={"a", "b", "c"};
+		String[] age_0={"2", "3", "4"};
+		
+		String[] name_1={"aa", "bb", "cc"};
+		String[] age_1={"12", "13", "14"};
+		
+		String[] name_2={"aaa", "bbb", "ccc"};
+		String[] age_2={"112", "113", "114"};
+		
+		src.put("0.name", name_0);
+		src.put("0.age", age_0);
+		
+		src.put("1.0.name", name_1[0]);
+		src.put("1.0.age", age_1[0]);
+		src.put("1.1.name", name_1[1]);
+		src.put("1.1.age", age_1[1]);
+		src.put("1.2.name", name_1[2]);
+		src.put("1.2.age", age_1[2]);
+		
+		src.put("2.name", name_2);
+		src.put("2.age", age_2);
+		
+		Type type=new MockGenericArrayType(new MockParameterizedType(List.class, JavaBean.class));
+		List<JavaBean>[] dest=converter.convert(src, type);
+		
+		Assert.assertEquals(3, dest.length);
+		
+		List<JavaBean> jb0=dest[0];
+		Assert.assertEquals(3, jb0.size());
+		Assert.assertEquals(name_0[0], jb0.get(0).getName());
+		Assert.assertEquals(age_0[0], jb0.get(0).getAge().toString());
+		Assert.assertEquals(name_0[1], jb0.get(1).getName());
+		Assert.assertEquals(age_0[1], jb0.get(1).getAge().toString());
+		Assert.assertEquals(name_0[2], jb0.get(2).getName());
+		Assert.assertEquals(age_0[2], jb0.get(2).getAge().toString());
+		
+		List<JavaBean> jb1=dest[1];
+		Assert.assertEquals(3, jb1.size());
+		Assert.assertEquals(name_1[0], jb1.get(0).getName());
+		Assert.assertEquals(age_1[0], jb1.get(0).getAge().toString());
+		Assert.assertEquals(name_1[1], jb1.get(1).getName());
+		Assert.assertEquals(age_1[1], jb1.get(1).getAge().toString());
+		Assert.assertEquals(name_1[2], jb1.get(2).getName());
+		Assert.assertEquals(age_1[2], jb1.get(2).getAge().toString());
+		
+		List<JavaBean> jb2=dest[2];
+		Assert.assertEquals(3, jb2.size());
+		Assert.assertEquals(name_2[0], jb2.get(0).getName());
+		Assert.assertEquals(age_2[0], jb2.get(0).getAge().toString());
+		Assert.assertEquals(name_2[1], jb2.get(1).getName());
+		Assert.assertEquals(age_2[1], jb2.get(1).getAge().toString());
+		Assert.assertEquals(name_2[2], jb2.get(2).getName());
+		Assert.assertEquals(age_2[2], jb2.get(2).getAge().toString());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToGeneric_javaBeanMapArray() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] name_0={"a", "b", "c"};
+		String[] age_0={"2", "3", "4"};
+		
+		String[] name_1={"aa", "bb", "cc"};
+		String[] age_1={"12", "13", "14"};
+		
+		String[] name_2={"aaa", "bbb", "ccc"};
+		String[] age_2={"112", "113", "114"};
+		
+		src.put("0.key00.name", name_0[0]);
+		src.put("0.key00.age", age_0[0]);
+		src.put("0.key01.name", name_0[1]);
+		src.put("0.key01.age", age_0[1]);
+		src.put("0.key02.name", name_0[2]);
+		src.put("0.key02.age", age_0[2]);
+		
+		src.put("1.key10.name", name_1[0]);
+		src.put("1.key10.age", age_1[0]);
+		src.put("1.key11.name", name_1[1]);
+		src.put("1.key11.age", age_1[1]);
+		src.put("1.key12.name", name_1[2]);
+		src.put("1.key12.age", age_1[2]);
+		
+		src.put("2.key20.name", name_2[0]);
+		src.put("2.key20.age", age_2[0]);
+		src.put("2.key21.name", name_2[1]);
+		src.put("2.key21.age", age_2[1]);
+		src.put("2.key22.name", name_2[2]);
+		src.put("2.key22.age", age_2[2]);
+		
+		Type type=new MockGenericArrayType(new MockParameterizedType(Map.class, String.class, JavaBean.class));
+		Map<String, JavaBean>[] dest=converter.convert(src, type);
+		
+		Assert.assertEquals(3, dest.length);
+		
+		Map<String, JavaBean> jb0=dest[0];
+		Assert.assertEquals(3, jb0.size());
+		Assert.assertEquals(name_0[0], jb0.get("key00").getName());
+		Assert.assertEquals(age_0[0], jb0.get("key00").getAge().toString());
+		Assert.assertEquals(name_0[1], jb0.get("key01").getName());
+		Assert.assertEquals(age_0[1], jb0.get("key01").getAge().toString());
+		Assert.assertEquals(name_0[2], jb0.get("key02").getName());
+		Assert.assertEquals(age_0[2], jb0.get("key02").getAge().toString());
+		
+		Map<String, JavaBean> jb1=dest[1];
+		Assert.assertEquals(3, jb1.size());
+		Assert.assertEquals(name_1[0], jb1.get("key10").getName());
+		Assert.assertEquals(age_1[0], jb1.get("key10").getAge().toString());
+		Assert.assertEquals(name_1[1], jb1.get("key11").getName());
+		Assert.assertEquals(age_1[1], jb1.get("key11").getAge().toString());
+		Assert.assertEquals(name_1[2], jb1.get("key12").getName());
+		Assert.assertEquals(age_1[2], jb1.get("key12").getAge().toString());
+		
+		Map<String, JavaBean> jb2=dest[2];
+		Assert.assertEquals(3, jb2.size());
+		Assert.assertEquals(name_2[0], jb2.get("key20").getName());
+		Assert.assertEquals(age_2[0], jb2.get("key20").getAge().toString());
+		Assert.assertEquals(name_2[1], jb2.get("key21").getName());
+		Assert.assertEquals(age_2[1], jb2.get("key21").getAge().toString());
+		Assert.assertEquals(name_2[2], jb2.get("key22").getName());
+		Assert.assertEquals(age_2[2], jb2.get("key22").getAge().toString());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToGeneric_javaBeanArrayMap() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] name_0={"a", "b", "c"};
+		String[] age_0={"2", "3", "4"};
+		
+		String[] name_1={"aa", "bb", "cc"};
+		String[] age_1={"12", "13", "14"};
+		
+		String[] name_2={"aaa", "bbb", "ccc"};
+		String[] age_2={"112", "113", "114"};
+		
+		src.put("key0.name", name_0);
+		src.put("key0.age", age_0);
+		
+		src.put("key1.0.name", name_1[0]);
+		src.put("key1.0.age", age_1[0]);
+		src.put("key1.1.name", name_1[1]);
+		src.put("key1.1.age", age_1[1]);
+		src.put("key1.2.name", name_1[2]);
+		src.put("key1.2.age", age_1[2]);
+		
+		src.put("key2.name", name_2);
+		src.put("key2.age", age_2);
+		
+		Type type=new MockParameterizedType(Map.class, String.class, JavaBean[].class);
+		Map<String, JavaBean[]> dest=converter.convert(src, type);
+		
+		Assert.assertEquals(3, dest.size());
+		
+		JavaBean[] jb0=dest.get("key0");
+		Assert.assertEquals(3, jb0.length);
+		Assert.assertEquals(name_0[0], jb0[0].getName());
+		Assert.assertEquals(age_0[0], jb0[0].getAge().toString());
+		Assert.assertEquals(name_0[1], jb0[1].getName());
+		Assert.assertEquals(age_0[1], jb0[1].getAge().toString());
+		Assert.assertEquals(name_0[2], jb0[2].getName());
+		Assert.assertEquals(age_0[2], jb0[2].getAge().toString());
+		
+		JavaBean[] jb1=dest.get("key1");
+		Assert.assertEquals(3, jb1.length);
+		Assert.assertEquals(name_1[0], jb1[0].getName());
+		Assert.assertEquals(age_1[0], jb1[0].getAge().toString());
+		Assert.assertEquals(name_1[1], jb1[1].getName());
+		Assert.assertEquals(age_1[1], jb1[1].getAge().toString());
+		Assert.assertEquals(name_1[2], jb1[2].getName());
+		Assert.assertEquals(age_1[2], jb1[2].getAge().toString());
+		
+		JavaBean[] jb2=dest.get("key2");
+		Assert.assertEquals(3, jb2.length);
+		Assert.assertEquals(name_2[0], jb2[0].getName());
+		Assert.assertEquals(age_2[0], jb2[0].getAge().toString());
+		Assert.assertEquals(name_2[1], jb2[1].getName());
+		Assert.assertEquals(age_2[1], jb2[1].getAge().toString());
+		Assert.assertEquals(name_2[2], jb2[2].getName());
+		Assert.assertEquals(age_2[2], jb2[2].getAge().toString());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToGeneric_javaBeanListMap() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] name_0={"a", "b", "c"};
+		String[] age_0={"2", "3", "4"};
+		
+		String[] name_1={"aa", "bb", "cc"};
+		String[] age_1={"12", "13", "14"};
+		
+		String[] name_2={"aaa", "bbb", "ccc"};
+		String[] age_2={"112", "113", "114"};
+		
+		src.put("key0.name", name_0);
+		src.put("key0.age", age_0);
+		
+		src.put("key1.0.name", name_1[0]);
+		src.put("key1.0.age", age_1[0]);
+		src.put("key1.1.name", name_1[1]);
+		src.put("key1.1.age", age_1[1]);
+		src.put("key1.2.name", name_1[2]);
+		src.put("key1.2.age", age_1[2]);
+		
+		src.put("key2.name", name_2);
+		src.put("key2.age", age_2);
+		
+		Type type=new MockParameterizedType(Map.class, String.class, new MockParameterizedType(List.class, JavaBean.class));
+		Map<String, List<JavaBean>> dest=converter.convert(src, type);
+		
+		Assert.assertEquals(3, dest.size());
+		
+		List<JavaBean> jb0=dest.get("key0");
+		Assert.assertEquals(3, jb0.size());
+		Assert.assertEquals(name_0[0], jb0.get(0).getName());
+		Assert.assertEquals(age_0[0], jb0.get(0).getAge().toString());
+		Assert.assertEquals(name_0[1], jb0.get(1).getName());
+		Assert.assertEquals(age_0[1], jb0.get(1).getAge().toString());
+		Assert.assertEquals(name_0[2], jb0.get(2).getName());
+		Assert.assertEquals(age_0[2], jb0.get(2).getAge().toString());
+		
+		List<JavaBean> jb1=dest.get("key1");
+		Assert.assertEquals(3, jb1.size());
+		Assert.assertEquals(name_1[0], jb1.get(0).getName());
+		Assert.assertEquals(age_1[0], jb1.get(0).getAge().toString());
+		Assert.assertEquals(name_1[1], jb1.get(1).getName());
+		Assert.assertEquals(age_1[1], jb1.get(1).getAge().toString());
+		Assert.assertEquals(name_1[2], jb1.get(2).getName());
+		Assert.assertEquals(age_1[2], jb1.get(2).getAge().toString());
+		
+		List<JavaBean> jb2=dest.get("key2");
+		Assert.assertEquals(3, jb2.size());
+		Assert.assertEquals(name_2[0], jb2.get(0).getName());
+		Assert.assertEquals(age_2[0], jb2.get(0).getAge().toString());
+		Assert.assertEquals(name_2[1], jb2.get(1).getName());
+		Assert.assertEquals(age_2[1], jb2.get(1).getAge().toString());
+		Assert.assertEquals(name_2[2], jb2.get(2).getName());
+		Assert.assertEquals(age_2[2], jb2.get(2).getAge().toString());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToGeneric_javaBeanMapMap() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] name_0={"a", "b", "c"};
+		String[] age_0={"2", "3", "4"};
+		
+		String[] name_1={"aa", "bb", "cc"};
+		String[] age_1={"12", "13", "14"};
+		
+		String[] name_2={"aaa", "bbb", "ccc"};
+		String[] age_2={"112", "113", "114"};
+		
+		src.put("key0.key00.name", name_0[0]);
+		src.put("key0.key00.age", age_0[0]);
+		src.put("key0.key01.name", name_0[1]);
+		src.put("key0.key01.age", age_0[1]);
+		src.put("key0.key02.name", name_0[2]);
+		src.put("key0.key02.age", age_0[2]);
+		
+		src.put("key1.key10.name", name_1[0]);
+		src.put("key1.key10.age", age_1[0]);
+		src.put("key1.key11.name", name_1[1]);
+		src.put("key1.key11.age", age_1[1]);
+		src.put("key1.key12.name", name_1[2]);
+		src.put("key1.key12.age", age_1[2]);
+		
+		src.put("key2.key20.name", name_2[0]);
+		src.put("key2.key20.age", age_2[0]);
+		src.put("key2.key21.name", name_2[1]);
+		src.put("key2.key21.age", age_2[1]);
+		src.put("key2.key22.name", name_2[2]);
+		src.put("key2.key22.age", age_2[2]);
+		
+		Type type=new MockParameterizedType(Map.class, String.class, new MockParameterizedType(Map.class, String.class, JavaBean.class));
+		Map<String, Map<String, JavaBean>> dest=converter.convert(src, type);
+		
+		Assert.assertEquals(3, dest.size());
+		
+		Map<String, JavaBean> jb0=dest.get("key0");
+		Assert.assertEquals(3, jb0.size());
+		Assert.assertEquals(name_0[0], jb0.get("key00").getName());
+		Assert.assertEquals(age_0[0], jb0.get("key00").getAge().toString());
+		Assert.assertEquals(name_0[1], jb0.get("key01").getName());
+		Assert.assertEquals(age_0[1], jb0.get("key01").getAge().toString());
+		Assert.assertEquals(name_0[2], jb0.get("key02").getName());
+		Assert.assertEquals(age_0[2], jb0.get("key02").getAge().toString());
+		
+		Map<String, JavaBean> jb1=dest.get("key1");
+		Assert.assertEquals(3, jb1.size());
+		Assert.assertEquals(name_1[0], jb1.get("key10").getName());
+		Assert.assertEquals(age_1[0], jb1.get("key10").getAge().toString());
+		Assert.assertEquals(name_1[1], jb1.get("key11").getName());
+		Assert.assertEquals(age_1[1], jb1.get("key11").getAge().toString());
+		Assert.assertEquals(name_1[2], jb1.get("key12").getName());
+		Assert.assertEquals(age_1[2], jb1.get("key12").getAge().toString());
+		
+		Map<String, JavaBean> jb2=dest.get("key2");
+		Assert.assertEquals(3, jb2.size());
+		Assert.assertEquals(name_2[0], jb2.get("key20").getName());
+		Assert.assertEquals(age_2[0], jb2.get("key20").getAge().toString());
+		Assert.assertEquals(name_2[1], jb2.get("key21").getName());
+		Assert.assertEquals(age_2[1], jb2.get("key21").getAge().toString());
+		Assert.assertEquals(name_2[2], jb2.get("key22").getName());
+		Assert.assertEquals(age_2[2], jb2.get("key22").getAge().toString());
+	}
+	
+	@Test
 	public void convert_noSupportConverter_mapToRawMap() throws Exception
 	{
 		HashMap<String,Integer> src=new HashMap<String, Integer>();

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.bean.CustomGenericArrayType;
@@ -166,7 +167,7 @@ public class SbmUtils
 			re=getFullQualifiedClassName(toConcreteType(type, (Class<?>)null));
 		}
 		else
-			throw new IllegalArgumentException("unknown type '"+type+"'");
+			throw new IllegalArgumentException("unknown type "+SbmUtils.toString(type));
 		
 		return re;
 	}
@@ -190,12 +191,35 @@ public class SbmUtils
 		}
 		else
 		{
-			Map<TypeVariable<?>, Type> variableTypesMap=new HashMap<TypeVariable<?>, Type>();
-			extractTypeVariablesInType(ownerClass, variableTypesMap);
+			Map<TypeVariable<?>, Type> variableTypesMap=getClassVarialbleTypesMap(ownerClass);
 			
 			return toConcreteTypeInner(type, variableTypesMap);
 		}
 	}
+	
+	/**
+	 * 获取给定类中声明的{@linkplain TypeVariable}对应的类型
+	 * @param clazz
+	 * @return
+	 * @date 2012-5-16
+	 */
+	private static Map<TypeVariable<?>, Type> getClassVarialbleTypesMap(Class<?> clazz)
+	{
+		Map<TypeVariable<?>, Type> re=classVarialbleTypesMap.get(clazz);
+		
+		if(re == null)
+		{
+			re=new HashMap<TypeVariable<?>, Type>();
+			extractTypeVariablesInType(clazz, re);
+			
+			classVarialbleTypesMap.putIfAbsent(clazz, re);
+		}
+		
+		return re;
+	}
+	
+	/**类中{@linkplain TypeVariable}类型缓存*/
+	private static ConcurrentHashMap<Class<?>, Map<TypeVariable<?>, Type>> classVarialbleTypesMap=new ConcurrentHashMap<Class<?>, Map<TypeVariable<?>,Type>>();
 	
 	/**
 	 * 具体化类型
@@ -467,7 +491,7 @@ public class SbmUtils
 					else if(next == '\\') sb.append('\\');
 					else if(next == '"') sb.append('"');
 					else
-						throw new ParseException("unknown escape character '\\"+next+"' ");
+						throw new ParseException("unknown escape character '\\"+next+"'");
 					
 					i++;
 				}

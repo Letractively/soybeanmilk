@@ -71,17 +71,6 @@ public class SbmUtils
 	}
 	
 	/**
-	 * 是否是枚举类型
-	 * @param type
-	 * @return
-	 * @date 2011-1-9
-	 */
-	public static boolean isEnum(Type type)
-	{
-		return type!=null && isClassType(type) && narrowToClassType(type).isEnum();
-	}
-	
-	/**
 	 * 对象是否<code>instanceof</code>给定的类型
 	 * @param obj
 	 * @param type
@@ -108,22 +97,6 @@ public class SbmUtils
 	public static boolean isAncestorClass(Class<?> ancestor, Class<?> descendant)
 	{
 		return ancestor!=null && ancestor.isAssignableFrom(narrowToClassType(descendant));
-	}
-	
-	/**
-	 * 是否是{@linkplain java.lang.Class Class}类型对象的数组类型
-	 * @param type
-	 * @return
-	 * @date 2010-12-31
-	 */
-	public static boolean isClassTypeArray(Type type)
-	{
-		if(type == null)
-			return false;
-		else if(isClassType(type))
-			return narrowToClassType(type).isArray();
-		else
-			return false;
 	}
 	
 	/**
@@ -155,25 +128,6 @@ public class SbmUtils
             return Character.class;
         else
             return type;
-	}
-	
-	public static Class<?> getRawClassType(Type type)
-	{
-		if(isClassType(type))
-			return (Class<?>)type;
-		else
-		{
-			String fqn=getFullQualifiedClassName(type);
-			
-			try
-			{
-				return Class.forName(fqn);
-			}
-			catch(ClassNotFoundException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
 	}
 	
 	/**
@@ -218,7 +172,7 @@ public class SbmUtils
 	}
 	
 	/**
-	 * 将<code>type</code>类型转换为具体化类型，它包含的所有{@linkplain TypeVariable}和{@linkplain WildcardType}类型都将被<code>ownerClass</code>的具体类型替代，
+	 * 将<code>type</code>类型转换为具体化类型，它包含的所有{@linkplain TypeVariable}和{@linkplain WildcardType}类型都将被<code>ownerClass</code>中的具体类型替代，
 	 * 如果<code>type</code>中不包含这两种类型，它将直接被返回；否则，一个新的类型将被创建并返回。
 	 * @param type
 	 * @param ownerClass

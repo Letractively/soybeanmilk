@@ -1344,17 +1344,28 @@ public class DefaultGenericConverter implements GenericConverter
 	{
 		Class<?> clazz=null;
 		
-		if(java.util.List.class.equals(type))
-			clazz=ArrayList.class;
-		else if(java.util.Set.class.equals(type))
-			clazz=HashSet.class;
-		else if(java.util.Map.class.equals(type))
-			clazz=HashMap.class;
+		if(SbmUtils.isClassType(type))
+		{
+			if(java.util.List.class.equals(type))
+				clazz=ArrayList.class;
+			else if(java.util.Set.class.equals(type))
+				clazz=HashSet.class;
+			else if(java.util.Map.class.equals(type))
+				clazz=HashMap.class;
+			else
+				clazz=SbmUtils.narrowToClassType(type);
+		}
 		else
-			clazz=SbmUtils.getRawClassType(type);
+			clazz=null;
 		
 		try
 		{
+			if(clazz == null)
+			{
+				String fqn=SbmUtils.getFullQualifiedClassName(type);
+				clazz=Class.forName(fqn);
+			}
+			
 			if(arrayLength < 0)
 				return clazz.newInstance();
 			else

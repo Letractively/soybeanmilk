@@ -52,7 +52,7 @@ public class Invoke extends AbstractExecutable
 	/**调用结果存放到对象源中的关键字*/
 	private Serializable resultKey;
 	
-	/**调用解决对象*/
+	/**调用目标提供者*/
 	private transient ResolverProvider resolverProvider;
 	
 	/**此调用的打断器在对象源中的关键字，打断器可以控制调用方法是否执行*/
@@ -261,7 +261,7 @@ public class Invoke extends AbstractExecutable
 	}
 	
 	/**
-	 * 获取当前调用解决对象
+	 * 获取当前调用目标
 	 * @param objectSource
 	 * @return
 	 * @throws ExecuteException
@@ -354,7 +354,7 @@ public class Invoke extends AbstractExecutable
 	}
 	
 	/**
-	 * 获取给定解决对象的{@linkplain MethodInfo 方法信息}对象
+	 * 获取给定调用目标的{@linkplain MethodInfo 方法信息}对象
 	 * @param methodClass
 	 * @param methodName
 	 * @param argNums

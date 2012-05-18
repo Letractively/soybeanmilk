@@ -42,11 +42,11 @@ import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
 import org.soybeanMilk.core.exe.support.DefaultResolverObjectFactory;
-import org.soybeanMilk.core.exe.support.DynamicResolverProvider;
-import org.soybeanMilk.core.exe.support.FactoryResolverProvider;
+import org.soybeanMilk.core.exe.support.DynamicResolver;
+import org.soybeanMilk.core.exe.support.FactoryResolver;
 import org.soybeanMilk.core.exe.support.KeyArg;
-import org.soybeanMilk.core.exe.support.ObjectResolverProvider;
-import org.soybeanMilk.core.exe.support.ObjectSourceResolverProvider;
+import org.soybeanMilk.core.exe.support.ObjectResolver;
+import org.soybeanMilk.core.exe.support.ObjectSourceResolver;
 import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
 import org.soybeanMilk.core.exe.support.ValueArg;
 import org.w3c.dom.Attr;
@@ -672,7 +672,7 @@ public class ConfigurationParser
 			try
 			{
 				Class<?> rc=Class.forName(resolver);
-				invoke.setResolverProvider(new ObjectResolverProvider(null, rc));
+				invoke.setResolverProvider(new ObjectResolver(null, rc));
 				
 				classResolver=true;
 			}
@@ -683,10 +683,10 @@ public class ConfigurationParser
 		}
 		if(!classResolver)
 		{
-			FactoryResolverProvider frp=new FactoryResolverProvider(configuration.getResolverObjectFactory(), resolver);
-			ObjectSourceResolverProvider orp=new ObjectSourceResolverProvider(resolver);
+			FactoryResolver frp=new FactoryResolver(configuration.getResolverObjectFactory(), resolver);
+			ObjectSourceResolver orp=new ObjectSourceResolver(resolver);
 			
-			invoke.setResolverProvider(new DynamicResolverProvider(frp, orp));
+			invoke.setResolverProvider(new DynamicResolver(frp, orp));
 		}
 	}
 	

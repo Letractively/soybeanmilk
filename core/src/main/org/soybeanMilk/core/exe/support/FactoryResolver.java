@@ -19,31 +19,30 @@ import java.io.Serializable;
 import org.soybeanMilk.core.ObjectSource;
 
 import org.soybeanMilk.core.exe.Invoke.Resolver;
-import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
 
 /**
- * 工厂调用目标提供者，它从{@linkplain ResolverObjectFactory 调用目标对象工厂}中获取{@linkplain Resolver 调用目标}
+ * 工厂调用目标，它从{@linkplain ResolverObjectFactory 调用目标对象工厂}中获取调用目标对象
  * @author earthangry@gmail.com
  * @date 2010-10-19
  */
-public class FactoryResolverProvider implements ResolverProvider
+public class FactoryResolver implements Resolver
 {
 	private Serializable resolverId;
 	private ResolverObjectFactory resolverObjectFactory;
 	
-	public FactoryResolverProvider()
+	public FactoryResolver()
 	{
 		this(null, null);
 	}
-
-	public FactoryResolverProvider(ResolverObjectFactory resolverObjectFactory,
+	
+	public FactoryResolver(ResolverObjectFactory resolverObjectFactory,
 			Serializable resolverId)
 	{
 		super();
 		this.resolverObjectFactory = resolverObjectFactory;
 		this.resolverId = resolverId;
 	}
-
+	
 	public ResolverObjectFactory getResolverObjectFactory() {
 		return resolverObjectFactory;
 	}
@@ -61,13 +60,19 @@ public class FactoryResolverProvider implements ResolverProvider
 	}
 	
 	//@Override
-	public Resolver getResolver(ObjectSource objectSource) throws Exception
+	public Object getResolverObject(ObjectSource objectSource) throws Exception
 	{
 		Object ro=this.resolverObjectFactory.getResolverObject(this.resolverId);
 		
-		return (ro == null ? null : new Resolver(ro));
+		return ro;
 	}
-
+	
+	//@Override
+	public Class<?> getResolverClass(ObjectSource objectSource) throws Exception
+	{
+		return null;
+	}
+	
 	//@Override
 	public String toString()
 	{

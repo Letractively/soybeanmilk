@@ -19,23 +19,22 @@ import java.io.Serializable;
 import org.soybeanMilk.core.ObjectSource;
 
 import org.soybeanMilk.core.exe.Invoke.Resolver;
-import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
 
 /**
- * 对象源调用目标提供者，它从当前{@linkplain ObjectSource 对象源}中动态获取{@linkplain Resolver 调用目标}
+ * 对象源调用目标，它从当前{@linkplain ObjectSource 对象源}中动态获取调用目标对象
  * @author earthangry@gmail.com
  * @date 2012-5-6
  */
-public class ObjectSourceResolverProvider implements ResolverProvider
+public class ObjectSourceResolver implements Resolver
 {
 	private Serializable resolverKey;
 	
-	public ObjectSourceResolverProvider()
+	public ObjectSourceResolver()
 	{
 		this(null);
 	}
 	
-	public ObjectSourceResolverProvider(Serializable resolverKey)
+	public ObjectSourceResolver(Serializable resolverKey)
 	{
 		this.resolverKey = resolverKey;
 	}
@@ -49,11 +48,17 @@ public class ObjectSourceResolverProvider implements ResolverProvider
 	}
 	
 	//@Override
-	public Resolver getResolver(ObjectSource objectSource) throws Exception
+	public Object getResolverObject(ObjectSource objectSource) throws Exception
 	{
 		Object ro=objectSource.get(this.resolverKey);
 		
-		return (ro == null ? null : new Resolver(ro));
+		return ro;
+	}
+	
+	//@Override
+	public Class<?> getResolverClass(ObjectSource objectSource) throws Exception
+	{
+		return null;
 	}
 	
 	//@Override

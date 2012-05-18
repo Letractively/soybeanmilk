@@ -33,13 +33,13 @@ import org.soybeanMilk.core.exe.ArgPrepareExecuteException;
 import org.soybeanMilk.core.exe.InvocationExecuteException;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
-import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
+import org.soybeanMilk.core.exe.Invoke.Resolver;
 import org.soybeanMilk.core.exe.support.DefaultResolverObjectFactory;
-import org.soybeanMilk.core.exe.support.DynamicResolverProvider;
-import org.soybeanMilk.core.exe.support.FactoryResolverProvider;
+import org.soybeanMilk.core.exe.support.DynamicResolver;
+import org.soybeanMilk.core.exe.support.FactoryResolver;
 import org.soybeanMilk.core.exe.support.KeyArg;
-import org.soybeanMilk.core.exe.support.ObjectResolverProvider;
-import org.soybeanMilk.core.exe.support.ObjectSourceResolverProvider;
+import org.soybeanMilk.core.exe.support.ObjectResolver;
+import org.soybeanMilk.core.exe.support.ObjectSourceResolver;
 import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
 import org.soybeanMilk.core.exe.support.ValueArg;
 import org.soybeanMilk.core.os.HashMapObjectSource;
@@ -77,19 +77,19 @@ public class TestInvoke
 	}
 	
 	@Test
-	public void init_byResolverProvider() throws Exception
+	public void init_byResolver() throws Exception
 	{
 		Arg[] args=new Arg[]{
 				new ValueArg("aaa"),
 				new ValueArg("bbb"),
 		};
-		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		Resolver rp=new ObjectResolver(new TestResolver());
 		
 		Invoke re=new Invoke("test", rp,  "test1", args, RESULT_KEY);
 		
 		Assert.assertEquals(re.getName(), "test");
 		Assert.assertEquals(re.getResultKey(), RESULT_KEY);
-		Assert.assertEquals(re.getResolverProvider(), rp);
+		Assert.assertEquals(re.getResolver(), rp);
 		Assert.assertTrue( (re.getArgs()[0]==args[0]) );
 		Assert.assertTrue( (re.getArgs()[1]==args[1]) );
 	}
@@ -102,13 +102,13 @@ public class TestInvoke
 				new ValueArg("bbb"),
 		};
 		
-		ResolverProvider rp=new ObjectResolverProvider(TestResolver.class);
+		Resolver rp=new ObjectResolver(TestResolver.class);
 		
 		Invoke re=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		
 		Assert.assertEquals(re.getName(), "test");
 		Assert.assertEquals(re.getResultKey(), RESULT_KEY);
-		Assert.assertEquals(re.getResolverProvider(), rp);
+		Assert.assertEquals(re.getResolver(), rp);
 		Assert.assertTrue( (re.getArgs()[0]==args[0]) );
 		Assert.assertTrue( (re.getArgs()[1]==args[1]) );
 	}
@@ -120,7 +120,7 @@ public class TestInvoke
 				new KeyArg("arg0"),
 				new KeyArg("arg1"),
 		};
-		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		Resolver rp=new ObjectResolver(new TestResolver());
 		
 		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		
@@ -134,14 +134,14 @@ public class TestInvoke
 	}
 	
 	@Test
-	public void execute_dynamic_objectSourceResolverProvider() throws Exception
+	public void execute_dynamic_objectSourceResolver() throws Exception
 	{
 		Arg[] args=new Arg[]{
 				new KeyArg("arg0"),
 				new KeyArg("arg1"),
 		};
 		
-		ResolverProvider rp=new ObjectSourceResolverProvider("objectSourceResolver");
+		Resolver rp=new ObjectSourceResolver("objectSourceResolver");
 		
 		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		
@@ -156,7 +156,7 @@ public class TestInvoke
 	}
 	
 	@Test
-	public void execute_dynamic_factoryResolverProvider() throws Exception
+	public void execute_dynamic_factoryResolver() throws Exception
 	{
 		Arg[] args=new Arg[]{
 				new KeyArg("arg0"),
@@ -166,7 +166,7 @@ public class TestInvoke
 		ResolverObjectFactory rof=new DefaultResolverObjectFactory();
 		rof.addResolverObject("factoryResolver", new TestResolver());
 		
-		ResolverProvider rp=new FactoryResolverProvider(rof, "factoryResolver");
+		Resolver rp=new FactoryResolver(rof, "factoryResolver");
 		
 		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		
@@ -180,7 +180,7 @@ public class TestInvoke
 	}
 
 	@Test
-	public void execute_dynamic_dynamicResolverProvider_objectSource() throws Exception
+	public void execute_dynamic_dynamicResolver_objectSource() throws Exception
 	{
 		Arg[] args=new Arg[]{
 				new KeyArg("arg0"),
@@ -190,7 +190,7 @@ public class TestInvoke
 		ResolverObjectFactory rof=new DefaultResolverObjectFactory();
 		rof.addResolverObject("dynamicResolver", new TestResolver());
 		
-		ResolverProvider rp=new DynamicResolverProvider(null, new ObjectSourceResolverProvider("dynamicResolver"));
+		Resolver rp=new DynamicResolver(null, new ObjectSourceResolver("dynamicResolver"));
 		
 		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		
@@ -205,7 +205,7 @@ public class TestInvoke
 	}
 	
 	@Test
-	public void execute_dynamic_dynamicResolverProvider_factory() throws Exception
+	public void execute_dynamic_dynamicResolver_factory() throws Exception
 	{
 		Arg[] args=new Arg[]{
 				new KeyArg("arg0"),
@@ -215,7 +215,7 @@ public class TestInvoke
 		ResolverObjectFactory rof=new DefaultResolverObjectFactory();
 		rof.addResolverObject("dynamicResolver", new TestResolver());
 		
-		ResolverProvider rp=new DynamicResolverProvider(new FactoryResolverProvider(rof, "dynamicResolver"), null);
+		Resolver rp=new DynamicResolver(new FactoryResolver(rof, "dynamicResolver"), null);
 		
 		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		
@@ -229,7 +229,7 @@ public class TestInvoke
 	}
 	
 	@Test
-	public void execute_dynamic_dynamicResolverProvider_none() throws Exception
+	public void execute_dynamic_dynamicResolver_none() throws Exception
 	{
 		Arg[] args=new Arg[]{
 				new KeyArg("arg0"),
@@ -238,7 +238,7 @@ public class TestInvoke
 		
 		ResolverObjectFactory rof=new DefaultResolverObjectFactory();
 		
-		ResolverProvider rp=new DynamicResolverProvider(new FactoryResolverProvider(rof, "dynamicResolver"), new ObjectSourceResolverProvider("dynamicResolver"));
+		Resolver rp=new DynamicResolver(new FactoryResolver(rof, "dynamicResolver"), new ObjectSourceResolver("dynamicResolver"));
 		
 		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		
@@ -258,7 +258,7 @@ public class TestInvoke
 		}
 		
 		Assert.assertNotNull(re);
-		Assert.assertTrue( (re.getMessage().startsWith("got null resolver from ResolverProvider")) );
+		Assert.assertTrue( (re.getMessage().startsWith("got null resolver class from")) );
 	}
 	
 	@Test
@@ -337,7 +337,7 @@ public class TestInvoke
 					new KeyArg("arg", Double.class),
 				};
 			
-			ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+			Resolver rp=new ObjectResolver(new TestResolver());
 			
 			Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
 			
@@ -354,7 +354,7 @@ public class TestInvoke
 					new KeyArg("arg", Integer.class),
 				};
 			
-			ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+			Resolver rp=new ObjectResolver(new TestResolver());
 			
 			Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
 			
@@ -374,7 +374,7 @@ public class TestInvoke
 				new KeyArg("arg"),
 			};
 		
-		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		Resolver rp=new ObjectResolver(new TestResolver());
 		
 		Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
 		
@@ -394,7 +394,7 @@ public class TestInvoke
 					new ValueArg(33D),
 				};
 			
-			ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+			Resolver rp=new ObjectResolver(new TestResolver());
 			
 			Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
 			
@@ -410,7 +410,7 @@ public class TestInvoke
 					new ValueArg(33),
 				};
 			
-			ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+			Resolver rp=new ObjectResolver(new TestResolver());
 			
 			Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
 			
@@ -430,7 +430,7 @@ public class TestInvoke
 				new ValueArg(33, int.class),
 			};
 		
-		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		Resolver rp=new ObjectResolver(new TestResolver());
 		
 		Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
 		
@@ -449,7 +449,7 @@ public class TestInvoke
 				new ValueArg(null, Integer.class),
 			};
 		
-		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		Resolver rp=new ObjectResolver(new TestResolver());
 		
 		Invoke invoke=new Invoke("test", rp, "sameMethod", args, RESULT_KEY);
 		
@@ -467,7 +467,7 @@ public class TestInvoke
 				new KeyArg("arg0"),
 				new KeyArg("arg1"),
 		};
-		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		Resolver rp=new ObjectResolver(new TestResolver());
 		
 		Invoke invoke=new Invoke("test", rp, "test1", args, RESULT_KEY);
 		
@@ -493,7 +493,7 @@ public class TestInvoke
 	@Test
 	public void execute_exception_InvocationExecuteException() throws Exception
 	{
-		ResolverProvider rp=new ObjectResolverProvider(new TestResolver());
+		Resolver rp=new ObjectResolver(new TestResolver());
 		
 		Invoke invoke=new Invoke("test", rp, "testThrow", null, RESULT_KEY);
 		

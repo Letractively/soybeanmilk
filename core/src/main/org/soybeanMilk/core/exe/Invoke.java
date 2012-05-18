@@ -52,8 +52,8 @@ public class Invoke extends AbstractExecutable
 	/**调用结果存放到对象源中的关键字*/
 	private Serializable resultKey;
 	
-	/**调用目标提供者*/
-	private transient ResolverProvider resolverProvider;
+	/**调用目标*/
+	private transient Resolver resolver;
 	
 	/**此调用的打断器在对象源中的关键字，打断器可以控制调用方法是否执行*/
 	private Serializable breaker;
@@ -65,12 +65,12 @@ public class Invoke extends AbstractExecutable
 		super();
 	}
 	
-	public Invoke(String name, ResolverProvider resolverProvider, String methodName, Arg[] args, Serializable resultKey)
+	public Invoke(String name, Resolver resolver, String methodName, Arg[] args, Serializable resultKey)
 	{
 		super.setName(name);
 		this.methodName=methodName;
 		this.args=args;
-		this.resolverProvider=resolverProvider;
+		this.resolver=resolver;
 		this.resultKey=resultKey;
 	}
 	
@@ -129,21 +129,21 @@ public class Invoke extends AbstractExecutable
 	}
 	
 	/**
-	 * 获取调用目标提供者
+	 * 获取调用目标
 	 * @return
 	 * @date 2012-5-9
 	 */
-	public ResolverProvider getResolverProvider() {
-		return resolverProvider;
+	public Resolver getResolver() {
+		return resolver;
 	}
 	
 	/**
-	 * 设置调用目标提供者
+	 * 设置调用目标
 	 * @return
 	 * @date 2012-5-9
 	 */
-	public void setResolverProvider(ResolverProvider resolverProvider) {
-		this.resolverProvider = resolverProvider;
+	public void setResolverProvider(Resolver resolver) {
+		this.resolver = resolver;
 	}
 	
 	/**
@@ -190,11 +190,11 @@ public class Invoke extends AbstractExecutable
 	//@Override
 	public String toString()
 	{
-		return getClass().getSimpleName()+" [name="+getName()+", resultKey=" + resultKey + ", resolverProvider="
-				+ resolverProvider + ", methodName=" + methodName + ", args="
+		return getClass().getSimpleName()+" [name="+getName()+", resultKey=" + resultKey + ", resolver="
+				+ resolver + ", methodName=" + methodName + ", args="
 				+ Arrays.toString(args) + ", breaker=" + breaker + "]";
 	}
-
+	
 	/**
 	 * 执行调用方法
 	 * @param objectSource
@@ -203,24 +203,45 @@ public class Invoke extends AbstractExecutable
 	 */
 	protected Object executeMethod(ObjectSource objectSource) throws ExecuteException
 	{
-		Resolver resolver=getResolver(objectSource);
-		if(resolver == null)
-			throw new ExecuteException("got null resolver from ResolverProvider "+SbmUtils.toString(this.getResolverProvider()));
+		Resolver resolver=getResolver();
+		Object resolverObject=null;
+		Class<?> resolverClass=null;
+		try
+		{
+			resolverObject=resolver.getResolverObject(objectSource);
+		}
+		catch(Exception e)
+		{
+			throw new ResolverObjectPrepareExecuteException(this, e);
+		}
 		
-		Class<?> resolverClass=resolver.getResolverClass();
-		if(resolverClass == null)
-			throw new ExecuteException("the resolver class must not be null in Resolver "+resolver);
+		if(resolverObject != null)
+			resolverClass=resolverObject.getClass();
+		else
+		{
+			try
+			{
+				resolverClass=resolver.getResolverClass(objectSource);
+			}
+			catch(Exception e)
+			{
+				throw new ExecuteException(e);
+			}
+			
+			if(resolverClass == null)
+				throw new ExecuteException("got null resolver class from Resolver "+SbmUtils.toString(resolver));
+		}
 		
 		MethodInfo methodInfo=getMethodInfo(resolverClass, this.methodName, this.args);
 		if(methodInfo == null)
 			throw new ExecuteException("no method named "+this.methodName+" with "+SbmUtils.toString(this.args)
-					+" arguments can be found in resolver class "+SbmUtils.toString(resolver.getResolverClass()));
+					+" arguments can be found in resolver class "+SbmUtils.toString(resolverClass));
 		
 		Object[] argValues=prepareMethodArgValues(methodInfo, objectSource);
 		
 		try
 		{
-			return methodInfo.getMethod().invoke(resolver.getResolverObject(), argValues);
+			return methodInfo.getMethod().invoke(resolverObject, argValues);
 		}
 		catch(InvocationTargetException e)
 		{
@@ -257,25 +278,6 @@ public class Invoke extends AbstractExecutable
 			{
 				throw new ExecuteException(e);
 			}
-		}
-	}
-	
-	/**
-	 * 获取当前调用目标
-	 * @param objectSource
-	 * @return
-	 * @throws ExecuteException
-	 * @date 2012-5-6
-	 */
-	protected Resolver getResolver(ObjectSource objectSource) throws ExecuteException
-	{
-		try
-		{
-			return getResolverProvider().getResolver(objectSource);
-		}
-		catch(Exception e)
-		{
-			throw new ExecuteException(e);
 		}
 	}
 	
@@ -550,73 +552,29 @@ public class Invoke extends AbstractExecutable
 	}
 	
 	/**
-	 * 调用目标，{@linkplain Invoke 调用}执行调用方法时依赖的目标对象，从{@linkplain ResolverProvider 调用目标提供者}获取
+	 * 调用目标，{@linkplain Invoke 调用}执行调用方法时依赖的调用目标对象由它提供
 	 * @author earthangry@gmail.com
-	 * @date 2012-5-7
+	 * @date 2010-10-19
 	 */
-	public static class Resolver
+	public static interface Resolver
 	{
-		/**目标对象，当调用方法是静态方法时，它可以为null*/
-		private Object resolverObject;
-		
-		/**目标类型，它不会为null*/
-		private Class<?> resolverClass;
-		
-		public Resolver(){}
-		
-		public Resolver(Object resolverObject)
-		{
-			super();
-			
-			if(resolverObject == null)
-				throw new NullPointerException("the resolverObject must not be null");
-			
-			this.resolverObject = resolverObject;
-			this.resolverClass = resolverObject.getClass();
-		}
-		
-		public Resolver(Object resolverObject, Class<?> resolverClass)
-		{
-			super();
-			this.resolverObject = resolverObject;
-			this.resolverClass = resolverClass;
-		}
-
 		/**
 		 * 获取调用目标对象
+		 * @param objectSource
 		 * @return
-		 * @date 2012-5-9
+		 * @throws Exception
+		 * @date 2012-5-7
 		 */
-		public Object getResolverObject() {
-			return resolverObject;
-		}
+		Object getResolverObject(ObjectSource objectSource) throws Exception;
 		
 		/**
-		 * 设置调用目标对象
-		 * @param resolverObject
-		 * @date 2012-5-9
-		 */
-		public void setResolverObject(Object resolverObject) {
-			this.resolverObject = resolverObject;
-		}
-		
-		/**
-		 * 获取调用目标类型
+		 * 获取调用目标类型，如果{@linkplain #getResolverObject(ObjectSource)}返回<code>null</code>，{@link Invoke 调用}将使用它来确定调用目标类型
+		 * @param objectSource
 		 * @return
-		 * @date 2012-5-9
+		 * @throws Exception
+		 * @date 2012-5-18
 		 */
-		public Class<?> getResolverClass() {
-			return resolverClass;
-		}
-		
-		/**
-		 * 设置调用目标类型
-		 * @param resolverClass
-		 * @date 2012-5-9
-		 */
-		public void setResolverClass(Class<?> resolverClass) {
-			this.resolverClass = resolverClass;
-		}
+		Class<?> getResolverClass(ObjectSource objectSource) throws Exception;
 	}
 	
 	/**
@@ -644,22 +602,5 @@ public class Invoke extends AbstractExecutable
 		 * @date 2012-5-11
 		 */
 		Type getType();
-	}
-	
-	/**
-	 * 调用目标提供者，它为{@linkplain Invoke 调用}执行时提供{@linkplain Resolver 调用目标}对象
-	 * @author earthangry@gmail.com
-	 * @date 2010-10-19
-	 */
-	public static interface ResolverProvider
-	{
-		/**
-		 * 获取调用目标
-		 * @param objectSource
-		 * @return
-		 * @throws Exception
-		 * @date 2012-5-7
-		 */
-		Resolver getResolver(ObjectSource objectSource) throws Exception;
 	}
 }

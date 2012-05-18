@@ -35,10 +35,10 @@ import org.soybeanMilk.core.config.parser.ConfigurationParser;
 import org.soybeanMilk.core.exe.Action;
 import org.soybeanMilk.core.exe.Invoke;
 import org.soybeanMilk.core.exe.Invoke.Arg;
-import org.soybeanMilk.core.exe.Invoke.ResolverProvider;
-import org.soybeanMilk.core.exe.support.DynamicResolverProvider;
+import org.soybeanMilk.core.exe.Invoke.Resolver;
+import org.soybeanMilk.core.exe.support.DynamicResolver;
 import org.soybeanMilk.core.exe.support.KeyArg;
-import org.soybeanMilk.core.exe.support.ObjectResolverProvider;
+import org.soybeanMilk.core.exe.support.ObjectResolver;
 import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
 
 /**
@@ -161,10 +161,10 @@ public class TestConfigurationParser
 		
 		Invoke exe=(Invoke)config.getExecutable("global_before");
 		
-		ResolverProvider rp=exe.getResolverProvider();
-		Assert.assertEquals(DynamicResolverProvider.class, rp.getClass());
-		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getFactoryResolverProvider().getResolverId());
-		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getObjectSourceResolverProvider().getResolverKey());
+		Resolver rp=exe.getResolver();
+		Assert.assertEquals(DynamicResolver.class, rp.getClass());
+		Assert.assertEquals("tr", ((DynamicResolver)rp).getFactoryResolverProvider().getResolverId());
+		Assert.assertEquals("tr", ((DynamicResolver)rp).getObjectSourceResolverProvider().getResolverKey());
 		Assert.assertEquals("test0", exe.getMethodName());
 		Assert.assertNull(exe.getArgs());
 	}
@@ -177,10 +177,10 @@ public class TestConfigurationParser
 		Invoke exe=(Invoke)config.getExecutable("global_exe3");
 		
 		Assert.assertEquals("result", exe.getResultKey());
-		ResolverProvider rp=exe.getResolverProvider();
-		Assert.assertEquals(DynamicResolverProvider.class, rp.getClass());
-		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getFactoryResolverProvider().getResolverId());
-		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getObjectSourceResolverProvider().getResolverKey());
+		Resolver rp=exe.getResolver();
+		Assert.assertEquals(DynamicResolver.class, rp.getClass());
+		Assert.assertEquals("tr", ((DynamicResolver)rp).getFactoryResolverProvider().getResolverId());
+		Assert.assertEquals("tr", ((DynamicResolver)rp).getObjectSourceResolverProvider().getResolverKey());
 		Assert.assertEquals("test2", exe.getMethodName());
 		Assert.assertEquals(2, exe.getArgs().length);
 		
@@ -198,10 +198,10 @@ public class TestConfigurationParser
 		Invoke exe=(Invoke)config.getExecutable("m1_exe1");
 		
 		Assert.assertEquals("result", exe.getResultKey());
-		ResolverProvider rp=exe.getResolverProvider();
-		Assert.assertEquals(ObjectResolverProvider.class, rp.getClass());
-		Assert.assertNull(((ObjectResolverProvider)rp).getResolver(null).getResolverObject());
-		Assert.assertEquals(TestResolver.class, ((ObjectResolverProvider)rp).getResolver(null).getResolverClass());
+		Resolver rp=exe.getResolver();
+		Assert.assertEquals(ObjectResolver.class, rp.getClass());
+		Assert.assertNull(((ObjectResolver)rp).getResolverObject(null));
+		Assert.assertEquals(TestResolver.class, ((ObjectResolver)rp).getResolverClass(null));
 		Assert.assertEquals("staticTest", exe.getMethodName());
 		Assert.assertEquals(2, exe.getArgs().length);
 		
@@ -219,10 +219,10 @@ public class TestConfigurationParser
 		Invoke exe=(Invoke)config.getExecutable("global_exe4");
 		
 		Assert.assertEquals("result", exe.getResultKey());
-		ResolverProvider rp=exe.getResolverProvider();
-		Assert.assertEquals(DynamicResolverProvider.class, rp.getClass());
-		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getFactoryResolverProvider().getResolverId());
-		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getObjectSourceResolverProvider().getResolverKey());
+		Resolver rp=exe.getResolver();
+		Assert.assertEquals(DynamicResolver.class, rp.getClass());
+		Assert.assertEquals("tr", ((DynamicResolver)rp).getFactoryResolverProvider().getResolverId());
+		Assert.assertEquals("tr", ((DynamicResolver)rp).getObjectSourceResolverProvider().getResolverKey());
 		Assert.assertEquals("test2", exe.getMethodName());
 		Assert.assertEquals(2, exe.getArgs().length);
 		
@@ -241,10 +241,10 @@ public class TestConfigurationParser
 		Invoke exe=(Invoke)config.getExecutable("global_exe5");
 		
 		Assert.assertEquals("result", exe.getResultKey());
-		ResolverProvider rp=exe.getResolverProvider();
-		Assert.assertEquals(DynamicResolverProvider.class, rp.getClass());
-		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getFactoryResolverProvider().getResolverId());
-		Assert.assertEquals("tr", ((DynamicResolverProvider)rp).getObjectSourceResolverProvider().getResolverKey());
+		Resolver rp=exe.getResolver();
+		Assert.assertEquals(DynamicResolver.class, rp.getClass());
+		Assert.assertEquals("tr", ((DynamicResolver)rp).getFactoryResolverProvider().getResolverId());
+		Assert.assertEquals("tr", ((DynamicResolver)rp).getObjectSourceResolverProvider().getResolverKey());
 		Assert.assertEquals("test2", exe.getMethodName());
 		Assert.assertEquals(4, exe.getArgs().length);
 		
@@ -442,17 +442,6 @@ public class TestConfigurationParser
 		}
 
 		public Converter getConverter(Type sourceType, Type targetType) {
-			return null;
-		}
-
-		public void setProperty(Object srcObj, String property, Object value)
-				throws ConvertException {
-			
-		}
-
-		public <T> T getProperty(Object srcObj, String property, Type expectType)
-				throws ConvertException {
-			// TODO Auto-generated method stub
 			return null;
 		}
 	}

@@ -80,12 +80,14 @@ public class SbmUtils
 	 */
 	public static boolean isInstanceOf(Object obj, Type type)
 	{
-		if(obj==null || type==null)
-			return false;
+		if(type == null)
+			return (obj == null ? true : false);
+		else if(obj == null)
+			return true;
 		else if(isClassType(type))
 			return narrowToClassType(type).isInstance(obj);
 		else
-			return type.getClass().isInstance(obj);
+			return false;
 	}
 	
 	/**

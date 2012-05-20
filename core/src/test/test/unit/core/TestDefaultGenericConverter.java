@@ -2935,6 +2935,27 @@ public class TestDefaultGenericConverter
 		Assert.assertNull( ((JavaBeanChild)destArray[0]).getFriend() );
 		Assert.assertEquals(friend, ((JavaBeanChild)destArray[2]).getFriend());
 	}
+
+	@Test
+	public void convert_noSupportConverter_collectionObjectToRawCollection() throws Exception
+	{
+		List<JavaBean> src=new ArrayList<JavaBean>();
+		
+		List<JavaBean> dest=converter.convert(src, List.class);
+		
+		Assert.assertTrue( (dest==src) );
+	}
+	
+	@Test
+	public void convert_noSupportConverter_collectionObjectToGenericCollection() throws Exception
+	{
+		List<JavaBean> src=new ArrayList<JavaBean>();
+		
+		Type type=new MockParameterizedType(List.class, JavaBean.class);
+		List<JavaBean> dest=converter.convert(src, type);
+		
+		Assert.assertTrue( (dest==src) );
+	}
 	
 	@Test
 	public void convert_noSupportConverter_mapToJavaBeanMap_customType_string() throws Exception

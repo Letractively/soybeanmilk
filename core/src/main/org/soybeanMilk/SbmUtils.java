@@ -72,7 +72,7 @@ public class SbmUtils
 	}
 	
 	/**
-	 * 对象是否<code>instanceof</code>给定的类型
+	 * 对象是否是给定的类型实例
 	 * @param obj
 	 * @param type
 	 * @return
@@ -80,14 +80,10 @@ public class SbmUtils
 	 */
 	public static boolean isInstanceOf(Object obj, Type type)
 	{
-		if(type == null)
-			return (obj == null ? true : false);
-		else if(obj == null)
-			return true;
-		else if(isClassType(type))
-			return narrowToClassType(type).isInstance(obj);
-		else
+		if(obj == null)
 			return false;
+		else
+			return isAncestorClass(type, obj.getClass());
 	}
 	
 	/**
@@ -97,9 +93,35 @@ public class SbmUtils
 	 * @return
 	 * @date 2010-12-31
 	 */
-	public static boolean isAncestorClass(Class<?> ancestor, Class<?> descendant)
+	public static boolean isAncestorClass(Type ancestor, Class<?> descendant)
 	{
-		return ancestor!=null && ancestor.isAssignableFrom(narrowToClassType(descendant));
+		if(ancestor == null)
+			return false;
+		else if(isClassType(ancestor))
+		{
+			return narrowToClassType(ancestor).isAssignableFrom(descendant);
+		}
+		else if(ancestor instanceof ParameterizedType)
+		{
+			return narrowToClassType(((ParameterizedType) ancestor).getRawType()).isAssignableFrom(descendant);
+		}
+		else if(ancestor instanceof GenericArrayType)
+		{
+			if(!descendant.isArray())
+				return false;
+			else
+				return isAncestorClass(((GenericArrayType) ancestor).getGenericComponentType(), descendant.getComponentType());
+		}
+		else if(ancestor instanceof TypeVariable<?>)
+		{
+			return isAncestorClass(toConcreteType(ancestor, null), descendant);
+		}
+		else if(ancestor instanceof WildcardType)
+		{
+			return isAncestorClass(toConcreteType(ancestor, null), descendant);
+		}
+		else
+			return false;
 	}
 	
 	/**
@@ -110,10 +132,11 @@ public class SbmUtils
 	 */
 	public static Type toWrapperType(Type type)
 	{
-		if (!isPrimitive(type))
+		if(!(type instanceof Class<?>))
+			return type;
+		else if (!narrowToClassType(type).isPrimitive())
             return type;
-		
-		if (Byte.TYPE.equals(type))
+		else if (Byte.TYPE.equals(type))
             return Byte.class;
 		else if (Short.TYPE.equals(type))
             return Short.class;
@@ -394,9 +417,12 @@ public class SbmUtils
 		if(obj == null)
 			return null;
 		
-		if(obj instanceof Class<?>)
+		if(obj instanceof Type)
 		{
-			return "'"+((Class<?>)obj).getName()+"'";
+			if(obj instanceof Class<?>)
+				return "'"+((Class<?>)obj).getName()+"'";
+			else
+				return "'"+obj.toString()+"'";
 		}
 		else if(obj instanceof String)
 		{

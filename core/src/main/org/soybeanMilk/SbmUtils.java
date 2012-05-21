@@ -81,9 +81,16 @@ public class SbmUtils
 	public static boolean isInstanceOf(Object obj, Type type)
 	{
 		if(obj == null)
-			return false;
+		{
+			if(type == null)
+				return true;
+			else if(isClassType(type) && narrowToClassType(type).isPrimitive())
+				return false;
+			else
+				return true;
+		}
 		else
-			return isAncestorClass(type, obj.getClass());
+			return isAncestorType(type, obj.getClass());
 	}
 	
 	/**
@@ -93,7 +100,7 @@ public class SbmUtils
 	 * @return
 	 * @date 2010-12-31
 	 */
-	public static boolean isAncestorClass(Type ancestor, Class<?> descendant)
+	public static boolean isAncestorType(Type ancestor, Class<?> descendant)
 	{
 		if(ancestor == null)
 			return false;
@@ -110,15 +117,15 @@ public class SbmUtils
 			if(!descendant.isArray())
 				return false;
 			else
-				return isAncestorClass(((GenericArrayType) ancestor).getGenericComponentType(), descendant.getComponentType());
+				return isAncestorType(((GenericArrayType) ancestor).getGenericComponentType(), descendant.getComponentType());
 		}
 		else if(ancestor instanceof TypeVariable<?>)
 		{
-			return isAncestorClass(toConcreteType(ancestor, null), descendant);
+			return isAncestorType(toConcreteType(ancestor, null), descendant);
 		}
 		else if(ancestor instanceof WildcardType)
 		{
-			return isAncestorClass(toConcreteType(ancestor, null), descendant);
+			return isAncestorType(toConcreteType(ancestor, null), descendant);
 		}
 		else
 			return false;

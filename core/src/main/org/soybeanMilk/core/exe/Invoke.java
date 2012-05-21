@@ -413,7 +413,7 @@ public class Invoke extends AbstractExecutable
 		MethodInfo result=null;
 		
 		//动态代理类会丢失泛型信息，所以如果是动态代理类，则需要在其实现的接口中查找方法，以获取泛型信息
-		if(SbmUtils.isAncestorClass(Proxy.class, clazz))
+		if(SbmUtils.isAncestorType(Proxy.class, clazz))
 		{
 			 Class<?>[] interfaces=clazz.getInterfaces();
 			 
@@ -477,7 +477,7 @@ public class Invoke extends AbstractExecutable
 								Type wt=SbmUtils.toWrapperType(types[i]);
 								
 								if(SbmUtils.isClassType(wat) && SbmUtils.isClassType(wt)
-										&&!SbmUtils.isAncestorClass((Class<?>)wt, (Class<?>)wat))
+										&&!SbmUtils.isAncestorType((Class<?>)wt, (Class<?>)wat))
 								{
 									match=false;
 									break;

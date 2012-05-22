@@ -273,7 +273,7 @@ public class DefaultGenericConverter implements GenericConverter
 			else
 				result=null;
 		}
-		else if(type==null || SbmUtils.isInstanceOf(obj, type))
+		else if(type==null || SbmUtils.isInstanceOf(obj, SbmUtils.toWrapperType(type)))
 		{
 			//Map需要特殊处理，因为它可能包含自定义目标类型
 			if(obj instanceof Map<?, ?>)

@@ -96,6 +96,16 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
+	public void convert_primitiveValueToPrimitive() throws Exception
+	{
+		int src=3;
+		
+		Integer re=converter.convert(src, int.class);
+		
+		Assert.assertEquals(src, re.intValue());
+	}
+	
+	@Test
 	public void convert_nullToObject() throws Exception
 	{
 		String src=null;

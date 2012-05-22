@@ -452,6 +452,46 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
+	public void convert_noSupportConverter_mapToJavaBean_customType_stringArray() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String name="aa";
+		String age="11";
+		String birth="1900-07-21";
+		
+		src.put("name", name);
+		src.put("age", age);
+		src.put("birth", birth);
+		
+		src.put("class", new String[]{JavaBean.class.getName(), JavaBean2.class.getName()});
+		
+		JavaBean dest=converter.convert(src, null);
+		
+		Assert.assertEquals(name, dest.getName());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToJavaBean_customType_classArray() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String name="aa";
+		String age="11";
+		String birth="1900-07-21";
+		
+		src.put("name", name);
+		src.put("age", age);
+		src.put("birth", birth);
+		
+		src.put("class", new Type[]{JavaBean.class, JavaBean2.class});
+		
+		JavaBean dest=converter.convert(src, null);
+		
+		Assert.assertEquals(name, dest.getName());
+	}
+	
+	@Test
 	public void convert_requestToTarget_noConverter() throws Exception
 	{
 		GenericConvertException re=null;

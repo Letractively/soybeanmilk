@@ -2842,7 +2842,7 @@ public class TestDefaultGenericConverter
 		
 		src.put("class", JavaBean.class.getName());
 		
-		JavaBean dest=converter.convert(src, Comparable.class);
+		JavaBean dest=converter.convert(src, null);
 		
 		Assert.assertEquals(name, dest.getName());
 	}
@@ -2862,7 +2862,7 @@ public class TestDefaultGenericConverter
 		
 		src.put("class", JavaBean.class);
 		
-		JavaBean dest=converter.convert(src, Comparable.class);
+		JavaBean dest=converter.convert(src, null);
 		
 		Assert.assertEquals(name, dest.getName());
 	}
@@ -2883,7 +2883,7 @@ public class TestDefaultGenericConverter
 		
 		src.put("2.friend", friend);
 		
-		src.put("class", JavaBean[].class);
+		src.put("class", JavaBean[].class.getName());
 		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
 		src.put("2.class", JavaBeanChild.class.getName());
 		
@@ -2913,7 +2913,7 @@ public class TestDefaultGenericConverter
 		
 		src.put("2.friend", friend);
 		
-		src.put("class", JavaBean[].class);
+		src.put("class", JavaBean[].class.getName());
 		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
 		src.put("2.class", JavaBeanChild.class.getName());
 		
@@ -2943,7 +2943,7 @@ public class TestDefaultGenericConverter
 		
 		src.put("2.friend", friend);
 		
-		src.put("class", List.class);
+		src.put("class", List.class.getName());
 		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
 		src.put("2.class", JavaBeanChild.class.getName());
 		
@@ -3004,7 +3004,7 @@ public class TestDefaultGenericConverter
 		
 		src.put("2.friend", friend);
 		
-		src.put("class", TreeSet.class);
+		src.put("class", TreeSet.class.getName());
 		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
 		src.put("2.class", JavaBeanChild.class.getName());
 		
@@ -3072,7 +3072,7 @@ public class TestDefaultGenericConverter
 			src.put(key[i]+".birth", births[i]);
 		}
 		
-		src.put("class", Map.class);
+		src.put("class", Map.class.getName());
 		src.put("c.friend", friend);
 		src.put("c.class", JavaBeanChild.class.getName());
 		

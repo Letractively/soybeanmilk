@@ -1060,11 +1060,15 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		if(typeObj == null)
 			return defaultType;
-		else
+		else if(typeObj instanceof Type)
+			return (Type)typeObj;
+		else if(typeObj instanceof String)
 		{
-			Type re=convertCustomTypeObjectToType(typeObj);
+			Type re=stringToType((String)typeObj);
 			return (re == null ? defaultType : re);
 		}
+		else
+			throw new GenericConvertException("illegal custom target type "+SbmUtils.toString(typeObj)+" with key "+SbmUtils.toString(KEY_CUSTOM_ELEMENT_CLASSES)+" in Map "+SbmUtils.toString(map));
 	}
 	
 	/**
@@ -1092,14 +1096,14 @@ public class DefaultGenericConverter implements GenericConverter
 				re=new Type[strTypes.length];
 				
 				for(int i=0; i<strTypes.length; i++)
-					re[i]=convertCustomTypeObjectToType(strTypes[i]);
+					re[i]=stringToType(strTypes[i]);
 			}
 			else if(typeObj instanceof Type[])
 			{
 				re=(Type[])typeObj;
 			}
 			else
-				throw new GenericConvertException("custom target type "+SbmUtils.toString(typeObj)+" with key "+SbmUtils.toString(KEY_CUSTOM_ELEMENT_CLASSES)+" in Map "+SbmUtils.toString(map)+" is not supported");
+				throw new GenericConvertException("illegal custom target type "+SbmUtils.toString(typeObj)+" with key "+SbmUtils.toString(KEY_CUSTOM_ELEMENT_CLASSES)+" in Map "+SbmUtils.toString(map));
 			
 			return re;
 		}
@@ -1139,37 +1143,6 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 		
 		return (re==null ? defaultType : re);
-	}
-	
-	/**
-	 * 将给定的自定义类型转换为类型对象
-	 * @param typeObj
-	 * @return
-	 * @date 2012-5-21
-	 */
-	protected Type convertCustomTypeObjectToType(Object typeObj)
-	{
-		Type re=null;
-		
-		if(typeObj instanceof String)
-		{
-			try
-			{
-				re=Class.forName((String)typeObj);
-			}
-			catch(ClassNotFoundException e)
-			{
-				throw new GenericConvertException("custom target type "+SbmUtils.toString(typeObj)+" not found", e);
-			}
-		}
-		else if(typeObj instanceof Type)
-		{
-			re=(Type)typeObj;
-		}
-		else
-			throw new GenericConvertException("custom target type "+SbmUtils.toString(typeObj)+" is not supported");
-		
-		return re;
 	}
 	
 	/**
@@ -1426,6 +1399,24 @@ public class DefaultGenericConverter implements GenericConverter
 		catch(Exception e)
 		{
 			throw new GenericConvertException("exception occur while creating instance of type "+SbmUtils.toString(type),e);
+		}
+	}
+	
+	/**
+	 * 将字符串转换为类型对象
+	 * @param typeObj
+	 * @return
+	 * @date 2012-5-21
+	 */
+	protected Type stringToType(String str)
+	{
+		try
+		{
+			return Class.forName(str);
+		}
+		catch(ClassNotFoundException e)
+		{
+			throw new GenericConvertException("type named "+SbmUtils.toString(str)+" not found", e);
 		}
 	}
 	

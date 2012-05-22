@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
+import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.os.ParamFilterValue;
 
@@ -128,5 +129,45 @@ public class WebGenericConverter extends DefaultGenericConverter
 			result=convertObjectToType(value, targetType);
 		
 		return result;
+	}
+	
+	@Override
+	protected Type getMapCustomTargetType(Map<?, ?> map, Type defaultType)
+	{
+		if(map.isEmpty())
+			return defaultType;
+		
+		Type result=null;
+		
+		Object typeObj=map.get(KEY_CUSTOM_CLASS);
+		
+		if(typeObj == null)
+			;
+		else if(typeObj instanceof String[])
+		{
+			String[] strTypes=(String[])typeObj;
+			
+			if(strTypes.length > 0)
+				result=stringToType(strTypes[0]);
+		}
+		else if(typeObj instanceof Type[])
+		{
+			Type[] tps=(Type[])typeObj;
+			
+			if(tps.length > 0)
+				result=tps[0];
+		}
+		else if(typeObj instanceof String)
+		{
+			result=stringToType((String)typeObj);
+		}
+		else if(typeObj instanceof Type)
+		{
+			result=(Type)typeObj;
+		}
+		else
+			throw new GenericConvertException("illegal custom target type "+SbmUtils.toString(typeObj)+" with key "+SbmUtils.toString(KEY_CUSTOM_ELEMENT_CLASSES)+" in Map "+SbmUtils.toString(map));
+		
+		return (result == null ? defaultType : result);
 	}
 }

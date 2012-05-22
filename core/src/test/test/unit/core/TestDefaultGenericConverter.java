@@ -110,13 +110,13 @@ public class TestDefaultGenericConverter
 	{
 		String src="";
 		
-		GenericConvertException re=null;
+		ConvertException re=null;
 		
 		try
 		{
 			converter.convert(src, int.class);
 		}
-		catch(GenericConvertException e)
+		catch(ConvertException e)
 		{
 			re=e;
 		}
@@ -2740,11 +2740,35 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convert_noSupportConverter_mapToRawMap() throws Exception
+	public void convert_noSupportConverter_mapToRawMap_targetIsRawMap() throws Exception
 	{
 		HashMap<String,Integer> src=new HashMap<String, Integer>();
 		
 		Object dest=converter.convert(src, Map.class);
+		
+		Assert.assertTrue(src == dest);
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToRawMap_targetIsWildcardParameterMap() throws Exception
+	{
+		HashMap<String,Integer> src=new HashMap<String, Integer>();
+		
+		Type type=new MockParameterizedType(Map.class, new MockWildcardType(), new MockWildcardType());
+		
+		Object dest=converter.convert(src, type);
+		
+		Assert.assertTrue(src == dest);
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToRawMap_targetIsObjectParameterMap() throws Exception
+	{
+		HashMap<String,Integer> src=new HashMap<String, Integer>();
+		
+		Type type=new MockParameterizedType(Map.class, Object.class, Object.class);
+		
+		Object dest=converter.convert(src, type);
 		
 		Assert.assertTrue(src == dest);
 	}
@@ -2773,7 +2797,7 @@ public class TestDefaultGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue( re.getMessage().endsWith("it has no javaBean property") );
+		Assert.assertTrue( re.getMessage().endsWith("its element type null is not JavaBean class") );
 	}
 
 	@Test
@@ -2800,7 +2824,7 @@ public class TestDefaultGenericConverter
 			re=e;
 		}
 		
-		Assert.assertTrue( re.getMessage().endsWith("it has no javaBean property") );
+		Assert.assertTrue( re.getMessage().endsWith("its element type null is not JavaBean class") );
 	}
 	
 	@Test
@@ -2844,7 +2868,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convert_noSupportConverter_mapToJavaBeanArray_customType_string() throws Exception
+	public void convert_noSupportConverter_mapToJavaBeanArray_customType_string_targetTypeInSrc() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -2859,7 +2883,38 @@ public class TestDefaultGenericConverter
 		
 		src.put("2.friend", friend);
 		
-		src.put("class", new String[]{ JavaBeanChild.class.getName() });
+		src.put("class", JavaBean[].class);
+		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
+		src.put("2.class", JavaBeanChild.class.getName());
+		
+		JavaBean[] dest=converter.convert(src, null);
+		
+		Assert.assertEquals(JavaBeanChild.class, dest[0].getClass());
+		Assert.assertEquals(JavaBean.class, dest[1].getClass());
+		Assert.assertEquals(JavaBeanChild.class, dest[2].getClass());
+		
+		Assert.assertNull( ((JavaBeanChild)dest[0]).getFriend() );
+		Assert.assertEquals(friend, ((JavaBeanChild)dest[2]).getFriend());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToJavaBeanArray_customType_string_targetTypeNotNull() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] names=new String[]{"aa", "bb", "cc"};
+		String[] ages=new String[]{"11", "22", "33"};
+		String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
+		String friend="jack";
+		
+		src.put("name", names);
+		src.put("age", ages);
+		src.put("birth", births);
+		
+		src.put("2.friend", friend);
+		
+		src.put("class", JavaBean[].class);
+		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
 		src.put("2.class", JavaBeanChild.class.getName());
 		
 		JavaBean[] dest=converter.convert(src, JavaBean[].class);
@@ -2873,7 +2928,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convert_noSupportConverter_mapToJavaBeanList_customType_string() throws Exception
+	public void convert_noSupportConverter_mapToJavaBeanList_customType_string_targetTypeInSrc() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -2888,7 +2943,37 @@ public class TestDefaultGenericConverter
 		
 		src.put("2.friend", friend);
 		
-		src.put("class", new String[]{ JavaBeanChild.class.getName() });
+		src.put("class", List.class);
+		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
+		src.put("2.class", JavaBeanChild.class.getName());
+		
+		List<JavaBean> dest=converter.convert(src, null);
+		
+		Assert.assertEquals(JavaBeanChild.class, dest.get(0).getClass());
+		Assert.assertEquals(JavaBeanChild.class, dest.get(1).getClass());
+		Assert.assertEquals(JavaBeanChild.class, dest.get(2).getClass());
+		
+		Assert.assertNull( ((JavaBeanChild)dest.get(0)).getFriend() );
+		Assert.assertEquals(friend, ((JavaBeanChild)dest.get(2)).getFriend());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToJavaBeanList_customType_string_targetTypeNotNull() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] names=new String[]{"aa", "bb", "cc"};
+		String[] ages=new String[]{"11", "22", "33"};
+		String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
+		String friend="jack";
+		
+		src.put("name", names);
+		src.put("age", ages);
+		src.put("birth", births);
+		
+		src.put("2.friend", friend);
+		
+		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
 		src.put("2.class", JavaBeanChild.class.getName());
 		
 		Type listType=new MockParameterizedType(List.class, JavaBean.class);
@@ -2904,7 +2989,7 @@ public class TestDefaultGenericConverter
 	}
 	
 	@Test
-	public void convert_noSupportConverter_mapToJavaBeanSet_customType_string() throws Exception
+	public void convert_noSupportConverter_mapToJavaBeanSet_customType_string_targetTypeInSrc() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -2919,7 +3004,39 @@ public class TestDefaultGenericConverter
 		
 		src.put("2.friend", friend);
 		
-		src.put("class", new String[]{ JavaBeanChild.class.getName() });
+		src.put("class", TreeSet.class);
+		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
+		src.put("2.class", JavaBeanChild.class.getName());
+		
+		Set<JavaBean> dest=converter.convert(src, null);
+		
+		JavaBean[] destArray=dest.toArray(new JavaBean[dest.size()]);
+		
+		Assert.assertEquals(JavaBeanChild.class, destArray[0].getClass());
+		Assert.assertEquals(JavaBeanChild.class, destArray[1].getClass());
+		Assert.assertEquals(JavaBeanChild.class, destArray[2].getClass());
+		
+		Assert.assertNull( ((JavaBeanChild)destArray[0]).getFriend() );
+		Assert.assertEquals(friend, ((JavaBeanChild)destArray[2]).getFriend());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToJavaBeanSet_customType_string_targetTypeNotNull() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] names=new String[]{"aa", "bb", "cc"};
+		String[] ages=new String[]{"11", "22", "33"};
+		String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
+		String friend="jack";
+		
+		src.put("name", names);
+		src.put("age", ages);
+		src.put("birth", births);
+		
+		src.put("2.friend", friend);
+		
+		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
 		src.put("2.class", JavaBeanChild.class.getName());
 		
 		Type setType=new MockParameterizedType(TreeSet.class, JavaBean.class);
@@ -2935,30 +3052,41 @@ public class TestDefaultGenericConverter
 		Assert.assertNull( ((JavaBeanChild)destArray[0]).getFriend() );
 		Assert.assertEquals(friend, ((JavaBeanChild)destArray[2]).getFriend());
 	}
-
+	
 	@Test
-	public void convert_noSupportConverter_collectionObjectToRawCollection() throws Exception
+	public void convert_noSupportConverter_mapToJavaBeanMap_customType_string_targetTypeInSrc() throws Exception
 	{
-		List<JavaBean> src=new ArrayList<JavaBean>();
+		Map<String,Object> src=new HashMap<String, Object>();
 		
-		List<JavaBean> dest=converter.convert(src, List.class);
+		String[] names=new String[]{"aa", "bb", "cc"};
+		String[] ages=new String[]{"11", "22", "33"};
+		String[] births=new String[]{"1900-07-21", "1900-07-22", "1900-07-23"};
+		String friend="jack";
 		
-		Assert.assertTrue( (dest==src) );
+		String[] key=new String[]{ "a", "b", "c" };
+		
+		for(int i=0; i<key.length; i++)
+		{
+			src.put(key[i]+".name", names[i]);
+			src.put(key[i]+".age", ages[i]);
+			src.put(key[i]+".birth", births[i]);
+		}
+		
+		src.put("class", Map.class);
+		src.put("c.friend", friend);
+		src.put("c.class", JavaBeanChild.class.getName());
+		
+		Map<String, JavaBean> dest=converter.convert(src, null);
+		
+		Assert.assertTrue( dest.get("a") instanceof Map );
+		Assert.assertTrue( dest.get("b") instanceof Map );
+		
+		Assert.assertEquals(JavaBeanChild.class, dest.get("c").getClass());
+		Assert.assertEquals(friend, ((JavaBeanChild)dest.get("c")).getFriend());
 	}
 	
 	@Test
-	public void convert_noSupportConverter_collectionObjectToGenericCollection() throws Exception
-	{
-		List<JavaBean> src=new ArrayList<JavaBean>();
-		
-		Type type=new MockParameterizedType(List.class, JavaBean.class);
-		List<JavaBean> dest=converter.convert(src, type);
-		
-		Assert.assertTrue( (dest==src) );
-	}
-	
-	@Test
-	public void convert_noSupportConverter_mapToJavaBeanMap_customType_string() throws Exception
+	public void convert_noSupportConverter_mapToJavaBeanMap_customType_string_targetTypeNotNull() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
 		
@@ -2988,6 +3116,27 @@ public class TestDefaultGenericConverter
 		Assert.assertEquals(JavaBeanChild.class, dest.get("c").getClass());
 		
 		Assert.assertEquals(friend, ((JavaBeanChild)dest.get("c")).getFriend());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_collectionObjectToRawCollection() throws Exception
+	{
+		List<JavaBean> src=new ArrayList<JavaBean>();
+		
+		List<JavaBean> dest=converter.convert(src, List.class);
+		
+		Assert.assertTrue( (dest==src) );
+	}
+	
+	@Test
+	public void convert_noSupportConverter_collectionObjectToGenericCollection() throws Exception
+	{
+		List<JavaBean> src=new ArrayList<JavaBean>();
+		
+		Type type=new MockParameterizedType(List.class, JavaBean.class);
+		List<JavaBean> dest=converter.convert(src, type);
+		
+		Assert.assertTrue( (dest==src) );
 	}
 	
 	@Test

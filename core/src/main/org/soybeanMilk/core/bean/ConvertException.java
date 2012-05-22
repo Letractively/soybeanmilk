@@ -42,6 +42,22 @@ public class ConvertException extends Exception
 		this.targetType=targetType;
 	}
 
+	public ConvertException(Object sourceObject, Type targetType, String message, Throwable cause)
+	{
+		super(message, cause);
+		
+		this.sourceObject=sourceObject;
+		this.targetType=targetType;
+	}
+
+	public ConvertException(Object sourceObject, Type targetType, String message)
+	{
+		super(message);
+		
+		this.sourceObject=sourceObject;
+		this.targetType=targetType;
+	}
+	
 	/**
 	 * 获取发生此异常时要转换的对象。
 	 * @return

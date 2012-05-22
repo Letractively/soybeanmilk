@@ -31,14 +31,24 @@ public abstract class ClassTypeConverter implements Converter
 	@SuppressWarnings("unchecked")
 	public <T> T convert(Object sourceObj, Type targetType) throws ConvertException
 	{
+		if(targetType == null)
+			return (T)sourceObj;
+		
 		Object result=null;
 		
-		if(targetType == null)
-			result=sourceObj;
+		Class<?> tc=SbmUtils.narrowToClassType(targetType);
+		
+		//空字符串到其他类型认为是null
+		if("".equals(sourceObj))
+		{
+			if(tc.isPrimitive())
+				throw new ConvertException(sourceObj, targetType, "can not convert "+SbmUtils.toString(sourceObj)+" to primitive type "+SbmUtils.toString(targetType));
+			return null;
+		}
 		
 		try
 		{
-			result=convertToClass(sourceObj, SbmUtils.narrowToClassType(targetType));
+			result=convertToClass(sourceObj, tc);
 		}
 		catch(Exception e)
 		{

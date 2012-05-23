@@ -15,23 +15,15 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
- * 字节类型转换器
+ * 字符串到{@linkplain Byte}类型转换器，它调用{@linkplain Byte#Byte(String)}实现转换。
  * @author earthangry@gmail.com
  * @date 2010-10-3
  */
-public class ByteConverter extends ClassTypeConverter
+public class ByteConverter extends AbstractStringTypeConverter
 {
-	private org.apache.commons.beanutils.converters.ByteConverter c;
-	
-	public ByteConverter()
-	{
-		super();
-		c=new org.apache.commons.beanutils.converters.ByteConverter();
-	}
-	
 	//@Override
-	protected Object convertToClass(Object sourceObj, Class<?> targetType)
+	protected Object convertStringToType(String str, Class<?> type) throws Exception
 	{
-		return c.convert(targetType, sourceObj);
+		return new Byte(str);
 	}
 }

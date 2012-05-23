@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.bean.CustomGenericArrayType;
 import org.soybeanMilk.core.bean.CustomParameterizedType;
-import org.soybeanMilk.core.config.parser.ParseException;
 
 /**
  * 框架内部常用类。
@@ -479,7 +478,7 @@ public class SbmUtils
 			if(c == '\\')
 			{
 				if(i == len-1)
-					throw new ParseException("\""+s+"\" must not be end with '\\' ");
+					throw new IllegalArgumentException("\""+s+"\" must not be end with '\\' ");
 				
 				i+=1;
 				
@@ -490,7 +489,7 @@ public class SbmUtils
 					int end=i+4;
 					
 					if(end > len)
-						throw new ParseException("illegal \\uxxxx encoding in \""+s+"\"");
+						throw new IllegalArgumentException("illegal \\uxxxx encoding in \""+s+"\"");
 					
 					int v=0;
 					for (;i<end;i++)
@@ -511,7 +510,7 @@ public class SbmUtils
 				        		v = (v << 4) + 10 + next - 'A';
 				        		break;
 				        	default:
-				        		throw new ParseException("illegal \\uxxxx encoding in \""+s+"\"");
+				        		throw new IllegalArgumentException("illegal \\uxxxx encoding in \""+s+"\"");
 				        }
 					}
 					
@@ -526,7 +525,7 @@ public class SbmUtils
 					else if(next == '\\') sb.append('\\');
 					else if(next == '"') sb.append('"');
 					else
-						throw new ParseException("unknown escape character '\\"+next+"'");
+						throw new IllegalArgumentException("unknown escape character '\\"+next+"'");
 					
 					i++;
 				}

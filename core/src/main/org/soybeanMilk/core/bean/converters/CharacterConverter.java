@@ -14,25 +14,28 @@
 
 package org.soybeanMilk.core.bean.converters;
 
+import org.soybeanMilk.SbmUtils;
+
 /**
- * 字符类型转换器。
+ * 字符串到字符类型转换器，它返回转义后长度为1的字符串的第一个字符。
  * @author earthangry@gmail.com
  * @date 2010-10-3
  */
-public class CharacterConverter extends ClassTypeConverter
+public class CharacterConverter extends AbstractStringTypeConverter
 {
-	private org.apache.commons.beanutils.converters.CharacterConverter c;
-	
-	public CharacterConverter()
-	{
-		super();
-		
-		c=new org.apache.commons.beanutils.converters.CharacterConverter();
-	}
-
 	//@Override
-	protected Object convertToClass(Object sourceObj, Class<?> targetType)
+	protected Object convertStringToType(String str, Class<?> type) throws Exception
 	{
-		return c.convert(targetType, sourceObj);
+		if(str.length() == 1)
+			return str.charAt(0);
+		else
+		{
+			String unEscaped=SbmUtils.unEscape(str);
+			
+			if(unEscaped.length() == 1)
+				return unEscaped.charAt(0);
+			else
+				return convertNotSupportedThrow(str, type);
+		}
 	}
 }

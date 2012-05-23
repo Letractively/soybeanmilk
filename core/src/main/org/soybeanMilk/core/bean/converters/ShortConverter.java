@@ -15,24 +15,15 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
- * 短整型转换器。
+ * 字符串到{@linkplain Short}类型转换器，它调用{@linkplain Short#Short(String)}实现转换。
  * @author earthangry@gmail.com
  * @date 2010-10-3
  */
-public class ShortConverter extends ClassTypeConverter
+public class ShortConverter extends AbstractStringTypeConverter
 {
-	private org.apache.commons.beanutils.converters.ShortConverter c;
-	
-	public ShortConverter()
-	{
-		super();
-		
-		c=new org.apache.commons.beanutils.converters.ShortConverter();
-	}
-
 	//@Override
-	protected Object convertToClass(Object sourceObj, Class<?> targetType)
+	protected Object convertStringToType(String str, Class<?> type) throws Exception
 	{
-		return c.convert(targetType, sourceObj);
+		return new Short(str);
 	}
 }

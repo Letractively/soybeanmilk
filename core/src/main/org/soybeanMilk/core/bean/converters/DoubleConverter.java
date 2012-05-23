@@ -15,24 +15,15 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
- * 双精度类型转换器。
+ * 字符串到{@linkplain Double}类型转换器，它调用{@linkplain Double#Double(String)}实现转换。
  * @author earthangry@gmail.com
  * @date 2010-10-3
  */
-public class DoubleConverter extends ClassTypeConverter
+public class DoubleConverter extends AbstractStringTypeConverter
 {
-	private org.apache.commons.beanutils.converters.DoubleConverter c;
-	
-	public DoubleConverter()
-	{
-		super();
-		
-		c=new org.apache.commons.beanutils.converters.DoubleConverter();
-	}
-
 	//@Override
-	protected Object convertToClass(Object sourceObj, Class<?> targetType)
+	protected Object convertStringToType(String str, Class<?> type) throws Exception
 	{
-		return c.convert(targetType, sourceObj);
+		return new Double(str);
 	}
 }

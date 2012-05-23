@@ -14,25 +14,18 @@
 
 package org.soybeanMilk.core.bean.converters;
 
+import java.math.BigInteger;
+
 /**
- * {@linkplain java.math.BigInteger BigInteger}类型转换器。
+ * 字符串到{@linkplain java.math.BigInteger BigInteger}类型转换器，它调用{@link BigInteger#BigInteger(String)}实现转换。
  * @author earthangry@gmail.com
  * @date 2010-10-3
  */
-public class BigIntegerConverter extends ClassTypeConverter
+public class BigIntegerConverter extends AbstractStringTypeConverter
 {
-	private org.apache.commons.beanutils.converters.BigIntegerConverter c;
-	
-	public BigIntegerConverter()
-	{
-		super();
-		
-		c=new org.apache.commons.beanutils.converters.BigIntegerConverter();
-	}
-
 	//@Override
-	protected Object convertToClass(Object sourceObj, Class<?> targetType)
+	protected Object convertStringToType(String str, Class<?> type) throws Exception
 	{
-		return c.convert(targetType, sourceObj);
+		return new BigInteger(str);
 	}
 }

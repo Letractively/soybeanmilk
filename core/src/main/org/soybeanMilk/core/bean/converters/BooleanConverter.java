@@ -15,23 +15,20 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
- * 布尔类型转换器
+ * 字符串到{@linkplain Boolean}类型转换器，它可以将<code>"true", "1", "on", "false", "0", "off"</code>转换为{@linkplain Boolean}类型对象
  * @author earthangry@gmail.com
  * @date 2010-10-3
  */
-public class BooleanConverter extends ClassTypeConverter
+public class BooleanConverter extends AbstractStringTypeConverter
 {
-	private org.apache.commons.beanutils.converters.BooleanConverter c;
-	
-	public BooleanConverter()
-	{
-		super();
-		c=new org.apache.commons.beanutils.converters.BooleanConverter();
-	}
-	
 	//@Override
-	protected Object convertToClass(Object sourceObj, Class<?> targetType)
+	protected Object convertStringToType(String str, Class<?> type) throws Exception
 	{
-		return c.convert(targetType, sourceObj);
+		if("true".equals(str) || "1".equals(str) || "on".equals(str))
+			return Boolean.TRUE;
+		else if("false".equals(str) || "0".equals(str) || "off".equals(str))
+			return Boolean.FALSE;
+		else
+			return convertNotSupportedThrow(str, type);
 	}
 }

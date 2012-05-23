@@ -15,23 +15,15 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
- * 单精度类型转换器。
+ * 字符串到{@linkplain Float}类型转换器，它调用{@linkplain Float#Float(String)}实现转换。
  * @author earthangry@gmail.com
  * @date 2010-10-3
  */
-public class FloatConverter extends ClassTypeConverter
+public class FloatConverter extends AbstractStringTypeConverter
 {
-	private org.apache.commons.beanutils.converters.FloatConverter c;
-	
-	public FloatConverter()
-	{
-		super();
-		c=new org.apache.commons.beanutils.converters.FloatConverter();
-	}
-
 	//@Override
-	protected Object convertToClass(Object sourceObj, Class<?> targetType)
+	protected Object convertStringToType(String str, Class<?> type) throws Exception
 	{
-		return c.convert(targetType, sourceObj);
+		return new Float(str);
 	}
 }

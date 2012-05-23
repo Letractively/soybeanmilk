@@ -14,28 +14,32 @@
 
 package org.soybeanMilk.core.bean.converters;
 
+import java.sql.Time;
+
+
 /**
- * {@linkplain java.sql.Time}类型转换器，它可以将“HH:mm:ss”或“HH:mm:ss.SSS”格式的字符串转换为{@linkplain java.sql.Time}类型的对象。
+ * 字符串到{@linkplain java.sql.Time}类型转换器，它可以将“HH:mm:ss”或“HH:mm:ss.SSS”格式的字符串转换为{@linkplain java.sql.Time}类型的对象。
  * @author earthangry@gmail.com
  * @date 2010-10-3
  */
-public class SqlTimeConverter extends ClassTypeConverter
+public class SqlTimeConverter extends DateConverter
 {
 	private static String[] PATTERNS=new String[]{"HH:mm:ss", "HH:mm:ss.SSS"};
 	
-	private org.apache.commons.beanutils.converters.SqlTimeConverter c;
-	
-	public SqlTimeConverter()
-	{
-		super();
-		
-		c = new org.apache.commons.beanutils.converters.SqlTimeConverter();
-		c.setPatterns(PATTERNS);
-	}
-	
 	//@Override
-	protected Object convertToClass(Object sourceObj, Class<?> targetType)
+	protected Object convertStringToType(String str, Class<?> type) throws Exception
 	{
-		return c.convert(targetType, sourceObj);
+		int len=str.length();
+		
+		if(len == 8)
+		{
+			return new Time(parseDate(str, PATTERNS[0]).getTime());
+		}
+		else if(len == 12)
+		{
+			return new Time(parseDate(str, PATTERNS[1]).getTime());
+		}
+		else
+			return convertNotSupportedThrow(str, type);
 	}
 }

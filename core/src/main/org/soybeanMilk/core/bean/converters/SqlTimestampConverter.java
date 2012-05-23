@@ -14,28 +14,32 @@
 
 package org.soybeanMilk.core.bean.converters;
 
+import java.sql.Timestamp;
+
+
 /**
- * {@linkplain java.sql.Timestamp}类型转换器，它可以将“yyyy-MM-dd HH:mm:ss”或“yyyy-MM-dd HH:mm:ss.SSS”格式的字符串转换为{@linkplain java.sql.Timestamp}类型的对象。
+ * 字符串到{@linkplain java.sql.Timestamp}类型转换器，它可以将“yyyy-MM-dd HH:mm:ss”或“yyyy-MM-dd HH:mm:ss.SSS”格式的字符串转换为{@linkplain java.sql.Timestamp}类型的对象。
  * @author earthangry@gmail.com
  * @date 2010-10-3
  */
-public class SqlTimestampConverter extends ClassTypeConverter
+public class SqlTimestampConverter extends DateConverter
 {
 	private static String[] PATTERNS=new String[]{"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss.SSS"};
 	
-	private org.apache.commons.beanutils.converters.SqlTimestampConverter c;
-	
-	public SqlTimestampConverter()
-	{
-		super();
-		
-		c = new org.apache.commons.beanutils.converters.SqlTimestampConverter();
-		c.setPatterns(PATTERNS);
-	}
-	
 	//@Override
-	protected Object convertToClass(Object sourceObj, Class<?> targetType)
+	protected Object convertStringToType(String str, Class<?> type) throws Exception
 	{
-		return c.convert(targetType, sourceObj);
+		int len=str.length();
+		
+		if(len == 19)
+		{
+			return new Timestamp(parseDate(str, PATTERNS[0]).getTime());
+		}
+		else if(len == 23)
+		{
+			return new Timestamp(parseDate(str, PATTERNS[1]).getTime());
+		}
+		else
+			return convertNotSupportedThrow(str, type);
 	}
 }

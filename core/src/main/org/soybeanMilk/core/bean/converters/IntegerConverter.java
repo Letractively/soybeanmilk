@@ -15,23 +15,15 @@
 package org.soybeanMilk.core.bean.converters;
 
 /**
- * 整数类型转换器。
+ * 字符串到{@linkplain Integer}类型转换器，它调用{@linkplain Integer#Integer(String)}实现转换。
  * @author earthangry@gmail.com
  * @date 2010-10-3
  */
-public class IntegerConverter extends ClassTypeConverter
+public class IntegerConverter extends AbstractStringTypeConverter
 {
-	private org.apache.commons.beanutils.converters.IntegerConverter c;
-	
-	public IntegerConverter()
-	{
-		super();
-		c=new org.apache.commons.beanutils.converters.IntegerConverter();
-	}
-
 	//@Override
-	protected Object convertToClass(Object sourceObj, Class<?> targetType)
+	protected Object convertStringToType(String str, Class<?> type) throws Exception
 	{
-		return c.convert(targetType, sourceObj);
+		return new Integer(str);
 	}
 }

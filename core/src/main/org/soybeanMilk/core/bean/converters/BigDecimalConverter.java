@@ -14,24 +14,18 @@
 
 package org.soybeanMilk.core.bean.converters;
 
+import java.math.BigDecimal;
+
 /**
- * {@linkplain java.math.BigDecimal BigDecimal}类型转换器。
+ * 字符串到{@linkplain java.math.BigDecimal BigDecimal}类型转换器，它调用{@link BigDecimal#BigDecimal(String)}实现转换。
  * @author earthangry@gmail.com
  * @date 2010-10-3
  */
-public class BigDecimalConverter extends ClassTypeConverter
+public class BigDecimalConverter extends AbstractStringTypeConverter
 {
-	private org.apache.commons.beanutils.converters.BigDecimalConverter c;
-	
-	public BigDecimalConverter()
-	{
-		super();
-		c=new org.apache.commons.beanutils.converters.BigDecimalConverter();
-	}
-	
 	//@Override
-	protected Object convertToClass(Object sourceObj, Class<?> targetType)
+	protected Object convertStringToType(String str, Class<?> type) throws Exception
 	{
-		return c.convert(targetType, sourceObj);
+		return new BigDecimal(str);
 	}
 }

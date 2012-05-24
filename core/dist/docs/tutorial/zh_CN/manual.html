@@ -27,7 +27,7 @@
 				如果你对java反射机制很熟悉，那么你会很容易理解这个框架，它实际上只是做如下四件事：<br>
 				<ul>
 					<li>依据参数配置来构造方法的参数值</li>
-					<li>在配置的对象上调用方法</li>
+					<li>在给定对象上调用方法</li>
 					<li>保存方法的结果</li>
 					<li>处理URL转发</li>
 				</ul>
@@ -42,8 +42,8 @@
 				它们都是对Java方法的高级封装，一个<span class="glossary">动作</span>可以包含多个<span class="glossary">调用</span>，一个<span class="glossary">调用</span>对应一个Java方法（下面我们将称为<span class="glossary">调用方法</span>）。
 			</p>
 			<p>
-				<a href="javascript:void(0);" class="glossary">解决对象</a>是框架的一个重要概念，<span class="glossary">调用方法</span>的调用目标即是它。
-				它在框架中并没有明确的接口体现，因为它完全是由框架使用者定义的，你可以把它理解为你应用中的业务对象。
+				<a href="../../api/org/soybeanMilk/core/exe/Invoke.Resolver.html" class="glossary">调用目标</a>是<span class="glossary">调用</span>执行的基础，<span class="glossary">调用方法</span>执行时依赖的对象即由它提供，
+				它通常是把你应用中的业务对象提供给<span class="glossary">调用</span>。
 			</p>
 			<p>
 				<a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">转换器</a>能够将<span class="glossary">对象源</span>存储的任意对象转换为符合<span class="glossary">调用方法</span>参数类型的对象，它是框架正确执行<span class="glossary">调用方法</span>的保证。

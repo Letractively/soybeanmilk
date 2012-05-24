@@ -81,34 +81,41 @@ import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
  * 对于Map&lt;String, ?&gt;类型的源对象，它的关键字必须符合下面的<i>访问符表达式</i>格式：
  * </p>
  * <p>
- * 		<i>name</i>[.<i>name</i> ...]
+ * 		<i>accessor</i>[.<i>accessor</i> ...]
  * </p>
  * <p>
- * 这里，<i>name</i>可以是下面这些语义和字面值：
+ * 这里，<i>accessor</i>可以是下面这些语义和字面值：
  * </p>
  * <ul>
  * 	<li>
  *  	JavaBean对象属性名<br>
- *  	表明映射表的值属于JavaBean的<i>name</i>属性值
+ *  	表明映射表的值是JavaBean的<i>accessor</i>属性值
  *  </li>
  *  <li>
  *  	List、Set、数组对象的下标值<br>
- *  	表明映射表的值属于集合中的<i>name</i>元素
+ *  	表明映射表的值是某个集合第<i>accessor</i>个元素的值
  *  </li>
  *  <li>
  *  	Map对象关键字<br>
- *  	表明映射表的值属于另一个映射表<i>name</i>关键字的值
+ *  	表明映射表的值是另一个映射表<i>accessor</i>关键字的值
  *  </li>
  *  <li>
  *  	"class"字面值<br>
- *  	表明自定义转换目标类型，它的值必须是全类名，且必须位于<i>访问符表达式</i>的末尾位置。<br>
- *  	它用以提供集合类元素的多态转换支持，比如：<br>
- *  	"2.class" -&gt; "org.somePkg.UserSub"<br>
- *  	&nbsp;&nbsp;&nbsp;&nbsp;指定目标集合的第三个元素类型为“org.somePkg.UserSub”<br>
- *  	"someKey.class" -&gt; "org.somePkg.UserSub"<br>
- *  	&nbsp;&nbsp;&nbsp;&nbsp;指定目标映射表的"someKey"元素类型为“org.somePkg.UserSub”<br>
- *  	"class" -&gt; ["org.somePkg.UserSub0", "org.somePkg.UserSub1"]<br>
- *  	&nbsp;&nbsp;&nbsp;&nbsp;指定目标集合的第一个元素类型为"org.somePkg.UserSub0"，第二个元素类型为"org.somePkg.UserSub1"
+ *  	指定自定义转换目标类型，用以提供多态转换支持，它的值必须是全类名，比如：<br>
+ *  	"class" -&gt; "org.somePkg.SomeJavaBean"<br>
+ *  	&nbsp;&nbsp;&nbsp;&nbsp;指定转换目标类型为“org.somePkg.SomeJavaBean”<br>
+ *  	"2.class" -&gt; "org.somePkg.SomeJavaBeanSub"<br>
+ *  	&nbsp;&nbsp;&nbsp;&nbsp;指定转换目标集合的第三个元素类型为“org.somePkg.SomeJavaBeanSub”<br>
+ *  	"someKey.class" -&gt; "org.somePkg.SomeJavaBean"<br>
+ *  	&nbsp;&nbsp;&nbsp;&nbsp;指定转换目标映射表的"someKey"元素类型为“org.somePkg.SomeJavaBean”<br>
+ *  </li>
+ *  <li>
+ *  	"classes"字面值<br>
+ *  	当转换目标为集合类时（数组、List、Set），用以统一设置元素类型的数组，比如：<br>
+ *  	"classes" -&gt; ["org.somePkg.SomeJava", "org.somePkg.SomeJavaSub"]<br>
+ *  	"2.class" -&gt; "org.somePkg.SomeJavaBean"<br>
+ *  	&nbsp;&nbsp;&nbsp;&nbsp;指定目标集合的第一个元素类型为“org.somePkg.SomeJava”，第二个元素类型为“org.somePkg.SomeJavaSub”，
+ *  	第三个元素类型为“org.somePkg.SomeJavaBean”
  *  </li>
  * </ul>
  * <p>

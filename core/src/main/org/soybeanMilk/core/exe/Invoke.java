@@ -33,7 +33,7 @@ import org.soybeanMilk.core.exe.ArgPrepareExecuteException;
 import org.soybeanMilk.core.exe.InvocationExecuteException;
 
 /**
- * 调用，它用于执行对象方法
+ * 调用，它用于执行对象方法。
  * @author earthangry@gmail.com
  * @date 2010-9-30
  */

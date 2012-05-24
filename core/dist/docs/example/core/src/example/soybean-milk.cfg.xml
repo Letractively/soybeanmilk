@@ -60,6 +60,12 @@
 			</invoke>
 		</action>
 		
+		<action name="dynamicResolver">
+			<invoke>
+				dynamicResolver.dynamicMethod();
+			</invoke>
+		</action>
+		
 		<action name="reference">
 			<ref name="refTarget"/>
 		</action>

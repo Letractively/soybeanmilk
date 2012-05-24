@@ -17,9 +17,9 @@ package example;
 import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.Executor;
 import org.soybeanMilk.core.DefaultExecutor;
+import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
-import org.soybeanMilk.core.os.ConvertableObjectSource;
 import org.soybeanMilk.core.os.HashMapObjectSource;
 
 /**
@@ -35,7 +35,7 @@ public class ExampleMain
 		
 		Executor executor=new DefaultExecutor(cfg);
 		
-		ConvertableObjectSource os = new HashMapObjectSource();
+		ObjectSource os = new HashMapObjectSource();
 		
 		os.set("helloTo", "friend");
 		os.set("helloRepeat", 3);
@@ -51,6 +51,10 @@ public class ExampleMain
 		
 		printDiv();
 		executor.execute("javaSyntax", os);
+		
+		printDiv();
+		os.set("dynamicResolver", new DynamicResolver());
+		executor.execute("dynamicResolver", os);
 
 		printDiv();
 		executor.execute("reference", os);
@@ -79,5 +83,15 @@ public class ExampleMain
 	static void printDiv()
 	{
 		System.out.println("\n------------------------------------------------\n");
+	}
+	
+	public static class DynamicResolver
+	{
+		public void dynamicMethod()
+		{
+			System.out.println();
+			System.out.println("I am a dynamic method of object set into the ObjectSource");
+			System.out.println();
+		}
 	}
 }

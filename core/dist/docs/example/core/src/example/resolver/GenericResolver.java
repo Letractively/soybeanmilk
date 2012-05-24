@@ -27,11 +27,14 @@ public class GenericResolver
 	{
 		public void simple(T t)
 		{
+			System.out.println();
 			System.out.println("T value is :"+t.toString()+", type is :"+t.getClass().getName());
+			System.out.println();
 		}
 		
 		public void list(List<T> list)
 		{
+			System.out.println();
 			if(list != null)
 			{
 				for(int i=0; i<list.size(); i++)
@@ -40,10 +43,12 @@ public class GenericResolver
 					System.out.println("List<T> "+i+" value is :"+t.toString()+", type is :"+t.getClass().getName());
 				}
 			}
+			System.out.println();
 		}
 		
 		public void set(Set<T> set)
 		{
+			System.out.println();
 			if(set != null)
 			{
 				int i=0;
@@ -54,10 +59,12 @@ public class GenericResolver
 					i++;
 				}
 			}
+			System.out.println();
 		}
 		
 		public void array(T[] array)
 		{
+			System.out.println();
 			if(array != null)
 			{
 				int i=0;
@@ -68,6 +75,7 @@ public class GenericResolver
 					i++;
 				}
 			}
+			System.out.println();
 		}
 	}
 	

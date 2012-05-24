@@ -3,7 +3,7 @@ package org.soybeanMilk.core.exe;
 import org.soybeanMilk.core.ExecuteException;
 
 /**
- * 调用目标对象准备异常
+ * 调用目标对象准备异常。
  * @author earthangry@gmail.com
  * @date 2012-5-18
  */

@@ -24,7 +24,9 @@ public class InterceptorResolver
 {
 	public void invokeNormal()
 	{
-		HelloResolver.printObject("invoke normal");
+		System.out.println();
+		System.out.println("invoke normal");
+		System.out.println();
 	}
 	
 	public void invokeThrow()
@@ -34,16 +36,22 @@ public class InterceptorResolver
 	
 	public void before(Execution execution)
 	{
-		HelloResolver.printObject("before execute: "+execution.getExecutable().getName());
+		System.out.println();
+		System.out.println("before execute: "+execution.getExecutable().getName());
+		System.out.println();
 	}
 	
 	public void after(Execution execution)
 	{
-		HelloResolver.printObject("after  execute: "+execution.getExecutable().getName());
+		System.out.println();
+		System.out.println("after  execute: "+execution.getExecutable().getName());
+		System.out.println();
 	}
 	
 	public void exception(Execution execution)
 	{
-		HelloResolver.printObject("exception handler: "+execution.getExecuteException());
+		System.out.println();
+		System.out.println("exception handler: "+execution.getExecuteException());
+		System.out.println();
 	}
 }

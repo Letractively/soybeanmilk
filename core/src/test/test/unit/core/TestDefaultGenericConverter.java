@@ -48,6 +48,9 @@ import org.soybeanMilk.core.bean.MapConvertException;
  */
 public class TestDefaultGenericConverter
 {
+	public static final String KEY_CLASS=DefaultGenericConverter.KEY_CUSTOM_CLASS;
+	public static final String KEY_CLASSES=DefaultGenericConverter.KEY_CUSTOM_ELEMENT_CLASSES;
+	
 	private DefaultGenericConverter converter;
 	
 	@Before
@@ -2893,9 +2896,9 @@ public class TestDefaultGenericConverter
 		
 		src.put("2.friend", friend);
 		
-		src.put("class", JavaBean[].class.getName());
-		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
-		src.put("2.class", JavaBeanChild.class.getName());
+		src.put(KEY_CLASS, JavaBean[].class.getName());
+		src.put(KEY_CLASSES, new String[]{ JavaBeanChild.class.getName() });
+		src.put("2."+KEY_CLASS, JavaBeanChild.class.getName());
 		
 		JavaBean[] dest=converter.convert(src, null);
 		
@@ -2923,9 +2926,9 @@ public class TestDefaultGenericConverter
 		
 		src.put("2.friend", friend);
 		
-		src.put("class", JavaBean[].class.getName());
-		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
-		src.put("2.class", JavaBeanChild.class.getName());
+		src.put(KEY_CLASS, JavaBean[].class.getName());
+		src.put(KEY_CLASSES, new String[]{ JavaBeanChild.class.getName() });
+		src.put("2."+KEY_CLASS, JavaBeanChild.class.getName());
 		
 		JavaBean[] dest=converter.convert(src, JavaBean[].class);
 		
@@ -2953,9 +2956,9 @@ public class TestDefaultGenericConverter
 		
 		src.put("2.friend", friend);
 		
-		src.put("class", List.class.getName());
-		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
-		src.put("2.class", JavaBeanChild.class.getName());
+		src.put(KEY_CLASS, List.class.getName());
+		src.put(KEY_CLASSES, new String[]{ JavaBeanChild.class.getName() });
+		src.put("2."+KEY_CLASS, JavaBeanChild.class.getName());
 		
 		List<JavaBean> dest=converter.convert(src, null);
 		
@@ -2983,8 +2986,8 @@ public class TestDefaultGenericConverter
 		
 		src.put("2.friend", friend);
 		
-		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
-		src.put("2.class", JavaBeanChild.class.getName());
+		src.put(KEY_CLASSES, new String[]{ JavaBeanChild.class.getName() });
+		src.put("2."+KEY_CLASS, JavaBeanChild.class.getName());
 		
 		Type listType=new MockParameterizedType(List.class, JavaBean.class);
 		
@@ -3014,9 +3017,9 @@ public class TestDefaultGenericConverter
 		
 		src.put("2.friend", friend);
 		
-		src.put("class", TreeSet.class.getName());
-		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
-		src.put("2.class", JavaBeanChild.class.getName());
+		src.put(KEY_CLASS, TreeSet.class.getName());
+		src.put(KEY_CLASSES, new String[]{ JavaBeanChild.class.getName() });
+		src.put("2."+KEY_CLASS, JavaBeanChild.class.getName());
 		
 		Set<JavaBean> dest=converter.convert(src, null);
 		
@@ -3046,8 +3049,8 @@ public class TestDefaultGenericConverter
 		
 		src.put("2.friend", friend);
 		
-		src.put("classes", new String[]{ JavaBeanChild.class.getName() });
-		src.put("2.class", JavaBeanChild.class.getName());
+		src.put(KEY_CLASSES, new String[]{ JavaBeanChild.class.getName() });
+		src.put("2."+KEY_CLASS, JavaBeanChild.class.getName());
 		
 		Type setType=new MockParameterizedType(TreeSet.class, JavaBean.class);
 		

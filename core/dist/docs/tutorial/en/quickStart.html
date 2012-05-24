@@ -53,17 +53,17 @@ public class UserManager
 		"http://soybeanmilk.googlecode.com/files/soybeanMilk-web-1.0.dtd"&gt;
 &lt;soybean-milk&gt;
         &lt;resolvers&gt;
-                &lt;resolver id="userManager" class="my.UserManager" /&gt;
+                &lt;resolver id="<span class="var">userManager</span>" class="my.UserManager" /&gt;
         &lt;/resolvers&gt;
 
         &lt;executables&gt;
                 &lt;action name="/user/add.do"&gt;
-                        &lt;invoke&gt; <span class="var">userManager.save(param.user)</span> &lt;/invoke&gt;
+                        &lt;invoke&gt; <span class="var">userManager.save(user)</span> &lt;/invoke&gt;
                         &lt;target url="/user/list.do" type="redirect" /&gt;
                 &lt;/action&gt;
                 
                 &lt;action name="/user/list.do"&gt;
-                        &lt;invoke&gt; <span class="var">request.userList = userManager.list()</span> &lt;/invoke&gt;
+                        &lt;invoke&gt; <span class="var">userList = userManager.list()</span> &lt;/invoke&gt;
                         &lt;target url="/user/list.jsp" /&gt;
                 &lt;/action&gt;
         &lt;/executables&gt;
@@ -91,10 +91,7 @@ public class UserManager
 			  	Put <span class="mainTitle">SoybeanMilk</span> and it's dependent library
 <pre class="code-xml">
 soybeanMilk-[<span class="var">version</span>].jar
-commons-beanutils-1.8.2.jar
-commons-logging-1.0.4.jar
 commons-logging-api-1.1.jar
-<span style="color:#999999">log4j-1.2.14.jar (Optional)</span>
 </pre>
 			  	into "/WEB-INF/lib" folder.
 			</p>

@@ -43,7 +43,7 @@
 			</p>
 			<p>
 				<a href="../../api/org/soybeanMilk/core/exe/Invoke.Resolver.html" class="glossary">调用目标</a>是<span class="glossary">调用</span>执行的基础，<span class="glossary">调用方法</span>执行时依赖的对象即由它提供，
-				它通常是把你应用中的业务对象提供给<span class="glossary">调用</span>。
+				它的实现类通常是把你应用中的业务对象提供给<span class="glossary">调用</span>。
 			</p>
 			<p>
 				<a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">转换器</a>能够将<span class="glossary">对象源</span>存储的任意对象转换为符合<span class="glossary">调用方法</span>参数类型的对象，它是框架正确执行<span class="glossary">调用方法</span>的保证。
@@ -128,13 +128,13 @@
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 								&nbsp;&nbsp;&nbsp;
-								 解决对象配置块
+								 调用目标配置块
 								<ul>
 									<li>
 										<a href="#tag_resolver"><span class="tag">&lt;resolver&gt;</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										 解决对象
+										 调用目标
 									</li>
 								</ul>
 							</li>
@@ -228,12 +228,12 @@
 						<span class="tagAttr">class</span>（可选） <br />
 						自定义通用转换器实现类，你可以配置它来完全替换框架的实现。
 						要注意的是，这个类必须实现<a href="../../api/org/soybeanMilk/core/bean/GenericConverter.html" class="glossary">通用转换器</a>接口并提供默认无参构造方法。<br />
-						如果你不配置这个属性，框架将使用默认的<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>。
+						如果你不配置这个属性，框架将使用默认的<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">Web通用转换器</a>。
 					</li>
 				</ul>
 			</p>
 			<p>
-				默认的<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>已经添加了大部分常用的辅助转换器（参考<a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a>类说明），
+				默认的<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">Web通用转换器</a>已经添加了大部分常用的辅助转换器（参考<a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a>类说明），
 				它还支持将“<span class="var">java.util.Map&lt;String, Object&gt;</span>”转换为JavaBean对象、JavaBean数组以及JavaBean集合（List、Set）。
 			</p>
 			<div class="seprator"></div>
@@ -301,7 +301,8 @@
 </pre>
 			</p>
 			<p>
-				通常，你只需要替换或定义上面提到的这些原子类型的辅助转换器即可，<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>会自动将JavaBean转换或者数组转换分解为这些原子类型的转换操作。
+				<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">Web通用转换器</a>默认会添加字符串到大部分常用原子类型的辅助转换器，它们都定义在<a href="../../api/org/soybeanMilk/core/bean/converters/package-summary.html" class="glossary">辅助转换器</a>包中。
+				通常，你只需要替换这些原子类型的辅助转换器即可，<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">Web通用转换器</a>会自动将类型转换分解为这些原子类型的转换操作。
 			</p>
 			<div class="seprator"></div>
 			<p>
@@ -326,7 +327,7 @@
 					<li>
 						<span class="tagAttr">exception</span>（可选） <br />
 						设置作为异常处理器的全局<span class="glossary">可执行对象</span>名称。<span class="glossary">执行器</span>会在执行<span class="glossary">可执行对象</span>遇到异常后执行它。
-						一般你的异常处理器只需要处理<a href="../../api/org/soybeanMilk/core/InvocationExecuteException.html">InvocationExecuteException</a>和<a href="../../api/org/soybeanMilk/core/ConvertExecuteException.html">ConvertExecuteException</a>执行异常。如果你不配置异常处理器，执行异常将会一直向上抛出。
+						一般你的异常处理器只需要处理<a href="../../api/org/soybeanMilk/core/exe/InvocationExecuteException.html">InvocationExecuteException</a>和<a href="../../api/org/soybeanMilk/core/exe/ArgPrepareExecuteException.html">ArgPrepareExecuteException</a>执行异常。如果你不配置异常处理器，执行异常将会一直向上抛出。
 					</li>
 					<li>
 						<span class="tagAttr">execution-key</span>（<span class="required">必须</span>） <br />
@@ -458,7 +459,7 @@ public void handleException(Execution execution)
 				<span class="tag bold">&lt;resolvers&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				<span class="glossary">解决对象</span>配置块。它只是作为一个父标签，没有任何属性。
+				<span class="glossary">调用目标</span>配置块。它只是作为一个父标签，没有任何属性。
 			</p>
 			<div class="seprator"></div>
 			<p>
@@ -466,18 +467,18 @@ public void handleException(Execution execution)
 				<span class="tag bold">&lt;resolver&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				<span class="glossary">解决对象</span>配置。你可以配置多个解决对象，以供后面的<span class="glossary">可执行对象</span>使用。
+				<span class="glossary">调用目标</span>配置。你可以配置多个调用目标，以供后面的<span class="glossary">可执行对象</span>使用。
 			</p>
 			<p>
 				它包含如下属性：
 				<ul>
 					<li>
 						<span class="tagAttr">id</span>（<span class="required">必须</span>） <br />
-						<span class="glossary">解决对象</span>ID，后面的<span class="glossary">可执行对象</span>通过这个ID来引用它
+						<span class="glossary">调用目标</span>ID，后面的<span class="glossary">可执行对象</span>通过这个ID来引用它
 					</li>
 					<li>
 						<span class="tagAttr">class</span>（<span class="required">必须</span>） <br />
-						<span class="glossary">解决对象</span>类名，配置解析器会在解析时创建它的单一实例，供所有与之相关的<span class="glossary">可执行对象</span>使用
+						<span class="glossary">调用目标</span>类名，配置解析器会在解析时创建它的单一实例，供所有与之相关的<span class="glossary">可执行对象</span>使用
 					</li>
 				</ul>
 			</p>
@@ -536,44 +537,18 @@ public void handleException(Execution execution)
 					</li>
 					<li>
 						<span class="tagAttr">method</span>（<span class="required">必须</span>） <br />
-						定义<span class="glossary">调用方法</span>的名称，这个方法必须在<span class="tagAttr">resolver-class</span>或者<span class="tagAttr">resolver</span>类中存在。
-						配置解析器会在解析时根据这个名称查找对应的方法，如果你定义了<span class="tagAttr">resolver-class</span>属性，解析器会优先使用它来查找；
-						否则，使用<span class="tagAttr">resolver</span>定义的<span class="glossary">解决对象</span>来查找。
+						定义<span class="glossary">调用方法</span>的名称，这个方法必须在下面<span class="tagAttr">resolver</span>表示的对象类中定义。
 					</li>
 					<li>
-						<span class="tagAttr">resolver-class</span>（<span class="required">二选一</span>） <br />
-						定义<span class="glossary">解决对象</span>类名，如果<span class="glossary">调用方法</span>是类方法，你仅需要定义这个属性即可，而不需定义下面的<span class="tagAttr">resolver</span>属性，
-						因为类方法执行时不需要<span class="glossary">解决对象</span>实例。
-					</li>
-					<li>
-						<span class="tagAttr">resolver</span>（<span class="required">二选一</span>） <br />
-						定义<span class="glossary">解决对象</span>引用ID，这个ID可以是该文件域内的<span class="glossary">解决对象</span>ID，也可以是任何包含模块文件中的<span class="glossary">解决对象</span>ID。
-						如果该<span class="glossary">调用方法</span>不是类方法，这个属性必须被定义。
+						<span class="tagAttr">resolver</span>（<span class="required">必须</span>） <br />
+						定义<span class="glossary">调用目标</span>，它的值可以是上面<a class="tag" href="#tag_resolver">resolver</a>标签的<span class="tagAttr">id</span>属性的值，
+						也可以是某个类的全名，或者是<span class="glossary">调用</span>当前执行的<span class="glossary">对象源</span>中的某个对象标识。
 					</li>
 					<li>
 						<span class="tagAttr">result-key</span>（可选） <br />
 						<span class="glossary">调用方法</span>结果在对象源中的保存关键字。无论方法是否有返回结果，只要你定义了<span class="tagAttr">result-key</span>，
 						框架总会执行保存操作，只不过无返回结果的话是以null值保存的；反之，则不会保存。<br />
-						下面是合法的结果关键字：
-						<ul>
-							<li>
-								<span class="tagValue">yourResultKey</span> <br/>
-								结果将以“<span class="var">yourResultKey</span>”关键字被保存到“<span class="var">request</span>”作用域中
-							</li>
-							<li>
-								<span class="tagValue">request.yourResultKey</span> <br/>
-								同上
-							</li>
-							<li>
-								<span class="tagValue">session.yourResultKey</span> <br/>
-								结果将以“<span class="var">yourResultKey</span>”关键字被保存到“<span class="var">session</span>”作用域中
-							</li>
-							<li>
-								<span class="tagValue">application.yourResultKey</span> <br/>
-								结果将以“<span class="var">yourResultKey</span>”关键字被保存到“<span class="var">application</span>”作用域中
-							</li>
-						</ul>
-						实际上，这里的关键字格式是由<a href="../../api/org/soybeanMilk/web/os/DefaultWebObjectSource.html">默认WEB对象源</a>类决定的，
+						允许的关键字格式请参考<a href="../../api/org/soybeanMilk/web/os/DefaultWebObjectSource.html">默认Web对象源</a>类说明，
 						因为它们会被直接传递给它的<span class="var">set(...)</span>方法。<br>
 					</li>
 					<li>
@@ -589,9 +564,9 @@ public void handleException(Execution execution)
 							</li>
 							<li>
 								任何其他字符串 <br/>
-								这个字符串将被认为是<a href="../../api/org/soybeanMilk/web/WebObjectSource.html">WEB对象源</a>中的一个关键字，如果这关键字的值为是<span class="var">Boolean.TRUE</span>对象，
-								<span class="glossary">调用方法</span>将不会被执行，而如果为<span class="var">null</span>或者任意其他对象，
-								<span class="glossary">调用方法</span>即会被执行。
+								这个字符串将被认为是<a href="../../api/org/soybeanMilk/web/WebObjectSource.html">Web对象源</a>中的一个关键字，
+								如果这关键字的值为是<span class="var">Boolean.TRUE</span>或者不为<span class="var">null</span>，
+								<span class="glossary">调用方法</span>将不会被执行，否则即会被执行。
 							</li>
 						</ul>
 						它的默认值为“<span class="var">false</span>”。
@@ -616,8 +591,7 @@ public void handleException(Execution execution)
 					</li>
 					<li>
 						<span class="tagAttr">resolver</span> <br>
-						与上面<span class="tag">&lt;invoke&gt;</span>的<span class="tagAttr">resolver</span>或者<span class="tagAttr">resolver-class</span>属性用法一致，
-						框架会自动判断它是<span class="glossary">解决对象</span>ID还是<span class="glossary">解决对象</span>类名
+						与上面<span class="tag">&lt;invoke&gt;</span>的<span class="tagAttr">resolver</span>属性用法一致
 					</li>
 					<li>
 						<span class="tagAttr">method</span> <br>
@@ -673,63 +647,8 @@ public void handleException(Execution execution)
 			</p>
 				<ul>
 					<li>参数关键字
-						<ul>
-							<li>
-								<span class="tagValue">param</span> <br/>
-								整个请求参数映射表。如果<span class="glossary">调用方法</span>参数是<span class="var">java.util.Map</span>类型，
-								那么这个请求参数映射表会原封不动地传递给方法；如果是其他类型，框架会首先使用<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>将此映射表转换为这个类型的对象，然后传递给方法。
-							</li>
-							<li>
-								<span class="tagValue">yourArgKey</span> <br/>
-								请求参数映射表中以“<span class="var">yourArgKey</span>”开头的请求参数。
-								如果这个参数有明确的值，框架会将这个值进行类型转换（需要的话）后传递给<span class="glossary">调用方法</span>；否则，就根据“<span class="var">yourArgKey</span>”来对参数映射表进行过滤，
-								产生一个新的参数映射表（它的主键是原始参数名“<span class="var">yourArgKey.</span>”之后的部分，比如把参数名“<span class="var">beanName.propertyName.subPropertyName</span>”变为“<span class="var">propertyName.subPropertyName</span>”），
-								然后，与上面提到的一样，根据<span class="glossary">调用方法</span>参数的类型直接传递这个新映射表或者使用<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WEB通用转换器</a>传递转换后的对象。
-							</li>
-							<li>
-								<span class="tagValue">param.yourArgKey</span> <br/>
-								同上。
-							</li>
-							<li>
-								<span class="tagValue">request</span> <br/>
-								请求HttpServletRequest对象。框架本身并没有提供它的转换器，如果<span class="glossary">调用方法</span>的参数类型不是“<span class="var">HttpServletRequest</span>”，
-								那么你需要自定义“<span class="var">javax.servlet.http.HttpServletRequest</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
-							</li>
-							<li>
-								<span class="tagValue">request.yourArgKey</span> <br/>
-								请求属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。如果<span class="glossary">调用方法</span>的参数类型与此对象不一致，框架将尝试执行类型转换。
-							</li>
-							<li>
-								<span class="tagValue">session</span> <br/>
-								会话HttpSession对象。框架本身并没有提供它的转换器，如果<span class="glossary">调用方法</span>的参数类型不是“<span class="var">HttpSession</span>”，
-								那么你需要自定义“<span class="var">javax.servlet.http.HttpSession</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
-							</li>
-							<li>
-								<span class="tagValue">session.yourArgKey</span> <br/>
-								会话属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。如果<span class="glossary">调用方法</span>的参数类型与此对象不一致，框架将尝试执行类型转换。
-							</li>
-							<li>
-								<span class="tagValue">application</span> <br/>
-								应用ServletContext对象。如果<span class="glossary">调用方法</span>的参数类型不是“<span class="var">ServletContext</span>”，
-								那么你需要自定义“<span class="var">javax.servlet.ServletContext</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
-							</li>
-							<li>
-								<span class="tagValue">application.yourArgKey</span> <br/>
-								应用属性中的“<span class="var">yourArgKey</span>”关键字对应的对象。如果<span class="glossary">调用方法</span>的参数类型与此对象不一致，框架将尝试执行类型转换。
-							</li>
-							<li>
-								<span class="tagValue">response</span> <br/>
-								响应HttpServletResponse对象。如果<span class="glossary">调用方法</span>的参数类型不是“<span class="var">HttpServletResponse</span>”，
-								那么你需要自定义“<span class="var">javax.servlet.http.HttpServletResponse</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
-							</li>
-							<li>
-						  		<span class="tagValue">objectSource</span> <br/>
-						  		当前的<a href="../../api/org/soybeanMilk/web/WebObjectSource.html">WEB对象源</a>对象，你可以使用它来获取所有servlet对象。如果<span class="glossary">调用方法</span>的参数类型不是“<span class="var">WebObjectSource</span>”，
-						  		那么你需要自定义“<span class="var">org.soybeanMilk.web.os.WebObjectSource</span>”到参数类型的<a href="#tag_converter">辅助转换器</a>。
-						  	</li>
-						</ul>
 						<p>
-							实际上，这里的关键字格式是由<a href="../../api/org/soybeanMilk/web/os/DefaultWebObjectSource.html">默认WEB对象源</a>类决定的，
+							允许的关键字格式请参考<a href="../../api/org/soybeanMilk/web/os/DefaultWebObjectSource.html">默认Web对象源</a>类说明，
 							因为它们会被直接传递给它的<span class="var">get(...)</span>方法。
 						</p>
 					</li>

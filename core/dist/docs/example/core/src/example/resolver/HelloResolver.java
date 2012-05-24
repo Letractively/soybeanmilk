@@ -39,6 +39,13 @@ public class HelloResolver
 		return re;
 	}
 	
+	public static void printObject(Object obj)
+	{
+		System.out.println();
+		System.out.println(obj);
+		System.out.println();
+	}
+	
 	public static void testJavaSyntax(char a, byte b, boolean c, int d, long e, float f, double g, String h, String _null)
 	{
 		System.out.println();

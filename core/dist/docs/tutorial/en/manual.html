@@ -54,8 +54,8 @@
 				and an <span class="glossary">Invoke</span> are corresponding to a <span class="glossary">java.lang.reflect.Method</span> object.
 			</p>
 			<p>
-				<a href="javascript:void(0);" class="glossary">Resolver</a> is an important concept, it is the target of <span class="glossary">Invoke</span>'s method.
-				But there is no interface defined for it, because it is writing by you. You may call it "Business object".
+				<a href="../../api/org/soybeanMilk/core/exe/Invoke.Resolver.html" class="glossary">Resolver</a> is the basis of <span class="glossary">Invoke</span> execution,
+				<span class="glossary">Invoke</span> method execution target is supplied by it, its implementations mostly supply your business object to  <span class="glossary">Invoke</span>.
 			</p>
 			<p>
 				<a href="../../api/org/soybeanMilk/core/bean/Converter.html" class="glossary">Converter</a> can convert any object stored in <span class="glossary">ObjectSource</span> to object that match <span class="glossary">Invoke</span>'s method argument type.
@@ -320,8 +320,10 @@
 </pre>
 			</p>
 			<p>
+				<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a> has add support converters for converting <span class="glossary">String</span> to most common atomic types,
+				they all defined in <a href="../../api/org/soybeanMilk/core/bean/converters/package-summary.html" class="glossary">support converters</a> package.
 				Normally, you only need to replace or define support converters for atomic types mentioned above, the <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a> will
-				automatically decompose JavaBean convertion or array convertion to these atomic type convertions.
+				automatically decompose convertion to these atomic type convertions.
 			</p>
 			<div class="seprator"></div>
 			<p>
@@ -349,7 +351,7 @@
 						<span class="tagAttr">exception</span> (Optional) <br />
 						Set the "exception" interceptor's global <span class="glossary">Executable</span> name.
 						<span class="glossary">Executor</span> will execute it if exception thrown when executing the current <span class="glossary">Executable</span>.
-						Usually, you only need to handle <a href="../../api/org/soybeanMilk/core/InvocationExecuteException.html">InvocationExecuteException</a> and <a href="../../api/org/soybeanMilk/core/ConvertExecuteException.html">ConvertExecuteException</a>
+						Usually, you only need to handle <a href="../../api/org/soybeanMilk/core/exe/InvocationExecuteException.html">InvocationExecuteException</a> and <a href="../../api/org/soybeanMilk/core/exe/ArgPrepareExecuteException.html">ArgPrepareExecuteException</a>
 						in your exception interceptor.
 					</li>
 					<li>
@@ -569,49 +571,21 @@ public void handleException(Execution execution)
 					<li>
 						<span class="tagAttr">method</span> (<span class="required">Required</span>) <br />
 						Set the method name of this <span class="glossary">Invoke</span>,
-						it must be defined in <span class="tagAttr">resolver-class</span> or <span class="tagAttr">resolver</span> class.
-						The configuration parser will use this attribute to find the <span class="glossary">Method</span> object.
-						If you set the <span class="tagAttr">resolver-class</span> attribute, it's class will be first used for finding,
-						or the <span class="tagAttr">resolver</span> attribute's class will be used.
+						it must be defined in <span class="tagAttr">resolver</span> object class.
 					</li>
 					<li>
-						<span class="tagAttr">resolver-class</span> (<span class="required">Alternatively</span>) <br />
-						Set the <span class="glossary">Resolver</span> class name of this <span class="glossary">Invoke</span>.
-						If the <span class="glossary">Invoke</span> method is static,
-						you can only set this attribute, because static method can be exeucted without instance.
-					</li>
-					<li>
-						<span class="tagAttr">resolver</span> (<span class="required">Alternatively</span>) <br />
-						Set  the <span class="glossary">Resolver</span> id of this <span class="glossary">Invoke</span> defined in <span class="tag">&lt;resolvers&gt;</span> tag.
-						All the ID defined in module files can be used here.
-						If the <span class="glossary">Invoke</span> method is not static, this attribute is required.
+						<span class="tagAttr">resolver</span> (<span class="required">Required</span>) <br />
+						Set  the <span class="glossary">Resolver</span> object of this <span class="glossary">Invoke</span>,
+						it can be the value which defined in <a class="tag" href="#tag_resolver">resolver</a> tag <span class="tagAttr">id</span> attribute above,
+						or a full name of an class, or an object id which is storing in this <span class="glossary">Invoke</span> current <span class="glossary">ObjectSource</span>.
 					</li>
 					<li>
 						<span class="tagAttr">result-key</span> (Optional) <br />
 						The saving keyword of this <span class="glossary">Invoke</span> method result.
 						The result will always be saved if you set this attribute, and "<span class="var">null</span>" is saved if the method has no return value.
 						Contrarily, nothing will be saved.<br />
-						Iegal result keywords are listing below:
-						<ul>
-							<li>
-								<span class="tagValue">yourResultKey</span> <br/>
-								The result will be saved in "<span class="var">request</span>" scope with keyword "<span class="var">yourResultKey</span>".
-							</li>
-							<li>
-								<span class="tagValue">request.yourResultKey</span> <br/>
-								The same as above.
-							</li>
-							<li>
-								<span class="tagValue">session.yourResultKey</span> <br/>
-								The result will be saved in "<span class="var">session</span>" scope with keyword "<span class="var">yourResultKey</span>".
-							</li>
-							<li>
-								<span class="tagValue">application.yourResultKey</span> <br/>
-								The result will be saved in "<span class="var">application</span>" scope with keyword "<span class="var">yourResultKey</span>".
-							</li>
-						</ul>
-						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/DefaultWebObjectSource.html">DefaultWebObjectSource</a> class,
-						because they will be directly passed to its <span class="var">set(...)</span> method.<br>
+						See <a href="../../api/org/soybeanMilk/web/os/DefaultWebObjectSource.html">DefaultWebObjectSource</a> class for detail,
+						because it will be directly passed to its <span class="var">set(...)</span> method.<br>
 					</li>
 					<li>
 						<a name="tag_invoke_breaker"></a>
@@ -627,8 +601,8 @@ public void handleException(Execution execution)
 							<li>
 								Any other string <br/>
 								This string will be treated as a key in the current <a href="../../api/org/soybeanMilk/web/WebObjectSource.html">WebObjectSource</a>,
-								and if the value of this key is <span class="var">Boolean.TRUE</span> object, this <span class="glossary">Invoke</span> method will not be executed,
-								if it is <span class="var">null</span> or any other object, this <span class="glossary">Invoke</span> method will be executed.
+								and if the value of this key is <span class="var">Boolean.TRUE</span> or not <span class="var">null</span>, this <span class="glossary">Invoke</span> method will not be executed,
+								otherwise this <span class="glossary">Invoke</span> method will be executed.
 							</li>
 						</ul>
 						Its default value is "<span class="var">false</span>".
@@ -654,8 +628,7 @@ public void handleException(Execution execution)
 					</li>
 					<li>
 						<span class="tagAttr">resolver</span> <br>
-						The same meaning to the above attribute <span class="tagAttr">resolver</span> or <span class="tagAttr">resolver-class</span> of <span class="tag">&lt;invoke&gt;</span>.
-						The framework can recognise which attribute it is.
+						The same meaning to the above attribute <span class="tagAttr">resolver</span> of <span class="tag">&lt;invoke&gt;</span>.
 					</li>
 					<li>
 						<span class="tagAttr">method</span> <br>
@@ -712,86 +685,10 @@ public void handleException(Execution execution)
 			</p>
 				<ul>
 					<li>Keyword
-						<ul>
-							<li>
-								<span class="tagValue">param</span> <br/>
-								The entire request parameter map.
-								If the <span class="glossary">Invoke</span> method argument is <span class="var">java.util.Map</span> type,
-								then this entire map will be directly passed to the method.
-								And if the argument is other type, the framework will first convert it to the target type,
-								by <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a>, then pass it to the method. 
-							</li>
-							<li>
-								<span class="tagValue">yourArgKey</span> <br/>
-								The parameters start with "<span class="var">yourArgKey</span>" in request parameter map.
-								The framework will simplely convert it to the <span class="glossary">Invoke</span> method type and then pass it,
-								if it is explicitly (only one value).
-								Otherwise, the framework will first creat a new map who contains parameters only start with "<span class="var">yourArgKey</span>",
-								and it's key will also be truncated from "<span class="var">beanName.propertyName.subPropertyName</span>" to "<span class="var">propertyName.subPropertyName</span>".
-								Then, it will directly pass this new map or pass the converted object by <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a> mentioned as above.
-							</li>
-							<li>
-								<span class="tagValue">param.yourArgKey</span> <br/>
-								The same as above.
-							</li>
-							<li>
-								<span class="tagValue">request</span> <br/>
-								The <span class="var">HttpServletRequest</span> object.
-								By default, the framework can not convert it.
-								So, you must define your own <a href="#tag_converter">support converter</a>
-								who converting "<span class="var">javax.servlet.http.HttpServletRequest</span>" source to your destination type
-								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpServletRequest</span>.
-							</li>
-							<li>
-								<span class="tagValue">request.yourArgKey</span> <br/>
-								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">request</span> scope.
-								The framework will try to convert it to the <span class="glossary">Invoke</span> method argument if they are not match.
-							</li>
-							<li>
-								<span class="tagValue">session</span> <br/>
-								The <span class="var">HttpSession</span> object.
-								By default, the framework can not convert it.
-								So, you must define your own <a href="#tag_converter">support converter</a>
-								who converting "<span class="var">javax.servlet.http.HttpSession</span>" source to your destination type
-								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpSession</span>.
-							</li>
-							<li>
-								<span class="tagValue">session.yourArgKey</span> <br/>
-								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">session</span> scope.
-								The framework will try to convert it to the <span class="glossary">Invoke</span> method argument if they are not match.
-							</li>
-							<li>
-								<span class="tagValue">application</span> <br/>
-								The <span class="var">ServletContext</span> object.
-								The framework can not convert it by default.
-								So, you must define your own <a href="#tag_converter">support converter</a>
-								who converting "<span class="var">javax.servlet.ServletContext</span>" source to your destination type
-								if the <span class="glossary">Invoke</span> method argument is not <span class="var">ServletContext</span>.
-							</li>
-							<li>
-								<span class="tagValue">application.yourArgKey</span> <br/>
-								The object whose key is "<span class="var">yourArgKey</span>" in <span class="var">application</span> scope.
-								The framework will try to convert it to the <span class="glossary">Invoke</span> method argument if they are not match.
-							</li>
-							<li>
-								<span class="tagValue">response</span> <br/>
-								The <span class="var">HttpServletResponse</span> object.
-								The framework can not convert it by default.
-								So, you must define your own <a href="#tag_converter">support converter</a>
-								who converting "<span class="var">javax.servlet.http.HttpServletResponse</span>" source to your destination type
-								if the <span class="glossary">Invoke</span> method argument is not <span class="var">HttpServletResponse</span>.
-							</li>
-							<li>
-						  		<span class="tagValue">objectSource</span> <br/>
-						  		The current <a href="../../api/org/soybeanMilk/web/WebObjectSource.html">WebObjectSource</a> object, you can get all the servlet objects from it.
-						  		The framework can not convert it by default.
-								So, you must define your own <a href="#tag_converter">support converter</a>
-								who converting "<span class="var">org.soybeanMilk.web.WebObjectSource</span>" source to your destination type
-								if the <span class="glossary">Invoke</span> method argument is not <span class="var">WebObjectSource</span>.
-						  	</li>
-						</ul>
-						In fact, the format of keywords here are determined by <a href="../../api/org/soybeanMilk/web/os/DefaultWebObjectSource.html">DefaultWebObjectSource</a> class,
-						because they will be directly passed to its <span class="var">get(...)</span> method.<br>
+						<p>
+							See <a href="../../api/org/soybeanMilk/web/os/DefaultWebObjectSource.html">DefaultWebObjectSource</a> class for detail,
+							because it will be directly passed to its <span class="var">get(...)</span> method.<br>
+						</p>
 					</li>
 					<li>
 						Value <br>

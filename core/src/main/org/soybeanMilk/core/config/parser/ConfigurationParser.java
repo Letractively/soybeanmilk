@@ -672,7 +672,7 @@ public class ConfigurationParser
 			try
 			{
 				Class<?> rc=Class.forName(resolver);
-				invoke.setResolverProvider(new ObjectResolver(null, rc));
+				invoke.setResolver(new ObjectResolver(null, rc));
 				
 				classResolver=true;
 			}
@@ -686,7 +686,7 @@ public class ConfigurationParser
 			FactoryResolver frp=new FactoryResolver(configuration.getResolverObjectFactory(), resolver);
 			ObjectSourceResolver orp=new ObjectSourceResolver(resolver);
 			
-			invoke.setResolverProvider(new DynamicResolver(frp, orp));
+			invoke.setResolver(new DynamicResolver(frp, orp));
 		}
 	}
 	
@@ -1160,7 +1160,7 @@ public class ConfigurationParser
 			//数值
 			if(Character.isDigit(first))
 			{
-				Type wrappedType=(argType == null ? null : SbmUtils.toWrapperType(argType));
+				Type wrappedType=(argType == null ? null : SbmUtils.wrapType(argType));
 				
 				if(Byte.class.equals(wrappedType))
 				{

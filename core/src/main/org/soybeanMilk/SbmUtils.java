@@ -93,30 +93,73 @@ public class SbmUtils
 	}
 	
 	/**
-	 * 是否是超类
+	 * 给定类型是否是另一类型的父类型
 	 * @param ancestor
 	 * @param descendant
 	 * @return
 	 * @date 2010-12-31
 	 */
-	public static boolean isAncestorType(Type ancestor, Class<?> descendant)
+	public static boolean isAncestorType(Type ancestor, Type descendant)
 	{
-		if(ancestor == null)
+		if(descendant == null)
+		{
+			return true;
+		}
+		else if(ancestor == null)
+		{
 			return false;
+		}
 		else if(isClassType(ancestor))
 		{
-			return narrowToClassType(ancestor).isAssignableFrom(descendant);
+			Class<?> ancestorClass=narrowToClassType(ancestor);
+			
+			if(isClassType(descendant))
+			{
+				return ancestorClass.isAssignableFrom(narrowToClassType(descendant));
+			}
+			else if(descendant instanceof ParameterizedType)
+			{
+				return ancestorClass.isAssignableFrom(narrowToClassType(((ParameterizedType) descendant).getRawType()));
+			}
+			else if(descendant instanceof GenericArrayType)
+			{
+				if(!ancestorClass.isArray())
+					return false;
+				else
+					return isAncestorType(ancestorClass.getComponentType(), ((GenericArrayType) descendant).getGenericComponentType());
+			}
+			else if(descendant instanceof TypeVariable<?>)
+			{
+				return isAncestorType(ancestorClass, toConcreteType(descendant, null));
+			}
+			else if(descendant instanceof WildcardType)
+			{
+				return isAncestorType(ancestorClass, toConcreteType(descendant, null));
+			}
+			else
+				return false;
 		}
 		else if(ancestor instanceof ParameterizedType)
 		{
-			return narrowToClassType(((ParameterizedType) ancestor).getRawType()).isAssignableFrom(descendant);
+			return isAncestorType(((ParameterizedType) ancestor).getRawType(), descendant);
 		}
 		else if(ancestor instanceof GenericArrayType)
 		{
-			if(!descendant.isArray())
-				return false;
+			if(isClassType(descendant))
+			{
+				Class<?> descendantClass=narrowToClassType(descendant);
+				
+				if(!descendantClass.isArray())
+					return false;
+				else
+					return isAncestorType(((GenericArrayType) ancestor).getGenericComponentType(), descendantClass.getComponentType());
+			}
+			else if(descendant instanceof GenericArrayType)
+			{
+				return isAncestorType(((GenericArrayType) ancestor).getGenericComponentType(), ((GenericArrayType) descendant).getGenericComponentType());
+			}
 			else
-				return isAncestorType(((GenericArrayType) ancestor).getGenericComponentType(), descendant.getComponentType());
+				return false;
 		}
 		else if(ancestor instanceof TypeVariable<?>)
 		{
@@ -131,14 +174,14 @@ public class SbmUtils
 	}
 	
 	/**
-	 * 返回基本类型的包装类型，如果不是基本类型，它将直接被返回
+	 * 将基本类型转换为包装类型，如果<code>type</code>不是基本类型，它将直接被返回。
 	 * @param type
 	 * @return
 	 * @date 2010-12-31
 	 */
-	public static Type toWrapperType(Type type)
+	public static Type wrapType(Type type)
 	{
-		if(!(type instanceof Class<?>))
+		if(!isClassType(type))
 			return type;
 		else if (!narrowToClassType(type).isPrimitive())
             return type;
@@ -324,16 +367,14 @@ public class SbmUtils
 		{
 			WildcardType wt=(WildcardType)type;
 			
-			Type[] ub=wt.getUpperBounds();
-			Type[] lb=wt.getLowerBounds();
+			Type[] upperBounds=wt.getUpperBounds();
 			
-			Type cwt=(ub!=null && ub.length>0 ? ub[0] : null);
-			if(cwt == null)
-				cwt=(lb!=null && lb.length>0 ? lb[0] : null);
-			if(cwt == null)
-				cwt=Object.class;
+			Type upperType=(upperBounds!=null && upperBounds.length>0 ? upperBounds[0] : null);
 			
-			result=toConcreteTypeInner(cwt, variableTypesMap);
+			if(upperType == null)
+				upperType=Object.class;
+			
+			result=toConcreteTypeInner(upperType, variableTypesMap);
 		}
 		else
 			result=type;

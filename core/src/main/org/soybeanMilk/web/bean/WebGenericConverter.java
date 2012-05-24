@@ -117,7 +117,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		String filter=pfv.getFilter();
 		Object value=pfv.getValue();
 		
-		if(SbmUtils.isInstanceOf(value, SbmUtils.toWrapperType(targetType)))
+		if(isInstanceOf(value, wrapType(targetType)))
 			return value;
 		else if(value instanceof Map<?, ?>)
 		{

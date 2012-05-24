@@ -238,7 +238,7 @@ public class DefaultGenericConverter implements GenericConverter
 		{
 			re=converters.get(generateConverterKey(sourceType, targetType));
 			if(re==null && SbmUtils.isPrimitive(targetType))
-				re=converters.get(generateConverterKey(sourceType, SbmUtils.toWrapperType(targetType)));
+				re=converters.get(generateConverterKey(sourceType, wrapType(targetType)));
 		}
 		
 		return re;
@@ -273,7 +273,7 @@ public class DefaultGenericConverter implements GenericConverter
 			else
 				result=null;
 		}
-		else if(type==null || SbmUtils.isInstanceOf(obj, SbmUtils.toWrapperType(type)))
+		else if(type==null || isInstanceOf(obj, wrapType(type)))
 		{
 			//Map需要特殊处理，因为它可能包含自定义目标类型
 			if(obj instanceof Map<?, ?>)
@@ -396,7 +396,7 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		Object result=null;
 		
-		if(type==null || SbmUtils.isInstanceOf(array, type))
+		if(type==null || isInstanceOf(array, type))
 		{
 			result=array;
 		}
@@ -468,12 +468,12 @@ public class DefaultGenericConverter implements GenericConverter
 			Class<?> actualType=SbmUtils.narrowToClassType(rt);
 			
 			//List<T>
-			if(SbmUtils.isAncestorType(List.class, actualType))
+			if(isAncestorType(List.class, actualType))
 			{
 				result=convertArrayToList(array, actualType, atas[0]);
 			}
 			//Set<T>
-			else if(SbmUtils.isAncestorType(Set.class, actualType))
+			else if(isAncestorType(Set.class, actualType))
 			{
 				List<?> list=convertArrayToList(array, List.class, atas[0]);
 				result=listToSet(list, actualType);
@@ -578,7 +578,7 @@ public class DefaultGenericConverter implements GenericConverter
 			Class<?> clazz=SbmUtils.narrowToClassType(type);
 			
 			//如果没有自定义类型且目标类型是原生Map则不做转换
-			if(customType==null && SbmUtils.isAncestorType(Map.class, clazz))
+			if(customType==null && isAncestorType(Map.class, clazz))
 			{
 				result=map;
 			}
@@ -595,7 +595,7 @@ public class DefaultGenericConverter implements GenericConverter
 			Type rt=pt.getRawType();
 			
 			//目标类型是Map<?, ?>或者Map<Object, Object>也不做转换
-			if(SbmUtils.isAncestorType(rt, map.getClass()))
+			if(isAncestorType(rt, map.getClass()))
 			{
 				Type[] at=pt.getActualTypeArguments();
 				if(at!=null && at.length==2
@@ -650,18 +650,18 @@ public class DefaultGenericConverter implements GenericConverter
 			result=listToArray(tmpRe, eleClass);
 		}
 		//List
-		else if(SbmUtils.isAncestorType(List.class, type))
+		else if(isAncestorType(List.class, type))
 		{
 			result=convertPropertyValueMapToList(pvm, type, null);
 		}
 		//Set
-		else if(SbmUtils.isAncestorType(Set.class, type))
+		else if(isAncestorType(Set.class, type))
 		{
 			List<?> tmpRe=convertPropertyValueMapToList(pvm, List.class, null);
 			result=listToSet(tmpRe, type);
 		}
 		//Map
-		else if(SbmUtils.isAncestorType(Map.class, type))
+		else if(isAncestorType(Map.class, type))
 		{
 			result=convertPropertyValueMapToMap(pvm, type, null, null);
 		}
@@ -747,18 +747,18 @@ public class DefaultGenericConverter implements GenericConverter
 			Class<?> actualType=SbmUtils.narrowToClassType(rt);
 			
 			//List<T>
-			if(SbmUtils.isAncestorType(List.class, actualType))
+			if(isAncestorType(List.class, actualType))
 			{
 				result=convertPropertyValueMapToList(pvm, actualType, atas[0]);
 			}
 			//Set<T>
-			else if(SbmUtils.isAncestorType(Set.class, actualType))
+			else if(isAncestorType(Set.class, actualType))
 			{
 				List<?> tmpRe=convertPropertyValueMapToList(pvm, List.class, atas[0]);
 				result=listToSet(tmpRe, actualType);
 			}
 			//Map<K, V>
-			else if(SbmUtils.isAncestorType(Map.class, actualType))
+			else if(isAncestorType(Map.class, actualType))
 			{
 				result=convertPropertyValueMapToMap(pvm, actualType, atas[0], atas[1]);
 			}
@@ -1400,6 +1400,41 @@ public class DefaultGenericConverter implements GenericConverter
 		{
 			throw new GenericConvertException("exception occur while creating instance of type "+SbmUtils.toString(type),e);
 		}
+	}
+	
+	/**
+	 * 给定类型是否是另一类型的父类型
+	 * @param ancestor
+	 * @param descendant
+	 * @return
+	 * @date 2012-5-24
+	 */
+	protected boolean isAncestorType(Type ancestor, Type descendant)
+	{
+		return SbmUtils.isAncestorType(ancestor, descendant);
+	}
+	
+	/**
+	 * 给定对象是否是某类型的实例
+	 * @param obj
+	 * @param type
+	 * @return
+	 * @date 2012-5-24
+	 */
+	protected boolean isInstanceOf(Object obj, Type type)
+	{
+		return SbmUtils.isInstanceOf(obj, type);
+	}
+	
+	/**
+	 * 将基本类型转换为包装类型，如果<code>type</code>不是基本类型，它将直接被返回。
+	 * @param type
+	 * @return
+	 * @date 2012-5-24
+	 */
+	protected Type wrapType(Type type)
+	{
+		return SbmUtils.wrapType(type);
 	}
 	
 	/**

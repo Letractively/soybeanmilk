@@ -142,7 +142,7 @@ public class Invoke extends AbstractExecutable
 	 * @return
 	 * @date 2012-5-9
 	 */
-	public void setResolverProvider(Resolver resolver) {
+	public void setResolver(Resolver resolver) {
 		this.resolver = resolver;
 	}
 	
@@ -413,7 +413,7 @@ public class Invoke extends AbstractExecutable
 		MethodInfo result=null;
 		
 		//动态代理类会丢失泛型信息，所以如果是动态代理类，则需要在其实现的接口中查找方法，以获取泛型信息
-		if(SbmUtils.isAncestorType(Proxy.class, clazz))
+		if(isAncestorType(Proxy.class, clazz))
 		{
 			 Class<?>[] interfaces=clazz.getInterfaces();
 			 
@@ -434,9 +434,9 @@ public class Invoke extends AbstractExecutable
 			Class<?> methodClass=clazz;
 			
 			int al=(args == null ? 0 : args.length);
-			Type[] at=new Type[al];
+			Type[] argTypes=new Type[al];
 			for(int i=0; i<al; i++)
-				at[i]=args[i].getType();
+				argTypes[i]=args[i].getType();
 			
 			Method[] ms=clazz.getMethods();
 			
@@ -458,26 +458,25 @@ public class Invoke extends AbstractExecutable
 						for(int i=0; i<mal; i++)
 						{
 							//null认为是匹配
-							if(at[i] == null)
+							if(argTypes[i] == null)
 								continue;
 							
 							//精确匹配
 							if(exactMatch)
 							{
-								if(!at[i].equals(types[i]))
+								if(!argTypes[i].equals(types[i]))
 								{
 									match=false;
 									break;
 								}
 							}
-							//父子类型匹配
+							//方法类型是参数类型的父类
 							else
 							{
-								Type wat=SbmUtils.toWrapperType(at[i]);
-								Type wt=SbmUtils.toWrapperType(types[i]);
+								Class<?> methodType=SbmUtils.narrowToClassType(wrapType(types[i]));
+								Type argType=wrapType(argTypes[i]);
 								
-								if(SbmUtils.isClassType(wat) && SbmUtils.isClassType(wt)
-										&&!SbmUtils.isAncestorType((Class<?>)wt, (Class<?>)wat))
+								if(!isAncestorType(methodType, argType))
 								{
 									match=false;
 									break;
@@ -499,6 +498,29 @@ public class Invoke extends AbstractExecutable
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * 给定类型是否是另一类型的父类型
+	 * @param ancestor
+	 * @param descendant
+	 * @return
+	 * @date 2012-5-24
+	 */
+	protected boolean isAncestorType(Type ancestor, Type descendant)
+	{
+		return SbmUtils.isAncestorType(ancestor, descendant);
+	}
+	
+	/**
+	 * 将基本类型转换为包装类型，如果<code>type</code>不是基本类型，它将直接被返回。
+	 * @param type
+	 * @return
+	 * @date 2012-5-24
+	 */
+	protected Type wrapType(Type type)
+	{
+		return SbmUtils.wrapType(type);
 	}
 	
 	/**

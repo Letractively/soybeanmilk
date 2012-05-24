@@ -40,7 +40,7 @@ public class InvokeStatementParser
 	/**调用结果关键字*/
 	private String resultKey;
 	
-	/**调用解决者*/
+	/**调用目标*/
 	private String resolver;
 	
 	/**调用方法名*/

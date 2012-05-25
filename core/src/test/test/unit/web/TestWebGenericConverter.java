@@ -139,6 +139,33 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
+	public void convert_paramFilterValue_valueIsMap_toJavaBean_customType() throws Exception
+	{
+		Map<String,Object> paramMap=new HashMap<String, Object>();
+		
+		String id="15";
+		String name="javaBean2";
+		String javaBean_name="javaBean";
+		String javaBean_age="13";
+		
+		paramMap.put("id", id);
+		paramMap.put("name", name);
+		paramMap.put("javaBean.name", javaBean_name);
+		paramMap.put("javaBean.age", javaBean_age);
+		
+		paramMap.put(WebGenericConverter.KEY_CUSTOM_CLASS, JavaBean2.class.getName());
+		
+		ParamFilterValue pfv=new ParamFilterValue("paramName", paramMap);
+		
+		JavaBean2 dest=converter.convert(pfv, null);
+		
+		Assert.assertEquals(id, dest.getId()+"");
+		Assert.assertEquals(name, dest.getName());
+		Assert.assertEquals(javaBean_name, dest.getJavaBean().getName());
+		Assert.assertEquals(javaBean_age, dest.getJavaBean().getAge()+"");
+	}
+	
+	@Test
 	public void convert_paramFilterValue_valueIsMap_containInexistentJavaBeanProperty_filterIsNull() throws Exception
 	{
 		Map<String,Object> paramMap=new HashMap<String, Object>();

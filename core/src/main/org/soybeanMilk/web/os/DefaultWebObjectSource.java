@@ -16,6 +16,8 @@ package org.soybeanMilk.web.os;
 
 import java.io.Serializable;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -252,7 +254,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		
 		if(WebConstants.Scope.PARAM.equalsIgnoreCase(scopedKeys[0]))
 		{
-			result=getParamFilterValue(getRequest().getParameterMap(), (scopedKeys.length > 1 ? scopedKeys[1] : null));
+			result=getParamFilterValue(getRequest().getParameterMap(), (scopedKeys.length > 1 ? scopedKeys[1] : null), expectType);
 		}
 		else if(WebConstants.Scope.REQUEST.equalsIgnoreCase(scopedKeys[0]))
 		{
@@ -293,7 +295,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		}
 		else
 		{
-			result=getObjectWithScopeUnknownKey(strKey);
+			result=getObjectWithScopeUnknownKey(strKey, expectType);
 		}
 		
 		result=convertGotObject(result, expectType);
@@ -305,13 +307,14 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	}
 	
 	/**
-	 * 从此对象源获取无法识别作用域的关键字对应的对象。
+	 * 从此对象源获取无法识别作用域的关键字对应的对象，这个方法不必执行类型转换。
 	 * @param key 关键字，此关键字的作用域无法被识别
+	 * @param expectType 期望类型
 	 * @return
 	 * @date 2012-3-24
 	 */
 	@SuppressWarnings("unchecked")
-	protected Object getObjectWithScopeUnknownKey(String key) throws ObjectSourceException
+	protected Object getObjectWithScopeUnknownKey(String key, Type expectType) throws ObjectSourceException
 	{
 		Object result=getRequest().getAttribute(key);
 		
@@ -324,7 +327,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 				result=getApplication().getAttribute(key);
 				
 				if(result == null)
-					result=getParamFilterValue(getRequest().getParameterMap(), key);
+					result=getParamFilterValue(getRequest().getParameterMap(), key, expectType);
 			}
 		}
 		return result;
@@ -342,12 +345,13 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	}
 	
 	/**
-	 * 获取请求参数过滤值对象。
+	 * 获取请求参数过滤值对象，这个方法不必执行类型转换。
 	 * @param paramMap 参数映射表
 	 * @param paramNameFilter 参数名筛选器，只有以此筛选器开头的参数关键字才会被保留，如果为<code>null</code>或空，则表明不做筛选
+	 * @param expectType 期望类型
 	 * @return
 	 */
-	protected ParamFilterValue getParamFilterValue(Map<String, ?> paramMap, String paramNameFilter)
+	protected ParamFilterValue getParamFilterValue(Map<String, ?> paramMap, String paramNameFilter, Type expectType)
 	{
 		ParamFilterValue result=null;
 		
@@ -358,7 +362,8 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		else
 		{
 			Object explictValue=paramMap.get(paramNameFilter);
-			if(explictValue != null)
+			
+			if(explictValue!=null || isSingleParamValue(expectType))
 			{
 				result=new ParamFilterValue(paramNameFilter, explictValue);
 			}
@@ -382,6 +387,32 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * 给定的类型是否只对应一个参数值
+	 * @param type
+	 * @return
+	 * @date 2012-5-25
+	 */
+	protected boolean isSingleParamValue(Type type)
+	{
+		if(!SbmUtils.isClassType(type))
+			return false;
+		else
+		{
+			Class<?> clazz=SbmUtils.narrowToClassType(type);
+			
+			if(clazz.isPrimitive())
+				return true;
+			else if (Boolean.class.equals(type) || Integer.class.equals(type) || Long.class.equals(type)
+					|| Float.class.equals(type) || Double.class.equals(type)
+					|| BigInteger.class.equals(type) || BigDecimal.class.equals(type)
+					|| Character.class.equals(type) || Byte.class.equals(type) || Short.class.equals(type))
+	            return true;
+	        else
+	        	return false;
+		}
 	}
 	
 	/**

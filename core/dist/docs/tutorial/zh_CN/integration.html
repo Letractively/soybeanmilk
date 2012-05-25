@@ -49,8 +49,8 @@
 		&lt;param-value&gt;/WEB-INF/soybean-milk-config.xml&lt;/param-value&gt;
 	&lt;/init-param&gt;
 	&lt;init-param&gt;
-		&lt;param-name&gt;external-resolver-factory-key&lt;/param-name&gt;
-		&lt;param-value&gt;mySpringAppContextResolverFactory&lt;/param-value&gt;
+		&lt;param-name&gt;external-resolver-object-factory&lt;/param-name&gt;
+		&lt;param-value&gt;mySpringAppContextResolverObjectFactory&lt;/param-value&gt;
 	&lt;/init-param&gt;
 	&lt;init-param&gt;
 		&lt;param-name&gt;webObjectSoruce-factory-class&lt;/param-name&gt;
@@ -78,7 +78,7 @@
 						<a href="#init_soybean-milk-config">soybean-milk-config</a>
 					</li>
 					<li>
-						<a href="#init_external-resolver-factory-key">external-resolver-factory-key</a>
+						<a href="#init_external-resolver-object-factory">external-resolver-object-factory</a>
 					</li>
 					<li>
 						<a href="#init_webObjectSoruce-factory-class">webObjectSoruce-factory-class</a>
@@ -116,12 +116,12 @@
 			</p>
 			<div class="seprator"></div>
 			<p>
-				<a name="init_external-resolver-factory-key"></a>
-				<span class="tag bold">external-resolver-factory-key</span>（可选）
+				<a name="init_external-resolver-object-factory"></a>
+				<span class="tag bold">external-resolver-object-factory</span>（可选）
 			</p>
 			<p>
-				指定外部<a href="../../api/org/soybeanMilk/core/resolver/ResolverFactory.html" class="glossary">解决对象工厂</a>在应用（ServletContext）中的关键字。
-				如果你设置了这个初始化参数，<span class="glossary">DispatchServlet</span>将会从应用中查找外部<span class="glossary">解决对象工厂</span>并将它整合到框架中。
+				指定外部<a href="../../api/org/soybeanMilk/core/exe/support/ResolverObjectFactory.html" class="glossary">调用目标工厂</a>在应用（ServletContext）中的关键字。
+				如果你设置了这个初始化参数，<span class="glossary">DispatchServlet</span>将会从应用中查找外部<span class="glossary">调用目标工厂</span>并将它整合到框架中。
 			</p>
 			<p>
 				你可以使用这个初始化参数来整合其他框架，比如IOC容器Spring和Guice。
@@ -130,29 +130,32 @@
 				下面是一个整合Spring的过程示例：
 			</p>
 			<p>
-				首先，定义一个<span class="glossary">解决对象工厂</span>类：
+				首先，定义一个<span class="glossary">调用目标工厂</span>类：
 <pre class="code-java">
-public class SpringResolverFactory implements ResolverFactory
+public class SpringResolverObjectFactory implements ResolverObjectFactory
 {
 	private BeanFactory beanFactory;
 	
-	public MySpringResolverFactory(BeanFactory beanFactory)
+	public MySpringResolverObjectFactory(BeanFactory beanFactory)
 	{
 		this.beanFactory=beanFactory;
 	}
 	
 	@Override
-	public Object getResolver(Serializable resolverId)
+	public Object getResolverObject(Serializable resolverObjectId)
 	{
-		return beanFactory == null ? null : beanFactory.getBean(resolverId);
+		return beanFactory == null ? null : beanFactory.getBean(resolverObjectId);
 	}
+	
+	@Override
+	public void addResolverObject(Serializable resolverObjectId, Object resolverObject){}
 }
 </pre>
 			</p>
 			<p>
 				定义一个应用监听器，并把它配置在web.xml中Spring初始化监听器之后：
 <pre class="code-java">
-public class SpringResolverFactoryInitListener implements ServletContextListener
+public class SpringResolverObjectFactoryInitListener implements ServletContextListener
 {
 	public void contextDestroyed(ServletContextEvent event)
 	{
@@ -164,9 +167,9 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 		ServletContext context=event.getServletContext();
 		
 		BeanFactory springContext=WebApplicationContextUtils.getWebApplicationContext(context);
-		SpringResolverFactory srf=new SpringResolverFactory(springContext);
+		SpringResolverObjectFactory srf=new SpringResolverObjectFactory(springContext);
 		
-		context.setAttribute("<span style="color:red;">springAppContextResolverFactory</span>",rf);
+		context.setAttribute("<span style="color:red;">springAppContextResolverObjectFactory</span>",rf);
 	}
 }
 </pre>
@@ -177,12 +180,12 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
     &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
 &lt;/listener&gt;
 &lt;listener&gt;
-    &lt;listener-class&gt;my.SpringResolverFactoryInitListener&lt;/listener-class&gt;
+    &lt;listener-class&gt;my.SpringResolverObjectFactoryInitListener&lt;/listener-class&gt;
 &lt;/listener&gt;
 </pre>
 			</p>
 			<p>
-				然后，将你的<span class="glossary">DispatchServlet</span>初始化参数<span class="tag">external-resolver-factory-key</span>的值设置为“<span style="color:red;">springAppContextResolverFactory</span>”。
+				然后，将你的<span class="glossary">DispatchServlet</span>初始化参数<span class="tag">external-resolver-object-factory</span>的值设置为“<span style="color:red;">springAppContextResolverObjectFactory</span>”。
 			</p>
 			<p>
 				这样，你就可以在框架配置文件<span class="tag">&lt;invoke&gt;</span>标签的<span class="tagAttr">resolver</span>属性中使用在Spring中定义的那些<span class="tag">&lt;bean&gt;</span>的<span class="tagAttr">id</span>了。
@@ -205,7 +208,7 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 </pre>
 			</p>
 			<p>
-				<span style="font-size:x-large;font-weight:bold;">还有</span>一种非常简便的整合方法，即是重写<span class="glossary">DispatchServlet</span>的<span class="tagValue">getInitExternalResolverFactory()</span>方法：
+				<span style="font-size:x-large;font-weight:bold;">还有</span>一种非常简便的整合方法，即是重写<span class="glossary">DispatchServlet</span>的<span class="tagValue">getInitExternalResolverObjectFactory()</span>方法：
 			</p>
 <pre class="code-java">
 package my.web;
@@ -214,29 +217,32 @@ public class DispatchServlet extends org.soybeanMilk.web.servlet.DispatchServlet
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	protected ResolverFactory getInitExternalResolverFactory()
+	protected ResolverObjectFactory getInitExternalResolverObjectFactory()
 			throws ServletException
 	{
 		final BeanFactory beanFactory=
 			WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		
-		return new ResolverFactory()
+		return new ResolverObjectFactory()
 		{
 			@Override
-			public Object getResolver(Serializable key)
+			public Object getResolver(Serializable resolverObjectId)
 			{
 				if(beanFactory == null)
 					return null;
 				
 				try
 				{
-					return beanFactory.getBean(key.toString());
+					return beanFactory.getBean(resolverObjectId.toString());
 				}
 				catch(Exception e)
 				{
 					return null;
 				}
 			}
+			
+			@Override
+			public void addResolverObject(Serializable resolverObjectId, Object resolverObject){}
 		};
 	}
 }
@@ -257,9 +263,9 @@ public class DispatchServlet extends org.soybeanMilk.web.servlet.DispatchServlet
 				<span class="tag bold">webObjectSoruce-factory-class</span>（可选）
 			</p>
 			<p>
-				设置自定义的<a href="../../api/org/soybeanMilk/web/os/WebObjectSourceFactory.html">WEB对象源工厂</a>。
-				设置它，你可以让框架使用你自定义的<a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WEB对象源</a>。
-				比如，自定义一个支持更多作用域的<span class="glossary">WEB对象源</span>，从而使<span class="glossary">调用</span>方法的参数和返回结果支持更多的作用域。
+				设置自定义的<a href="../../api/org/soybeanMilk/web/servlet/WebObjectSourceFactory.html">Web对象源工厂</a>。
+				设置它，你可以让框架使用你自定义的<a href="../../api/org/soybeanMilk/web/WebObjectSource.html">Web对象源</a>。
+				比如，自定义一个支持更多作用域的<span class="glossary">Web对象源</span>，从而使<span class="glossary">调用</span>方法的参数和返回结果支持更多的作用域。
 			</p>
 			<p>
 				你可以使用这个初始化参数来整合其他视图层框架，比如Velocity和FreeMarker。
@@ -286,30 +292,33 @@ public class MyWebObjectSourceFactory implements WebObjectSourceFactory
 		return os;
 	}
 	
-	protected static class MyWebObjectSource extends WebObjectSource
+	protected static class MyWebObjectSource extends DefaultWebObjectSource
 	{
 		private Context velocityContext;
+		
 		public Context getVelocityContext() {
 			return velocityContext;
 		}
 		public void setVelocityContext(Context velocityContext) {
 			this.velocityContext = velocityContext;
 		}
+		
 		@Override
-		protected Object getObjectFromUnknownScope(String scope, String keyInScope, Type expectType)
+		protected Object getObjectWithScopeUnknownKey(String key, Type expectType) throws ObjectSourceException
 		{
-			<span class="highlight">if("vm".equals(scope))
-				return velocityContext.get(keyInScope);</span>
+			<span class="highlight">if(key.startWith("vm."))
+				return velocityContext.get(key.subString(3));</span>
 			else
-				return super.getObjectFromUnknownScope(scope, keyInScope, expectType);
+				return super.getObjectWithScopeUnknownKey(key, expectType);
 		}
+		
 		@Override
-		protected void setObjectToUnknownScope(String scope, String keyInScope, Object value)
+		protected void setObjectWithScopeUnknownKey(String key, Object value) throws ObjectSourceException
 		{
-			<span class="highlight">if("vm".equals(scope))
-				velocityContext.put(keyInScope, value);</span>
+			<span class="highlight">if(key.startWith("vm."))
+				velocityContext.put(key.subString(3), value);</span>
 			else
-				super.setObjectToUnknownScope(scope, keyInScope, value);
+				super.setObjectWithScopeUnknownKey(key, value);
 		}
 		
 		//...

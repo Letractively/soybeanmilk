@@ -50,8 +50,8 @@
 		&lt;param-value&gt;/WEB-INF/soybean-milk-config.xml&lt;/param-value&gt;
 	&lt;/init-param&gt;
 	&lt;init-param&gt;
-		&lt;param-name&gt;external-resolver-factory-key&lt;/param-name&gt;
-		&lt;param-value&gt;mySpringAppContextResolverFactory&lt;/param-value&gt;
+		&lt;param-name&gt;external-resolver-object-factory&lt;/param-name&gt;
+		&lt;param-value&gt;mySpringAppContextResolverObjectFactory&lt;/param-value&gt;
 	&lt;/init-param&gt;
 	&lt;init-param&gt;
 		&lt;param-name&gt;webObjectSoruce-factory-class&lt;/param-name&gt;
@@ -79,7 +79,7 @@
 						<a href="#init_soybean-milk-config">soybean-milk-config</a>
 					</li>
 					<li>
-						<a href="#init_external-resolver-factory-key">external-resolver-factory-key</a>
+						<a href="#init_external-resolver-object-factory">external-resolver-object-factory</a>
 					</li>
 					<li>
 						<a href="#init_webObjectSoruce-factory-class">webObjectSoruce-factory-class</a>
@@ -118,12 +118,12 @@
 			</p>
 			<div class="seprator"></div>
 			<p>
-				<a name="init_external-resolver-factory-key"></a>
-				<span class="tag bold">external-resolver-factory-key</span> (Optional)
+				<a name="init_external-resolver-object-factory"></a>
+				<span class="tag bold">external-resolver-object-factory</span> (Optional)
 			</p>
 			<p>
-				Set the external <a href="../../api/org/soybeanMilk/core/resolver/ResolverFactory.html" class="glossary">ResolverFactory</a> key in your application (ServletContext).
-				If you set this parameter, the <span class="glossary">DispatchServlet</span> will find external <span class="glossary">ResolverFactory</span> with this key and integrate it.
+				Set the external <a href="../../api/org/soybeanMilk/core/exe/support/ResolverObjectFactory.html" class="glossary">ResolverObjectFactory</a> key in your application (ServletContext).
+				If you set this parameter, the <span class="glossary">DispatchServlet</span> will find external <span class="glossary">ResolverObjectFactory</span> with this key and integrate it.
 			</p>
 			<p>
 				You can integrate other IOC container (such as Spring or Guice) by setting this init parameter.
@@ -132,29 +132,32 @@
 				The following is a example of Spring integration:
 			</p>
 			<p>
-				First, you must write a <span class="glossary">ResolverFactory</span> class:
+				First, you must write a <span class="glossary">ResolverObjectFactory</span> class:
 <pre class="code-java">
-public class SpringResolverFactory implements ResolverFactory
+public class SpringResolverObjectFactory implements ResolverObjectFactory
 {
 	private BeanFactory beanFactory;
 	
-	public MySpringResolverFactory(BeanFactory beanFactory)
+	public MySpringResolverObjectFactory(BeanFactory beanFactory)
 	{
 		this.beanFactory=beanFactory;
 	}
 	
 	@Override
-	public Object getResolver(Serializable resolverId)
+	public Object getResolverObject(Serializable resolverObjectId)
 	{
-		return beanFactory == null ? null : beanFactory.getBean(resolverId);
+		return beanFactory == null ? null : beanFactory.getBean(resolverObjectId);
 	}
+	
+	@Override
+	public void addResolverObject(Serializable resolverObjectId, Object resolverObject){}
 }
 </pre>
 			</p>
 			<p>
 				and a ServletContext listener with adding it after Spring init listener in <span class="var">web.xml</span>:
 <pre class="code-java">
-public class SpringResolverFactoryInitListener implements ServletContextListener
+public class SpringResolverObjectFactoryInitListener implements ServletContextListener
 {
 	public void contextDestroyed(ServletContextEvent event)
 	{
@@ -166,9 +169,9 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 		ServletContext context=event.getServletContext();
 		
 		BeanFactory springContext=WebApplicationContextUtils.getWebApplicationContext(context);
-		SpringResolverFactory srf=new SpringResolverFactory(springContext);
+		SpringResolverObjectFactory srf=new SpringResolverObjectFactory(springContext);
 		
-		context.setAttribute("<span style="color:red;">springAppContextResolverFactory</span>",rf);
+		context.setAttribute("<span style="color:red;">springAppContextResolverObjectFactory</span>",rf);
 	}
 }
 </pre>
@@ -179,12 +182,12 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
     &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
 &lt;/listener&gt;
 &lt;listener&gt;
-    &lt;listener-class&gt;my.SpringResolverFactoryInitListener&lt;/listener-class&gt;
+    &lt;listener-class&gt;my.SpringResolverObjectFactoryInitListener&lt;/listener-class&gt;
 &lt;/listener&gt;
 </pre>
 			</p>
 			<p>
-				Then, setting <span class="tag">external-resolver-factory-key</span> value to be "<span class="var" style="color:red;">springAppContextResolverFactory</span>".
+				Then, setting <span class="tag">external-resolver-object-factory</span> value to be "<span class="var" style="color:red;">springAppContextResolverObjectFactory</span>".
 			</p>
 			<p>
 				Now, you can use any <span class="tagAttr">id</span> of <span class="tag">&lt;bean&gt;</span> defined in Spring as the <span class="tagAttr">resolver</span> attribute of <span class="tag">&lt;invoke&gt;</span>.
@@ -208,7 +211,7 @@ public class SpringResolverFactoryInitListener implements ServletContextListener
 			</p>
 			<p>
 				<span style="font-size:x-large;font-weight:bold;">There is</span> also a very simple way,
-				by overriding the <span class="tagValue">getInitExternalResolverFactory()</span> method of <span class="glossary">DispatchServlet</span> class:
+				by overriding the <span class="tagValue">getInitExternalResolverObjectFactory()</span> method of <span class="glossary">DispatchServlet</span> class:
 			</p>
 <pre class="code-java">
 package my.web;
@@ -217,29 +220,32 @@ public class DispatchServlet extends org.soybeanMilk.web.servlet.DispatchServlet
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	protected ResolverFactory getInitExternalResolverFactory()
+	protected ResolverObjectFactory getInitExternalResolverObjectFactory()
 			throws ServletException
 	{
 		final BeanFactory beanFactory=
 			WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		
-		return new ResolverFactory()
+		return new ResolverObjectFactory()
 		{
 			@Override
-			public Object getResolver(Serializable key)
+			public Object getResolver(Serializable resolverObjectId)
 			{
 				if(beanFactory == null)
 					return null;
 				
 				try
 				{
-					return beanFactory.getBean(key.toString());
+					return beanFactory.getBean(resolverObjectId.toString());
 				}
 				catch(Exception e)
 				{
 					return null;
 				}
 			}
+			
+			@Override
+			public void addResolverObject(Serializable resolverObjectId, Object resolverObject){}
 		};
 	}
 }
@@ -260,8 +266,8 @@ public class DispatchServlet extends org.soybeanMilk.web.servlet.DispatchServlet
 				<span class="tag bold">webObjectSoruce-factory-class</span> (Optional)
 			</p>
 			<p>
-				Set the customized <a href="../../api/org/soybeanMilk/web/os/WebObjectSourceFactory.html">WebObjectSourceFactory</a>.
-				You can make the framework to use your own <a href="../../api/org/soybeanMilk/web/os/WebObjectSource.html">WebObjectSource</a> by setting this init parameter.
+				Set the customized <a href="../../api/org/soybeanMilk/web/servlet/WebObjectSourceFactory.html">WebObjectSourceFactory</a>.
+				You can make the framework to use your own <a href="../../api/org/soybeanMilk/web/WebObjectSource.html">WebObjectSource</a> by setting this init parameter.
 				For example, you can define an <span class="glossary">WebObjectSource</span> that supporting more scopes, so that they can be used in the
 				<span class="glossary">Invoke</span> method arguments or result keywords.
 			</p>
@@ -290,30 +296,33 @@ public class MyWebObjectSourceFactory implements WebObjectSourceFactory
 		return os;
 	}
 	
-	protected static class MyWebObjectSource extends WebObjectSource
+	protected static class MyWebObjectSource extends DefaultWebObjectSource
 	{
 		private Context velocityContext;
+		
 		public Context getVelocityContext() {
 			return velocityContext;
 		}
 		public void setVelocityContext(Context velocityContext) {
 			this.velocityContext = velocityContext;
 		}
+		
 		@Override
-		protected Object getObjectFromUnknownScope(String scope, String keyInScope, Type expectType)
+		protected Object getObjectWithScopeUnknownKey(String key, Type expectType) throws ObjectSourceException
 		{
-			<span class="highlight">if("vm".equals(scope))
-				return velocityContext.get(keyInScope);</span>
+			<span class="highlight">if(key.startWith("vm."))
+				return velocityContext.get(key.subString(3));</span>
 			else
-				return super.getObjectFromUnknownScope(scope, keyInScope, expectType);
+				return super.getObjectWithScopeUnknownKey(key, expectType);
 		}
+		
 		@Override
-		protected void setObjectToUnknownScope(String scope, String keyInScope, Object value)
+		protected void setObjectWithScopeUnknownKey(String key, Object value) throws ObjectSourceException
 		{
-			<span class="highlight">if("vm".equals(scope))
-				velocityContext.put(keyInScope, value);</span>
+			<span class="highlight">if(key.startWith("vm."))
+				velocityContext.put(key.subString(3), value);</span>
 			else
-				super.setObjectToUnknownScope(scope, keyInScope, value);
+				super.setObjectWithScopeUnknownKey(key, value);
 		}
 		
 		//...

@@ -18,7 +18,6 @@ import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -371,7 +370,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 			{
 				//按照访问符表达式过滤
 				paramNameFilter=paramNameFilter+WebConstants.ACCESSOR;
-				Map<String, Object> fm=new HashMap<String, Object>();
+				Map<String, Object> fm=new ParamFilterMap<Object>();
 				int fl=paramNameFilter.length();
 				
 				Set<String> keys=paramMap.keySet();
@@ -426,44 +425,104 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 	{
 		Object result=null;
 		
-		if(targetType == null)
+		ParamFilterValue pfv=(sourceObj instanceof ParamFilterValue ? ((ParamFilterValue)sourceObj) : null);
+		
+		if(pfv != null)
+			sourceObj=pfv.getValue();
+		
+		try
 		{
-			if(sourceObj instanceof ParamFilterValue)
-				result=((ParamFilterValue)sourceObj).getValue();
-			else
-				result=sourceObj;
+			result=getGenericConverter().convert(sourceObj, targetType);
 		}
-		else
+		catch(ConvertException e)
 		{
-			try
+			if(pfv != null)
 			{
-				result=getGenericConverter().convert(sourceObj, targetType);
-			}
-			catch(ConvertException e)
-			{
-				if(sourceObj instanceof ParamFilterValue)
+				String paramName=pfv.getFilter();
+				
+				if(e instanceof MapConvertException)
 				{
-					ParamFilterValue pfv=(ParamFilterValue)sourceObj;
+					String key=((MapConvertException)e).getKey();
 					
-					String paramName=pfv.getFilter();
-					
-					if(e instanceof MapConvertException)
-					{
-						String key=((MapConvertException)e).getKey();
-						
-						if(paramName == null)
-							paramName=key;
-						else if(key != null)
-							paramName+=key;
-					}
-					
-					throw new ParamIllegalException(paramName, e.getSourceObject(), e.getTargetType(), e);
+					if(paramName == null)
+						paramName=key;
+					else if(key != null)
+						paramName+=key;
 				}
-				else
-					throw new ObjectSourceException(e);
+				
+				throw new ParamIllegalException(paramName, e.getSourceObject(), e.getTargetType(), e);
 			}
+			else
+				throw new ObjectSourceException(e);
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * 参数过滤值，它保存参数过滤器和过滤结果值。
+	 * 
+	 * @author earthangry@gmail.com
+	 * @date 2012-3-27
+	 */
+	protected static class ParamFilterValue
+	{
+		/**过滤器*/
+		private String filter;
+		
+		/**过滤值*/
+		private Object value;
+		
+		/**
+		 * 创建一个空过滤值对象
+		 */
+		public ParamFilterValue(){}
+
+		/**
+		 * 创建一个参数过滤值对象
+		 * @param filter 过滤器
+		 * @param value 过滤值
+		 */
+		public ParamFilterValue(String filter, Object value)
+		{
+			this.filter = filter;
+			this.value = value;
+		}
+
+		/**
+		 * 设置过滤器
+		 * @param filter
+		 */
+		public void setFilter(String filter)
+		{
+			this.filter = filter;
+		}
+		
+		/**
+		 * 获取过滤器
+		 * @return
+		 */
+		public String getFilter()
+		{
+			return this.filter;
+		}
+		
+		/**
+		 * 设置过滤值
+		 * @param value
+		 */
+		public void setValue(Object value)
+		{
+			this.value = value;
+		}
+		
+		/**
+		 * 获取过滤值
+		 * @return
+		 */
+		public Object getValue()
+		{
+			return this.value;
+		}
 	}
 }

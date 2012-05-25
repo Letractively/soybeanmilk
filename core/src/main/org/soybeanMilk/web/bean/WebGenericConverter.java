@@ -30,7 +30,7 @@ import org.soybeanMilk.core.bean.ConvertException;
 import org.soybeanMilk.core.bean.DefaultGenericConverter;
 import org.soybeanMilk.core.bean.GenericConvertException;
 import org.soybeanMilk.web.WebObjectSource;
-import org.soybeanMilk.web.os.ParamFilterValue;
+import org.soybeanMilk.web.os.ParamFilterMap;
 
 /**
  * Web通用转换器，除了继承自{@linkplain DefaultGenericConverter 默认通用转换器的}的转换支持，
@@ -69,10 +69,6 @@ public class WebGenericConverter extends DefaultGenericConverter
 			
 			result=convertObjectToType(sourceObj, targetType);
 		}
-		else if(sourceObj instanceof ParamFilterValue)
-		{
-			result=convertParamFilterValue((ParamFilterValue)sourceObj, targetType);
-		}
 		else if(sourceObj instanceof HttpServletRequest)
 		{
 			result=getConverterNotNull(HttpServletRequest.class, targetType).convert(sourceObj, targetType);
@@ -101,34 +97,23 @@ public class WebGenericConverter extends DefaultGenericConverter
 		return result;
 	}
 	
-	/**
-	 * 转换请求参数过滤值
-	 * @param pfv
-	 * @param targetType
-	 * @return
-	 * @throws ConvertException
-	 * @date 2012-3-28
-	 */
-	@SuppressWarnings("unchecked")
-	protected Object convertParamFilterValue(ParamFilterValue pfv, Type targetType) throws ConvertException
+	@Override
+	protected PropertyValueMap toPropertyValueMap(Map<String, ?> map)
 	{
-		Object result=null;
-		
-		String filter=pfv.getFilter();
-		Object value=pfv.getValue();
-		
-		if(isInstanceOf(value, wrapType(targetType)))
-			return value;
-		else if(value instanceof Map<?, ?>)
+		if(map instanceof PropertyValueMap)
 		{
-			//过滤后的参数映射表必须是清洁的
-			value=new PropertyValueMap((Map<String, ?>)value, (filter!=null && filter.length()!=0));
-			result=convertObjectToType(value, targetType);
+			return (PropertyValueMap)map;
 		}
 		else
-			result=convertObjectToType(value, targetType);
-		
-		return result;
+		{
+			//过滤后的参数是清洁的，否则一律当作是不清洁的
+			if(map instanceof ParamFilterMap<?>)
+				return new PropertyValueMap(map, true);
+			else
+			{
+				return new PropertyValueMap(map, false);
+			}
+		}
 	}
 	
 	@Override

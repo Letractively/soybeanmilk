@@ -38,7 +38,6 @@ import org.soybeanMilk.core.bean.MapConvertException;
 import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 import org.soybeanMilk.web.os.DefaultWebObjectSource;
-import org.soybeanMilk.web.os.ParamFilterValue;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -73,176 +72,6 @@ public class TestWebGenericConverter
 		
 		Integer dest=converter.convert(src, Integer.class);
 		Assert.assertNull(dest);
-	}
-	
-	@Test
-	public void convert_paramFilterValue_valueIsSimpleObject() throws Exception
-	{
-		ParamFilterValue pfv=new ParamFilterValue("paramName", "12345");
-		
-		Integer dest=converter.convert(pfv, Integer.class);
-		
-		Assert.assertEquals(pfv.getValue(), dest.toString());
-	}
-	
-	@Test
-	public void convert_paramFilterValue_valueIsMap_toRawMap() throws Exception
-	{
-		Map<String,Object> paramMap=new HashMap<String, Object>();
-		
-		String id="15";
-		String name="javaBean2";
-		String javaBean_name="javaBean";
-		String javaBean_age="13";
-		
-		paramMap.put("id", id);
-		paramMap.put("name", name);
-		paramMap.put("javaBean.name", javaBean_name);
-		paramMap.put("javaBean.age", javaBean_age);
-		
-		ParamFilterValue pfv=new ParamFilterValue("paramName", paramMap);
-		
-		Map<String, String[]> dest=converter.convert(pfv, Map.class);
-		
-		Assert.assertEquals(paramMap.size(), dest.size());
-		
-		Assert.assertEquals(id, dest.get("id"));
-		Assert.assertEquals(name, dest.get("name"));
-		Assert.assertEquals(javaBean_name, dest.get("javaBean.name"));
-		Assert.assertEquals(javaBean_age, dest.get("javaBean.age"));
-	}
-	
-
-	@Test
-	public void convert_paramFilterValue_valueIsMap_toJavaBean() throws Exception
-	{
-		Map<String,Object> paramMap=new HashMap<String, Object>();
-		
-		String id="15";
-		String name="javaBean2";
-		String javaBean_name="javaBean";
-		String javaBean_age="13";
-		
-		paramMap.put("id", id);
-		paramMap.put("name", name);
-		paramMap.put("javaBean.name", javaBean_name);
-		paramMap.put("javaBean.age", javaBean_age);
-		
-		ParamFilterValue pfv=new ParamFilterValue("paramName", paramMap);
-		
-		JavaBean2 dest=converter.convert(pfv, JavaBean2.class);
-		
-		Assert.assertEquals(id, dest.getId()+"");
-		Assert.assertEquals(name, dest.getName());
-		Assert.assertEquals(javaBean_name, dest.getJavaBean().getName());
-		Assert.assertEquals(javaBean_age, dest.getJavaBean().getAge()+"");
-	}
-	
-	@Test
-	public void convert_paramFilterValue_valueIsMap_toJavaBean_customType() throws Exception
-	{
-		Map<String,Object> paramMap=new HashMap<String, Object>();
-		
-		String id="15";
-		String name="javaBean2";
-		String javaBean_name="javaBean";
-		String javaBean_age="13";
-		
-		paramMap.put("id", id);
-		paramMap.put("name", name);
-		paramMap.put("javaBean.name", javaBean_name);
-		paramMap.put("javaBean.age", javaBean_age);
-		
-		paramMap.put(WebGenericConverter.KEY_CUSTOM_CLASS, JavaBean2.class.getName());
-		
-		ParamFilterValue pfv=new ParamFilterValue("paramName", paramMap);
-		
-		JavaBean2 dest=converter.convert(pfv, null);
-		
-		Assert.assertEquals(id, dest.getId()+"");
-		Assert.assertEquals(name, dest.getName());
-		Assert.assertEquals(javaBean_name, dest.getJavaBean().getName());
-		Assert.assertEquals(javaBean_age, dest.getJavaBean().getAge()+"");
-	}
-	
-	@Test
-	public void convert_paramFilterValue_valueIsMap_containInexistentJavaBeanProperty_filterIsNull() throws Exception
-	{
-		Map<String,Object> paramMap=new HashMap<String, Object>();
-		
-		String name="jack";
-		String age="15";
-		String birth="1900-10-21";
-		
-		paramMap.put("name", name);
-		paramMap.put("age", age);
-		paramMap.put("birth", birth);
-		
-		paramMap.put("inexistent", "inexistentValue");
-		
-		ParamFilterValue pfv=new ParamFilterValue(null, paramMap);
-		
-		JavaBean dest=converter.convert(pfv, JavaBean.class);
-		
-		Assert.assertEquals(name, dest.getName());
-		Assert.assertEquals(age, dest.getAge().toString());
-		Assert.assertEquals(birth, new SimpleDateFormat("yyyy-MM-dd").format(dest.getBirth()));
-	}
-	
-	@Test
-	public void convert_paramFilterValue_valueIsMap_containInexistentJavaBeanProperty_filterIsEmpty() throws Exception
-	{
-		Map<String,Object> paramMap=new HashMap<String, Object>();
-		
-		String name="jack";
-		String age="15";
-		String birth="1900-10-21";
-		
-		paramMap.put("name", name);
-		paramMap.put("age", age);
-		paramMap.put("birth", birth);
-		
-		paramMap.put("inexistent", "inexistentValue");
-		
-		ParamFilterValue pfv=new ParamFilterValue("", paramMap);
-		
-		JavaBean dest=converter.convert(pfv, JavaBean.class);
-		
-		Assert.assertEquals(name, dest.getName());
-		Assert.assertEquals(age, dest.getAge().toString());
-		Assert.assertEquals(birth, new SimpleDateFormat("yyyy-MM-dd").format(dest.getBirth()));
-	}
-	
-	@Test
-	public void convert_paramFilterValue_valueIsMap_containInexistentJavaBeanProperty_filterNotEmpty() throws Exception
-	{
-		Map<String,Object> paramMap=new HashMap<String, Object>();
-		
-		String name="jack";
-		String age="15";
-		String birth="1900-10-21";
-		
-		paramMap.put("name", name);
-		paramMap.put("age", age);
-		paramMap.put("birth", birth);
-		
-		paramMap.put("inexistent", "inexistentValue");
-		
-		ParamFilterValue pfv=new ParamFilterValue("paramName", paramMap);
-		
-		
-		GenericConvertException re=null;
-		
-		try
-		{
-			converter.convert(pfv, JavaBean.class);
-		}
-		catch(GenericConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertTrue((re.getMessage().startsWith("can not find property \"inexistent\"")));
 	}
 	
 	@Test
@@ -422,6 +251,26 @@ public class TestWebGenericConverter
 				Assert.assertTrue( idx> -1 );
 			}
 		}
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToJavaBean_srcContainInexistentJavaBeanProperty() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] id=new String[]{"1"};
+		String[] name=new String[]{"jack"};
+		String[] simpleCollectionProperty=new String[]{"1","3","9"};
+		
+		src.put("id", id);
+		src.put("name", name);
+		src.put("simpleArray", simpleCollectionProperty);
+		src.put("notAnyProperty", "aaaajskjewr");
+		
+		ComplexJavaBean dest=converter.convert(src, ComplexJavaBean.class);
+		
+		Assert.assertEquals(id[0], dest.getId()+"");
+		Assert.assertEquals(name[0], dest.getName());
 	}
 	
 	@Test

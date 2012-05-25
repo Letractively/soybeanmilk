@@ -38,6 +38,7 @@ import org.soybeanMilk.core.bean.MapConvertException;
 import org.soybeanMilk.web.WebObjectSource;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 import org.soybeanMilk.web.os.DefaultWebObjectSource;
+import org.soybeanMilk.web.os.ParamFilterMap;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
@@ -72,36 +73,6 @@ public class TestWebGenericConverter
 		
 		Integer dest=converter.convert(src, Integer.class);
 		Assert.assertNull(dest);
-	}
-	
-	@Test
-	public void convert_noSupportConverter_mapToJavaBean_srcContainInexistentSubJavaBeanProperty_inSubArrayProperty() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		String[] id=new String[]{"1"};
-		String[] name=new String[]{"jack"};
-		
-		String[] cmplexCollectionProperty_id=new String[]{"2","5","7"};
-		String[] cmplexCollectionProperty_name=new String[]{"aaa","bbb","ccc"};
-		
-		src.put("id", id);
-		src.put("name", name);
-		
-		src.put("javaBean2Array.id", cmplexCollectionProperty_id);
-		src.put("javaBean2Array.name", cmplexCollectionProperty_name);
-		src.put("javaBean2Array.notExistsProperty", cmplexCollectionProperty_name);
-		
-		GenericConvertException re=null;
-		try
-		{
-			converter.convert(src, ComplexJavaBean.class);
-		}
-		catch(GenericConvertException e)
-		{
-			re=e;
-		}
-		
-		Assert.assertTrue( (re.getMessage().startsWith("can not find property \"notExistsProperty\"")) );
 	}
 	
 	@Test
@@ -254,26 +225,6 @@ public class TestWebGenericConverter
 	}
 	
 	@Test
-	public void convert_noSupportConverter_mapToJavaBean_srcContainInexistentJavaBeanProperty() throws Exception
-	{
-		Map<String,Object> src=new HashMap<String, Object>();
-		
-		String[] id=new String[]{"1"};
-		String[] name=new String[]{"jack"};
-		String[] simpleCollectionProperty=new String[]{"1","3","9"};
-		
-		src.put("id", id);
-		src.put("name", name);
-		src.put("simpleArray", simpleCollectionProperty);
-		src.put("notAnyProperty", "aaaajskjewr");
-		
-		ComplexJavaBean dest=converter.convert(src, ComplexJavaBean.class);
-		
-		Assert.assertEquals(id[0], dest.getId()+"");
-		Assert.assertEquals(name[0], dest.getName());
-	}
-	
-	@Test
 	public void convert_noSupportConverter_mapToJavaBean_srcArrayPropertyContainIllegalValue() throws Exception
 	{
 		Map<String,Object> src=new HashMap<String, Object>();
@@ -300,6 +251,84 @@ public class TestWebGenericConverter
 		Assert.assertEquals("simpleArray", re.getKey());
 		Assert.assertEquals("illegalValue", re.getSourceObject());
 		Assert.assertEquals(Integer.class, re.getTargetType());
+	}
+
+	@Test
+	public void convert_noSupportConverter_mapToJavaBean_srcContainInexistentJavaBeanProperty() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		
+		String[] id=new String[]{"1"};
+		String[] name=new String[]{"jack"};
+		String[] simpleCollectionProperty=new String[]{"1","3","9"};
+		
+		src.put("id", id);
+		src.put("name", name);
+		src.put("simpleArray", simpleCollectionProperty);
+		src.put("notAnyProperty", "aaaajskjewr");
+		
+		ComplexJavaBean dest=converter.convert(src, ComplexJavaBean.class);
+		
+		Assert.assertEquals(id[0], dest.getId()+"");
+		Assert.assertEquals(name[0], dest.getName());
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToJavaBean_srcContainInexistentSubJavaBeanProperty_inSubArrayProperty() throws Exception
+	{
+		Map<String,Object> src=new HashMap<String, Object>();
+		String[] id=new String[]{"1"};
+		String[] name=new String[]{"jack"};
+		
+		String[] cmplexCollectionProperty_id=new String[]{"2","5","7"};
+		String[] cmplexCollectionProperty_name=new String[]{"aaa","bbb","ccc"};
+		
+		src.put("id", id);
+		src.put("name", name);
+		
+		src.put("javaBean2Array.id", cmplexCollectionProperty_id);
+		src.put("javaBean2Array.name", cmplexCollectionProperty_name);
+		src.put("javaBean2Array.notExistsProperty", cmplexCollectionProperty_name);
+		
+		GenericConvertException re=null;
+		try
+		{
+			converter.convert(src, ComplexJavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( (re.getMessage().startsWith("can not find property \"notExistsProperty\"")) );
+	}
+	
+	@Test
+	public void convert_noSupportConverter_mapToJavaBean_paramFilterMap() throws Exception
+	{
+		Map<String,Object> src=new ParamFilterMap<Object>();
+		
+		String[] name=new String[]{"jack"};
+		String[] age=new String[]{"15"};
+		String[] birth=new String[]{"1900-10-21"};
+		
+		src.put("name", name);
+		src.put("age", age);
+		src.put("birth", birth);
+		src.put("illegalProperty", "1");
+		
+		GenericConvertException re=null;
+		
+		try
+		{
+			converter.convert(src, JavaBean.class);
+		}
+		catch(GenericConvertException e)
+		{
+			re=e;
+		}
+		
+		Assert.assertTrue( re.getMessage().startsWith("can not find property \"illegalProperty\"") );
 	}
 	
 	@Test

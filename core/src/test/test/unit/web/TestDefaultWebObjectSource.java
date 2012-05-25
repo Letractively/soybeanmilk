@@ -84,6 +84,22 @@ public class TestDefaultWebObjectSource
 	}
 	
 	@Test
+	public void get_paramScope_keyIsScope_targetIsJavaBean() throws Exception
+	{
+		request.setParameter("id", new String[]{"1"});
+		request.setParameter("name", new String[]{"jack"});
+		request.setParameter("yourBean.id", new String[]{"2"});
+		request.setParameter("yourBean.name", new String[]{"tom"});
+		
+		MyBean dest=webObjectSource.get("param", MyBean.class);
+		
+		Assert.assertEquals(1, dest.getId().intValue());
+		Assert.assertEquals("jack", dest.getName());
+		Assert.assertEquals(2, dest.getYourBean().getId().intValue());
+		Assert.assertEquals("tom", dest.getYourBean().getName());
+	}
+	
+	@Test
 	public void get_paramScope_singleValue() throws Exception
 	{
 		request.setParameter("key", "3");
@@ -180,7 +196,7 @@ public class TestDefaultWebObjectSource
 		Assert.assertEquals(3, re.getYourBean().getId().intValue());
 		Assert.assertEquals("tom", re.getYourBean().getName());
 	}
-
+	
 	@Test
 	public void get_paramScope_mapValue_containIllegalValue() throws Exception
 	{

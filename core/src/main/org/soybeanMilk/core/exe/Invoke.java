@@ -234,7 +234,7 @@ public class Invoke extends AbstractExecutable
 		
 		MethodInfo methodInfo=getMethodInfo(resolverClass, this.methodName, this.args);
 		if(methodInfo == null)
-			throw new ExecuteException("no method named "+this.methodName+" with "+SbmUtils.toString(this.args)
+			throw new ExecuteException("no method named "+SbmUtils.toString(this.methodName)+" with "+SbmUtils.toString(this.args)
 					+" arguments can be found in resolver class "+SbmUtils.toString(resolverClass));
 		
 		Object[] argValues=prepareMethodArgValues(methodInfo, objectSource);

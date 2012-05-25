@@ -229,7 +229,7 @@ public class DispatchServlet extends org.soybeanMilk.web.servlet.DispatchServlet
 		return new ResolverObjectFactory()
 		{
 			@Override
-			public Object getResolver(Serializable resolverObjectId)
+			public Object getResolverObject(Serializable resolverObjectId)
 			{
 				if(beanFactory == null)
 					return null;
@@ -308,7 +308,8 @@ public class MyWebObjectSourceFactory implements WebObjectSourceFactory
 		}
 		
 		@Override
-		protected Object getObjectWithScopeUnknownKey(String key, Type expectType) throws ObjectSourceException
+		protected Object getObjectWithScopeUnknownKey(String key, Type expectType)
+			throws ObjectSourceException
 		{
 			<span class="highlight">if(key.startWith("vm."))
 				return velocityContext.get(key.subString(3));</span>
@@ -317,7 +318,8 @@ public class MyWebObjectSourceFactory implements WebObjectSourceFactory
 		}
 		
 		@Override
-		protected void setObjectWithScopeUnknownKey(String key, Object value) throws ObjectSourceException
+		protected void setObjectWithScopeUnknownKey(String key, Object value)
+			throws ObjectSourceException
 		{
 			<span class="highlight">if(key.startWith("vm."))
 				velocityContext.put(key.subString(3), value);</span>

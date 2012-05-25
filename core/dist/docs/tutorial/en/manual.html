@@ -249,7 +249,7 @@
 				The nested generic converter implementation <a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">WebGenericConverter</a>
 				has add most common support converters
 				(see <a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a> class),
-				and it can also convert "<span class="var">java.util.Map&lt;String, Object&gt;</span>"  to JavaBean object, JavaBean array and JavaBean collection(List, Set).
+				and it can also convert "<span class="var">java.util.Map&lt;String, Object&gt;</span>"  to JavaBean object, JavaBean collection(Array, List, Set) and JavaBean Map.
 			</p>
 			<div class="seprator"></div>
 			<p>
@@ -372,8 +372,8 @@
 
 &lt;executables&gt;
 		&lt;action name="/handleException.do"&gt;
-			&lt;invoke method="handleException" resolver="exceptionResolver"&gt;
-				&lt;arg&gt;session.execution&lt;/arg&gt;
+			&lt;invoke&gt;
+				exceptionResolver.handleException(session.execution);
 			&lt;/invoke&gt;
 			
 			&lt;target url="/error.jsp" /&gt;
@@ -811,10 +811,10 @@ void genericMethod(T[] array);
 <pre class="code-xml">
 &lt;action name="/complexArgMethod.do"&gt;
 	&lt;invoke&gt;
-		request.myArg = myResolver.paramToMyArg(param);
+		myArg = myResolver.paramToMyArg(param);
 	&lt;/invoke&gt;
 	&lt;invoke&gt;
-		myResolver.complexArgMethod(request.myArg);
+		myResolver.complexArgMethod(myArg);
 	&lt;/invoke&gt;
 &lt;/action&gt;
 </pre>
@@ -838,8 +838,8 @@ void genericMethod(T[] array);
 						You can also define variables in it, for RESTful support.
 						For example:
 <pre class="code-xml">
-&lt;action name="/user/{request.userId}/edit"&gt;
-	&lt;invoke&gt; userResolver.edit(request.userId) &lt;/invoke&gt;
+&lt;action name="/user/{userId}/edit"&gt;
+	&lt;invoke&gt; userResolver.edit(userId) &lt;/invoke&gt;
 &lt;/action&gt;
 </pre>
 						It will be able to process requests such as "<span class="var">/user/jack/edit</span>" or "<span class="var">/user/tom/edit</span>",
@@ -852,11 +852,11 @@ void genericMethod(T[] array);
 				It is an example below:
 <pre class="code-xml">
 &lt;action name="/yourAction.do"&gt;
-	&lt;invoke method="method0" resolver="yourResolver" result-key="result0" /&gt;
-	&lt;invoke method="method1" resolver="yourResolver"&gt;
-		&lt;arg&gt;param.a&lt;arg/&gt;
-		&lt;arg&gt;request.result0&lt;arg/&gt;
-		&lt;arg&gt;true&lt;arg/&gt;
+	&lt;invoke&gt;
+		arg1 = yourResolver.method0();
+	&lt;/invoke&gt;
+	&lt;invoke&gt;
+		yourResolver.method1(paramArg0, arg1, true);
 	&lt;/invoke&gt;
 	&lt;ref name="gloablInvoke0" /&gt;
 	&lt;ref name="gloablInvoke1" /&gt;
@@ -902,9 +902,9 @@ void genericMethod(T[] array);
 						You can also use the keywords the <span class="glossary">WebObjectSource</span> supported here for dynamic URL (With "<span class="var">{</span>" prefix and "<span class="var">}</span>" suffix).
 						For example:
 <pre class="code-xml">
-&lt;action name="/user/{request.userId}/edit"&gt;
-	&lt;invoke&gt; userResolver.edit(request.userId) &lt;/invoke&gt;
-	&lt;target url="/user/{request.userId}/view" type="redirect" /&gt;
+&lt;action name="/user/{userId}/edit"&gt;
+	&lt;invoke&gt; userResolver.edit(userId) &lt;/invoke&gt;
+	&lt;target url="/user/{userId}/view" type="redirect" /&gt;
 &lt;/action&gt;
 </pre>
 						The framework will redirect to "<span class="var">/user/jack/view</span>" for request "<span class="var">/user/jack/edit</span>".

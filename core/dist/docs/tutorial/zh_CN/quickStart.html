@@ -55,13 +55,13 @@ public class UserManager
                 &lt;resolver id="<span class="var">userManager</span>" class="my.UserManager" /&gt;
         &lt;/resolvers&gt;
 
-        &lt;executables&gt;
-                &lt;action name="/user/add.do"&gt;
+        &lt;executables prefix="<span class="var">/user</span>"&gt;
+                &lt;action name="/add.do"&gt;
                         &lt;invoke&gt; <span class="var">userManager.save(user)</span> &lt;/invoke&gt;
                         &lt;target url="/user/list.do" type="redirect" /&gt;
                 &lt;/action&gt;
                 
-                &lt;action name="/user/list.do"&gt;
+                &lt;action name="/list.do"&gt;
                         &lt;invoke&gt; <span class="var">userList = userManager.list()</span> &lt;/invoke&gt;
                         &lt;target url="/user/list.jsp" /&gt;
                 &lt;/action&gt;

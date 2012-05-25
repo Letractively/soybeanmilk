@@ -234,7 +234,7 @@
 			</p>
 			<p>
 				默认的<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html" class="glossary">Web通用转换器</a>已经添加了大部分常用的辅助转换器（参考<a href="../../api/org/soybeanMilk/core/bean/DefaultGenericConverter.html" class="glossary">DefaultGenericConverter</a>类说明），
-				它还支持将“<span class="var">java.util.Map&lt;String, Object&gt;</span>”转换为JavaBean对象、JavaBean数组以及JavaBean集合（List、Set）。
+				它还支持将“<span class="var">java.util.Map&lt;String, Object&gt;</span>”转换为JavaBean对象、JavaBean集合（数组、List、Set）以及JavaBean映射表（Map）。
 			</p>
 			<div class="seprator"></div>
 			<p>
@@ -345,8 +345,8 @@
 
 &lt;executables&gt;
 		&lt;action name="/handleException.do"&gt;
-			&lt;invoke method="handleException" resolver="exceptionResolver"&gt;
-				&lt;arg&gt;session.execution&lt;/arg&gt;
+			&lt;invoke&gt;
+				exceptionResolver.handleException(session.execution);
 			&lt;/invoke&gt;
 			
 			&lt;target url="/error.jsp" /&gt;
@@ -758,10 +758,10 @@ void genericMethod(T[] array);
 <pre class="code-xml">
 &lt;action name="/complexArgMethod.do"&gt;
 	&lt;invoke&gt;
-		request.myArg = myResolver.paramToMyArg(param);
+		myArg = myResolver.paramToMyArg(param);
 	&lt;/invoke&gt;
 	&lt;invoke&gt;
-		myResolver.complexArgMethod(request.myArg);
+		myResolver.complexArgMethod(myArg);
 	&lt;/invoke&gt;
 &lt;/action&gt;
 </pre>
@@ -783,8 +783,8 @@ void genericMethod(T[] array);
 						定义<span class="glossary">动作</span>的名称，一般是你期望它所处理的servlet路径。<br />
 						你也可以为它定义变量元素（以“<span class="var">{</span>”开始并以“<span class="var">}</span>”结束），以使其支持RESTful，比如：
 <pre class="code-xml">
-&lt;action name="/user/{request.userId}/edit"&gt;
-	&lt;invoke&gt; userResolver.edit(request.userId) &lt;/invoke&gt;
+&lt;action name="/user/{userId}/edit"&gt;
+	&lt;invoke&gt; userResolver.edit(userId) &lt;/invoke&gt;
 &lt;/action&gt;
 </pre>
 						将会处理诸如“<span class="var">/user/jack/edit</span>”、“<span class="var">/user/tom/edit</span>”之类的请求，
@@ -796,11 +796,11 @@ void genericMethod(T[] array);
 				下面是一个<span class="glossary">动作</span>示例：
 <pre class="code-xml">
 &lt;action name="/yourAction.do"&gt;
-	&lt;invoke method="method0" resolver="yourResolver" result-key="result0" /&gt;
-	&lt;invoke method="method1" resolver="yourResolver"&gt;
-		&lt;arg&gt;param.a&lt;arg/&gt;
-		&lt;arg&gt;request.result0&lt;arg/&gt;
-		&lt;arg&gt;true&lt;arg/&gt;
+	&lt;invoke&gt;
+		arg1 = yourResolver.method0();
+	&lt;/invoke&gt;
+	&lt;invoke&gt;
+		yourResolver.method1(paramArg0, arg1, true);
 	&lt;/invoke&gt;
 	&lt;ref name="gloablInvoke0" /&gt;
 	&lt;ref name="gloablInvoke1" /&gt;
@@ -843,9 +843,9 @@ void genericMethod(T[] array);
 						目标URL，如果是应用内的URL，则必须以“<span class="var">/</span>”开头。<br />
 						你也可以在这里使用对象源支持的关键字（以“<span class="var">{</span>”开始并以“<span class="var">}</span>”结束），以使其支持动态URL，比如：
 <pre class="code-xml">
-&lt;action name="/user/{request.userId}/edit"&gt;
-	&lt;invoke&gt; userResolver.edit(request.userId) &lt;/invoke&gt;
-	&lt;target url="/user/{request.userId}/view" type="redirect" /&gt;
+&lt;action name="/user/{userId}/edit"&gt;
+	&lt;invoke&gt; userResolver.edit(userId) &lt;/invoke&gt;
+	&lt;target url="/user/{userId}/view" type="redirect" /&gt;
 &lt;/action&gt;
 </pre>
 						对于请求“<span class="var">/user/jack/edit</span>”，框架将会重定向到“<span class="var">/user/jack/view</span>”。

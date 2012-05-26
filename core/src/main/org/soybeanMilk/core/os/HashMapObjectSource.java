@@ -101,16 +101,23 @@ public class HashMapObjectSource extends ConvertableObjectSource
 	 */
 	protected Object convertGotObject(Object sourceObj, Type targetType) throws ObjectSourceException
 	{
-		if(targetType == null)
+		if(targetType==null)
 			return sourceObj;
 		
-		try
+		GenericConverter converter=getGenericConverter();
+		
+		if(converter == null)
+			return sourceObj;
+		else
 		{
-			return getGenericConverter().convert(sourceObj, targetType);
-		}
-		catch(ConvertException e)
-		{
-			throw new ObjectSourceException(e);
+			try
+			{
+				return getGenericConverter().convert(sourceObj, targetType);
+			}
+			catch(ConvertException e)
+			{
+				throw new ObjectSourceException(e);
+			}
 		}
 	}
 }

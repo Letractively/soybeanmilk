@@ -437,19 +437,31 @@ public class SbmUtils
 		{
 			ParameterizedType pt=(ParameterizedType)source;
 			
-			if(pt.getRawType() instanceof Class<?>)
+			if(isClassType(pt.getRawType()))
 			{
 				Type[] actualArgTypes=pt.getActualTypeArguments();
-				TypeVariable<?>[] typeVariables=((Class<?>)pt.getRawType()).getTypeParameters();
+				TypeVariable<?>[] typeVariables=narrowToClassType(pt.getRawType()).getTypeParameters();
 				
 				for(int i=0; i<actualArgTypes.length;i++)
 				{
-					TypeVariable<?> tv=typeVariables[i];
-					Type tvType=actualArgTypes[i];
+					TypeVariable<?> var=typeVariables[i];
+					Type value=actualArgTypes[i];
 					
-					variableTypesMap.put(tv, tvType);
+					//多级的参数类型继承结构，则可能会有多级的类型变量实例结构
+					if(value instanceof TypeVariable<?>)
+					{
+						Type actual=variableTypesMap.get(value);
+						
+						if(actual != null)
+							value=actual;
+					}
+					
+					variableTypesMap.put(var, value);
 				}
 			}
+			
+			//处理多级的参数类型继承结构
+			extractTypeVariablesInType(pt.getRawType(), variableTypesMap);
 		}
 	}
 	

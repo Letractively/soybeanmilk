@@ -15,6 +15,9 @@
 package test.unit.core;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 import junit.framework.Assert;
 
 import org.apache.commons.logging.Log;
@@ -459,6 +462,54 @@ public class TestInvoke
 		
 		Assert.assertNotNull(os.get(RESULT_KEY));
 	}
+
+	@Test
+	public void execute_genericMethod_resolveBase() throws Exception
+	{
+		Arg[] args=new Arg[1];
+		args[0]=new KeyArg("arg0");
+		Invoke invoke=new Invoke(null, new ObjectResolver(new SubSubSubGenericResolverImpl()), "resolveBase", args, "result");
+		
+		Map<String, Object> src=new HashMap<String, Object>();
+		src.put("id", 1);
+		src.put("name", "generic");
+		src.put("age", 5);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("arg0", src);
+		
+		invoke.execute(os);
+		
+		JavaBeanSub re=os.get("result");
+		
+		Assert.assertEquals(1, re.getId().intValue());
+		Assert.assertEquals("generic", re.getName());
+		Assert.assertEquals(5, re.getAge().intValue());
+	}
+	
+	@Test
+	public void execute_genericMethod_resolveSub() throws Exception
+	{
+		Arg[] args=new Arg[1];
+		args[0]=new KeyArg("arg0");
+		Invoke invoke=new Invoke(null, new ObjectResolver(new SubSubSubGenericResolverImpl()), "resolveSub", args, "result");
+		
+		Map<String, Object> src=new HashMap<String, Object>();
+		src.put("id", 1);
+		src.put("name", "generic");
+		src.put("age", 5);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("arg0", src);
+		
+		invoke.execute(os);
+		
+		JavaBeanSub re=os.get("result");
+		
+		Assert.assertEquals(1, re.getId().intValue());
+		Assert.assertEquals("generic", re.getName());
+		Assert.assertEquals(5, re.getAge().intValue());
+	}
 	
 	@Test
 	public void execute_exception_ArgPrepareExecuteException() throws Exception
@@ -533,7 +584,7 @@ public class TestInvoke
 		{
 			return "Integer";
 		}
-
+		
 		public String sameMethod(int arg)
 		{
 			return "int";
@@ -547,6 +598,67 @@ public class TestInvoke
 		public String sameMethod(Object o)
 		{
 			return "object";
+		}
+	}
+	
+	public static interface BaseGenericResolver<T extends Object>
+	{
+		T resolveBase(T t);
+	}
+	
+	public static interface SubGenericResolver<T extends Object> extends BaseGenericResolver<T>
+	{
+		T resolveSub(T t);
+	}
+	
+	public static class SubGenericResolverImpl<T extends Object> implements SubGenericResolver<T>
+	{
+		public T resolveBase(T t)
+		{
+			return t;
+		}
+		
+		public T resolveSub(T t)
+		{
+			return t;
+		}
+	}
+	
+	public static interface SubSubGenericResolver<T extends JavaBean> extends SubGenericResolver<T>{}
+	
+	public static interface SubSubSubGenericResolver extends SubSubGenericResolver<JavaBeanSub>{}
+	
+	public static class SubSubSubGenericResolverImpl extends SubGenericResolverImpl<JavaBeanSub> implements SubSubSubGenericResolver{}
+	
+	public static class JavaBean
+	{
+		private Integer id;
+		private String name;
+
+		public Integer getId() {
+			return id;
+		}
+		public void setId(Integer id) {
+			this.id = id;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+	}
+	
+	public static class JavaBeanSub extends JavaBean
+	{
+		private Integer age;
+
+		public Integer getAge() {
+			return age;
+		}
+
+		public void setAge(Integer age) {
+			this.age = age;
 		}
 	}
 }

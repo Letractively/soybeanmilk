@@ -204,8 +204,18 @@ public class Invoke extends AbstractExecutable
 	protected Object executeMethod(ObjectSource objectSource) throws ExecuteException
 	{
 		Resolver resolver=getResolver();
-		Object resolverObject=null;
 		Class<?> resolverClass=null;
+		Object resolverObject=null;
+		
+		try
+		{
+			resolverClass=resolver.getResolverClass(objectSource);
+		}
+		catch(Exception e)
+		{
+			throw new ExecuteException(e);
+		}
+		
 		try
 		{
 			resolverObject=resolver.getResolverObject(objectSource);
@@ -215,22 +225,11 @@ public class Invoke extends AbstractExecutable
 			throw new ResolverObjectPrepareExecuteException(this, e);
 		}
 		
-		if(resolverObject != null)
+		if(resolverClass==null && resolverObject!=null)
 			resolverClass=resolverObject.getClass();
-		else
-		{
-			try
-			{
-				resolverClass=resolver.getResolverClass(objectSource);
-			}
-			catch(Exception e)
-			{
-				throw new ExecuteException(e);
-			}
-			
-			if(resolverClass == null)
-				throw new ExecuteException("got null resolver class from Resolver "+SbmUtils.toString(resolver));
-		}
+		
+		if(resolverClass == null)
+			throw new ExecuteException("got null resolver class from Resolver "+SbmUtils.toString(resolver));
 		
 		MethodInfo methodInfo=getMethodInfo(resolverClass, this.methodName, this.args);
 		if(methodInfo == null)
@@ -590,7 +589,8 @@ public class Invoke extends AbstractExecutable
 		Object getResolverObject(ObjectSource objectSource) throws Exception;
 		
 		/**
-		 * 获取调用目标类型，如果{@linkplain #getResolverObject(ObjectSource)}返回<code>null</code>，{@link Invoke 调用}将使用它来确定调用目标类型
+		 * 获取调用目标类型，{@linkplain Invoke 调用}使用它来查找和确定调用方法，
+		 * 如果返回<code>null</code>，{@linkplain #getResolverObject(ObjectSource)}的类型将被作为调用目标类型。
 		 * @param objectSource
 		 * @return
 		 * @throws Exception

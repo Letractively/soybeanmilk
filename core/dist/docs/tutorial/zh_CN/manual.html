@@ -581,7 +581,7 @@ public void handleException(Execution execution)
 				它使你可以像书写Java代码一样配置<span class="glossary">调用</span>，下面是它的语法格式：<br>
 <pre class="code-xml">
 <span class="tag">&lt;invoke name="yourInvokeName"&gt;</span>
-	<span class="tagAttr">resultKey</span> = <span class="tagAttr">resolver</span>.<span class="tagAttr">method</span>(<span class="tagAttr">arg</span>, <span class="tagAttr">arg</span>, ...)
+	<span class="tagAttr">resultKey</span> = <span class="tagAttr">resolver</span>.<span class="tagAttr">method</span>(<span class="tagAttr">arg</span>, <span class="tagAttr">arg</span>(<span class="tagAttr">type</span>), ...)
 <span class="tag">&lt;/invoke&gt;</span>
 </pre>
 				<ul>
@@ -600,6 +600,10 @@ public void handleException(Execution execution)
 					<li>
 						<span class="tagAttr">arg</span> <br>
 						与下面<span class="tag">&lt;arg&gt;</span>的标签内容用法一致
+					</li>
+					<li>
+						<span class="tagAttr">type</span> <br>
+						与下面<span class="tag">&lt;arg&gt;</span>标签的<span class="tagAttr">type</span>属性用法一致
 					</li>
 				</ul>
 			</p>
@@ -640,7 +644,18 @@ public void handleException(Execution execution)
 				如果<span class="glossary">调用方法</span>没有参数，你就不必要配置它。
 			</p>
 			<p>
-				它没有属性，只有标签内容。标签内容可以分为两大类，一是参数关键字、一是参数值，框架会自动识别它们。
+				<a name="tag_arg_attr"></a>
+				它包含如下属性：
+				<ul>
+					<li>
+						<span class="tagAttr">type</span>（可选） <br />
+						设置参数的类型，它的值可以是上面<a href="#tag_converter" class="tag">&lt;converter&gt;</a>章节提到的类名简写，或者是全类名。
+						如果设置它，那么<span class="glossary">调用执行时</span>从<span class="glossary">对象源</span>获取的参数值将被转换为这个类型，而非<span class="glossary">调用方法</span>的实际参数类型。
+					</li>
+				</ul>
+			</p>
+			<p>
+				它的标签内容可以分为两大类，一是参数关键字、一是参数值，框架会自动识别它们。
 			</p>
 			<p>
 				下面是合法的标签内容：
@@ -658,44 +673,46 @@ public void handleException(Execution execution)
 						<ul>
 							<li>
 								<span class="tagValue">boolean</span> <br>
-								布尔值“<span class="var">true</span>”或者“<span class="var">false</span>”。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">boolean</span>”或者“<span class="var">Boolean</span>”。
+								布尔值“<span class="var">true</span>”或者“<span class="var">false</span>”，对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">boolean</span>”或者“<span class="var">Boolean</span>”。
 							</li>
 							<li>
 								<span class="tagValue">byte</span> <br>
-								字节值。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">byte</span>”或者“<span class="var">Byte</span>”。
+								字节值，对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">byte</span>”或者“<span class="var">Byte</span>”。
+								由于它的字面值无法与整数值区分，所以你需要将它的<span class="tagAttr">type</span>属性设为“<span class="var">byte</span>”或者“<span class="var">Byte</span>”
 							</li>
 							<li>
 								<span class="tagValue">char</span> <br>
-								字符。可以是普通字符（'a'、'b'、'c'、'1'、'5'）、Java转义字符（'\n'、'\r'、'\t'、'\''、'\\'、'\"'），或者unicode字符（'\uxxxx'）。
+								字符，可以是普通字符（'a'、'b'、'c'、'1'、'5'）、Java转义字符（'\n'、'\r'、'\t'、'\''、'\\'、'\"'），或者unicode字符（'\uxxxx'）。
 								对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">char</span>”或者“<span class="var">Char</span>”。
 							</li>
 							<li>
 								<span class="tagValue">double</span> <br>
-								双精度小数。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">double</span>”或者“<span class="var">Double</span>”。
+								双精度小数，比如“3.2397”、“1.2345d”，对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">double</span>”或者“<span class="var">Double</span>”。
 							</li>
 							<li>
 								<span class="tagValue">float</span> <br>
-								单精度小数。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">float</span>”或者“<span class="var">Float</span>”。
+								单精度小数，比如“3.2397f”、“1.2345F”，对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">float</span>”或者“<span class="var">Float</span>”。
 							</li>
 							<li>
 								<span class="tagValue">int</span> <br>
-								整型值。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">int</span>”或者“<span class="var">Integer</span>”。
+								整型值，对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">int</span>”或者“<span class="var">Integer</span>”。
 							</li>
 							<li>
 								<span class="tagValue">long</span> <br>
-								长整型值。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">long</span>”或者“<span class="var">Long</span>”。
+								长整型值，比如“12345456L”、“12345456l”，对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">long</span>”或者“<span class="var">Long</span>”。
 							</li>
 							<li>
 								<span class="tagValue">short</span> <br>
-								短整型值。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">short</span>”或者“<span class="var">Short</span>”。
+								短整型值，对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">short</span>”或者“<span class="var">Short</span>”。
+								由于它的字面值无法与整数值区分，所以你需要将它的<span class="tagAttr">type</span>属性设为“<span class="var">short</span>”或者“<span class="var">Short</span>”
 							</li>
 							<li>
 								<span class="tagValue">String</span> <br>
-								字符串。它可以包含<span class="tagValue">char</span>中定义的字符。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">String</span>”。
+								字符串，它可以包含<span class="tagValue">char</span>中定义的字符。对应的<span class="glossary">调用方法</span>类型应该为“<span class="var">String</span>”。
 							</li>
 							<li>
 								<span class="tagValue">null</span> <br>
-								空。对应的<span class="glossary">调用方法</span>类型可以是除基本类型外的任何类型。
+								空，对应的<span class="glossary">调用方法</span>类型可以是除基本类型外的任何类型。
 							</li>
 						</ul>
 					</li>

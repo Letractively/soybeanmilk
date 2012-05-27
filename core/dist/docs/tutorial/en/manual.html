@@ -618,7 +618,7 @@ public void handleException(Execution execution)
 				The syntax is listed below:
 <pre class="code-xml">
 <span class="tag">&lt;invoke name="yourInvokeName"&gt;</span>
-	<span class="tagAttr">resultKey</span> = <span class="tagAttr">resolver</span>.<span class="tagAttr">method</span>(<span class="tagAttr">arg</span>, <span class="tagAttr">arg</span>, ...)
+	<span class="tagAttr">resultKey</span> = <span class="tagAttr">resolver</span>.<span class="tagAttr">method</span>(<span class="tagAttr">arg</span>, <span class="tagAttr">arg</span>(<span class="tagAttr">type</span>), ...)
 <span class="tag">&lt;/invoke&gt;</span>
 </pre>
 				<ul>
@@ -637,6 +637,10 @@ public void handleException(Execution execution)
 					<li>
 						<span class="tagAttr">arg</span> <br>
 						The same meaning to the below tag <span class="tag">&lt;arg&gt;</span>.
+					</li>
+					<li>
+						<span class="tagAttr">type</span> <br>
+						The same meaning to the below attribute <span class="tagAttr">type</span> of <span class="tag">&lt;arg&gt;</span>.
 					</li>
 				</ul>
 			</p>
@@ -676,7 +680,19 @@ public void handleException(Execution execution)
 				It may be needed only if you are using XML mode to configure your <span class="tag">&lt;invoke&gt;</span>.
 			</p>
 			<p>
-				It contains no attributes, but only content.
+				<a name="tag_arg_attr"></a>
+				It contains the following attrinutes :
+				<ul>
+					<li>
+						<span class="tagAttr">type</span> (Optional) <br />
+						Set the type of this argument, its value can be class short-names which mentioned at <a href="#tag_converter" class="tag">&lt;converter&gt;</a> above,
+						or a full class name.
+						If set, argument value got from <span class="glossary">ObjectSource</span> will be converted to this type but not the actual <span class="glossary">Invoke method</span>
+						while executing.
+					</li>
+				</ul>
+			</p>
+			<p>
 				There are two types of <span class="tag">&lt;arg&gt;</span> content, one is keyword, and another is value.
 				The framework can recognize them.
 			</p>
@@ -704,6 +720,8 @@ public void handleException(Execution execution)
 								<span class="tagValue">byte</span> <br>
 								Byte value.
 								The coresponding argument must be "<span class="var">byte</span>" or "<span class="var">Byte</span>" type.
+								You must set its <span class="tagAttr">type</span> attribute to be "<span class="var">byte</span>" or "<span class="var">Byte</span>"
+								because its literal value is the same as interger value.
 							</li>
 							<li>
 								<span class="tagValue">char</span> <br>
@@ -714,12 +732,12 @@ public void handleException(Execution execution)
 							</li>
 							<li>
 								<span class="tagValue">double</span> <br>
-								Double value.
+								Double value. Such as : 3.2397, 1.2345d.
 								The coresponding argument must be "<span class="var">double</span>" or "<span class="var">Double</span>" type.
 							</li>
 							<li>
 								<span class="tagValue">float</span> <br>
-								Float value.
+								Float value. Such as : 3.2397f, 1.2345F.
 								The coresponding argument must be "<span class="var">float</span>" or "<span class="var">Float</span>" type.
 							</li>
 							<li>
@@ -729,13 +747,15 @@ public void handleException(Execution execution)
 							</li>
 							<li>
 								<span class="tagValue">long</span> <br>
-								Long value.
+								Long value. Such as : 12345456L, 12345456l.
 								The coresponding argument must be "<span class="var">long</span>" or "<span class="var">Long</span>" type.
 							</li>
 							<li>
 								<span class="tagValue">short</span> <br>
 								Short value.
 								The coresponding argument must be "<span class="var">short</span>" or "<span class="var">Short</span>" type.
+								You must set its <span class="tagAttr">type</span> attribute to be "<span class="var">short</span>" or "<span class="var">Short</span>"
+								because its literal value is the same as interger value.
 							</li>
 							<li>
 								<span class="tagValue">String</span> <br>

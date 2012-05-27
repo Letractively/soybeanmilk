@@ -20,7 +20,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,6 +206,25 @@ public class SbmUtils
             return Character.class;
         else
             return type;
+	}
+	
+	/**
+	 * 由类型名称获取其类型，<code>name</code>可以是一些原子类型的简写
+	 * @param name
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @date 2012-5-27
+	 */
+	public static Type nameToType(String name) throws ClassNotFoundException
+	{
+		Type re=ClassShortNames.get(name);
+		
+		if(re == null)
+		{
+			re=Class.forName(name);
+		}
+		
+		return re;
 	}
 	
 	/**
@@ -680,5 +702,57 @@ public class SbmUtils
         }
         
         return list.toArray(new String[list.size()]);//return (String[]) list.toArray(new String[list.size()]);
+	}
+	
+	/**
+	 * 类名简写工具类，它可以由简写获取类型
+	 * @author earthangry@gmail.com
+	 * @date 2010-12-31
+	 */
+	protected static class ClassShortNames
+	{
+		private static Class<?>[] simpleNameClasses=new Class<?>[]{
+				boolean.class, 		boolean[].class, 	Boolean.class, 		Boolean[].class,
+				byte.class, 		byte[].class, 		Byte.class, 		Byte[].class, 
+				char.class, 		char[].class, 		Character.class, 	Character[].class,
+				double.class, 		double[].class, 	Double.class, 		Double[].class,
+				float.class, 		float[].class, 		Float.class, 		Float[].class,
+				int.class, 			int[].class, 		Integer.class, 		Integer[].class,
+				long.class, 		long[].class, 		Long.class, 		Long[].class,
+				short.class, 		short[].class, 		Short.class, 		Short[].class,
+				String.class, 		String[].class,
+				BigDecimal.class, 	BigDecimal[].class,
+				BigInteger.class, 	BigInteger[].class,
+				Date.class, 		Date[].class
+		};
+		
+		private static Class<?>[] canonicalNameClasses=new Class<?>[]{
+				java.sql.Date.class,		java.sql.Date[].class,
+				java.sql.Time.class,		java.sql.Time[].class,
+				java.sql.Timestamp.class,	java.sql.Timestamp[].class
+		};
+		
+		private static Map<String, Class<?>> nameMaps=new HashMap<String, Class<?>>();
+		static
+		{
+			for(Class<?> c : simpleNameClasses)
+				nameMaps.put(c.getSimpleName(), c);
+			
+			for(Class<?> c : canonicalNameClasses)
+				nameMaps.put(c.getCanonicalName(), c);
+		}
+		
+		/**
+		 * 由简称获取类型
+		 * @param shortName
+		 * @return
+		 */
+		public static Class<?> get(String shortName)
+		{
+			if(shortName==null || shortName.length()==0)
+				return null;
+			
+			return nameMaps.get(shortName);
+		}
 	}
 }

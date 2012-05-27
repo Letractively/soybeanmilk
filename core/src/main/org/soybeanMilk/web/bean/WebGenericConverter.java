@@ -133,7 +133,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 			String[] strTypes=(String[])typeObj;
 			
 			if(strTypes.length > 0)
-				result=stringToType(strTypes[0]);
+				result=nameToType(strTypes[0]);
 		}
 		else if(typeObj instanceof Type[])
 		{
@@ -144,7 +144,7 @@ public class WebGenericConverter extends DefaultGenericConverter
 		}
 		else if(typeObj instanceof String)
 		{
-			result=stringToType((String)typeObj);
+			result=nameToType((String)typeObj);
 		}
 		else if(typeObj instanceof Type)
 		{

@@ -332,7 +332,7 @@ public class DispatchServlet extends HttpServlet
 		{
 			try
 			{
-				wsf=(WebObjectSourceFactory)Class.forName(clazz).newInstance();
+				wsf=(WebObjectSourceFactory)SbmUtils.narrowToClassType(SbmUtils.nameToType(clazz)).newInstance();
 			}
 			catch(Exception e)
 			{

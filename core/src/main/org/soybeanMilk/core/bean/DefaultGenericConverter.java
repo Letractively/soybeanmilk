@@ -1071,7 +1071,7 @@ public class DefaultGenericConverter implements GenericConverter
 			return (Type)typeObj;
 		else if(typeObj instanceof String)
 		{
-			Type re=stringToType((String)typeObj);
+			Type re=nameToType((String)typeObj);
 			return (re == null ? defaultType : re);
 		}
 		else
@@ -1103,7 +1103,7 @@ public class DefaultGenericConverter implements GenericConverter
 				re=new Type[strTypes.length];
 				
 				for(int i=0; i<strTypes.length; i++)
-					re[i]=stringToType(strTypes[i]);
+					re[i]=nameToType(strTypes[i]);
 			}
 			else if(typeObj instanceof Type[])
 			{
@@ -1395,7 +1395,7 @@ public class DefaultGenericConverter implements GenericConverter
 			if(clazz == null)
 			{
 				String fqn=SbmUtils.getFullQualifiedClassName(type);
-				clazz=Class.forName(fqn);
+				clazz=SbmUtils.narrowToClassType(nameToType(fqn));
 			}
 			
 			if(arrayLength < 0)
@@ -1450,11 +1450,11 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2012-5-21
 	 */
-	protected Type stringToType(String str)
+	protected Type nameToType(String str)
 	{
 		try
 		{
-			return Class.forName(str);
+			return SbmUtils.nameToType(str);
 		}
 		catch(ClassNotFoundException e)
 		{

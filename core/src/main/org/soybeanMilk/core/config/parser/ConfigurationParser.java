@@ -421,7 +421,7 @@ public class ConfigurationParser
 			assertNotEmpty(target, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_TARGET+"] must not be empty");
 			assertNotEmpty(clazz, "<"+TAG_CONVERTER+"> attribute ["+TAG_CONVERTER_ATTR_CLASS+"] must not be empty");
 			
-			genericConverter.addConverter(nameToClass(src), nameToClass(target), (Converter)createClassInstance(clazz));
+			genericConverter.addConverter(nameToType(src), nameToType(target), (Converter)createClassInstance(clazz));
 		}
 	}
 	
@@ -671,7 +671,7 @@ public class ConfigurationParser
 		{
 			try
 			{
-				Class<?> rc=Class.forName(resolver);
+				Class<?> rc=SbmUtils.narrowToClassType(nameToType(resolver));
 				invoke.setResolver(new ObjectResolver(null, rc));
 				
 				classResolver=true;
@@ -1147,7 +1147,7 @@ public class ConfigurationParser
 		
 		Type argType=null;
 		if(strType!=null && strType.length()>0)
-			argType=nameToClass(strType);
+			argType=nameToType(strType);
 		
 		if(strArg==null || strArg.length()==0)
 			re=new ValueArg(strArg, argType);
@@ -1335,7 +1335,7 @@ public class ConfigurationParser
 	{
 		try
 		{
-			return Class.forName(clazz).newInstance();
+			return SbmUtils.narrowToClassType(SbmUtils.nameToType(clazz)).newInstance();
 		}
 		catch(Exception e)
 		{
@@ -1343,23 +1343,22 @@ public class ConfigurationParser
 		}
 	}
 	
-	protected Class<?> nameToClass(String clazz)
+	/**
+	 * 由类型名称获取其类型
+	 * @param type
+	 * @return
+	 * @date 2012-5-27
+	 */
+	protected Type nameToType(String type)
 	{
-		Class<?> re=ClassShortName.get(clazz);
-		
-		if(re == null)
+		try
 		{
-			try
-			{
-				re=Class.forName(clazz);
-			}
-			catch(Exception e)
-			{
-				throw new ParseException(e);
-			}
+			return SbmUtils.nameToType(type);
 		}
-		
-		return re;
+		catch(Exception e)
+		{
+			throw new ParseException(e);
+		}
 	}
 	
 	/**

@@ -14,11 +14,13 @@
 
 package test.unit.core;
 
+import java.lang.reflect.Type;
+
 import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.soybeanMilk.core.config.parser.ClassShortName;
+import org.soybeanMilk.SbmUtils;
 
 /**
  * @author earthangry@gmail.com
@@ -27,105 +29,82 @@ import org.soybeanMilk.core.config.parser.ClassShortName;
 public class TestClassShortName
 {
 	@Before
-	public void setUp(){}
+	public void setUp() throws Exception{}
 	
 	@Test
-	public void getShortName_boolean()
+	public void getShortName_boolean()throws Exception
 	{
-		{
-			Class<?> c=ClassShortName.get("boolean");
-			Assert.assertEquals(boolean.class, c);
-		}
+		Type c=SbmUtils.nameToType("boolean");
+		Assert.assertEquals(boolean.class, c);
 	}
 	
 	@Test
-	public void getShortName_booleanArray()
+	public void getShortName_booleanArray()throws Exception
 	{
-		{
-
-			Class<?> c=ClassShortName.get("boolean[]");
-			Assert.assertEquals(boolean[].class, c);
-		}
+		Type c=SbmUtils.nameToType("boolean[]");
+		Assert.assertEquals(boolean[].class, c);
 	}
 	
 	@Test
-	public void getShortName_Boolean()
+	public void getShortName_Boolean() throws Exception
 	{
-		{
-			Class<?> c=ClassShortName.get("Boolean");
-			Assert.assertEquals(Boolean.class, c);
-		}
+		Type c=SbmUtils.nameToType("Boolean");
+		Assert.assertEquals(Boolean.class, c);
 	}
 	
 	@Test
-	public void getShortName_BooleanArray()
+	public void getShortName_BooleanArray() throws Exception
 	{
-		{
-			Class<?> c=ClassShortName.get("Boolean[]");
-			Assert.assertEquals(Boolean[].class, c);
-		}
+		Type c=SbmUtils.nameToType("Boolean[]");
+		Assert.assertEquals(Boolean[].class, c);
 	}
 	
 	@Test
-	public void getShortName_stringArray()
+	public void getShortName_stringArray() throws Exception
 	{
-		{
-			Class<?> c=ClassShortName.get("String[]");
-			Assert.assertEquals(String[].class, c);
-		}
+		Type c=SbmUtils.nameToType("String[]");
+		Assert.assertEquals(String[].class, c);
 	}
 	
 	@Test
-	public void getShortName_sqlDate()
+	public void getShortName_sqlDate() throws Exception
 	{
-		{
-			Class<?> c=ClassShortName.get("java.sql.Date");
-			Assert.assertEquals(java.sql.Date.class, c);
-		}
+		Type c=SbmUtils.nameToType("java.sql.Date");
+		Assert.assertEquals(java.sql.Date.class, c);
 	}
 	
 	@Test
-	public void getShortName_sqlDateArray()
+	public void getShortName_sqlDateArray() throws Exception
 	{
-		{
-			Class<?> c=ClassShortName.get("java.sql.Date[]");
-			Assert.assertEquals(java.sql.Date[].class, c);
-		}
+		Type c=SbmUtils.nameToType("java.sql.Date[]");
+		Assert.assertEquals(java.sql.Date[].class, c);
 	}
 	
 	@Test
-	public void getShortName_sqlTime()
+	public void getShortName_sqlTime() throws Exception
 	{
-		{
-			Class<?> c=ClassShortName.get("java.sql.Time");
-			Assert.assertEquals(java.sql.Time.class, c);
-		}
+		Type c=SbmUtils.nameToType("java.sql.Time");
+		Assert.assertEquals(java.sql.Time.class, c);
 	}
 	
 	@Test
-	public void getShortName_sqlTimeArray()
+	public void getShortName_sqlTimeArray() throws Exception
 	{
-		{
-			Class<?> c=ClassShortName.get("java.sql.Time[]");
-			Assert.assertEquals(java.sql.Time[].class, c);
-		}
+		Type c=SbmUtils.nameToType("java.sql.Time[]");
+		Assert.assertEquals(java.sql.Time[].class, c);
 	}
 	
 	@Test
-	public void getShortName_sqlTimestamp()
+	public void getShortName_sqlTimestamp() throws Exception
 	{
-		{
-			Class<?> c=ClassShortName.get("java.sql.Timestamp");
-			Assert.assertEquals(java.sql.Timestamp.class, c);
-		}
+		Type c=SbmUtils.nameToType("java.sql.Timestamp");
+		Assert.assertEquals(java.sql.Timestamp.class, c);
 	}
 	
 	@Test
-	public void getShortName_sqlTimestampArray()
+	public void getShortName_sqlTimestampArray() throws Exception
 	{
-		{
-			Class<?> c=ClassShortName.get("java.sql.Timestamp[]");
-			Assert.assertEquals(java.sql.Timestamp[].class, c);
-		}
+		Type c=SbmUtils.nameToType("java.sql.Timestamp[]");
+		Assert.assertEquals(java.sql.Timestamp[].class, c);
 	}
 }

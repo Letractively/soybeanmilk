@@ -15,6 +15,7 @@
 package org.soybeanMilk.web.config.parser;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -210,7 +211,7 @@ public class WebConfigurationParser extends ConfigurationParser
 	}
 	
 	//@Override
-	protected Class<?> nameToClass(String name)
+	protected Type nameToType(String name)
 	{
 		if(WebConstants.Scope.REQUEST.equals(name))
 			return HttpServletRequest.class;
@@ -221,7 +222,7 @@ public class WebConfigurationParser extends ConfigurationParser
 		if(WebConstants.Scope.RESPONSE.equals(name))
 			return HttpServletResponse.class;
 		else
-			return super.nameToClass(name);
+			return super.nameToType(name);
 	}
 	
 	//@Override

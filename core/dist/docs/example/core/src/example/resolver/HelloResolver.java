@@ -46,16 +46,18 @@ public class HelloResolver
 		System.out.println();
 	}
 	
-	public static void testJavaSyntax(char a, byte b, boolean c, int d, long e, float f, double g, String h, String _null)
+	public static void literals(byte b, short s, int d, long e, float f, double g,
+			char a, boolean c, String h, Object _null)
 	{
 		System.out.println();
-		System.out.println("char 	:"+a);
 		System.out.println("byte 	:"+b);
-		System.out.println("boolean :"+c);
+		System.out.println("short 	:"+s);
 		System.out.println("int 	:"+d);
 		System.out.println("long 	:"+e);
 		System.out.println("float 	:"+f);
 		System.out.println("double 	:"+g);
+		System.out.println("char 	:"+a);
+		System.out.println("boolean :"+c);
 		System.out.println("String 	:"+h);
 		System.out.println("null 	:"+ _null);
 		System.out.println();

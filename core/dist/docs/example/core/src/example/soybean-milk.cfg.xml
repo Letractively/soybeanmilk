@@ -44,16 +44,17 @@
 			</invoke>
 		</action>
 		
-		<action name="javaSyntax">
+		<action name="literals">
 			<invoke>
-				example.resolver.HelloResolver.testJavaSyntax(
-					'a',
-					35(byte),
-					true,
+				example.resolver.HelloResolver.literals(
+					35 ( byte ),
+					235 (short),
 					22222,
 					33333333333333L,
 					2.533f,
 					3.23423434089d,
+					'a',
+					true,
 					"ab\tcd",
 					null
 				);
@@ -72,6 +73,10 @@
 		
 		<invoke name="refTarget">
 			helloResolver.printObject("i am the reference target");
+		</invoke>
+		
+		<invoke name="externalIocResolver">
+			externalResolver.resolve();
 		</invoke>
 		
 		<action name="interceptorBeforeAfter">

@@ -14,12 +14,18 @@
 
 package example;
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.soybeanMilk.core.Constants;
 import org.soybeanMilk.core.Executor;
 import org.soybeanMilk.core.DefaultExecutor;
 import org.soybeanMilk.core.ObjectSource;
 import org.soybeanMilk.core.config.Configuration;
 import org.soybeanMilk.core.config.parser.ConfigurationParser;
+import org.soybeanMilk.core.exe.support.DefaultResolverObjectFactory;
+import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
 import org.soybeanMilk.core.os.HashMapObjectSource;
 
 /**
@@ -32,6 +38,9 @@ public class ExampleMain
 	{
 		Configuration cfg=new ConfigurationParser().parse(
 				"example/"+Constants.DEFAULT_CONFIG_FILE);
+		
+		DefaultResolverObjectFactory drof=(DefaultResolverObjectFactory)cfg.getResolverObjectFactory();
+		drof.setExternalResolverObjectFactory(new SpringBeanFactory());
 		
 		Executor executor=new DefaultExecutor(cfg);
 		
@@ -50,14 +59,17 @@ public class ExampleMain
 		executor.execute("helloStatement", os);
 		
 		printDiv();
-		executor.execute("javaSyntax", os);
+		executor.execute("literals", os);
 		
 		printDiv();
 		os.set("dynamicResolver", new DynamicResolver());
 		executor.execute("dynamicResolver", os);
-
+		
 		printDiv();
 		executor.execute("reference", os);
+		
+		printDiv();
+		executor.execute("externalIocResolver", os);
 		
 		printDiv();
 		executor.execute("interceptorBeforeAfter", os);
@@ -92,6 +104,40 @@ public class ExampleMain
 			System.out.println();
 			System.out.println("I am a dynamic method of object set into the ObjectSource");
 			System.out.println();
+		}
+	}
+	
+	public static class SpringBeanFactory implements ResolverObjectFactory
+	{
+		private Map<String, Object> beans;
+		
+		public SpringBeanFactory()
+		{
+			beans=new HashMap<String, Object>();
+			
+			beans.put("externalResolver", new ExternalResolver());
+		}
+		
+		public Object getBean(String id)
+		{
+			return beans.get(id);
+		}
+		
+		public Object getResolverObject(Serializable resolverObjectId)
+		{
+			return getBean((String)resolverObjectId);
+		}
+		
+		public void addResolverObject(Serializable resolverObjectId, Object resolverObject){}
+		
+		public static class ExternalResolver
+		{
+			public void resolve()
+			{
+				System.out.println();
+				System.out.println("I am a resolver in spring BeanFactory");
+				System.out.println();
+			}
 		}
 	}
 }

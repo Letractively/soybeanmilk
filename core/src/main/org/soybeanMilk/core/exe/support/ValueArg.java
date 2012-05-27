@@ -38,7 +38,9 @@ public class ValueArg extends AbstractArg
 	{
 		super();
 		this.value = value;
-		setType((this.value == null ? null : this.value.getClass()));
+		
+		if(this.value != null)
+			setType(this.value.getClass());
 	}
 	
 	public ValueArg(Object value, Type type)
@@ -47,7 +49,7 @@ public class ValueArg extends AbstractArg
 		this.value = value;
 		setType(type);
 	}
-
+	
 	public Object getValue()
 	{
 		return value;
@@ -61,18 +63,18 @@ public class ValueArg extends AbstractArg
 	//@Override
 	public Object getValue(ObjectSource objectSource, Type argType, Method method, Class<?> methodClass) throws Exception
 	{
-		return value;
+		return this.value;
 	}
 	
-	//@Override
+	@Override
 	public Type getType()
 	{
-		Type re=super.getType();
+		Type result=super.getType();
 		
-		if(re==null && this.value!=null)
-			re=this.value.getClass();
+		if(result==null && this.value!=null)
+			result=this.value.getClass();
 		
-		return re;
+		return result;
 	}
 	
 	//@Override

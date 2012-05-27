@@ -13,7 +13,7 @@ public abstract class AbstractArg implements Arg
 {
 	/**参数类型*/
 	private Type type;
-
+	
 	//@Override
 	public Type getType(){
 		return type;

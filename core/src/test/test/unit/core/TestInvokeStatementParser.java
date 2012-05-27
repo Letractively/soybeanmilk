@@ -59,7 +59,7 @@ public class TestInvokeStatementParser
 	@Test
 	public void parse_hasArgType() throws Exception
 	{
-		String stmt=" testResult =  testResolver . method_b  ( my.argKey(int), \"aaa\", 10(somepkg.some.someClass), 345(double), \"aaa\"(String), 'a'(char), endArg()); ";
+		String stmt=" testResult =  testResolver . method_b  ( my.argKey (int), \"aaa\", 10 ( somepkg. some\t\r. someClass \t ) , 345 \t(double ) , \"aaa\"   (String), 'a'  (char) , endArg()); ";
 		InvokeStatementParser isp=new InvokeStatementParser(stmt);
 		isp.parse();
 		

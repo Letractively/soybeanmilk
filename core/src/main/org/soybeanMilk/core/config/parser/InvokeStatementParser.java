@@ -17,7 +17,6 @@ package org.soybeanMilk.core.config.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.soybeanMilk.SbmUtils;
 import org.soybeanMilk.core.config.parser.ParseException;
 import org.soybeanMilk.core.exe.Invoke;
 
@@ -28,11 +27,15 @@ import org.soybeanMilk.core.exe.Invoke;
  */
 public class InvokeStatementParser
 {
-	private static final char[] FORMAT_WITH_SPACE={'\n', '\t', ' '};
-	private static final char[] KEY_CHAR_EQUAL={'='};
-	private static final char[] METHOD_ARG_END={'\n', '\t', ' ', ','};
-	private static final char[] SINGLE_QUOTE={'\''};
-	private static final char[] DOUBLE_QUOTE={'"'};
+	protected static final char ARG_TYPE_START='(';
+	protected static final char ARG_TYPE_END=')';
+	
+	protected static final char[] FORMAT_CHARS={'\n', '\r', '\t', ' '};
+	protected static final char[] KEY_CHAR_EQUAL={'='};
+	protected static final char[] METHOD_ARG_NAME_END={'\n', '\r', '\t', ' ', ',', ARG_TYPE_START};
+	protected static final char[] METHOD_ARG_TYPE_END={ARG_TYPE_END};
+	protected static final char[] SINGLE_QUOTE={'\''};
+	protected static final char[] DOUBLE_QUOTE={'"'};
 	
 	/**输入语句*/
 	private String statement;
@@ -153,7 +156,7 @@ public class InvokeStatementParser
 		{
 			ignoreFormatChars();
 			
-			resultKey=parseUtil(KEY_CHAR_EQUAL, true, true, FORMAT_WITH_SPACE);
+			resultKey=parseUtil(KEY_CHAR_EQUAL, true, true, FORMAT_CHARS);
 			if(resultKey==null || resultKey.length()==0)
 				throw new ParseException("no result key segment found in statement \""+this.statement+"\"");
 			
@@ -164,7 +167,7 @@ public class InvokeStatementParser
 		//解析调用目标
 		ignoreFormatChars();
 		setEndIdx(methodLeftDotIdx);
-		resolver=parseUtil(null, true, true, FORMAT_WITH_SPACE);
+		resolver=parseUtil(null, true, true, FORMAT_CHARS);
 		if(resolver==null || resolver.length()==0)
 			throw new ParseException("no resolver segment found in statement \""+this.statement+"\"");
 		
@@ -174,7 +177,7 @@ public class InvokeStatementParser
 		//解析方法名
 		ignoreFormatChars();
 		setEndIdx(methodLeftBracketIdx);
-		methodName=parseUtil(null, true, true, FORMAT_WITH_SPACE);
+		methodName=parseUtil(null, true, true, FORMAT_CHARS);
 		if(methodName==null || methodName.length()==0)
 			throw new ParseException("no method name segment found in statement \""+this.statement+"\"");
 		
@@ -185,19 +188,40 @@ public class InvokeStatementParser
 		setEndIdx(methodRightBracketIdx);
 		List<String> argStrList=new ArrayList<String>();
 		List<String> argTypeStrList=new ArrayList<String>();
+		String arg=null;
+		String argType=null;
+		
 		while(getCurrentIdx() < this.length)
 		{
 			ignoreFormatChars();
 			
 			//遇到方法的右括弧
 			if(getCurrentIdx() >= methodRightBracketIdx)
+			{
+				if(arg != null)
+				{
+					argStrList.add(arg);
+					argTypeStrList.add(argType);
+				}
+				arg=null;
+				argType=null;
+				
 				break;
+			}
 			
 			char c=getCurrentChar();
 			
 			//参数分隔符
 			if(c == ',')
 			{
+				if(arg != null)
+				{
+					argStrList.add(arg);
+					argTypeStrList.add(argType);
+				}
+				arg=null;
+				argType=null;
+				
 				setCurrentIdx(getCurrentIdx()+1);
 			}
 			//字符串或者字符
@@ -206,58 +230,35 @@ public class InvokeStatementParser
 				this.cache.append('"');
 				setCurrentIdx(getCurrentIdx()+1);
 				
-				String str=parseUtil(DOUBLE_QUOTE, true, true, null);
+				arg=parseUtil(DOUBLE_QUOTE, true, true, null);
+				
+				arg+="\"";
 				
 				setCurrentIdx(getCurrentIdx()+1);
-				String strType=parseUtil(METHOD_ARG_END, true, true, null);
-				if(strType==null || strType.length()==0)
-					strType=null;
-				else if(strType.startsWith("(") && strType.endsWith(")"))
-					strType=strType.substring(1, strType.length()-1);
-				else
-					throw new ParseException("illegal argument segment "+SbmUtils.toString(strType)+" in statement "+SbmUtils.toString(this.statement));
-				
-				argStrList.add(str+"\"");
-				argTypeStrList.add(strType);
 			}
 			else if(c == '\'')
 			{
 				this.cache.append('\'');
 				setCurrentIdx(getCurrentIdx()+1);
 				
-				String str=parseUtil(SINGLE_QUOTE, true, true, null);
+				arg=parseUtil(SINGLE_QUOTE, true, true, null);
+				arg+="'";
 				
 				setCurrentIdx(getCurrentIdx()+1);
-				String strType=parseUtil(METHOD_ARG_END, true, true, null);
-				if(strType==null || strType.length()==0)
-					strType=null;
-				else if(strType.startsWith("(") && strType.endsWith(")"))
-					strType=strType.substring(1, strType.length()-1);
-				else
-					throw new ParseException("illegal argument segment "+SbmUtils.toString(strType)+" in statement "+SbmUtils.toString(this.statement));
+			}
+			//参数类型
+			else if(c == ARG_TYPE_START)
+			{
+				setCurrentIdx(getCurrentIdx()+1);
+				ignoreFormatChars();
 				
-				argStrList.add(str+"'");
-				argTypeStrList.add(strType);
+				argType=parseUtil(METHOD_ARG_TYPE_END, true, true, FORMAT_CHARS);
+				
+				setCurrentIdx(getCurrentIdx()+1);
 			}
 			else
 			{
-				String str=parseUtil(METHOD_ARG_END, true, true, null);
-				
-				String arg=str;
-				String argType=null;
-				
-				if(str.endsWith(")"))
-				{
-					int typeStartIdx=str.indexOf('(');
-					if(typeStartIdx <= 0)
-						throw new ParseException("illegal argument type segment "+SbmUtils.toString(str)+" in statement "+SbmUtils.toString(this.statement));
-					
-					arg=str.substring(0, typeStartIdx);
-					argType=str.substring(typeStartIdx+1, str.length()-1);
-				}
-				
-				argStrList.add(arg);
-				argTypeStrList.add(argType);
+				arg=parseUtil(METHOD_ARG_NAME_END, true, true, null);
 			}
 		}
 		
@@ -297,7 +298,7 @@ public class InvokeStatementParser
 	 */
 	private void ignoreFormatChars()
 	{
-		parseUtil(FORMAT_WITH_SPACE, false, false, null);
+		parseUtil(FORMAT_CHARS, false, false, null);
 	}
 	
 	/**

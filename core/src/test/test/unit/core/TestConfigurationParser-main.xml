@@ -74,7 +74,7 @@
 				"string"(String),
 				true(boolean), 			false(boolean),
 				true(Boolean), 			false(Boolean),
-				null(java.lang.String)	null,
+				null(java.lang.String),	null,
 				10,						10.0,
 				10l,					10L,
 				10f,					10F,

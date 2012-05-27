@@ -462,6 +462,33 @@ public class TestInvoke
 		
 		Assert.assertNotNull(os.get(RESULT_KEY));
 	}
+	
+	@Test
+	public void execute_customTypeInKeyArg() throws Exception
+	{
+		Arg[] args=new Arg[]
+				{
+					new KeyArg("arg0", JavaBeanSub.class)
+				};
+		
+		Invoke invoke=new Invoke(null, new ObjectResolver(new SubGenericResolverImpl<JavaBean>()), "resolveBase", args, "result");
+		
+		Map<String, Object> src=new HashMap<String, Object>();
+		src.put("id", 1);
+		src.put("name", "generic");
+		src.put("age", 5);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("arg0", src);
+		
+		invoke.execute(os);
+		
+		JavaBeanSub re=os.get("result");
+		
+		Assert.assertEquals(1, re.getId().intValue());
+		Assert.assertEquals("generic", re.getName());
+		Assert.assertEquals(5, re.getAge().intValue());
+	}
 
 	@Test
 	public void execute_genericMethod_resolveBase() throws Exception

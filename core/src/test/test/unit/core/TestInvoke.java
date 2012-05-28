@@ -15,6 +15,9 @@
 package test.unit.core;
 
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -464,7 +467,7 @@ public class TestInvoke
 	}
 	
 	@Test
-	public void execute_customTypeInKeyArg() throws Exception
+	public void execute_genericMethod_customTypeInKeyArg() throws Exception
 	{
 		Arg[] args=new Arg[]
 				{
@@ -520,6 +523,80 @@ public class TestInvoke
 		Arg[] args=new Arg[1];
 		args[0]=new KeyArg("arg0");
 		Invoke invoke=new Invoke(null, new ObjectResolver(new SubSubSubGenericResolverImpl()), "resolveSub", args, "result");
+		
+		Map<String, Object> src=new HashMap<String, Object>();
+		src.put("id", 1);
+		src.put("name", "generic");
+		src.put("age", 5);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("arg0", src);
+		
+		invoke.execute(os);
+		
+		JavaBeanSub re=os.get("result");
+		
+		Assert.assertEquals(1, re.getId().intValue());
+		Assert.assertEquals("generic", re.getName());
+		Assert.assertEquals(5, re.getAge().intValue());
+	}
+	
+	@Test
+	public void execute_genericMethod_resolverIsProxy_resolveBase() throws Exception
+	{
+		SubSubSubGenericResolver resolver=(SubSubSubGenericResolver)Proxy.newProxyInstance(
+				SubSubSubGenericResolver.class.getClassLoader(),
+				new Class<?>[]{ SubSubSubGenericResolver.class },
+				new InvocationHandler()
+				{
+					private Object handler=new SubSubSubGenericResolverImpl();
+					
+					public Object invoke(Object arg0, Method arg1, Object[] arg2) throws Throwable
+					{
+						return arg1.invoke(handler, arg2);
+					}
+				});
+		
+		Arg[] args=new Arg[1];
+		args[0]=new KeyArg("arg0");
+		Invoke invoke=new Invoke(null, new ObjectResolver(resolver), "resolveBase", args, "result");
+		
+		Map<String, Object> src=new HashMap<String, Object>();
+		src.put("id", 1);
+		src.put("name", "generic");
+		src.put("age", 5);
+		
+		ObjectSource os=new HashMapObjectSource(new DefaultGenericConverter());
+		os.set("arg0", src);
+		
+		invoke.execute(os);
+		
+		JavaBeanSub re=os.get("result");
+		
+		Assert.assertEquals(1, re.getId().intValue());
+		Assert.assertEquals("generic", re.getName());
+		Assert.assertEquals(5, re.getAge().intValue());
+	}
+	
+	@Test
+	public void execute_genericMethod_resolverIsProxy_resolveSub() throws Exception
+	{
+		SubSubSubGenericResolver resolver=(SubSubSubGenericResolver)Proxy.newProxyInstance(
+				SubSubSubGenericResolver.class.getClassLoader(),
+				new Class<?>[]{ SubSubSubGenericResolver.class },
+				new InvocationHandler()
+				{
+					private Object handler=new SubSubSubGenericResolverImpl();
+					
+					public Object invoke(Object arg0, Method arg1, Object[] arg2) throws Throwable
+					{
+						return arg1.invoke(handler, arg2);
+					}
+				});
+		
+		Arg[] args=new Arg[1];
+		args[0]=new KeyArg("arg0");
+		Invoke invoke=new Invoke(null, new ObjectResolver(resolver), "resolveSub", args, "result");
 		
 		Map<String, Object> src=new HashMap<String, Object>();
 		src.put("id", 1);

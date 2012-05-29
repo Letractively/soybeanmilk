@@ -131,23 +131,17 @@ public class DispatchServlet extends HttpServlet
 		
 		super.init();
 		
-		//编码
 		String ec=getInitEncoding();
+		WebObjectSourceFactory wsf=getInitWebObjectSourceFactory();
+		String appExecutorKey=getInitAppExecutorKey();
+		WebExecutor webExecutor=getInitWebExecutor();
+		
+		//设置编码
 		if(ec==null || ec.length()==0)
 			ec=WebConstants.DEFAULT_ENCODING;
 		setEncoding(ec);
 		
-		//执行器
-		setWebExecutor(getInitWebExecutor());
-		
-		if(log.isInfoEnabled())
-		{
-			int totalExecutables= getWebExecutor().getWebConfiguration().getExecutables() == null ? 0 : getWebExecutor().getWebConfiguration().getExecutables().size();
-			log.info(totalExecutables+" executables has been initialized");
-		}
-		
-		//WEB对象源工厂
-		WebObjectSourceFactory wsf=getInitWebObjectSourceFactory();
+		//创建Web对象源工厂
 		if(wsf == null)
 		{
 			wsf=new WebObjectSourceFactory()
@@ -161,10 +155,18 @@ public class DispatchServlet extends HttpServlet
 		}
 		setWebObjectSourceFactory(wsf);
 		
+		//创建执行器
+		setWebExecutor(webExecutor);
+		if(log.isInfoEnabled())
+		{
+			int totalExecutables= getWebExecutor().getWebConfiguration().getExecutables() == null ? 0 : getWebExecutor().getWebConfiguration().getExecutables().size();
+			log.info(totalExecutables+" executables has been initialized");
+		}
+		
 		//执行器存储关键字
-		setAppExecutorKey(getInitAppExecutorKey());
+		setAppExecutorKey(appExecutorKey);
 		String aek=getAppExecutorKey();
-		if(aek==null || aek.length()==0)
+		if(aek!=null && aek.length()==0)
 			setAppExecutorKey(null);
 		if(aek != null)
 			getServletContext().setAttribute(aek, getWebExecutor());
@@ -356,23 +358,33 @@ public class DispatchServlet extends HttpServlet
 		if(erfKey!=null && erfKey.length()!=0)
 		{
 			erf=(ResolverObjectFactory)getServletContext().getAttribute(erfKey);
-			if(erf == null)
-				throw new ServletException("can not find external ResolverObjectFactory in application with key "+SbmUtils.toString(erfKey));
 			
-			if(log.isDebugEnabled())
-				log.debug("found external ResolverObjectFactory "+SbmUtils.toString(erf.getClass())+" in "+SbmUtils.toString(WebConstants.Scope.APPLICATION)+" scope");
+			if(erf == null)
+				log.warn("no external ResolverObjectFactory found in "+SbmUtils.toString(WebConstants.Scope.APPLICATION)+" scope with key "+SbmUtils.toString(erfKey));
+			else
+				if(log.isDebugEnabled())
+					log.debug("found external ResolverObjectFactory "+SbmUtils.toString(erf.getClass())+" in "+SbmUtils.toString(WebConstants.Scope.APPLICATION)+" scope");
 		}
 		
 		return erf;
 	}
-
+	
 	//@Override
 	public String getInitParameter(String name)
 	{
-		String re=super.getInitParameter(name);
+		String re=null;
 		
-		if(log.isDebugEnabled())
-			log.debug("got init parameter value "+SbmUtils.toString(re)+" for key "+SbmUtils.toString(name));
+		try
+		{
+			re=super.getInitParameter(name);
+		}
+		catch(Exception e)
+		{
+			re=null;
+		}
+		
+		if(log.isInfoEnabled())
+			log.info("got init parameter "+SbmUtils.toString(name)+" value :"+SbmUtils.toString(re));
 		
 		return re;
 	}

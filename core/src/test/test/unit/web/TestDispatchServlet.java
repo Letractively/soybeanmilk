@@ -67,150 +67,127 @@ public class TestDispatchServlet
 	@Test
 	public void initEncoding_userSet()
 	{
-		{
-			servletInitParameters.put(WebConstants.ServletInitParams.ENCODING, myEncoding);
-			
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertEquals(myEncoding, servlet.getEncoding());
-		}
+		servletInitParameters.put(WebConstants.ServletInitParams.ENCODING, myEncoding);
+		
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		Assert.assertEquals(myEncoding, servlet.getEncoding());
 	}
 	
 	@Test
 	public void initEncoding_userSetEmpty()
 	{
-		{
-			servletInitParameters.put(WebConstants.ServletInitParams.ENCODING, "");
-			
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertEquals(WebConstants.DEFAULT_ENCODING, servlet.getEncoding());
-		}
+		servletInitParameters.put(WebConstants.ServletInitParams.ENCODING, "");
+		
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		Assert.assertEquals(WebConstants.DEFAULT_ENCODING, servlet.getEncoding());
 	}
 	
 	@Test
 	public void initEncoding_userNotSet()
 	{
-		{
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertEquals(WebConstants.DEFAULT_ENCODING, servlet.getEncoding());
-		}
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		Assert.assertEquals(WebConstants.DEFAULT_ENCODING, servlet.getEncoding());
 	}
 	
 	@Test
 	public void initAppExecutorKey_userSet()
 	{
-		{
-			servletInitParameters.put(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY, myExecutorKey);
-			
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertEquals(myExecutorKey, servlet.getAppExecutorKey());
-		}
+		servletInitParameters.put(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY, myExecutorKey);
+		
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		Assert.assertEquals(myExecutorKey, servlet.getAppExecutorKey());
 	}
 	
 	@Test
 	public void initAppExecutorKey_userSetEmpty()
 	{
-		{
-			servletInitParameters.put(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY, "");
-			
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertNull(servlet.getAppExecutorKey());
-		}
+		servletInitParameters.put(WebConstants.ServletInitParams.APPLICATION_EXECUTOR_KEY, "");
+		
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		Assert.assertNull(servlet.getAppExecutorKey());
 	}
 	
 	@Test
 	public void initAppExecutorKey_userNotSet()
 	{
-		{
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertNull(servlet.getAppExecutorKey());
-		}
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		Assert.assertNull(servlet.getAppExecutorKey());
 	}
 	
 	@Test
 	public void initWebObjectSourceFactory_userSet()
 	{
-		{
-			servletInitParameters.put(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY_CLASS, myWebObjectSourceFactoryClass);
-			
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertEquals(MyWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
-		}
+		servletInitParameters.put(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY_CLASS, myWebObjectSourceFactoryClass);
+		
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		Assert.assertEquals(MyWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
 	}
 	
 	@Test
 	public void initWebObjectSourceFactory_userSetEmpty()
 	{
-		{
-			servletInitParameters.put(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY_CLASS, "");
-			
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertEquals(DefaultWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
-		}
+		servletInitParameters.put(WebConstants.ServletInitParams.WEB_OBJECT_SOURCE_FACTORY_CLASS, "");
+		
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		Assert.assertEquals(DefaultWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
 	}
 	
 	@Test
 	public void initWebObjectSourceFactory_userNotSet()
 	{
-		{
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertEquals(DefaultWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
-		}
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		Assert.assertEquals(DefaultWebObjectSource.class, servlet.getWebObjectSourceFactory().create(null, null, null).getClass());
 	}
 	
 	@Test
 	public void initExternalResolverFactory_userSet()
 	{
-		{
-			servletContext.setAttribute(myExternalResolverKey, myExternalResolverObjectFactory);
-			servletInitParameters.put(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_OBJECT_FACTORY, myExternalResolverKey);
-			
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertTrue( ((DefaultResolverObjectFactory)servlet.getWebExecutor().getConfiguration().getResolverObjectFactory()).getExternalResolverObjectFactory() == myExternalResolverObjectFactory );
-		}
+		servletContext.setAttribute(myExternalResolverKey, myExternalResolverObjectFactory);
+		servletInitParameters.put(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_OBJECT_FACTORY, myExternalResolverKey);
+		
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		Assert.assertTrue( ((DefaultResolverObjectFactory)servlet.getWebExecutor().getConfiguration().getResolverObjectFactory()).getExternalResolverObjectFactory() == myExternalResolverObjectFactory );
 	}
 	
 	@Test
 	public void initExternalResolverFactory_userSetNull()
 	{
-		{
-			servletContext.setAttribute(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_OBJECT_FACTORY, null);
-			
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertNull(((DefaultResolverObjectFactory)servlet.getWebExecutor().getConfiguration().getResolverObjectFactory()).getExternalResolverObjectFactory());
-		}
+		servletInitParameters.put(WebConstants.ServletInitParams.EXTERNAL_RESOLVER_OBJECT_FACTORY, "myExternalResolverObjectFactory");
+		servletContext.setAttribute("myExternalResolverObjectFactory", null);
+		
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		Assert.assertNull(((DefaultResolverObjectFactory)servlet.getWebExecutor().getConfiguration().getResolverObjectFactory()).getExternalResolverObjectFactory());
 	}
 	
 	@Test
 	public void initExternalResolverFactory_userNotSet()
 	{
-		{
-			MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
-			initServlet(servlet);
-			
-			Assert.assertNull(((DefaultResolverObjectFactory)servlet.getWebExecutor().getConfiguration().getResolverObjectFactory()).getExternalResolverObjectFactory());
-		}
+		MockDispathServlet servlet=new MockDispathServlet(servletContext, servletInitParameters);
+		initServlet(servlet);
+		
+		Assert.assertNull(((DefaultResolverObjectFactory)servlet.getWebExecutor().getConfiguration().getResolverObjectFactory()).getExternalResolverObjectFactory());
 	}
 	
 	@Test

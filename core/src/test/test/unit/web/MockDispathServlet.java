@@ -43,7 +43,18 @@ public class MockDispathServlet extends DispatchServlet
 	//@Override
 	public String getInitParameter(String name)
 	{
-		return servletInitParameters.get(name);
+		String result=null;
+		
+		try
+		{
+			result=super.getInitParameter(name);
+		}
+		catch(Exception e){}
+		
+		if(result == null)
+			result=servletInitParameters.get(name);
+		
+		return result;
 	}
 
 	//@Override

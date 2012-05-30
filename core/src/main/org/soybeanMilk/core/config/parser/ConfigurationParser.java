@@ -110,7 +110,10 @@ public class ConfigurationParser
 	
 	/**主文档*/
 	private Document rootDocument;
+	
+	/**配置对象*/
 	private Configuration configuration;
+	
 	/**主文档包含的模块文档*/
 	private List<Document> modules;
 	

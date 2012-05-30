@@ -1,4 +1,8 @@
 
-1. 动态Invoke，支持直接调用对象源中对象的方法
-
-2. 自动检测和初始化支持
+自动检测和初始化支持
+	<executales-scanner class="">
+		<location>jar:</location>
+		<location>classpath:</location>
+		<location>classpath:</location>
+		<location>file:</location>
+	</executales-scanner>

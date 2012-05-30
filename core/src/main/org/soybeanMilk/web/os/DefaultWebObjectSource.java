@@ -400,7 +400,7 @@ public class DefaultWebObjectSource extends ConvertableObjectSource implements W
 			return false;
 		else
 		{
-			Class<?> clazz=SbmUtils.narrowToClassType(type);
+			Class<?> clazz=SbmUtils.narrowToClass(type);
 			
 			if(clazz.isPrimitive())
 				return true;

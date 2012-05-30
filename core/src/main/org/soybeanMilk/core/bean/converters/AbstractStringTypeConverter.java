@@ -35,7 +35,7 @@ public abstract class AbstractStringTypeConverter implements Converter
 			return (T)sourceObj;
 		
 		String sourceStr=(String)sourceObj;
-		Class<?> tc=SbmUtils.narrowToClassType(targetType);
+		Class<?> tc=SbmUtils.narrowToClass(targetType);
 		
 		//空字符串到其他类型认为是null
 		if(sourceStr==null || "".equals(sourceStr))

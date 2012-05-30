@@ -472,7 +472,7 @@ public class Invoke extends AbstractExecutable
 							//方法类型是参数类型的父类
 							else
 							{
-								Class<?> methodType=SbmUtils.narrowToClassType(wrapType(types[i]));
+								Class<?> methodType=SbmUtils.narrowToClass(wrapType(types[i]));
 								Type argType=wrapType(argTypes[i]);
 								
 								if(!isAncestorType(methodType, argType))

@@ -68,7 +68,7 @@ public class KeyArg extends AbstractArg
 			targetType=argType;
 		
 		if(!SbmUtils.isClassType(targetType))
-			targetType=toConcreteArgType(argType, methodClass);
+			targetType=reify(argType, methodClass);
 		
 		return objectSource.get(this.key, targetType);
 	}
@@ -86,8 +86,8 @@ public class KeyArg extends AbstractArg
 	 * @return
 	 * @date 2012-5-16
 	 */
-	protected Type toConcreteArgType(Type argType, Class<?> ownerClass)
+	protected Type reify(Type argType, Class<?> ownerClass)
 	{
-		return SbmUtils.toConcreteType(argType, ownerClass);
+		return SbmUtils.reify(argType, ownerClass);
 	}
 }

@@ -359,7 +359,7 @@ public class DefaultGenericConverter implements GenericConverter
 		else if(SbmUtils.isClassType(type))
 		{
 			@SuppressWarnings("rawtypes")
-			Class clazz=SbmUtils.narrowToClassType(type);
+			Class clazz=SbmUtils.narrowToClass(type);
 			
 			if(clazz.isEnum())
 				result= Enum.valueOf(clazz, str);
@@ -368,11 +368,11 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 		else if(type instanceof TypeVariable<?>)
 		{
-			result=convertObjectToType(str, toConcreteType(type));
+			result=convertObjectToType(str, reify(type));
 		}
 		else if(type instanceof WildcardType)
 		{
-			result=convertObjectToType(str, toConcreteType(type));
+			result=convertObjectToType(str, reify(type));
 		}
 		else if(type instanceof ParameterizedType)
 		{
@@ -409,7 +409,7 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 		else if(SbmUtils.isClassType(type))
 		{
-			result=convertArrayToClass(array, SbmUtils.narrowToClassType(type));
+			result=convertArrayToClass(array, SbmUtils.narrowToClass(type));
 		}
 		else if(type instanceof ParameterizedType)
 		{
@@ -421,11 +421,11 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 		else if(type instanceof TypeVariable<?>)
 		{
-			result=convertObjectToType(array, toConcreteType(type));
+			result=convertObjectToType(array, reify(type));
 		}
 		else if(type instanceof WildcardType)
 		{
-			result=convertObjectToType(array, toConcreteType(type));
+			result=convertObjectToType(array, reify(type));
 		}
 		else
 			result=converterNotFoundThrow(array.getClass(), type);
@@ -472,7 +472,7 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		if(SbmUtils.isClassType(rt))
 		{
-			Class<?> actualType=SbmUtils.narrowToClassType(rt);
+			Class<?> actualType=SbmUtils.narrowToClass(rt);
 			
 			//List<T>
 			if(isAncestorType(List.class, actualType))
@@ -582,7 +582,7 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 		else if(SbmUtils.isClassType(type))
 		{
-			Class<?> clazz=SbmUtils.narrowToClassType(type);
+			Class<?> clazz=SbmUtils.narrowToClass(type);
 			
 			//如果没有自定义类型且目标类型是原生Map则不做转换
 			if(customType==null && isAncestorType(Map.class, clazz))
@@ -624,11 +624,11 @@ public class DefaultGenericConverter implements GenericConverter
 		}
 		else if(type instanceof TypeVariable<?>)
 		{
-			result=convertObjectToType(map, toConcreteType(type));
+			result=convertObjectToType(map, reify(type));
 		}
 		else if(type instanceof WildcardType)
 		{
-			result=convertObjectToType(map, toConcreteType(type));
+			result=convertObjectToType(map, reify(type));
 		}
 		else
 			result=converterNotFoundThrow(map.getClass(), type);
@@ -751,7 +751,7 @@ public class DefaultGenericConverter implements GenericConverter
 		
 		if(SbmUtils.isClassType(rt))
 		{
-			Class<?> actualType=SbmUtils.narrowToClassType(rt);
+			Class<?> actualType=SbmUtils.narrowToClass(rt);
 			
 			//List<T>
 			if(isAncestorType(List.class, actualType))
@@ -819,18 +819,18 @@ public class DefaultGenericConverter implements GenericConverter
 		PropertyInfo commonEleBeanInfo=null;
 		Type commonEleType=null;
 		if(elementType != null)
-			commonEleType=toConcreteType(elementType);
+			commonEleType=reify(elementType);
 		else
 		{
 			Type cet=getMapTargetListElementCustomType(pvm, 0, customTypes, elementType);
 			
 			//使用第一个元素的类型作为共有属性信息
 			if(cet != null)
-				commonEleType=toConcreteType(cet);
+				commonEleType=reify(cet);
 		}
 		
 		if(commonEleType!=null && SbmUtils.isClassType(commonEleType))
-			commonEleBeanInfo=PropertyInfo.getPropertyInfo(SbmUtils.narrowToClassType(commonEleType));
+			commonEleBeanInfo=PropertyInfo.getPropertyInfo(SbmUtils.narrowToClass(commonEleType));
 		
 		Set<String> propertyKeyes=pvm.keySet();
 		for(String property : propertyKeyes)
@@ -1287,7 +1287,7 @@ public class DefaultGenericConverter implements GenericConverter
 	{
 		Type targetType=propertyInfo.getPropGenericType();
 		if(!SbmUtils.isClassType(targetType))
-			targetType=toConcreteType(targetType, propertyInfo.getOwnerClass());
+			targetType=reify(targetType, propertyInfo.getOwnerClass());
 		
 		Object destValue=convertObjectToType(value, targetType);
 		try
@@ -1385,7 +1385,7 @@ public class DefaultGenericConverter implements GenericConverter
 			else if(java.util.Map.class.equals(type))
 				clazz=HashMap.class;
 			else
-				clazz=SbmUtils.narrowToClassType(type);
+				clazz=SbmUtils.narrowToClass(type);
 		}
 		else
 			clazz=null;
@@ -1395,7 +1395,7 @@ public class DefaultGenericConverter implements GenericConverter
 			if(clazz == null)
 			{
 				String fqn=SbmUtils.getFullQualifiedClassName(type);
-				clazz=SbmUtils.narrowToClassType(nameToType(fqn));
+				clazz=SbmUtils.narrowToClass(nameToType(fqn));
 			}
 			
 			if(arrayLength < 0)
@@ -1468,9 +1468,9 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2012-5-15
 	 */
-	protected Type toConcreteType(Type type)
+	protected Type reify(Type type)
 	{
-		return SbmUtils.toConcreteType(type, null);
+		return SbmUtils.reify(type, null);
 	}
 	
 	/**
@@ -1480,9 +1480,9 @@ public class DefaultGenericConverter implements GenericConverter
 	 * @return
 	 * @date 2012-5-15
 	 */
-	protected Type toConcreteType(Type type, Class<?> ownerClass)
+	protected Type reify(Type type, Class<?> ownerClass)
 	{
-		return SbmUtils.toConcreteType(type, ownerClass);
+		return SbmUtils.reify(type, ownerClass);
 	}
 	
 	protected Map<ConverterKey, Converter> getConverters() {

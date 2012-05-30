@@ -57,7 +57,7 @@ public class SbmUtils
 	 * @return
 	 * @date 2010-12-31
 	 */
-	public static Class<?> narrowToClassType(Type type)
+	public static Class<?> narrowToClass(Type type)
 	{
 		return (Class<?>)type;
 	}
@@ -70,7 +70,7 @@ public class SbmUtils
 	 */
 	public static boolean isPrimitive(Type type)
 	{
-		return type!=null && isClassType(type) && narrowToClassType(type).isPrimitive();
+		return type!=null && isClassType(type) && narrowToClass(type).isPrimitive();
 	}
 	
 	/**
@@ -86,13 +86,18 @@ public class SbmUtils
 		{
 			if(type == null)
 				return true;
-			else if(isClassType(type) && narrowToClassType(type).isPrimitive())
+			else if(isClassType(type) && narrowToClass(type).isPrimitive())
 				return false;
 			else
 				return true;
 		}
 		else
-			return isAncestorType(type, obj.getClass());
+		{
+			if(isClassType(type))
+				return narrowToClass(type).isInstance(obj);
+			else
+				return isAncestorType(type, obj.getClass());
+		}
 	}
 	
 	/**
@@ -114,15 +119,15 @@ public class SbmUtils
 		}
 		else if(isClassType(ancestor))
 		{
-			Class<?> ancestorClass=narrowToClassType(ancestor);
+			Class<?> ancestorClass=narrowToClass(ancestor);
 			
 			if(isClassType(descendant))
 			{
-				return ancestorClass.isAssignableFrom(narrowToClassType(descendant));
+				return ancestorClass.isAssignableFrom(narrowToClass(descendant));
 			}
 			else if(descendant instanceof ParameterizedType)
 			{
-				return ancestorClass.isAssignableFrom(narrowToClassType(((ParameterizedType) descendant).getRawType()));
+				return ancestorClass.isAssignableFrom(narrowToClass(((ParameterizedType) descendant).getRawType()));
 			}
 			else if(descendant instanceof GenericArrayType)
 			{
@@ -133,11 +138,11 @@ public class SbmUtils
 			}
 			else if(descendant instanceof TypeVariable<?>)
 			{
-				return isAncestorType(ancestorClass, toConcreteType(descendant, null));
+				return isAncestorType(ancestorClass, reify(descendant, null));
 			}
 			else if(descendant instanceof WildcardType)
 			{
-				return isAncestorType(ancestorClass, toConcreteType(descendant, null));
+				return isAncestorType(ancestorClass, reify(descendant, null));
 			}
 			else
 				return false;
@@ -150,7 +155,7 @@ public class SbmUtils
 		{
 			if(isClassType(descendant))
 			{
-				Class<?> descendantClass=narrowToClassType(descendant);
+				Class<?> descendantClass=narrowToClass(descendant);
 				
 				if(!descendantClass.isArray())
 					return false;
@@ -166,11 +171,11 @@ public class SbmUtils
 		}
 		else if(ancestor instanceof TypeVariable<?>)
 		{
-			return isAncestorType(toConcreteType(ancestor, null), descendant);
+			return isAncestorType(reify(ancestor, null), descendant);
 		}
 		else if(ancestor instanceof WildcardType)
 		{
-			return isAncestorType(toConcreteType(ancestor, null), descendant);
+			return isAncestorType(reify(ancestor, null), descendant);
 		}
 		else
 			return false;
@@ -186,7 +191,7 @@ public class SbmUtils
 	{
 		if(!isClassType(type))
 			return type;
-		else if (!narrowToClassType(type).isPrimitive())
+		else if (!narrowToClass(type).isPrimitive())
             return type;
 		else if (Byte.TYPE.equals(type))
             return Byte.class;
@@ -256,11 +261,11 @@ public class SbmUtils
 		}
 		else if(type instanceof TypeVariable<?>)
 		{
-			re=getFullQualifiedClassName(toConcreteType(type, (Class<?>)null));
+			re=getFullQualifiedClassName(reify(type, (Class<?>)null));
 		}
 		else if(type instanceof WildcardType)
 		{
-			re=getFullQualifiedClassName(toConcreteType(type, (Class<?>)null));
+			re=getFullQualifiedClassName(reify(type, (Class<?>)null));
 		}
 		else
 			throw new IllegalArgumentException("unknown type "+SbmUtils.toString(type));
@@ -269,53 +274,29 @@ public class SbmUtils
 	}
 	
 	/**
-	 * 将<code>type</code>类型转换为具体化类型，它包含的所有{@linkplain TypeVariable}和{@linkplain WildcardType}类型都将被<code>ownerClass</code>中的具体类型替代，
+	 * 将<code>type</code>类型具体化，它包含的所有{@linkplain TypeVariable}和{@linkplain WildcardType}类型都将被<code>ownerClass</code>中的具体类型参数替代，
 	 * 如果<code>type</code>中不包含这两种类型，它将直接被返回；否则，一个新的类型将被创建并返回。
-	 * @param type
-	 * @param ownerClass
+	 * @param type 要具体化的类型
+	 * @param ownerClass <code>type</code>类型的持有类
 	 * @return
 	 * @date 2012-5-14
 	 */
-	public static Type toConcreteType(Type type, Class<?> ownerClass)
+	public static Type reify(Type type, Class<?> ownerClass)
 	{
 		if(isClassType(type))
 			return type;
 		
 		if(ownerClass == null)
 		{
-			return toConcreteTypeInner(type, null);
+			return reifyInner(type, null);
 		}
 		else
 		{
 			Map<TypeVariable<?>, Type> variableTypesMap=getClassVarialbleTypesMap(ownerClass);
 			
-			return toConcreteTypeInner(type, variableTypesMap);
+			return reifyInner(type, variableTypesMap);
 		}
 	}
-	
-	/**
-	 * 获取给定类中声明的{@linkplain TypeVariable}对应的类型
-	 * @param clazz
-	 * @return
-	 * @date 2012-5-16
-	 */
-	private static Map<TypeVariable<?>, Type> getClassVarialbleTypesMap(Class<?> clazz)
-	{
-		Map<TypeVariable<?>, Type> re=classVarialbleTypesMap.get(clazz);
-		
-		if(re == null)
-		{
-			re=new HashMap<TypeVariable<?>, Type>();
-			extractTypeVariablesInType(clazz, re);
-			
-			classVarialbleTypesMap.putIfAbsent(clazz, re);
-		}
-		
-		return re;
-	}
-	
-	/**类中{@linkplain TypeVariable}类型缓存*/
-	private static ConcurrentHashMap<Class<?>, Map<TypeVariable<?>, Type>> classVarialbleTypesMap=new ConcurrentHashMap<Class<?>, Map<TypeVariable<?>,Type>>();
 	
 	/**
 	 * 具体化类型
@@ -324,7 +305,7 @@ public class SbmUtils
 	 * @return
 	 * @date 2012-5-14
 	 */
-	private static Type toConcreteTypeInner(Type type, Map<TypeVariable<?>, Type> variableTypesMap)
+	private static Type reifyInner(Type type, Map<TypeVariable<?>, Type> variableTypesMap)
 	{
 		Type result=null;
 		
@@ -340,16 +321,16 @@ public class SbmUtils
 			Type[] cat=new Type[at.length];
 			
 			//如果pt的所有的参数类型都已具体化，则直接返回pt；否则，创建具体化的自定义参数类型
-			boolean concrete=true;
+			boolean reified=true;
 			for(int i=0; i<at.length; i++)
 			{
-				cat[i]=toConcreteTypeInner(at[i], variableTypesMap);
+				cat[i]=reifyInner(at[i], variableTypesMap);
 				
 				if(cat[i] != at[i])
-					concrete=false;
+					reified=false;
 			}
 			
-			if(concrete)
+			if(reified)
 				result=pt;
 			else
 				result=new CustomParameterizedType(pt.getRawType(), pt.getOwnerType(), cat);
@@ -359,7 +340,7 @@ public class SbmUtils
 			GenericArrayType gap=(GenericArrayType)type;
 			
 			Type ct=gap.getGenericComponentType();
-			Type cct=toConcreteTypeInner(ct, variableTypesMap);
+			Type cct=reifyInner(ct, variableTypesMap);
 			
 			if(cct == ct)
 				result=gap;
@@ -383,7 +364,7 @@ public class SbmUtils
 					result=bounds[0];
 			}
 			
-			result=toConcreteTypeInner(result, variableTypesMap);
+			result=reifyInner(result, variableTypesMap);
 		}
 		else if(type instanceof WildcardType)
 		{
@@ -396,13 +377,37 @@ public class SbmUtils
 			if(upperType == null)
 				upperType=Object.class;
 			
-			result=toConcreteTypeInner(upperType, variableTypesMap);
+			result=reifyInner(upperType, variableTypesMap);
 		}
 		else
 			result=type;
 		
 		return result;
 	}
+	
+	/**
+	 * 获取给定类中声明的{@linkplain TypeVariable}对应的类型
+	 * @param clazz
+	 * @return
+	 * @date 2012-5-16
+	 */
+	private static Map<TypeVariable<?>, Type> getClassVarialbleTypesMap(Class<?> clazz)
+	{
+		Map<TypeVariable<?>, Type> re=classReifiedTypeMap.get(clazz);
+		
+		if(re == null)
+		{
+			re=new HashMap<TypeVariable<?>, Type>();
+			extractTypeVariablesInType(clazz, re);
+			
+			classReifiedTypeMap.putIfAbsent(clazz, re);
+		}
+		
+		return re;
+	}
+	
+	/**类中{@linkplain TypeVariable}类型参数缓存*/
+	private static ConcurrentHashMap<Class<?>, Map<TypeVariable<?>, Type>> classReifiedTypeMap=new ConcurrentHashMap<Class<?>, Map<TypeVariable<?>,Type>>();
 	
 	/**
 	 * 查找给定类型中包含的所有变量类型对应的具体类型，比如对于：
@@ -462,7 +467,7 @@ public class SbmUtils
 			if(isClassType(pt.getRawType()))
 			{
 				Type[] actualArgTypes=pt.getActualTypeArguments();
-				TypeVariable<?>[] typeVariables=narrowToClassType(pt.getRawType()).getTypeParameters();
+				TypeVariable<?>[] typeVariables=narrowToClass(pt.getRawType()).getTypeParameters();
 				
 				for(int i=0; i<actualArgTypes.length;i++)
 				{

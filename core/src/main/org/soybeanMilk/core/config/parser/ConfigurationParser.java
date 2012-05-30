@@ -674,7 +674,7 @@ public class ConfigurationParser
 		{
 			try
 			{
-				Class<?> rc=SbmUtils.narrowToClassType(nameToType(resolver));
+				Class<?> rc=SbmUtils.narrowToClass(nameToType(resolver));
 				invoke.setResolver(new ObjectResolver(null, rc));
 				
 				classResolver=true;
@@ -1338,7 +1338,7 @@ public class ConfigurationParser
 	{
 		try
 		{
-			return SbmUtils.narrowToClassType(SbmUtils.nameToType(clazz)).newInstance();
+			return SbmUtils.narrowToClass(SbmUtils.nameToType(clazz)).newInstance();
 		}
 		catch(Exception e)
 		{

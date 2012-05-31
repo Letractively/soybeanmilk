@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--根元素-->
-<!ELEMENT soybean-milk (global-config?,includes?,resolvers?,executables)>
+<!ELEMENT soybean-milk (global-config?,includes?,resolvers?,executables*)>
 
 <!--全局配置-->
 <!ELEMENT global-config ((interceptor?,generic-converter?) | (generic-converter?,interceptor?))>

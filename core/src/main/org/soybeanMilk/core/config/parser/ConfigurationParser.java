@@ -208,6 +208,7 @@ public class ConfigurationParser
 		setDocument(parseDocument(configFile));
 		
 		parseAll();
+		
 		return getConfiguration();
 	}
 	
@@ -221,6 +222,7 @@ public class ConfigurationParser
 		setDocument(parseDocument(in));
 		
 		parseAll();
+		
 		return getConfiguration();
 	}
 	
@@ -234,6 +236,7 @@ public class ConfigurationParser
 		setDocument(document);
 		
 		parseAll();
+		
 		return getConfiguration();
 	}
 	
@@ -251,20 +254,16 @@ public class ConfigurationParser
 		parseGlobalConfigs(rootDocEle);
 		parseIncludes(rootDocEle);
 		parseResolvers(rootDocEle);
-		
-		if(modules !=null)
-		{
-			for(Document doc : modules)
-				parseResolvers(getDocumentRootElement(doc));
-		}
-		
 		parseExecutables(rootDocEle);
 		
-		if(modules !=null)
+		if(modules != null)
 		{
 			for(Document doc : modules)
 			{
-				parseExecutables(getDocumentRootElement(doc));
+				Element subDoc=getDocumentRootElement(doc);
+				
+				parseResolvers(subDoc);
+				parseExecutables(subDoc);
 			}
 		}
 		
@@ -346,25 +345,29 @@ public class ConfigurationParser
 	 */
 	protected void parseExecutables(Element docRoot)
 	{
-		Element executables=getSingleElementByTagName(docRoot,TAG_EXECUTABLES);
+		List<Element> executables=getChildrenByTagName(docRoot,TAG_EXECUTABLES);
+		
 		if(executables != null)
 		{
-			setCurrentExecutablePrefix(getAttributeValue(executables, TAG_EXECUTABLES_ATTR_PREFIX));
-			
-			List<Element> children=getChildrenByTagName(executables, null);
-			
-			if(children != null)
+			for(Element ele : executables)
 			{
-				for(Element e : children)
+				setCurrentExecutablePrefix(getAttributeValue(ele, TAG_EXECUTABLES_ATTR_PREFIX));
+				
+				List<Element> children=getChildrenByTagName(ele, null);
+				
+				if(children != null)
 				{
-					Executable executable=createExecutableInstance(e.getTagName());
-					
-					if(executable instanceof Action)
-						setActionProperties((Action)executable,e);
-					else
-						setInvokeProperties((Invoke)executable,e, true);
-					
-					configuration.addExecutable(executable);
+					for(Element e : children)
+					{
+						Executable executable=createExecutableInstance(e.getTagName());
+						
+						if(executable instanceof Action)
+							setActionProperties((Action)executable,e);
+						else
+							setInvokeProperties((Invoke)executable,e, true);
+						
+						configuration.addExecutable(executable);
+					}
 				}
 			}
 		}

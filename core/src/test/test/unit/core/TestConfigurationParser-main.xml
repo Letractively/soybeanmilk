@@ -20,11 +20,16 @@
 	</resolvers>
 	
 	<executables prefix="global_">
-	
+		
 		<invoke name="before">
 			tr.test0();
 		</invoke>
+		
 		<action name="after"></action>
+		
+	</executables>
+	
+	<executables prefix="global_">
 		
 		<action name=""></action>
 		
@@ -83,6 +88,19 @@
 				"string",
 				true,					false
 			);
+		</invoke>
+		
+	</executables>
+	
+	<executables prefix="another_">
+	
+		<action name="exe1">
+			<ref name="innerRef"/>
+			<ref name="global_exe1"/>
+		</action>
+		
+		<invoke name="innerRef">
+			tr.test2(arg0, arg1);
 		</invoke>
 		
 	</executables>

@@ -130,6 +130,22 @@ public class TestConfigurationParser
 		Action exe2=(Action)config.getExecutable("m2_");
 		Assert.assertNotNull(exe2);
 	}
+
+	@Test
+	public void parse_executables_multiExecutables() throws Exception
+	{
+		config=new ConfigurationParser().parse("test/unit/core/TestConfigurationParser-main.xml");
+		
+		Action exe0=(Action)config.getExecutable("another_exe1");
+		Assert.assertNotNull(exe0);
+		
+		List<Executable> inners=exe0.getExecutables();
+		
+		Assert.assertEquals(2, inners.size());
+		
+		Assert.assertTrue( inners.get(0) == config.getExecutable("another_innerRef") );
+		Assert.assertTrue( inners.get(1) == config.getExecutable("global_exe1") );
+	}
 	
 	@Test
 	public void parse_executables_action() throws Exception

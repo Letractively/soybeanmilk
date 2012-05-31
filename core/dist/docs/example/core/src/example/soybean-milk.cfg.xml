@@ -27,7 +27,9 @@
 		<invoke name="exceptionHandler">
 			interceptor.exception(executionKey);
 		</invoke>
-		
+	</executables>
+	
+	<executables>
 		<action name="helloStatement">
 			<invoke> statement.helloResult = helloResolver.hello(helloTo, 3) </invoke>
 			<invoke> example . resolver. HelloResolver . printObject ( statement.helloResult ); </invoke>
@@ -108,5 +110,4 @@
 		</invoke>
 		
 	</executables>
-	
 </soybean-milk>

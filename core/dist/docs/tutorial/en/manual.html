@@ -127,11 +127,10 @@
 								 Included modules
 								<ul>
 									<li>
-										<a href="#tag_file"><span class="tag">&lt;file&gt;</span></a>
+										<a href="#tag_location"><span class="tag">&lt;location&gt;</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										&nbsp;&nbsp;&nbsp;
-										 Module file
+										 Module file locations
 									</li>
 								</ul>
 							</li>
@@ -461,11 +460,11 @@ public void handleException(Execution execution)
 			</p>
 			<div class="seprator"></div>
 			<p>
-				<a name="tag_file"></a>
-				<span class="tag bold">&lt;file&gt;</span> (Optional) <br/>
+				<a name="tag_location"></a>
+				<span class="tag bold">&lt;location&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				The file of module configuration. It can be a resource file in classpath, or file in "<span class="var">/WEB-INF</span>" folder of your application.
+				The location of module configuration file. It can be a resource file in classpath, or file in "<span class="var">/WEB-INF</span>" folder of your application.
 			</p>
 			<p>
 				Note that only <span class="tag">&lt;resolvers&gt;</span> and <span class="tag">&lt;executables&gt;</span> tags are valid in module configuration files.
@@ -474,11 +473,11 @@ public void handleException(Execution execution)
 				It's an example below:
 <pre class="code-xml">
 &lt;includes&gt;
-	&lt;file&gt;your/config/module.1.xml&lt;/file&gt;
-	&lt;file&gt;your/config/module.2.xml&lt;/file&gt;
-	&lt;file&gt;/WEB-INF/config/module.3.xml&lt;/file&gt;
-	&lt;file&gt;/WEB-INF/config/module.4.xml&lt;/file&gt;
-	&lt;file&gt;/home/yourapp/config/module.5.xml&lt;/file&gt;
+	&lt;location&gt;your/config/module.1.xml&lt;/location&gt;
+	&lt;location&gt;your/config/module.2.xml&lt;/location&gt;
+	&lt;location&gt;/WEB-INF/config/module.3.xml&lt;/location&gt;
+	&lt;location&gt;/WEB-INF/config/module.4.xml&lt;/location&gt;
+	&lt;location&gt;/home/yourapp/config/module.5.xml&lt;/location&gt;
 &lt;/includes&gt;
 </pre>
 			</p>
@@ -528,7 +527,7 @@ public void handleException(Execution execution)
 				<span class="tag bold">&lt;executables&gt;</span> (Optional) <br/>
 			</p>
 			<p>
-				<span class="glossary">Executable</span> configuration block.
+				<span class="glossary">Executable</span> configuration block. It can present more than once in a configuration file.
 			</p>
 			<p>
 				It contains the following attributes:

@@ -69,19 +69,25 @@
 						1.0-b5 (Current)
 						<ul>
 							<li>
+								<a href="manual.html#tag_includes">&lt;includes&gt;</a>标签内的<a href="javascript:void(0);">&lt;file&gt;</a>标签重命名为<a href="manual.html#tag_location">&lt;location&gt;</a>标签
+							</li>
+							<li>
+								现在可以在一个文件域内定义多个<a href="manual.html#tag_executables">&lt;executables&gt;</a>标签
+							</li>
+							<li>
+								为<a href="manual.html#tag_arg">&lt;arg&gt;</a>标签添加“<a href="manual.html#tag_arg_attr"><span class="tagAttr">type</span></a>”属性，用于明确设置参数类型
+							</li>
+							<li>
 								重写所有<a href="../../api/org/soybeanMilk/core/bean/converters/package-summary.html">基本字符串类型转换器</a>，框架现在不再依赖common-beanutils包
 							</li>
 							<li>
 								重构<a href="../../api/org/soybeanMilk/core/exe/Invoke.html">调用</a>类及其相关类，使其也能够执行存储在<a href="../../api/org/soybeanMilk/core/ObjectSource.html">对象源</a>中对象的方法
 							</li>
 							<li>
-								为<a href="manual.html#tag_arg">&lt;arg&gt;</a>添加“<a href="manual.html#tag_arg_attr"><span class="tagAttr">type</span></a>”属性，用于明确设置参数类型
-							</li>
-							<li>
 								重构部分异常处理逻辑，添加<a href="../../api/org/soybeanMilk/core/exe/ArgPrepareExecuteException.html">参数准备执行异常</a>类和<a href="../../api/org/soybeanMilk/web/os/ParamIllegalException.html">参数非法异常</a>类，使请求参数非法异常更易于追踪和处理
 							</li>
 							<li>
-								重构<a href="#">Web对象源</a>类，将其拆分为<a href="../../api/org/soybeanMilk/web/WebObjectSource.html">Web对象源</a>接口和<a href="../../api/org/soybeanMilk/web/os/DefaultWebObjectSource.html">默认Web对象源</a>实现类，并改进其关键字处理逻辑，使关键字中的作用域部分并非必须
+								重构<a href="javascript:void(0);">Web对象源</a>类，将其拆分为<a href="../../api/org/soybeanMilk/web/WebObjectSource.html">Web对象源</a>接口和<a href="../../api/org/soybeanMilk/web/os/DefaultWebObjectSource.html">默认Web对象源</a>实现类，并改进其关键字处理逻辑，使关键字中的作用域部分并非必须
 							</li>
 							<li>
 								重写<a href="../../api/org/soybeanMilk/web/bean/WebGenericConverter.html">Web通用转换器</a>类，使其支持更复杂的类型转换，并为其添加映射表多态转换支持

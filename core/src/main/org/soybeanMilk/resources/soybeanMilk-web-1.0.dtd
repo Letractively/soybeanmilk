@@ -37,14 +37,14 @@
 <!--
 包含的模块配置文件
 -->
-<!ELEMENT includes (file*)>
+<!ELEMENT includes (location*)>
 <!--
 模块配置文件名，它可以是模糊的也可以是明确的
 比如：
 “my/cfg/*”			表示目录“my/cfg/”下面的所有XML文件（不包括子目录）
 “my/cfg/my.xml”		表示单一的配置文件
 -->
-<!ELEMENT file (#PCDATA)>
+<!ELEMENT location (#PCDATA)>
 
 <!--
 解决对象配置

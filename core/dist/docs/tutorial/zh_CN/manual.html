@@ -115,11 +115,10 @@
 								 包含模块
 								<ul>
 									<li>
-										<a href="#tag_file"><span class="tag">&lt;file&gt;</span></a>
+										<a href="#tag_location"><span class="tag">&lt;location&gt;</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										&nbsp;&nbsp;&nbsp;
-										 模块配置文件 
+										 模块配置文件位置
 									</li>
 								</ul>
 							</li>
@@ -432,11 +431,11 @@ public void handleException(Execution execution)
 			</p>
 			<div class="seprator"></div>
 			<p>
-				<a name="tag_file"></a>
-				<span class="tag bold">&lt;file&gt;</span>（可选） <br/>
+				<a name="tag_location"></a>
+				<span class="tag bold">&lt;location&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				模块配置文件。这个配置文件可以是类路径的资源文件，也可以是应用“<span class="var">/WEB-INF</span>”下的文件。
+				模块配置文件位置。这个配置文件可以是类路径的资源文件，也可以是应用“<span class="var">/WEB-INF</span>”下的文件。
 			</p>
 			<p>
 				注意，模块配置文件中只有<span class="tag">&lt;resolvers&gt;</span>和<span class="tag">&lt;executables&gt;</span>才是有效的。
@@ -445,11 +444,11 @@ public void handleException(Execution execution)
 				下面是一个示例：
 <pre class="code-xml">
 &lt;includes&gt;
-	&lt;file&gt;your/config/module.1.xml&lt;/file&gt;
-	&lt;file&gt;your/config/module.2.xml&lt;/file&gt;
-	&lt;file&gt;/WEB-INF/config/module.3.xml&lt;/file&gt;
-	&lt;file&gt;/WEB-INF/config/module.4.xml&lt;/file&gt;
-	&lt;file&gt;/home/yourapp/config/module.5.xml&lt;/file&gt;
+	&lt;location&gt;your/config/module.1.xml&lt;/location&gt;
+	&lt;location&gt;your/config/module.2.xml&lt;/location&gt;
+	&lt;location&gt;/WEB-INF/config/module.3.xml&lt;/location&gt;
+	&lt;location&gt;/WEB-INF/config/module.4.xml&lt;/location&gt;
+	&lt;location&gt;/home/yourapp/config/module.5.xml&lt;/location&gt;
 &lt;/includes&gt;
 </pre>
 			</p>
@@ -498,7 +497,7 @@ public void handleException(Execution execution)
 				<span class="tag bold">&lt;executables&gt;</span>（可选） <br/>
 			</p>
 			<p>
-				<span class="glossary">可执行对象</span>配置块。
+				<span class="glossary">可执行对象</span>配置块。它可以在一个文件域内定义多个。
 			</p>
 			<p>
 				它包含如下属性：

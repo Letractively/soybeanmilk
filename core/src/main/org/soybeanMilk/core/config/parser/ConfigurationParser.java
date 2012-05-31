@@ -82,7 +82,7 @@ public class ConfigurationParser
 	protected static final String TAG_INTERCEPROT_ATTR_EXECUTION_KEY="execution-key";
 	
 	protected static final String TAG_INCLUDES="includes";
-	protected static final String TAG_FILE="file";
+	protected static final String TAG_LOCATION="location";
 	
 	protected static final String TAG_RESOLVERS="resolvers";
 	protected static final String TAG_RESOLVER="resolver";
@@ -287,7 +287,7 @@ public class ConfigurationParser
 	 */
 	protected void parseIncludes(Element docRoot)
 	{
-		List<Element> files=getChildrenByTagName(getSingleElementByTagName(docRoot, TAG_INCLUDES), TAG_FILE);
+		List<Element> files=getChildrenByTagName(getSingleElementByTagName(docRoot, TAG_INCLUDES), TAG_LOCATION);
 		
 		if(files == null || files.isEmpty())
 			return;
@@ -297,7 +297,7 @@ public class ConfigurationParser
 		for(Element el : files)
 		{
 			String fileName=getTextContent(el);
-			assertNotEmpty(fileName, "<"+TAG_FILE+"> content must not be null");
+			assertNotEmpty(fileName, "<"+TAG_LOCATION+"> content must not be null");
 			
 			Document[] docs=parseDocuments(fileName);
 			if(docs != null)

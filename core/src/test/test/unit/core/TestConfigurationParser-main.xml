@@ -11,8 +11,8 @@
 	</global-config>
 	
 	<includes>
-		<file>test/unit/core/TestConfigurationParser-main-1.xml</file>
-		<file>test/unit/core/TestConfigurationParser-main-2.xml</file>
+		<location>test/unit/core/TestConfigurationParser-main-1.xml</location>
+		<location>test/unit/core/TestConfigurationParser-main-2.xml</location>
 	</includes>
 	
 	<resolvers>

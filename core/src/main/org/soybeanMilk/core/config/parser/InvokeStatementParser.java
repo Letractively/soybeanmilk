@@ -87,7 +87,7 @@ public class InvokeStatementParser
 	}
 	
 	/**
-	 * 获取调用解决对象
+	 * 获取调用目标对象
 	 * @return
 	 * @date 2012-5-6
 	 */

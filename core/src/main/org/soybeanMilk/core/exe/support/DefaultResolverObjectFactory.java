@@ -23,8 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.soybeanMilk.SbmUtils;
 
 /**
- * 调用目标对象工厂的默认实现，它本身是一个对象容器，另外还支持添加<i>外部调用目标对象工厂</i>，用于支持其他的IOC容器，比如spring和Guice。
- * 如果设置了外部调用目标对象工厂，它将被优先考虑。
+ * {@link ResolverObjectFactory 调用目标对象工厂}的默认实现，它本身是一个对象容器，
+ * 另外还支持添加<i>外部调用目标对象工厂</i>，用于支持其他的IOC容器，比如spring和Guice。
+ * <i>外部调用目标对象工厂</i>中的对象将被优先使用。
  * @author earthangry@gmail.com
  * @date 2010-10-1
  */
@@ -47,6 +48,11 @@ public class DefaultResolverObjectFactory implements ResolverObjectFactory
 		this.resolverObjects = resolverObjects;
 	}
 
+	/**
+	 * 获取<i>外部调用目标对象工厂</i>
+	 * @return
+	 * @date 2012-6-1
+	 */
 	public ResolverObjectFactory getExternalResolverObjectFactory() {
 		return externalResolverObjectFactory;
 	}
@@ -71,8 +77,8 @@ public class DefaultResolverObjectFactory implements ResolverObjectFactory
 	
 	/**
 	 * 添加一个调用目标对象
-	 * @param id 解决对象标识
-	 * @param resolver 解决对象
+	 * @param resolverObjectId 调用目标对象标识
+	 * @param resolverObject 调用目标对象
 	 */
 	public void addResolverObject(Serializable resolverObjectId, Object resolverObject)
 	{

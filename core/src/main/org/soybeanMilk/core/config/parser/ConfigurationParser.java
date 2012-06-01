@@ -309,7 +309,7 @@ public class ConfigurationParser
 	}
 	
 	/**
-	 * 解析并构建解决对象
+	 * 解析并构建调用目标对象
 	 */
 	protected void parseResolvers(Element docRoot)
 	{

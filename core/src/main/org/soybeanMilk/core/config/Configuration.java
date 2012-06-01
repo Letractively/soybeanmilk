@@ -26,7 +26,7 @@ import org.soybeanMilk.core.bean.GenericConverter;
 import org.soybeanMilk.core.exe.support.ResolverObjectFactory;
 
 /**
- * 配置，它包含执行所需的环境信息，比如{@linkplain ResolverFactory 解决对象工厂}、{@linkplain GenericConverter 通用转换器}，
+ * 配置，它包含执行所需的环境信息，比如{@linkplain ResolverObjectFactory 调用目标对象工厂}、{@linkplain GenericConverter 通用转换器}，
  * {@linkplain Executable 可执行对象}集以及{@linkplain Interceptor 执行拦截器}
  * @author earthangry@gmail.com
  * @date 2010-10-1
@@ -35,7 +35,7 @@ public class Configuration
 {
 	private static Log log=LogFactory.getLog(Configuration.class);
 	
-	/**解决对象工厂*/
+	/**调用目标对象工厂*/
 	private ResolverObjectFactory resolverObjectFactory;
 	
 	/**通用转换器*/

@@ -16,8 +16,10 @@ package org.soybeanMilk.core.exe.support;
 
 import java.io.Serializable;
 
+import org.soybeanMilk.core.exe.Invoke;
+
 /**
- * 调用目标对象工厂
+ * 调用目标对象工厂，它为{@link Invoke 调用}提供执行调用方法时所依赖的方法对象。
  * @author earthangry@gmail.com
  * @date 2010-10-19
  */

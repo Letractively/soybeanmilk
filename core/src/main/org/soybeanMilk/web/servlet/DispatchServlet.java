@@ -310,7 +310,8 @@ public class DispatchServlet extends HttpServlet
 		DefaultResolverObjectFactory rf=new DefaultResolverObjectFactory();
 		rf.setExternalResolverObjectFactory(getInitExternalResolverObjectFactory());
 		
-		WebConfiguration webConfiguration=new WebConfiguration(rf);
+		WebConfiguration webConfiguration=new WebConfiguration();
+		webConfiguration.setResolverObjectFactory(rf);
 		
 		String configFileName=getInitParameter(WebConstants.ServletInitParams.SOYBEAN_MILK_CONFIG);
 		

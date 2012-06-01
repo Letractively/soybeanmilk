@@ -47,15 +47,7 @@ public class Configuration
 	/**可执行对象集*/
 	private Map<String, Executable> executablesMap;
 	
-	public Configuration()
-	{
-		this(null);
-	}
-	
-	public Configuration(ResolverObjectFactory resolverObjectFactory)
-	{
-		this.resolverObjectFactory = resolverObjectFactory;
-	}
+	public Configuration(){}
 	
 	public ResolverObjectFactory getResolverObjectFactory() {
 		return resolverObjectFactory;

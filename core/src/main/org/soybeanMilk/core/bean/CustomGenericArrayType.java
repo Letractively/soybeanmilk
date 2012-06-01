@@ -4,7 +4,7 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 
 /**
- * 自定义泛型数组类型，它的{{@link #equals(Object)}方法被重写为可以和任意{@linkplain GenericArrayType}实现类对象比较，
+ * 自定义泛型数组类型，它的{@link #equals(Object)}方法被重写为可以和任意{@linkplain GenericArrayType}实现类对象比较，
  * 当两者的{@link #getGenericComponentType()}相等时，则它们也相等。
  * @author earthangry@gmail.com
  * @date 2012-5-14

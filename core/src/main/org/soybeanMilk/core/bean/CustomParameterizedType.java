@@ -5,7 +5,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 
 /**
- * 自定义参数类型，它的{{@link #equals(Object)}方法被重写为可以和任意{@linkplain ParameterizedType}实现类对象比较，
+ * 自定义参数类型，它的{@link #equals(Object)}方法被重写为可以和任意{@linkplain ParameterizedType}实现类对象比较，
  * 当两者的{@link #getRawType()}、{@linkplain #getOwnerType()}和{@linkplain #getActualTypeArguments()}都相等时，则它们也相等。
  * @author earthangry@gmail.com
  * @date 2012-5-14

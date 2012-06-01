@@ -176,7 +176,7 @@ import org.soybeanMilk.core.bean.converters.SqlTimestampConverter;
  * 类型的对象。
  * </p>
  * <p>
- * 你也可以通过{@link #addConverter(Type, Type, Converter)}方法为它添加更多辅助转换器，使其支持更多的类型转换。<br>
+ * 你也可以通过{@linkplain #addConverter(Type, Type, Converter)}方法为它添加更多辅助转换器，使其支持更多的类型转换。<br>
  * 另外，如果目标类型为<code>String</code>，而你没有添加某类型对象到<code>String</code>类型的辅助转换器，那么它将返回此对象的<code>toString()</code>结果。
  * </p>
  * 
@@ -1053,7 +1053,7 @@ public class DefaultGenericConverter implements GenericConverter
 	}
 	
 	/**
-	 * 获取映射表中的自定义转换类型，映射表中的“class”关键字的字符串值或者{@link Class}值将被认为是自定义类型
+	 * 获取映射表中的自定义转换类型，映射表中的“class”关键字的字符串值或者{@linkplain Class}值将被认为是自定义类型
 	 * @param map
 	 * @return
 	 * @date 2012-5-20

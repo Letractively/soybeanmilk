@@ -42,12 +42,12 @@ public class WebConstants extends Constants
 	public static final class ServletInitParams
 	{
 		/**
-		 * 编码。如果不指定，则框架会使用{@link WebConstants#DEFAULT_ENCODING}编码
+		 * 编码。如果不指定，则框架会使用{@linkplain WebConstants#DEFAULT_ENCODING}编码
 		 */
 		public static final String ENCODING="encoding";
 		
 		/**
-		 * 配置文件位置。如果不指定，则框架会使用{@link WebConstants#DEFAULT_CONFIG_FILE}配置
+		 * 配置文件位置。如果不指定，则框架会使用{@linkplain WebConstants#DEFAULT_CONFIG_FILE}配置
 		 */
 		public static final String SOYBEAN_MILK_CONFIG="soybean-milk-config";
 		

@@ -6,7 +6,7 @@ import java.util.Map;
 import org.soybeanMilk.web.bean.WebGenericConverter;
 
 /**
- * 参数过滤映射表，它继承自{@link HashMap}且没有做任何扩展，主要作为一个标识类，使{@link WebGenericConverter Web通用转换器}可以识别参数过滤映射表。
+ * 参数过滤映射表，它继承自{@linkplain HashMap}且没有做任何扩展，主要作为一个标识类，使{@linkplain WebGenericConverter Web通用转换器}可以识别参数过滤映射表。
  * @author earthangry@gmail.com
  * @date 2012-5-25
  * @param <V>

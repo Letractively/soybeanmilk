@@ -22,7 +22,7 @@ import org.soybeanMilk.core.exe.Action;
 
 
 /**
- * WEB动作，它拥有一个{@link Target 目标}属性。
+ * WEB动作，它拥有一个{@linkplain Target 目标}属性。
  * @author earthangry@gmail.com
  * @date 2010-10-4
  */

@@ -302,7 +302,7 @@ public class InvokeStatementParser
 	}
 	
 	/**
-	 * 从当前位置（{@link #getCurrentIdx()}）解析，直到遇到特殊字符或者不是特殊字符
+	 * 从当前位置（{@linkplain #getCurrentIdx()}）解析，直到遇到特殊字符或者不是特殊字符
 	 * @param specialChars 特殊字符集合
 	 * @param inSpecial 是否当遇到特殊字符时停止，否则，当不是特殊字符时停止
 	 * @param record 是否保存遇到的字符
@@ -416,7 +416,7 @@ public class InvokeStatementParser
 	}
 	
 	/**
-	 * 设置{@link Arg}的关键字属性或者值属性，它根据字符串的语法格式（与Java语法一样）来确定应该设置哪个属性。<br>
+	 * 设置{@linkplain Arg}的关键字属性或者值属性，它根据字符串的语法格式（与Java语法一样）来确定应该设置哪个属性。<br>
 	 * 比如，["abc"]是字符串值、[myresult_key]是关键字、['a']是字符值、[3.5f]是数值
 	 * @param arg
 	 * @param stmt 符合Java语法的字符串，可以包含转义字符和'\\uxxxx'格式字符

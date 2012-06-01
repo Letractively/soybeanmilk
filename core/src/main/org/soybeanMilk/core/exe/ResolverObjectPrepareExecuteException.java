@@ -38,7 +38,7 @@ public class ResolverObjectPrepareExecuteException extends ExecuteException
 	}
 	
 	/**
-	 * 获取产生此异常的{@link Invoke 调用}对象
+	 * 获取产生此异常的{@linkplain Invoke 调用}对象
 	 * @return
 	 * @date 2012-5-18
 	 */
@@ -47,7 +47,7 @@ public class ResolverObjectPrepareExecuteException extends ExecuteException
 	}
 	
 	/**
-	 * 设置产生此异常的{@link Invoke 调用}对象
+	 * 设置产生此异常的{@linkplain Invoke 调用}对象
 	 * @param invoke
 	 * @date 2012-5-18
 	 */

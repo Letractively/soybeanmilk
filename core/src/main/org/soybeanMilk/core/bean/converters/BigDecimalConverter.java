@@ -17,7 +17,7 @@ package org.soybeanMilk.core.bean.converters;
 import java.math.BigDecimal;
 
 /**
- * 字符串到{@linkplain java.math.BigDecimal BigDecimal}类型转换器，它调用{@link BigDecimal#BigDecimal(String)}实现转换。
+ * 字符串到{@linkplain java.math.BigDecimal BigDecimal}类型转换器，它调用{@linkplain BigDecimal#BigDecimal(String)}实现转换。
  * @author earthangry@gmail.com
  * @date 2010-10-3
  */

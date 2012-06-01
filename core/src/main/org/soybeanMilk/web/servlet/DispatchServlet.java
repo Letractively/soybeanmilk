@@ -301,7 +301,7 @@ public class DispatchServlet extends HttpServlet
 	}
 	
 	/**
-	 * 取得初始化{@link WebExecutor Web执行器}对象。
+	 * 取得初始化{@linkplain WebExecutor Web执行器}对象。
 	 */
 	protected WebExecutor getInitWebExecutor() throws ServletException
 	{

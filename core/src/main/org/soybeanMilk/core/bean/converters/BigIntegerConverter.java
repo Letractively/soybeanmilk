@@ -17,7 +17,7 @@ package org.soybeanMilk.core.bean.converters;
 import java.math.BigInteger;
 
 /**
- * 字符串到{@linkplain java.math.BigInteger BigInteger}类型转换器，它调用{@link BigInteger#BigInteger(String)}实现转换。
+ * 字符串到{@linkplain java.math.BigInteger BigInteger}类型转换器，它调用{@linkplain BigInteger#BigInteger(String)}实现转换。
  * @author earthangry@gmail.com
  * @date 2010-10-3
  */

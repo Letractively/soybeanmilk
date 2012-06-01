@@ -26,7 +26,6 @@
 	
 	<!--打jar包-->
 	<target name="jarFramework">
-		<delete file="${distDir}/${appName_old}.jar" />
 		<delete file="${distDir}/${appName}.jar" />
 		<jar destfile="${distDir}/${appName}.jar">
 			
@@ -62,15 +61,15 @@
 		<copydir dest="${distDir}/src" src="${srcDir}/main" />
 	</target>
 	
-	<!--拷贝临时目录下的API到docs下-->
-	<target name="copyApiToDocs" depends="copySrcToDist">
+	<!--生成API到docs下-->
+	<target name="docApiToDocs" depends="copySrcToDist">
 		<delete dir="${distDir}/docs/api" />
 		<mkdir dir="${distDir}/docs/api"/>
-		<copydir dest="${distDir}/docs/api" src="${tmpDir}/api" />
+		<javadoc sourcepath="${srcDir}/main" destdir="${distDir}/docs/api" windowtitle="${appName}" encoding="utf-8" charset="utf-8" />
 	</target>
 	
 	<!--将core example打jar包-->
-	<target name="jarCoreExamples" depends="copyApiToDocs">
+	<target name="jarCoreExamples" depends="docApiToDocs">
 		<delete file="${distDir}/docs/example/core/example.jar" />
 		<jar destfile="${distDir}/docs/example/core/example.jar">
 			
@@ -101,5 +100,7 @@
 	<target name="cleanAfterDist" depends="zipDist">
 		<delete dir="${distDir}/docs/api" />
 		<delete dir="${distDir}/src" />
+		<delete file="${distDir}/${appName}.jar" />
+		<delete file="${distDir}/docs/example/core/example.jar" />
 	</target>
 </project>

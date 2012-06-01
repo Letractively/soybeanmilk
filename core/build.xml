@@ -65,7 +65,7 @@
 	<target name="docApiToDocs" depends="copySrcToDist">
 		<delete dir="${distDir}/docs/api" />
 		<mkdir dir="${distDir}/docs/api"/>
-		<javadoc sourcepath="${srcDir}/main" destdir="${distDir}/docs/api" windowtitle="${appName}" encoding="utf-8" charset="utf-8" />
+		<javadoc sourcepath="${srcDir}/main" destdir="${distDir}/docs/api" windowtitle="${appName}" access="public" encoding="utf-8" charset="utf-8" />
 	</target>
 	
 	<!--将core example打jar包-->

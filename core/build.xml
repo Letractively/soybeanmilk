@@ -30,7 +30,7 @@
 		<jar destfile="${distDir}/${appName}.jar">
 			
 			<fileset dir="${classDir}"
-				includes="org/**/*.class, org/**/*.dtd, org/**/*.xml" />
+				includes="org/soybeanMilk/core/**/*.class, org/soybeanMilk/resources/*.dtd, org/soybeanMilk/web/**/*.class, org/soybeanMilk/*.class" />
 			
 			<fileset dir="src" includes="META-INF/*" />
 			
@@ -74,12 +74,12 @@
 		<jar destfile="${distDir}/docs/example/core/example.jar">
 			
 			<fileset dir="${classDir}"
-				includes="example/**/*.class, example/**/*.xml" />
+				includes="org/soybeanMilk/example/**/*.class, org/soybeanMilk/example/**/*.xml" />
 			
 			<manifest>
 				<attribute name="Author" value="earthangry@gmail.com"/>
-				<attribute name="Main-Class" value="example.ExampleMain"/>
-				<attribute name="Class-Path" value="../../../${appName}.jar ../../../lib/required/commons-logging-1.0.4.jar ../../../lib/required/commons-logging-api-1.1.jar ../../../lib/required/commons-beanutils-1.8.2.jar"/>
+				<attribute name="Main-Class" value="org.soybeanMilk.example.ExampleMain"/>
+				<attribute name="Class-Path" value="../../../${appName}.jar ../../../lib/required/commons-logging-api-1.1.jar"/>
 			</manifest>
 		</jar>
 	</target>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE soybean-milk PUBLIC "-//SoybeanMilk//DTD soybeanMilk web//EN" "http://soybeanmilk.googlecode.com/files/soybeanMilk-web-1.0.dtd">
+<soybean-milk>
+	
+	<global-config>
+		
+		<interceptor before="before" after="after" exception="exception" execution-key="execution" />
+		
+	</global-config>
+	
+	
+	<resolvers>
+		<resolver id="resolver" class="org.soybeanMilk.test.unit.core.TestDefaultExecutor$ResolverForTest" />
+	</resolvers>
+	
+	<executables>
+		
+		<invoke name="before">
+			before=resolver.before();
+		</invoke>
+		
+		<invoke name="after">
+			after=resolver.after();
+		</invoke>
+		
+		<invoke name="exception">
+			exception=resolver.exception();
+		</invoke>
+		
+		<action name="hello">
+			<invoke>
+				resolver.hello();
+			</invoke>
+		</action>
+		
+		<action name="helloThrow">
+			<invoke>
+				resolver.helloThrow();
+			</invoke>
+		</action>
+		
+	</executables>
+	
+</soybean-milk>

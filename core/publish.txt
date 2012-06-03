@@ -3,7 +3,7 @@
 	1.	将dist\docs\tutorial\zh_CN\index.html和dist\docs\tutorial\en\index.html两个文件
 		内的版本更新历史对应版本中的“Current”修改为当前发布日期
 	
-	2.	运行“build_version.xml”生成当前版本包
+	2.	运行“build.xml”生成当前版本包
 	
 	3.	如果dtd文件在此版本中有修改，则先将
 		soybeanMilk-core-1.0.dtd		core dtd文件，SoybeanMilk配置文件的DOCTYPE声明中引入了此资源
@@ -11,9 +11,9 @@
 		上传至服务器下载列表中（设置为“Deprecated”）。
 		然后将此版本包上传到服务器下载列表中，并将之前的版本设置为“Deprecated”
 		
-	4.	修改“build_version.xml”中的属性“appVersion_old”的值为当前版本号，修改“appVersion”的值为下一个版本号。
+	4.	修改“build.xml”中的属性“appVersion_old”的值为当前版本号，修改“appVersion”的值为下一个版本号。
 	
 	5.	在dist\docs\tutorial\zh_CN\index.html和dist\docs\tutorial\en\index.html两个文件
 		内的版本更新历史添加新版本标题
 		
-	6.	运行“build_version.xml”生成新版本的初始文件并提交
+	6.	运行“build.xml”生成新版本的初始文件并提交

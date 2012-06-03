@@ -204,17 +204,8 @@ public class Invoke extends AbstractExecutable
 	protected Object executeMethod(ObjectSource objectSource) throws ExecuteException
 	{
 		Resolver resolver=getResolver();
-		Class<?> resolverClass=null;
+		MethodInfo methodInfo=getMethodInfo();
 		Object resolverObject=null;
-		
-		try
-		{
-			resolverClass=resolver.getResolverClass(objectSource);
-		}
-		catch(Exception e)
-		{
-			throw new ExecuteException(e);
-		}
 		
 		try
 		{
@@ -225,16 +216,35 @@ public class Invoke extends AbstractExecutable
 			throw new ResolverObjectPrepareExecuteException(this, e);
 		}
 		
-		if(resolverClass==null && resolverObject!=null)
-			resolverClass=resolverObject.getClass();
-		
-		if(resolverClass == null)
-			throw new ExecuteException("got null resolver class from Resolver "+SbmUtils.toString(resolver));
-		
-		MethodInfo methodInfo=getMethodInfo(resolverClass, this.methodName, this.args);
 		if(methodInfo == null)
-			throw new ExecuteException("no method named "+SbmUtils.toString(this.methodName)+" with "+SbmUtils.toString(this.args)
-					+" arguments can be found in resolver class "+SbmUtils.toString(resolverClass));
+		{
+			Class<?> resolverClass=null;
+			
+			try
+			{
+				resolverClass=resolver.getResolverClass(objectSource);
+			}
+			catch(Exception e)
+			{
+				throw new ExecuteException(e);
+			}
+			
+			if(resolverClass==null && resolverObject!=null)
+				resolverClass=resolverObject.getClass();
+			
+			if(resolverClass == null)
+				throw new ExecuteException("got null resolver class from Resolver "+SbmUtils.toString(resolver));
+			
+			methodInfo=findMethodInfo(resolverClass, this.methodName, this.args, true);
+			if(methodInfo == null)
+				methodInfo=findMethodInfo(resolverClass, this.methodName, this.args, false);
+			
+			if(methodInfo == null)
+				throw new ExecuteException("no method named "+SbmUtils.toString(this.methodName)+" with "+SbmUtils.toString(this.args)
+						+" arguments can be found in resolver class "+SbmUtils.toString(resolverClass));
+			
+			setMethodInfo(methodInfo);
+		}
 		
 		Object[] argValues=prepareMethodArgValues(methodInfo, objectSource);
 		
@@ -352,31 +362,6 @@ public class Invoke extends AbstractExecutable
 		}
 		
 		return breaked == null ? false : breaked;
-	}
-	
-	/**
-	 * 获取给定调用目标的{@linkplain MethodInfo 方法信息}对象
-	 * @param methodClass
-	 * @param methodName
-	 * @param argNums
-	 * @return
-	 * @date 2012-5-7
-	 */
-	protected MethodInfo getMethodInfo(Class<?> methodClass, String methodName, Arg[] args)
-	{
-		MethodInfo methodInfo=getMethodInfo();
-		
-		if(methodInfo == null)
-		{
-			methodInfo=findMethodInfo(methodClass, methodName, args, true);
-			if(methodInfo == null)
-				methodInfo=findMethodInfo(methodClass, methodName, args, false);
-			
-			if(methodInfo != null)
-				setMethodInfo(methodInfo);
-		}
-		
-		return methodInfo;
 	}
 	
 	protected MethodInfo getMethodInfo() {
